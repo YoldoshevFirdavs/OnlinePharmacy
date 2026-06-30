@@ -1,0 +1,208 @@
+{% load static %}
+
+{% include 'components/header.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
+<style>
+    body {
+        background-color: #f0f2f5;
+    }
+    .admin-check-container {
+        max-width: 550px;
+        margin: 60px auto;
+        padding: 35px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        font-family: Arial, sans-serif;
+    }
+    .admin-check-title {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #333;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .input-field {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #ffffff;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+    .input-field:focus {
+        border-color: #007bff;
+    }
+    .password-input-group {
+        position: relative;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+    }
+    .btn-primary {
+        width: 100%;
+        padding: 15px;
+        background: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 10px;
+    }
+    .btn-primary:hover {
+        background: #0069d9;
+    }
+    .error-message {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    #admin-check-error-banner {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-check-container">
+    <h3 class="admin-check-title">Admin ma'lumotlarini tasdiqlash</h3>
+
+    <div id="admin-check-error-banner" style="display: none;"></div>
+
+    <form id="admin-check-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="admin-email">Email</label>
+            <input type="email" id="admin-email" name="email" class="input-field" placeholder="Admin emailini kiriting" required>
+        </div>
+        <div class="form-group">
+            <label for="admin-phone">Telefon raqam (ixtiyoriy)</label>
+            <input type="text" id="admin-phone" name="phone_number" class="input-field" placeholder="Telefon raqamini kiriting">
+        </div>
+        <div class="form-group">
+            <label for="admin-name">Ism</label>
+            <input type="text" id="admin-name" name="full_name" class="input-field" placeholder="Ismingizni kiriting" required>
+        </div>
+        <div class="form-group">
+            <label for="admin-password">Parol</label>
+            <div class="password-input-group">
+                <input type="password" id="admin-password" name="password" class="input-field" placeholder="Parolingizni kiriting" required>
+                <span class="password-toggle" id="toggle-password">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+        </div>
+        <button type="submit" id="admin-check-submit" class="btn-primary">Tasdiqlash</button>
+    </form>
+</div>
+
+{% include 'components/footer.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{% static 'js/utils.js' %}"></script>
+<script type="module" src="{% static 'js/header.js' %}"></script>
+<script type="module">
+    import { sendRequest, getFingerprint } from '{% static "js/utils.js" %}';
+
+    const ADMIN_CHECK_ENDPOINT = '/api/v1/users/admin/check/';
+    const ADMIN_DASHBOARD_URL = '/dashboard/'; // Assuming this is the admin dashboard URL
+
+    const adminCheckForm = document.getElementById('admin-check-form');
+    const adminEmailInput = document.getElementById('admin-email');
+    const adminPhoneInput = document.getElementById('admin-phone');
+    const adminNameInput = document.getElementById('admin-name');
+    const adminPasswordInput = document.getElementById('admin-password');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const errorBanner = document.getElementById('admin-check-error-banner');
+
+    function showAdminError(message) {
+        if (errorBanner) {
+            errorBanner.textContent = message;
+            errorBanner.style.display = 'block';
+            setTimeout(() => {
+                errorBanner.style.display = 'none';
+            }, 5000);
+        }
+    }
+
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            adminPasswordInput.setAttribute('type', type);
+            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye');
+            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+
+    if (adminCheckForm) {
+        adminCheckForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBanner.style.display = 'none';
+
+            const email = adminEmailInput.value.trim();
+            const phone_number = adminPhoneInput.value.trim();
+            const full_name = adminNameInput.value.trim();
+            const password = adminPasswordInput.value.trim();
+
+            if (!email || !full_name || !password) {
+                showAdminError("Iltimos, barcha majburiy maydonlarni to'ldiring.");
+                return;
+            }
+
+            try {
+                const payload = {
+                    email: email,
+                    phone_number: phone_number,
+                    full_name: full_name,
+                    password: password,
+                    fingerprint: await getFingerprint()
+                };
+
+                const response = await sendRequest(ADMIN_CHECK_ENDPOINT, 'POST', payload);
+
+                if (response.success && response.redirect) {
+                    localStorage.setItem('access_token', response.access); // Assuming access token is returned
+                    localStorage.setItem('username', full_name);
+                    localStorage.setItem('user_role', 'admin');
+                    window.location.href = response.redirect;
+                } else {
+                    showAdminError(response.detail || response.message || "Admin ma'lumotlarini tekshirishda xato yuz berdi.");
+                }
+            } catch (error) {
+                showAdminError(error.message || "Server bilan bog'lanishda xato yuz berdi.");
+            }
+        });
+    }
+</script>
+{% endblock %}

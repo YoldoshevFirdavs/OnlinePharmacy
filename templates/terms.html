@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% include "components/begin.html" %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foydalanish shartlari | OnlinePharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="/static/css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-text: #2c3e50;
+            --secondary-text: #34495e;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --line-height: 1.6;
+            --container-width: 900px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--secondary-text);
+            line-height: var(--line-height);
+            margin: 0;
+            padding: 0;
+        }
+
+        .legal-container {
+            max-width: var(--container-width);
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary-text);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--primary-text);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e67e22;
+            padding-left: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-align: justify;
+        }
+
+        .warning-box {
+            background: #fff5e6;
+            border-left: 5px solid #e67e22;
+            padding: 20px;
+            margin: 25px 0;
+            font-style: italic;
+        }
+
+        .btn-accept {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-card { padding: 30px; }
+        }
+    </style>
+</head>
+<body data-page="terms">
+
+    {% include "components/header.html" %}
+
+    <main class="legal-container">
+        <article class="content-card">
+            <h1>Foydalanish shartlari</h1>
+
+            <section>
+                <h2>1. Umumiy qoidalar</h2>
+                <p>Ushbu Foydalanish shartlari OnlinePharmacy platformasi va uning foydalanuvchilari o'rtasidagi huquqiy munosabatlarni tartibga soladi. Platformadan foydalanishni boshlash orqali siz barcha shartlarga so'zsiz rozilik bildirasiz.</p>
+                <p>Agar siz ushbu shartlarning birortasiga rozi bo'lmasangiz, platformadan foydalanmasligingizni so'raymiz.</p>
+            </section>
+
+            <section class="warning-box">
+                <h2>2. Tibbiy ogohlantirish</h2>
+                <p>Muhim: OnlinePharmacy platformasida keltirilgan barcha ma'lumotlar faqatgina tanishtirish xarakteriga ega. Biz hech qachon shifokor maslahati o'rnini bosa olmaymiz. Har qanday dori vositasini qabul qilishdan oldin, albatta, mutaxassis bilan maslahatlashing!</p>
+            </section>
+
+            <section>
+                <h2>3. Foydalanuvchi majburiyatlari</h2>
+                <p>Foydalanuvchi quyidagilarga majbur:</p>
+                <ul>
+                    <li>Ro'yxatdan o'tishda faqatgina to'g'ri va haqiqiy ma'lumotlarni taqdim etish.</li>
+                    <li>O'z profilining xavfsizligini ta'minlash va parolni uchinchi shaxslarga bermaslik.</li>
+                    <li>Platformadan faqatgina qonuniy maqsadlarda foydalanish.</li>
+                    <li>Sotib olingan dori vositalaridan faqatgina shaxsiy maqsadlarda (tijorat maqsadida qayta sotmaslik) foydalanish.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>4. Buyurtmalar va to'lovlar</h2>
+                <p>Barcha buyurtmalar platformada ko'rsatilgan narxlarda qabul qilinadi. OnlinePharmacy texnik xatolar tufayli narxlar noto'g'ri ko'rsatilgan taqdirda buyurtmani bekor qilish huquqini saqlab qoladi. To'lovlar naqd pulda yoki elektron to'lov tizimlari orqali amalga oshirilishi mumkin.</p>
+            </section>
+
+            <section>
+                <h2>5. Javobgarlikni cheklash</h2>
+                <p>OnlinePharmacy platformasi dori vositalarini noto'g'ri qo'llash yoki shifokor ko'rsatmasisiz foydalanish natijasida yuzaga kelishi mumkin bo'lgan sog'liq muammolari uchun javobgarlikni o'z zimmasiga olmaydi. Shuningdek, kurerlik xizmati yoki uchinchi tomon yetkazib beruvchilari tomonidan sodir etilgan kechikishlar uchun javobgar emas.</p>
+            </section>
+
+            <section>
+                <h2>6. Shartlarni o'zgartirish</h2>
+                <p>Biz ushbu shartlarni istalgan vaqtda, foydalanuvchini oldindan ogohlantirmagan holda o'zgartirish huquqiga egamiz. O'zgartirishlar saytda e'lon qilingan vaqtdan boshlab kuchga kiradi.</p>
+            </section>
+
+            <button class="btn-accept" id="acceptBtn">Shartlarni qabul qilaman</button>
+        </article>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script src="/static/js/header.js"></script>
+    <script src="/static/js/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('acceptBtn').addEventListener('click', () => {
+                alert('Foydalanish shartlarini qabul qilganingiz uchun rahmat! ✅');
+            });
+        });
+    </script>
+</body>
+</html>

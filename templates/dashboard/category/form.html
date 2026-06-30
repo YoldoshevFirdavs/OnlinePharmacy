@@ -1,0 +1,50 @@
+{% load static %}
+{% extends 'dashboard/user/base.html' %}
+
+{% block title %}Category Form{% endblock %}
+
+{% block content %}
+    <!-- TODO: topError in base.html -->
+    <div class="page-wrapper">
+        {% include 'dashboard/user/sidebar.html' %}
+        <div class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h2 class="title-1 m-b-25">Category Form</h2>
+                            <div class="card">
+                                <div class="card-header">
+                                    <strong class="card-title">Add/Edit Category</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form id="categoryForm" method="post">
+                                        <!-- TODO: confirm backend field names -->
+                                        <div class="form-group">
+                                            <label for="name" class="control-label mb-1">Name</label>
+                                            <input id="name" name="name" type="text" class="form-control" value="<!-- TODO: confirm actual model/field name for category name -->">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="slug" class="control-label mb-1">Slug</label>
+                                            <input id="slug" name="slug" type="text" class="form-control" value="<!-- TODO: confirm actual model/field name for category slug -->">
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="btn btn-info btn-block" id="saveCategoryBtn">
+                                                Save Category
+                                            </button>
+                                            <!-- TODO: confirm API endpoint for saving category -->
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- TODO: confirm additional static files: js/category_form.js -->
+{% endblock %}

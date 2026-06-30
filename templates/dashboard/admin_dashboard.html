@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Online Pharmacy admin dashboard — manage categories, products, customers and orders.">
+  <title>Admin Dashboard — Online Pharmacy</title>
+
+  {# ── Fonts (Inter) — self-hosted fallback via system fonts, no CDN required ── #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  {# ── Font Awesome — local vendor ── #}
+  <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+
+  {# ── Design tokens (must come before page CSS) ── #}
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+
+  {# ── Page CSS ── #}
+  <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+
+  {# ── Chart.js — local vendor ── #}
+  <script src="{% static 'vendor/chartjs/chart.min.js' %}"></script>
+
+  {# ── Superadmin flag (used by JS delete button visibility) ── #}
+  <script>window._isSuperadmin = {{ request.user.is_superuser|yesno:"true,false" }};</script>
+</head>
+
+<body>
+  {# CSRF token available for JS fetch calls #}
+  {% csrf_token %}
+
+  {# ════════════════════════════════════════════════════════════
+     SIDEBAR OVERLAY (mobile backdrop)
+  ════════════════════════════════════════════════════════════ #}
+  <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+  <div class="admin-wrapper">
+
+    {# ════════════════════════════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════════════════════════════ #}
+    <aside id="adminSidebar" class="sidebar" role="navigation" aria-label="Main sidebar navigation">
+
+      {# Brand / Logo #}
+      <a href="{% url 'dashboard:main_dashboard' %}" class="sidebar-brand" aria-label="Online Pharmacy Admin Home">
+        <div class="sidebar-brand-icon" aria-hidden="true">
+          <i class="fa-solid fa-pills"></i>
+        </div>
+        <div>
+          <div class="sidebar-brand-text">PharmAdmin</div>
+          <div class="sidebar-brand-sub">Management Console</div>
+        </div>
+      </a>
+
+      {# Navigation #}
+      <ul class="sidebar-nav" id="sidebarNav" role="list">
+
+        <li class="sidebar-section-label">Main</li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:main_dashboard' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:main_dashboard' %}active{% endif %}"
+             aria-label="Dashboard overview"
+             aria-current="{% if request.resolver_match.view_name == 'dashboard:main_dashboard' %}page{% else %}false{% endif %}">
+            <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
+            Dashboard
+          </a>
+        </li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:order_list' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:order_list' %}active{% endif %}"
+             aria-label="Orders list">
+            <i class="fa-solid fa-bag-shopping nav-icon" aria-hidden="true"></i>
+            Orders
+            <span class="sidebar-badge" id="sidebarOrderBadge" aria-label="Pending orders count">{{ pending_orders_count|default:"—" }}</span><!-- TODO: confirm context variable: pending_orders_count or provide API endpoint -->
+          </a>
+        </li>
+
+        <li class="sidebar-section-label">Catalogue</li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:category_list' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:category_list' %}active{% endif %}"
+             aria-label="Categories list">
+            <i class="fa-solid fa-layer-group nav-icon" aria-hidden="true"></i>
+            Categories
+          </a>
+        </li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:product_list' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:product_list' %}active{% endif %}"
+             aria-label="Products list">
+            <i class="fa-solid fa-box nav-icon" aria-hidden="true"></i>
+            Products
+          </a>
+        </li>
+
+        <li class="sidebar-section-label">People</li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:user_list' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:user_list' %}active{% endif %}"
+             aria-label="Customer list">
+            <i class="fa-solid fa-users nav-icon" aria-hidden="true"></i>
+            Customers
+          </a>
+        </li>
+
+        <li class="sidebar-section-label">System</li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:audit_log_list' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:audit_log_list' %}active{% endif %}"
+             aria-label="Audit logs">
+            <i class="fa-solid fa-shield-halved nav-icon" aria-hidden="true"></i>
+            Audit Logs
+          </a>
+        </li>
+
+        <li class="sidebar-nav-item" role="listitem">
+          <a href="{% url 'dashboard:account_settings' %}"
+             class="sidebar-nav-link {% if request.resolver_match.view_name == 'dashboard:account_settings' %}active{% endif %}"
+             aria-label="Account settings">
+            <i class="fa-solid fa-gear nav-icon" aria-hidden="true"></i>
+            Settings
+          </a>
+        </li>
+
+      </ul>
+
+      {# Sidebar footer — logged-in user #}
+      <div class="sidebar-footer">
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 4px;">
+          <div class="user-avatar" aria-hidden="true" style="width:34px;height:34px;font-size:12px">
+            {{ user.username|slice:":2"|upper }}
+          </div>
+          <div style="overflow:hidden">
+            <div style="font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              {{ user.get_full_name|default:user.username }}
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.45)">
+              {% if user.is_superuser %}Superadmin{% elif user.is_staff %}Staff{% else %}User{% endif %}
+            </div>
+          </div>
+          <a href="{% url 'dashboard:logout_page' %}"
+             class="btn-icon-sm" style="margin-left:auto;flex-shrink:0"
+             aria-label="Sign out" title="Sign out">
+            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+
+    {# ════════════════════════════════════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════════════════════════════════════ #}
+    <main class="main-content" id="mainContent">
+
+      {# ── TOPBAR ── #}
+      <header class="topbar" role="banner">
+        <div class="topbar-left">
+          {# Hamburger (mobile) #}
+          <button id="hamburgerBtn" class="btn-hamburger" aria-label="Toggle sidebar" aria-controls="adminSidebar" aria-expanded="false">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+          </button>
+
+          <div>
+            <div class="topbar-title">Dashboard Overview</div>
+            <div class="topbar-subtitle">Welcome back, {{ user.get_full_name|default:user.username }}</div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+
+          {# Quick primary-colour picker in topbar #}
+          <div class="icon-btn color-picker-btn" title="Change accent colour" aria-label="Change accent colour">
+            <div class="color-swatch" aria-hidden="true"></div>
+            <input type="color" id="topbarColorPicker" value="#4f7ef8" aria-label="Select primary accent colour">
+          </div>
+
+          {# Theme toggle #}
+          <button id="themeToggle" class="icon-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+            <i class="fa-solid fa-moon" aria-hidden="true"></i>
+          </button>
+
+          {# Notifications #}
+          <button class="icon-btn" aria-label="Notifications" title="Notifications">
+            <i class="fa-solid fa-bell" aria-hidden="true"></i>
+            <span class="notification-dot" aria-hidden="true"></span>
+          </button>
+
+          {# User dropdown #}
+          <div class="user-dropdown" id="userDropdownWrapper">
+            <button class="user-trigger"
+                    id="userDropdownTrigger"
+                    data-dropdown="userDropdownMenu"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="userDropdownMenu">
+              <div class="user-avatar" aria-hidden="true">{{ user.username|slice:":2"|upper }}</div>
+              <div class="user-info">
+                <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                <div class="user-role">{% if user.is_superuser %}Superadmin{% elif user.is_staff %}Staff{% else %}User{% endif %}</div>
+              </div>
+              <i class="fa-solid fa-chevron-down" aria-hidden="true" style="font-size:10px;color:var(--muted);margin-left:4px"></i>
+            </button>
+
+            <div class="dropdown-menu-custom" id="userDropdownMenu" role="menu" aria-labelledby="userDropdownTrigger">
+              <a href="{% url 'dashboard:account_settings' %}" role="menuitem" aria-label="Go to settings">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i> Settings
+              </a>
+              <div class="dropdown-divider" role="separator"></div>
+              <a href="{% url 'dashboard:logout_page' %}" role="menuitem" aria-label="Sign out" style="color:var(--danger)">
+                <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Sign out
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      {# ── PAGE BODY ── #}
+      <div class="page-body">
+
+        {# Django messages #}
+        {% if messages %}
+        <div role="alert" aria-live="polite" style="margin-bottom:16px">
+          {% for message in messages %}
+          <div style="padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:8px;
+                      background:{% if message.tags == 'success' %}var(--success-alpha){% elif message.tags == 'error' %}var(--danger-alpha){% else %}var(--primary-alpha-10){% endif %};
+                      color:{% if message.tags == 'success' %}var(--success){% elif message.tags == 'error' %}var(--danger){% else %}var(--primary){% endif %};
+                      border:1px solid currentColor;font-size:13px;font-weight:500">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {# ──────────────────────────────────────────
+           STAT CARDS
+        ────────────────────────────────────────── #}
+        <div class="stats-grid">
+
+          {# Categories #}
+          <article class="stat-card" aria-label="Total categories">
+            <div class="stat-icon stat-icon--blue" aria-hidden="true">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Categories</div>
+              <div class="stat-value loading" id="statCategories" aria-live="polite">
+                {{ stats.categories_count|default:"—" }}
+              </div>
+              <span class="stat-trend stat-trend--up" aria-label="Trend up">
+                <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> {{ categories_trend|default:"+0%" }}<!-- TODO: confirm context variable: categories_trend or provide API endpoint /api/dashboard/summary -->
+              </span>
+            </div>
+            <div class="sparkline-wrap" aria-hidden="true">
+              <canvas id="sparkCategories" width="70" height="36"></canvas>
+            </div>
+          </article>
+
+          {# Products #}
+          <article class="stat-card" aria-label="Total products">
+            <div class="stat-icon stat-icon--primary" aria-hidden="true">
+              <i class="fa-solid fa-box"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Products</div>
+              <div class="stat-value loading" id="statProducts" aria-live="polite">
+                {{ stats.products_count|default:"—" }}
+              </div>
+              <span class="stat-trend stat-trend--up" aria-label="Trend up">
+                <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> {{ products_trend|default:"+0%" }}<!-- TODO: confirm context variable: products_trend or provide API endpoint /api/dashboard/summary -->
+              </span>
+            </div>
+            <div class="sparkline-wrap" aria-hidden="true">
+              <canvas id="sparkProducts" width="70" height="36"></canvas>
+            </div>
+          </article>
+
+          {# Customers #}
+          <article class="stat-card" aria-label="Total customers">
+            <div class="stat-icon stat-icon--green" aria-hidden="true">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Customers</div>
+              <div class="stat-value loading" id="statCustomers" aria-live="polite">
+                {{ stats.users_count|default:"—" }}
+              </div>
+              <span class="stat-trend stat-trend--up" aria-label="Trend up">
+                <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> {{ customers_trend|default:"+0%" }}<!-- TODO: confirm context variable: customers_trend or provide API endpoint /api/dashboard/summary -->
+              </span>
+            </div>
+            <div class="sparkline-wrap" aria-hidden="true">
+              <canvas id="sparkCustomers" width="70" height="36"></canvas>
+            </div>
+          </article>
+
+          {# Orders #}
+          <article class="stat-card" aria-label="Total orders">
+            <div class="stat-icon stat-icon--orange" aria-hidden="true">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label">Orders</div>
+              <div class="stat-value loading" id="statOrders" aria-live="polite">
+                {{ stats.orders_count|default:"—" }}
+              </div>
+              <span class="stat-trend stat-trend--up" aria-label="Trend up">
+                <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> {{ orders_trend|default:"+0%" }}<!-- TODO: confirm context variable: orders_trend or provide API endpoint /api/dashboard/summary -->
+              </span>
+            </div>
+            <div class="sparkline-wrap" aria-hidden="true">
+              <canvas id="sparkOrders" width="70" height="36"></canvas>
+            </div>
+          </article>
+
+        </div>
+        {# / stats-grid #}
+
+        {# ──────────────────────────────────────────
+           CHARTS ROW 1 — Line chart (orders) + Pie chart (categories)
+        ────────────────────────────────────────── #}
+        <div class="charts-row" style="margin-bottom:24px">
+
+          {# Orders over time — Line chart #}
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Orders Over Time</div>
+                <div class="card-subtitle">Weekly order volume</div>
+              </div>
+              <div class="chart-actions">
+                <button class="chart-badge active" aria-label="View weekly data">Week</button>
+                <button class="chart-badge" aria-label="View monthly data">Month</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container chart-container--md" role="img" aria-label="Line chart: orders over time">
+                <canvas id="ordersChart" aria-label="Orders over time line chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          {# Product distribution by category — Pie / Doughnut #}
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Category Distribution</div>
+                <div class="card-subtitle">Products by category</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container chart-container--pie" role="img" aria-label="Pie chart: product distribution by category">
+                <canvas id="categoriesChart" aria-label="Category distribution pie chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        {# / charts-row #}
+
+        {# ──────────────────────────────────────────
+           CHARTS ROW 2 — Top products (Bar)
+        ────────────────────────────────────────── #}
+        <div style="margin-bottom:24px">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Top Selling Products</div>
+                <div class="card-subtitle">Units sold (all time)</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container chart-container--md" role="img" aria-label="Bar chart: top selling products">
+                <canvas id="productsChart" aria-label="Top products horizontal bar chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ──────────────────────────────────────────
+           RECENT ORDERS TABLE
+        ────────────────────────────────────────── #}
+        <div class="card table-card" aria-label="Recent orders section">
+
+          <div class="table-toolbar">
+            <div>
+              <div class="card-title" style="margin-bottom:2px">Recent Orders</div>
+              <div class="card-subtitle" id="tableInfo" aria-live="polite">Loading…</div>
+            </div>
+
+            <div class="table-actions">
+              {# Search #}
+              <div class="table-search" role="search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search"
+                       id="ordersSearch"
+                       placeholder="Search orders…"
+                       aria-label="Search orders"
+                       autocomplete="off">
+              </div>
+
+              {# Filter #}
+              <button class="btn btn-outline" aria-label="Filter orders" id="filterBtn">
+                <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                Filter
+              </button>
+
+              {# Export #}
+              <button class="btn btn-outline" aria-label="Export orders to CSV" id="exportBtn">
+                <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                Export
+              </button>
+
+              {# New order #}
+              <a href="{% url 'dashboard:order_list' %}"
+                 class="btn btn-primary"
+                 aria-label="View all orders">
+                <i class="fa-solid fa-list" aria-hidden="true"></i>
+                All Orders
+              </a>
+            </div>
+          </div>
+
+          {# Table #}
+          <div class="data-table-wrap" role="region" aria-label="Orders table" tabindex="0">
+            <table class="data-table" id="recentOrdersTable" aria-label="Recent orders">
+              <thead>
+                <tr>
+                  <th scope="col" aria-sort="none">Order ID</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Address</th>
+                  <th scope="col">Payment</th>
+                  <th scope="col" aria-sort="none">Status</th>
+                  <th scope="col" aria-sort="descending">Date</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody" aria-live="polite" aria-atomic="false">
+                {# Rows injected by admin-dashboard.js #}
+                <tr>
+                  <td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">
+                    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                    Loading orders…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {# Pagination #}
+          <div class="table-footer">
+            <span class="table-info" id="tableInfoFooter"></span>
+            <div id="paginationWrap" aria-label="Table pagination"></div>
+          </div>
+
+        </div>
+        {# / table-card #}
+
+      </div>
+      {# / page-body #}
+
+    </main>
+    {# / main-content #}
+
+  </div>
+  {# / admin-wrapper #}
+
+  {# ════════════════════════════════════════════════════════════
+     DESIGN SETTINGS PANEL (slide-out)
+  ════════════════════════════════════════════════════════════ #}
+  <button id="settingsTab"
+          class="settings-tab"
+          aria-label="Open design settings panel"
+          aria-controls="settingsPanel"
+          aria-expanded="false"
+          title="Design Settings">
+    <i class="fa-solid fa-palette" aria-hidden="true"></i>
+  </button>
+
+  <aside id="settingsPanel" class="settings-panel" role="complementary" aria-label="Design settings panel">
+    <div class="settings-panel-header">
+      <span class="settings-panel-title">
+        <i class="fa-solid fa-palette" aria-hidden="true"></i>&nbsp; Design Settings
+      </span>
+      <button id="closePanelBtn" class="icon-btn" aria-label="Close design settings panel" style="width:28px;height:28px;font-size:12px">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="settings-panel-body">
+
+      {# Theme #}
+      <div class="settings-group">
+        <span class="settings-label">Theme Mode</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" style="flex:1;justify-content:center"
+                  aria-label="Switch to light theme"
+                  onclick="document.documentElement.classList.remove('dark');localStorage.setItem('theme','light');updateThemeIcon()">
+            <i class="fa-solid fa-sun" aria-hidden="true"></i> Light
+          </button>
+          <button class="btn btn-outline" style="flex:1;justify-content:center"
+                  aria-label="Switch to dark theme"
+                  onclick="document.documentElement.classList.add('dark');localStorage.setItem('theme','dark');updateThemeIcon()">
+            <i class="fa-solid fa-moon" aria-hidden="true"></i> Dark
+          </button>
+        </div>
+      </div>
+
+      {# Primary colour #}
+      <div class="settings-group">
+        <span class="settings-label">Primary Colour</span>
+        <div class="color-palette" id="colorPalette" role="group" aria-label="Colour palette presets">
+          {# Swatches injected by admin-dashboard.js #}
+        </div>
+
+        <div class="custom-color-row" style="margin-top:12px">
+          <input type="color" id="customColorInput" value="#4f7ef8" aria-label="Pick a custom colour">
+          <input type="text"  id="hexInput" value="#4f7ef8" placeholder="#4f7ef8" maxlength="7" aria-label="Enter hex colour code">
+        </div>
+      </div>
+
+      {# Reset #}
+      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px"
+              aria-label="Reset design settings to defaults"
+              onclick="setPrimaryColor('#4f7ef8');document.documentElement.classList.remove('dark');localStorage.removeItem('theme');updateThemeIcon()">
+        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reset to defaults
+      </button>
+    </div>
+  </aside>
+
+  {# ── Toast container ── #}
+  <div id="toastContainer" class="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  {# ── Admin Dashboard JS ── #}
+  <script src="{% static 'js/admin-dashboard.js' %}"></script>
+
+</body>
+</html>

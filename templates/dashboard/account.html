@@ -1,0 +1,272 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <h1>My Account</h1>
+            <nav>
+                <ul>
+                    <li><a href="#profile">Profile</a></li>
+                    <li><a href="#orders">Orders</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <aside class="dashboard-sidebar">
+                <nav>
+                    <ul>
+                        <li><a href="#profile">Profile Information</a></li>
+                        <li><a href="#order-history">Order History</a></li>
+                        <li><a href="#payment-methods">Payment Methods</a></li>
+                        <li><a href="#addresses">Shipping Addresses</a></li>
+                        <li><a href="#notifications">Notifications</a></li>
+                        <li><a href="#security">Security & Privacy</a></li>
+                        <li><a href="#help">Help & Support</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <section class="dashboard-content">
+                <h2 id="profile">Profile Information</h2>
+                <div class="card">
+                    <h3>Personal Details</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="full-name">Full Name:</label>
+                            <input type="text" id="full-name" name="full-name" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="john.doe@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number:</label>
+                            <input type="tel" id="phone" name="phone" value="+998 90 123 45 67">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <h2 id="orders">Order History</h2>
+                <div class="card">
+                    <h3>Recent Orders</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#1001</td>
+                                <td>2023-10-26</td>
+                                <td>$120.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1002</td>
+                                <td>2023-10-25</td>
+                                <td>$75.50</td>
+                                <td>Processing</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1003</td>
+                                <td>2023-10-24</td>
+                                <td>$200.00</td>
+                                <td>Shipped</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1004</td>
+                                <td>2023-10-23</td>
+                                <td>$50.00</td>
+                                <td>Canceled</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1005</td>
+                                <td>2023-10-22</td>
+                                <td>$150.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1006</td>
+                                <td>2023-10-21</td>
+                                <td>$99.99</td>
+                                <td>Processing</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1007</td>
+                                <td>2023-10-20</td>
+                                <td>$30.25</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1008</td>
+                                <td>2023-10-19</td>
+                                <td>$180.00</td>
+                                <td>Shipped</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1009</td>
+                                <td>2023-10-18</td>
+                                <td>$65.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1010</td>
+                                <td>2023-10-17</td>
+                                <td>$110.00</td>
+                                <td>Processing</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1011</td>
+                                <td>2023-10-16</td>
+                                <td>$88.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1012</td>
+                                <td>2023-10-15</td>
+                                <td>$135.00</td>
+                                <td>Shipped</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1013</td>
+                                <td>2023-10-14</td>
+                                <td>$45.00</td>
+                                <td>Canceled</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1014</td>
+                                <td>2023-10-13</td>
+                                <td>$220.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1015</td>
+                                <td>2023-10-12</td>
+                                <td>$90.00</td>
+                                <td>Processing</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1016</td>
+                                <td>2023-10-11</td>
+                                <td>$60.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1017</td>
+                                <td>2023-10-10</td>
+                                <td>$170.00</td>
+                                <td>Shipped</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1018</td>
+                                <td>2023-10-09</td>
+                                <td>$80.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1019</td>
+                                <td>2023-10-08</td>
+                                <td>$105.00</td>
+                                <td>Processing</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                            <tr>
+                                <td>#1020</td>
+                                <td>2023-10-07</td>
+                                <td>$70.00</td>
+                                <td>Delivered</td>
+                                <td><a href="#">View Details</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 id="settings">Account Settings</h2>
+                <div class="card">
+                    <h3>Password Change</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="current-password">Current Password:</label>
+                            <input type="password" id="current-password" name="current-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password:</label>
+                            <input type="password" id="new-password" name="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm New Password:</label>
+                            <input type="password" id="confirm-password" name="confirm-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Notification Preferences</h3>
+                    <form>
+                        <div class="form-group">
+                            <input type="checkbox" id="email-notifications" name="email-notifications" checked>
+                            <label for="email-notifications">Email Notifications</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" id="sms-notifications" name="sms-notifications">
+                            <label for="sms-notifications">SMS Notifications</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Preferences</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Delete Account</h3>
+                    <p>Permanently delete your account and all associated data.</p>
+                    <button class="btn btn-danger">Delete Account</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="dashboard-footer">
+        <div class="container">
+            <p>&copy; 2023 Online Pharmacy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

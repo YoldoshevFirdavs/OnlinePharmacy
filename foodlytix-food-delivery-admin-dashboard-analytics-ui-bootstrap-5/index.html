@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodlytix - Admin Dashboard</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="./assets/icons/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="index.html">
+                <i class="bi bi-basket2-fill"></i>
+                <span class="logo-text">Foodlytix</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link active">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order.html" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="restaurants.html" class="nav-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Restaurants</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="customer.html" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="riders.html" class="nav-link">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Delivery Riders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="payments.html" class="nav-link">
+                    <i class="bi bi-credit-card-fill"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reviews.html" class="nav-link">
+                    <i class="bi bi-chat-left-dots-fill"></i>
+                    <span>Reviews</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="signup.html" class="nav-link">
+                    <i class="bi bi-person-add"></i>
+                    <span>Signup</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forgot-password.html" class="nav-link">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Forgot password</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="404.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>404</span>
+                </a>
+            </li>
+             <li class="nav-item">
+                <a href="500.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>500</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <button class="menu-toggle-mobile" id="MenuToggleMobile">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search orders, customers, restaurants...">
+            </div>
+            
+            <div class="top-bar-actions">
+                 <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                       <button class="action-btn">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge-notification">12</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+
+                
+                <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                        <button class="action-btn">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span class="badge-notification">5</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+                <div class="dropdown profile-dropdown">
+                     <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                         <div class="user-profile">
+                            <div class="user-avatar">AD</div>
+                            <div class="user-info">
+                                <h6>Admin User</h6>
+                                <p>Super Admin</p>
+                            </div>
+                        </div>
+                     </div>
+                     <ul class="dropdown-menu dropdown-menu-end mt-2">
+                         <li><h6 class="dropdown-header">Settings</h6></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user"></i> Profile Settings</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy &amp; Security</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-credit-card"></i> Billing</a></li>
+                         <li>
+                             <div class="sign-out">
+                             <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                             </div>
+                         </li>
+                     </ul>
+                 </div>
+
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Dashboard Overview</h1>
+                <p>Welcome back! Here's what's happening with your food delivery platform today.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i> 12%
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalOrders">1,547</div>
+                    <div class="stat-label">Total Orders Today</div>
+                    <div class="stat-footer">
+                        <i class="bi bi-clock"></i>
+                        <span>Updated 5 mins ago</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i> 8.5%
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalRevenue">$24,580</div>
+                    <div class="stat-label">Revenue Today</div>
+                    <div class="stat-footer">
+                        <i class="bi bi-graph-up"></i>
+                        <span>vs $22,650 yesterday</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="bi bi-bicycle"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i> 3.2%
+                        </div>
+                    </div>
+                    <div class="stat-value" id="activeRiders">87</div>
+                    <div class="stat-label">Active Riders</div>
+                    <div class="stat-footer">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>45 on delivery</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon info">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="bi bi-arrow-up"></i> 0.3
+                        </div>
+                    </div>
+                    <div class="stat-value">4.8</div>
+                    <div class="stat-label">Average Rating</div>
+                    <div class="stat-footer">
+                        <i class="bi bi-chat-left-dots"></i>
+                        <span>From 2,341 reviews</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Revenue Analytics</h3>
+                            <div class="chart-filters">
+                                <button class="filter-btn active">Day</button>
+                                <button class="filter-btn">Week</button>
+                                <button class="filter-btn">Month</button>
+                                <button class="filter-btn">Year</button>
+                            </div>
+                        </div>
+                        <canvas id="revenueChart" height="80"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Order Status</h3>
+                        </div>
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Recent Orders</h3>
+                    <div class="table-actions">
+                        <button class="filter-btn">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
+                        <button class="filter-btn">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Restaurant</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody >
+                <tr>
+                    <td><strong>#ORD-2547</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">SJ</div>
+                            <div class="customer-info">
+                                <h6>Sarah Johnson</h6>
+                                <p>+1 234 567 8900</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Pizza Palace</td>
+                    <td><strong>$45.80</strong></td>
+                    <td>
+                        <span class="status-badge delivering">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Delivering
+                        </span>
+                    </td>
+                    <td>5 mins ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2546</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">MC</div>
+                            <div class="customer-info">
+                                <h6>Michael Chen</h6>
+                                <p>+1 234 567 8901</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Burger House</td>
+                    <td><strong>$32.50</strong></td>
+                    <td>
+                        <span class="status-badge preparing">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Preparing
+                        </span>
+                    </td>
+                    <td>12 mins ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2545</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">ED</div>
+                            <div class="customer-info">
+                                <h6>Emily Davis</h6>
+                                <p>+1 234 567 8902</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Sushi Master</td>
+                    <td><strong>$67.20</strong></td>
+                    <td>
+                        <span class="status-badge delivered">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Delivered
+                        </span>
+                    </td>
+                    <td>25 mins ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2544</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">JW</div>
+                            <div class="customer-info">
+                                <h6>James Wilson</h6>
+                                <p>+1 234 567 8903</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Taco Fiesta</td>
+                    <td><strong>$28.90</strong></td>
+                    <td>
+                        <span class="status-badge confirmed">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Confirmed
+                        </span>
+                    </td>
+                    <td>32 mins ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2543</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">LA</div>
+                            <div class="customer-info">
+                                <h6>Lisa Anderson</h6>
+                                <p>+1 234 567 8904</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Thai Kitchen</td>
+                    <td><strong>$54.30</strong></td>
+                    <td>
+                        <span class="status-badge pending">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Pending
+                        </span>
+                    </td>
+                    <td>45 mins ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2542</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">RB</div>
+                            <div class="customer-info">
+                                <h6>Robert Brown</h6>
+                                <p>+1 234 567 8905</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Pasta Bar</td>
+                    <td><strong>$41.75</strong></td>
+                    <td>
+                        <span class="status-badge delivered">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Delivered
+                        </span>
+                    </td>
+                    <td>1 hour ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td><strong>#ORD-2541</strong></td>
+                    <td>
+                        <div class="order-customer">
+                            <div class="customer-avatar">JM</div>
+                            <div class="customer-info">
+                                <h6>Jessica Martinez</h6>
+                                <p>+1 234 567 8906</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>BBQ Grill</td>
+                    <td><strong>$78.50</strong></td>
+                    <td>
+                        <span class="status-badge cancelled">
+                            <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                            Cancelled
+                        </span>
+                    </td>
+                    <td>1 hour ago</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-icon-btn" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-icon-btn" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>© 2025 Foodlytix — All Rights Reserved</span>
+                <span class="footer-divider">|</span>
+                <span>Themes By TemplateRise</span>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

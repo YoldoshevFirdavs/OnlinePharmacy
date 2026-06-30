@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% load static %}
+    {% include 'components/begin.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do'kon - Online Pharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+</head>
+<body>
+
+{% include 'components/header.html' %}
+
+<div class="shop-container">
+    <!-- SIDEBAR - CATEGORIES -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3>Kategoriyalar</h3>
+        </div>
+        <div class="categories-list" id="categories-list">
+            <div class="loading">Yuklanmoqda...</div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="shop-main">
+        <!-- SEARCH & FILTER -->
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Dori nomini qidirish..."
+                    autocomplete="off"
+                >
+                <div class="search-suggestions" id="search-suggestions"></div>
+            </div>
+
+            <div class="phone-login">
+                <div id="selected-country" class="country-selector">
+                    <span class="flag-icon fi fi-uz"></span>
+                    <span class="dial-code">+998</span>
+                    <span class="caret">▾</span>
+                </div>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone_number"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    placeholder="901234567"
+                    maxlength="9"
+                >
+                <button class="btn-login" id="btn-phone-login">
+                    <i class="fas fa-phone"></i> Kirish
+                </button>
+            </div>
+        </div>
+
+        <!-- PRODUCTS GRID -->
+        <div class="products-section">
+            <h2 id="section-title">Barcha Mahsulotlar</h2>
+            <div class="products-grid" id="products-grid">
+                <div class="loading">Mahsulotlar yuklanmoqda...</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- OTP MODAL -->
+<div id="otp-modal" class="modal hidden">
+    <div class="modal-content">
+        <button class="close-btn" id="close-modal">&times;</button>
+        <h3>Telefon Raqamingizni Tasdiqlang</h3>
+        <p id="phone-display"></p>
+
+        <div class="otp-section">
+            <p class="otp-label">6 xonali kodni kiriting</p>
+            <div class="otp-inputs" id="otp-inputs"></div>
+        </div>
+
+        <div class="timer-section">
+            <div class="timer" id="timer">
+                <span id="timer-value">120</span>s
+            </div>
+            <button class="btn-resend hidden" id="resend-btn">Kodni Qayta Yubor</button>
+        </div>
+
+        <p class="error-msg" id="otp-error"></p>
+        <button class="btn btn-primary" id="verify-btn" disabled>Tasdiqlash</button>
+    </div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div id="product-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+        <button class="close-btn" id="close-product">&times;</button>
+        <div class="product-detail">
+            <div class="detail-image" id="detail-image"></div>
+            <div class="detail-info">
+                <h2 id="detail-name"></h2>
+                <p id="detail-desc"></p>
+                <div class="detail-meta">
+                    <div class="price" id="detail-price"></div>
+                    <div class="rating" id="detail-rating"></div>
+                </div>
+                <button class="btn btn-primary" id="add-to-cart">
+                    <i class="fas fa-shopping-cart"></i> Savatchaga Qo'sh
+                </button>
+                <div class="reviews" id="detail-reviews"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'components/footer.html' %}
+
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/shop.js' %}"></script>
+
+</body>
+</html>

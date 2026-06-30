@@ -1,0 +1,74 @@
+from django.contrib import admin
+from django.urls import path, include
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
+from django.shortcuts import render
+from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from users.views import AdminLoginViewSet, auth_view, AccountView
+
+class JWTSchemaGenerator(OpenAPISchemaGenerator):
+    def get_security_definitions(self):
+        security_definitions = super().get_security_definitions()
+        security_definitions['Bearer'] = {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+        return security_definitions
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="API",
+        default_version='v1',
+        description="E-commerce API",
+        contact=openapi.Contact(email="contact@myapi.local"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+    generator_class=JWTSchemaGenerator,
+)
+
+urlpatterns = [
+    path('', TemplateView.as_view(template_name='main.html'), name='home'),
+    path('shop/', TemplateView.as_view(template_name='shop/shop.html'), name='shop'),
+    path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
+    path('terms/', TemplateView.as_view(template_name='terms.html'), name='terms'),
+    path('privacy/', TemplateView.as_view(template_name='privacy.html'), name='privacy'),
+    path('contact/', TemplateView.as_view(template_name='contact.html'), name='contact'),
+    path('auth/', auth_view, name='auth'),
+    path("account/", AccountView.as_view(), name="account"),
+
+
+    path('admin/', admin.site.urls),
+
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
+
+    path("accounts/login/", TemplateView.as_view(template_name="auth.html"), name="login"),
+
+    path('api/v1/users/', include('users.urls')),
+    path('api/v1/admin/login/', AdminLoginViewSet.as_view({'post': 'login'}), name='admin_login_alias'),
+    path('api/v1/pharmacy/', include('pharmacy.urls')),
+    path('api/v1/orders/', include('orders.urls')),
+    path('api/v1/payments/', include('payments.urls')),
+
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui')
+]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()
+
+def custom_page_not_found(request, exception):
+    return render(request, "404.html", status=404)
+
+def custom_server_error(request):
+    return render(request, "500.html", status=500)
+
+handler404 = custom_page_not_found
+handler500 = custom_server_error

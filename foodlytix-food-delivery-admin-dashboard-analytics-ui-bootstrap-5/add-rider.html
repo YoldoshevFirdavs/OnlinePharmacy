@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodlytix - Admin Dashboard</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="./assets/icons/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="index.html">
+                <i class="bi bi-basket2-fill"></i>
+                <span class="logo-text">Foodlytix</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order.html" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="restaurants.html" class="nav-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Restaurants</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="customer.html" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="riders.html" class="nav-link active">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Delivery Riders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="payments.html" class="nav-link">
+                    <i class="bi bi-credit-card-fill"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reviews.html" class="nav-link">
+                    <i class="bi bi-chat-left-dots-fill"></i>
+                    <span>Reviews</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="signup.html" class="nav-link">
+                    <i class="bi bi-person-add"></i>
+                    <span>Signup</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forgot-password.html" class="nav-link">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Forgot password</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="404.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>404</span>
+                </a>
+            </li>
+             <li class="nav-item">
+                <a href="500.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>500</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+         <div class="top-bar">
+            <button class="menu-toggle-mobile" id="MenuToggleMobile">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search orders, customers, restaurants...">
+            </div>
+            
+            <div class="top-bar-actions">
+                 <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                       <button class="action-btn">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge-notification">12</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+
+                
+                <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                        <button class="action-btn">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span class="badge-notification">5</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+                <div class="dropdown profile-dropdown">
+                     <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                         <div class="user-profile">
+                            <div class="user-avatar">AD</div>
+                            <div class="user-info">
+                                <h6>Admin User</h6>
+                                <p>Super Admin</p>
+                            </div>
+                        </div>
+                     </div>
+                     <ul class="dropdown-menu dropdown-menu-end mt-2">
+                         <li><h6 class="dropdown-header">Settings</h6></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user"></i> Profile Settings</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy &amp; Security</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-credit-card"></i> Billing</a></li>
+                         <li>
+                             <div class="sign-out">
+                             <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                             </div>
+                         </li>
+                     </ul>
+                 </div>
+
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Page Header -->
+             <div class="page-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+                    <div>
+                       <h1>Add New Riders</h1>
+                    </div>
+                    <div class="d-flex gap-2">
+                         <a href="riders.html" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <form id="addRiderForm">
+                    <div class="row">
+                        <!-- Main Form -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-8">
+                            <!-- Personal Information -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">First Name *</label>
+                                            <input type="text" class="form-control" id="firstName" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Last Name *</label>
+                                            <input type="text" class="form-control" id="lastName" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Email Address *</label>
+                                            <input type="email" class="form-control" id="email" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Phone Number *</label>
+                                            <input type="tel" class="form-control" id="phone" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Date of Birth *</label>
+                                            <input type="date" class="form-control" id="dob" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Gender *</label>
+                                            <select class="form-select" id="gender" required="">
+                                                <option value="">Select Gender</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Address *</label>
+                                        <input type="text" class="form-control" id="address" placeholder="Street Address" required="">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">City *</label>
+                                            <input type="text" class="form-control" id="city" required="">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">State/Province *</label>
+                                            <input type="text" class="form-control" id="state" required="">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">ZIP Code *</label>
+                                            <input type="text" class="form-control" id="zipCode" required="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vehicle Information -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-motorcycle me-2"></i>Vehicle Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Vehicle Type *</label>
+                                            <select class="form-select" id="vehicleType" required="">
+                                                <option value="">Select Vehicle Type</option>
+                                                <option value="motorcycle">Motorcycle</option>
+                                                <option value="scooter">Scooter</option>
+                                                <option value="bicycle">Bicycle</option>
+                                                <option value="car">Car</option>
+                                                <option value="electric">Electric Vehicle</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Vehicle Make &amp; Model *</label>
+                                            <input type="text" class="form-control" id="vehicleModel" placeholder="e.g., Honda CBR 150" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">License Plate Number *</label>
+                                            <input type="text" class="form-control" id="licensePlate" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Vehicle Year</label>
+                                            <input type="number" class="form-control" id="vehicleYear" min="1990" max="2025">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Vehicle Color</label>
+                                        <input type="text" class="form-control" id="vehicleColor" placeholder="e.g., Red">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- License & Documents -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>License &amp; Documents</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Driver's License Number *</label>
+                                            <input type="text" class="form-control" id="licenseNumber" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">License Expiry Date *</label>
+                                            <input type="date" class="form-control" id="licenseExpiry" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">National ID Number</label>
+                                            <input type="text" class="form-control" id="nationalId">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Insurance Policy Number</label>
+                                            <input type="text" class="form-control" id="insuranceNumber">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Upload Driver's License</label>
+                                        <input type="file" class="form-control" id="licenseUpload" accept="image/*,.pdf">
+                                        <small class="text-muted">Upload front and back of license (Max 5MB each)</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Upload Vehicle Registration</label>
+                                        <input type="file" class="form-control" id="registrationUpload" accept="image/*,.pdf">
+                                        <small class="text-muted">Upload vehicle registration document (Max 5MB)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Information -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-university me-2"></i>Bank Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Bank Name *</label>
+                                        <input type="text" class="form-control" id="bankName" required="">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Account Holder Name *</label>
+                                            <input type="text" class="form-control" id="accountHolder" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Account Number *</label>
+                                            <input type="text" class="form-control" id="accountNumber" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Routing Number</label>
+                                            <input type="text" class="form-control" id="routingNumber">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">SWIFT/IFSC Code</label>
+                                            <input type="text" class="form-control" id="swiftCode">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Emergency Contact -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-phone-alt me-2"></i>Emergency Contact</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Contact Name *</label>
+                                            <input type="text" class="form-control" id="emergencyName" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Relationship *</label>
+                                            <input type="text" class="form-control" id="emergencyRelation" placeholder="e.g., Spouse, Parent" required="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Phone Number *</label>
+                                            <input type="tel" class="form-control" id="emergencyPhone" required="">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Alternative Phone</label>
+                                            <input type="tel" class="form-control" id="emergencyAltPhone">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-4">
+                            <!-- Profile Photo -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-image"></i> Profile Photo</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="image-upload-container">
+                                        <div class="image-preview" id="imagePreview">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Click or drag image here</p>
+                                            <small>Recommended: 800x600px</small>
+                                        </div>
+                                        <input type="file" id="restaurantImage" accept="image/*" style="display: none;">
+                                        <button type="button" class="btn btn-primary w-100 mt-3" onclick="document.getElementById('restaurantImage').click()">
+                                            <i class="fas fa-upload"></i> Choose Image
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Account Status -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-toggle-on me-2"></i>Account Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Initial Status</label>
+                                        <select class="form-select" id="accountStatus">
+                                            <option value="pending">Pending Approval</option>
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="verifiedSwitch">
+                                        <label class="form-check-label" for="verifiedSwitch">Verified Account</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="backgroundCheck">
+                                        <label class="form-check-label" for="backgroundCheck">Background Check Completed</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="trainingCompleted">
+                                        <label class="form-check-label" for="trainingCompleted">Training Completed</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Zone -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Delivery Zone</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Assigned Zone *</label>
+                                        <select class="form-select" id="deliveryZone" required="">
+                                            <option value="">Select Zone</option>
+                                            <option value="zone1">Zone 1 - Downtown</option>
+                                            <option value="zone2">Zone 2 - North District</option>
+                                            <option value="zone3">Zone 3 - South District</option>
+                                            <option value="zone4">Zone 4 - East Side</option>
+                                            <option value="zone5">Zone 5 - West Side</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Working Radius (km)</label>
+                                        <input type="number" class="form-control" id="workingRadius" value="10" min="1" max="50">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Settings -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Additional Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Commission Rate (%)</label>
+                                        <input type="number" class="form-control" id="commissionRate" value="15" min="0" max="100" step="0.5">
+                                        <small class="text-muted">Percentage per delivery</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Preferred Language</label>
+                                        <select class="form-select" id="language">
+                                            <option value="en">English</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="zh">Chinese</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Max Orders Per Day</label>
+                                        <input type="number" class="form-control" id="maxOrders" value="20" min="1" max="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Admin Notes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <textarea class="form-control" id="adminNotes" rows="4" placeholder="Add any internal notes about this rider..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                                        <i class="fas fa-check me-2"></i>Add Rider
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary w-100" onclick="window.location.href='riders.html'">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+           
+              
+           
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>© 2025 Foodlytix — All Rights Reserved</span>
+                <span class="footer-divider">|</span>
+                <span>Themes By TemplateRise</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

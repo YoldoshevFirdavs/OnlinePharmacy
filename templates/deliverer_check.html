@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yetkazuvchi Onboarding</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 {
+            color: #6a0dad;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #6a0dad;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #5a0ca0;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .success-message {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Yetkazuvchi Hisobini Faollashtirish</h1>
+        <p id="status-message"></p>
+        <form id="onboarding-form">
+            <div class="form-group">
+                <label for="full_name">To'liq ism:</label>
+                <input type="text" id="full_name" name="full_name" required>
+                <p class="error-message" id="full_name-error"></p>
+            </div>
+            <div class="form-group">
+                <label for="password">Parol:</label>
+                <input type="password" id="password" name="password" required>
+                <p class="error-message" id="password-error"></p>
+            </div>
+            <div class="form-group">
+                <label for="password_confirm">Parolni tasdiqlash:</label>
+                <input type="password" id="password_confirm" name="password_confirm" required>
+                <p class="error-message" id="password_confirm-error"></p>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="accept_terms" name="accept_terms" required>
+                <label for="accept_terms" style="display: inline; font-weight: normal;">Shartlarga roziman</label>
+                <p class="error-message" id="accept_terms-error"></p>
+            </div>
+            <button type="submit" id="submit-btn">Faollashtirish</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const delivererId = urlParams.get('deliverer_id');
+            const form = document.getElementById('onboarding-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const statusMessage = document.getElementById('status-message');
+
+            if (!token || !delivererId) {
+                statusMessage.textContent = 'Xato: Token yoki yetkazuvchi ID topilmadi.';
+                statusMessage.style.color = 'red';
+                form.style.display = 'none';
+                return;
+            }
+
+            // Function to display error messages
+            function displayError(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.textContent = message;
+                }
+            }
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                // Clear previous errors
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+                const full_name = document.getElementById('full_name').value;
+                const password = document.getElementById('password').value;
+                const password_confirm = document.getElementById('password_confirm').value;
+                const accept_terms = document.getElementById('accept_terms').checked;
+
+                let isValid = true;
+                if (full_name.trim() === '') {
+                    displayError('full_name-error', 'To\'liq ism majburiy.');
+                    isValid = false;
+                }
+                if (password.length < 8) {
+                    displayError('password-error', 'Parol kamida 8 belgidan iborat bo\'lishi kerak.');
+                    isValid = false;
+                }
+                if (password !== password_confirm) {
+                    displayError('password_confirm-error', 'Parollar mos kelmadi.');
+                    isValid = false;
+                }
+                if (!accept_terms) {
+                    displayError('accept_terms-error', 'Shartlarni qabul qilishingiz shart.');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                statusMessage.textContent = 'Faollashtirilmoqda...';
+                statusMessage.style.color = 'blue';
+
+                try {
+                    const response = await fetch('/api/v1/deliverers/complete-onboard/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            token: token,
+                            deliverer_id: delivererId,
+                            full_name: full_name,
+                            password: password,
+                            accept_terms: accept_terms
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        statusMessage.textContent = 'Hisob muvaffaqiyatli faollashtirildi!';
+                        statusMessage.style.color = 'green';
+                        // Redirect to card setup page
+                        window.location.href = data.next || `/deliverer/card-setup/?token=${token}&deliverer_id=${delivererId}`;
+                    } else {
+                        statusMessage.textContent = data.detail || 'Faollashtirishda xato yuz berdi.';
+                        statusMessage.style.color = 'red';
+                        submitBtn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Kutilmagan xato yuz berdi.';
+                    statusMessage.style.color = 'red';
+                    submitBtn.disabled = false;
+                }
+            });
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+</body>
+</html>

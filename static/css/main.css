@@ -1,0 +1,783 @@
+/* ============================================
+   OnlinePharmacy - Main CSS (v3.3)
+   Apple Style Design + Uzbek UX
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-gradient: linear-gradient(90deg, #6a00f4 0%, #b084f4 100%);
+  --primary-dark: #6a00f4;
+  --primary-light: #b084f4;
+  --secondary: #ffffff;
+  --footer-bg: #0f1120;
+  --text-dark: #1a1a1a;
+  --text-gray: #666666;
+  --border-light: #e5e5ea;
+  --bg-soft: #f9f9fb;
+  --success: #4CAF50;
+  --error: #f44336;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+  --radius: 12px;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fff;
+  color: var(--text-dark);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   HEADER / NAVBAR
+   ============================================ */
+
+header.navbar {
+  height: 80px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo h1 {
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  cursor: pointer;
+}
+
+.logo a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+nav ul.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 24px;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-dark);
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.navbar-user:hover {
+  background: var(--bg-soft);
+}
+
+#navbar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-light);
+}
+
+#navbar-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.btn-nav {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary-gradient);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 14px;
+}
+
+.btn-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   HERO SECTION (Apple Style v2)
+   ============================================ */
+
+.hero-apple-v2 {
+  background: var(--primary-gradient);
+  color: #fff;
+  padding: 100px 20px;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 900px;
+  text-align: center;
+}
+
+.hero-headline {
+  font-size: clamp(40px, 8vw, 64px);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.hero-headline span {
+  display: block;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-tagline {
+  font-size: 18px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.95;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.btn-apple-primary,
+.btn-apple-secondary {
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn-apple-primary {
+  background: #fff;
+  color: var(--primary-dark);
+}
+
+.btn-apple-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.btn-apple-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.btn-apple-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.arrow {
+  margin-left: 6px;
+}
+
+.hero-trust-bar {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.icon {
+  font-size: 18px;
+}
+
+/* ============================================
+   MAIN SECTIONS & CONTAINERS
+   ============================================ */
+
+.apple-section {
+  padding: 80px 20px;
+  background: #fff;
+}
+
+.apple-section.bg-soft {
+  background: var(--bg-soft);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-intro {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.apple-title {
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.apple-title.centered {
+  text-align: center;
+}
+
+.apple-subtitle {
+  font-size: 18px;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+/* ============================================
+   PRODUCT CARDS (Apple Grid)
+   ============================================ */
+
+.apple-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.apple-card {
+  background: #fff;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+.apple-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.apple-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.card-content {
+  padding: 20px;
+}
+
+.card-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.card-content p {
+  font-size: 14px;
+  color: var(--text-gray);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.btn-buy-mini {
+  padding: 8px 16px;
+  background: var(--primary-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+
+.btn-buy-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(106, 0, 244, 0.3);
+}
+
+.center-btn {
+  text-align: center;
+}
+
+.link-more-apple {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.link-more-apple:hover {
+  color: var(--primary-light);
+}
+
+/* ============================================
+   BENEFITS GRID
+   ============================================ */
+
+.benefits-apple-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.benefit-card {
+  text-align: center;
+}
+
+.benefit-icon-box {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.benefit-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+.benefit-card p {
+  font-size: 14px;
+  color: var(--text-gray);
+  line-height: 1.6;
+}
+
+/* ============================================
+   ABOUT & IBN SINO QUOTES
+   ============================================ */
+
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.about-info-v2 {
+  padding-right: 20px;
+}
+
+.lead-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+}
+
+.about-info-v2 p {
+  font-size: 16px;
+  color: var(--text-gray);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.btn-apple-outline {
+  display: inline-block;
+  padding: 12px 24px;
+  border: 2px solid var(--primary-dark);
+  color: var(--primary-dark);
+  background: transparent;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  margin-top: 16px;
+}
+
+.btn-apple-outline:hover {
+  background: var(--primary-dark);
+  color: #fff;
+}
+
+.ibn-sino-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quote-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--primary-dark);
+  transition: transform 0.3s;
+}
+
+.quote-card:hover {
+  transform: translateX(8px);
+}
+
+.quote-card.gold {
+  border-left-color: #d4af37;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(106, 0, 244, 0.02) 100%);
+}
+
+.quote-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.quote-author {
+  font-size: 14px;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+/* ============================================
+   TESTIMONIALS
+   ============================================ */
+
+.testimonials-apple-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.testimonial-apple-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s;
+  border: 1px solid var(--border-light);
+}
+
+.testimonial-apple-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-meta img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-light);
+}
+
+.user-meta h5 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 4px 0;
+}
+
+.rating {
+  font-size: 14px;
+  color: #f0ad4e;
+}
+
+.testimonial-apple-card p {
+  font-size: 14px;
+  color: var(--text-gray);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+footer {
+  background: var(--footer-bg);
+  color: #fff;
+  padding: 60px 20px 20px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.footer-column p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.footer-column a {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 8px;
+  transition: color 0.3s;
+}
+
+.footer-column a:hover {
+  color: var(--primary-light);
+}
+
+.footer-subscribe {
+  display: flex;
+  gap: 8px;
+}
+
+.footer-subscribe input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+}
+
+.footer-subscribe input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-subscribe button {
+  padding: 10px 16px;
+  background: var(--primary-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.footer-subscribe button:hover {
+  transform: translateY(-2px);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .nav-menu {
+    gap: 12px !important;
+  }
+
+  .nav-link {
+    font-size: 13px;
+  }
+
+  .hero-apple-v2 {
+    padding: 60px 20px;
+  }
+
+  .hero-headline {
+    font-size: 36px;
+  }
+
+  .hero-tagline {
+    font-size: 16px;
+  }
+
+  .hero-trust-bar {
+    gap: 8px;
+  }
+
+  .trust-badge {
+    font-size: 12px;
+  }
+
+  .apple-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .apple-section {
+    padding: 48px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  header.navbar {
+    height: auto;
+    padding: 12px 0;
+  }
+
+  .nav-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .btn-apple-primary,
+  .btn-apple-secondary {
+    width: 100%;
+  }
+
+  .hero-trust-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Commit: css: remove footer stickers and add social icon hover animations */
+footer .sticker, footer .badge, footer .promo, footer .chip, footer .floating-badge {
+  display: none !important;
+}
+
+/* Social icons base */
+.socials a {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; border-radius:50%; /* Changed to 40px circle */
+  color:#fff; font-size:1.25rem; /* Changed font size */
+  transition: color 0.3s ease; /* Changed transition to only color */
+  text-decoration:none;
+}
+
+/* Hover states */
+.socials a:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+
+/* Specific colors - only change color on hover, no background */
+.socials a.telegram:hover { color:#0088cc; background: transparent; } /* Removed background */
+.socials a.facebook:hover { color:#1877f2; background: transparent; } /* Removed background */
+.socials a.instagram:hover { color:#e1306c; background: transparent; } /* Removed background */
+
+/* Commit: css: fix features icons layout */
+.features-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:24px; align-items:start; }
+.feature-card { background:#fff; border-radius:12px; padding:24px; text-align:center; box-shadow:var(--shadow-sm); }
+.feature-icon { width:72px; height:72px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; border-radius:16px; background:linear-gradient(180deg, rgba(106,0,244,0.08), rgba(176,132,244,0.04)); }
+.feature-icon img, .feature-icon svg { width:40px; height:40px; }

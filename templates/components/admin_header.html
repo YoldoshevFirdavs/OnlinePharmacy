@@ -1,0 +1,219 @@
+{% load static %}
+<header class="admin-header">
+    <div class="left-section">
+        <a href="{% url 'dashboard:main_dashboard' %}" class="logo-btn" aria-label="Magazin sahifasiga o'tish">
+            <i class="fas fa-store"></i> Magazin
+        </a>
+        <span class="page-title">Dashboard</span> {# This will be dynamically updated by JS or context #}
+    </div>
+    <div class="right-section">
+        <button id="themeToggle" class="theme-toggle" aria-label="Temani o'zgartirish">
+            <i class="fas fa-sun"></i>
+        </button>
+        <div class="user-dropdown">
+            <a href="#" class="user-dropdown-toggle" id="dropdownUserToggle" aria-expanded="false" aria-controls="userDropdownMenu">
+                <img id="adminAvatar" src="{% static 'images/default_avatar.png' %}" alt="Admin Avatari" class="user-avatar">
+                <span id="adminUserName">Admin</span>
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="dropdown-menu" id="userDropdownMenu">
+                <li><a class="dropdown-item" href="{% url 'dashboard:account_settings' %}"><i class="fas fa-user-cog"></i> Akkaunt sozlamalari</a></li>
+                <li><a class="dropdown-item" href="{% url 'home' %}"><i class="fas fa-store"></i> Magazin</a></li>
+                <li><div class="divider"></div></li>
+                <li><a class="dropdown-item" href="{% url 'dashboard:logout_page' %}"><i class="fas fa-sign-out-alt"></i> Chiqish</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<style>
+    /* Admin Header Specific Styles */
+    .admin-header {
+        background-color: var(--card-background);
+        padding: 1rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: var(--shadow-sm);
+        transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+    }
+
+    .admin-header .left-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .admin-header .logo-btn {
+        background-color: var(--primary);
+        color: var(--card-background);
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-speed) ease;
+    }
+
+    .admin-header .logo-btn:hover {
+        background-color: var(--primary-dark);
+    }
+
+    .admin-header .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .admin-header .right-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .admin-header .theme-toggle {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--border-radius-md);
+        transition: all var(--transition-speed) ease;
+    }
+
+    .admin-header .theme-toggle:hover {
+        background-color: var(--gray-100);
+        color: var(--primary);
+    }
+
+    .admin-header .user-dropdown {
+        position: relative;
+    }
+
+    .admin-header .user-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-color);
+        text-decoration: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: var(--border-radius-md);
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .admin-header .user-dropdown-toggle:hover {
+        background-color: var(--gray-100);
+    }
+
+    .admin-header .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+    }
+
+    .admin-header .user-name {
+        font-weight: 500;
+    }
+
+    .admin-header .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-md);
+        list-style: none;
+        padding: 0.5rem 0;
+        margin-top: 0.5rem;
+        min-width: 180px;
+        z-index: 100;
+        display: none; /* Hidden by default */
+        transition: all var(--transition-speed) ease;
+    }
+
+    .admin-header .dropdown-menu.show {
+        display: block;
+    }
+
+    .admin-header .dropdown-menu li a {
+        display: flex; /* To align icon and text */
+        align-items: center;
+        gap: 0.75rem; /* Space between icon and text */
+        padding: 0.75rem 1rem;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .admin-header .dropdown-menu li a:hover {
+        background-color: var(--gray-100);
+        color: var(--primary);
+    }
+
+    .admin-header .dropdown-menu .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 0.5rem 0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropdownUserToggle = document.getElementById('dropdownUserToggle');
+        const userDropdownMenu = document.getElementById('userDropdownMenu');
+        const themeToggle = document.getElementById('themeToggle');
+        const adminUserName = document.getElementById('adminUserName');
+        const adminAvatar = document.getElementById('adminAvatar');
+
+        // Dropdown toggle logic
+        if (dropdownUserToggle && userDropdownMenu) {
+            dropdownUserToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                userDropdownMenu.classList.toggle('show');
+                dropdownUserToggle.setAttribute('aria-expanded', userDropdownMenu.classList.contains('show'));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdownUserToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                    userDropdownMenu.classList.remove('show');
+                    dropdownUserToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // Theme toggle logic
+        if (themeToggle) {
+            const applyTheme = (theme) => {
+                document.documentElement.classList.toggle('dark-theme', theme === 'dark');
+                themeToggle.querySelector('i').className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            };
+
+            const savedTheme = localStorage.getItem('theme');
+            applyTheme(savedTheme || 'light'); // Apply saved theme or default to light
+
+            themeToggle.addEventListener('click', () => {
+                let currentTheme = document.documentElement.classList.contains('dark-theme') ? 'dark' : 'light';
+                let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+        }
+
+        // Load user info for header
+        const userName = localStorage.getItem('user_name') || 'Admin';
+        const userAvatarUrl = localStorage.getItem('user_avatar_url') || "{% static 'images/default_avatar.png' %}";
+        if (adminUserName) adminUserName.textContent = userName;
+        if (adminAvatar) adminAvatar.src = userAvatarUrl;
+    });
+</script>

@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodlytix - Admin Dashboard</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="./assets/icons/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="index.html">
+                <i class="bi bi-basket2-fill"></i>
+                <span class="logo-text">Foodlytix</span>
+            </a>
+             <button class="menu-toggle" id="menuToggle">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order.html" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="restaurants.html" class="nav-link">
+                    <i class="bi bi-shop"></i>
+                    <span>Restaurants</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="customer.html" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="riders.html" class="nav-link active">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Delivery Riders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="payments.html" class="nav-link">
+                    <i class="bi bi-credit-card-fill"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reviews.html" class="nav-link">
+                    <i class="bi bi-chat-left-dots-fill"></i>
+                    <span>Reviews</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="signup.html" class="nav-link">
+                    <i class="bi bi-person-add"></i>
+                    <span>Signup</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forgot-password.html" class="nav-link">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Forgot password</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="404.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>404</span>
+                </a>
+            </li>
+             <li class="nav-item">
+                <a href="500.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>500</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+         <div class="top-bar">
+            <button class="menu-toggle-mobile" id="MenuToggleMobile">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search orders, customers, restaurants...">
+            </div>
+            
+            <div class="top-bar-actions">
+                 <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                       <button class="action-btn">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge-notification">12</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+
+                
+                <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                        <button class="action-btn">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span class="badge-notification">5</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+                <div class="dropdown profile-dropdown">
+                     <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                         <div class="user-profile">
+                            <div class="user-avatar">AD</div>
+                            <div class="user-info">
+                                <h6>Admin User</h6>
+                                <p>Super Admin</p>
+                            </div>
+                        </div>
+                     </div>
+                     <ul class="dropdown-menu dropdown-menu-end mt-2">
+                         <li><h6 class="dropdown-header">Settings</h6></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user"></i> Profile Settings</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy &amp; Security</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-credit-card"></i> Billing</a></li>
+                         <li>
+                             <div class="sign-out">
+                             <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                             </div>
+                         </li>
+                     </ul>
+                 </div>
+
+            </div>
+        </div>
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+                    <div>
+                        <h1>Delivery Riders</h1>
+                        <p>Welcome back! Here's what's happening with your food delivery platform today.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="add-rider.html" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Riders
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+           <div class="row mb-4">
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="totalRiders">8</h3>
+                                <p>Total Riders</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="onlineRiders">7</h3>
+                                <p>Online Now</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="busyRiders">3</h3>
+                                <p>On Delivery</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="avgRating">4.8</h3>
+                                <p>Avg Rating</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="ridersGrid">
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Alex%20Johnson&amp;background=random&amp;size=80" alt="Alex Johnson" class="rider-avatar">
+                    <div class="rider-status online">online</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Alex Johnson</h5>
+                    <p class="rider-id">RIDER-001</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Motorcycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Downtown Area</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.9</span>
+                        <span class="rating-reviews">(234 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1543</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$12,450</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Maria%20Garcia&amp;background=random&amp;size=80" alt="Maria Garcia" class="rider-avatar">
+                    <div class="rider-status busy">busy</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Maria Garcia</h5>
+                    <p class="rider-id">RIDER-002</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Bicycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Midtown</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.8</span>
+                        <span class="rating-reviews">(198 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1234</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$9,870</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+
+                    <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=James%20Wilson&amp;background=random&amp;size=80" alt="James Wilson" class="rider-avatar">
+                    <div class="rider-status online">online</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">James Wilson</h5>
+                    <p class="rider-id">RIDER-003</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Motorcycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Uptown</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.7</span>
+                        <span class="rating-reviews">(176 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1098</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$11,230</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+
+                     <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Sofia%20Rodriguez&amp;background=random&amp;size=80" alt="Sofia Rodriguez" class="rider-avatar">
+                    <div class="rider-status busy">busy</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Sofia Rodriguez</h5>
+                    <p class="rider-id">RIDER-004</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Scooter</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Westside</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.9</span>
+                        <span class="rating-reviews">(289 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1876</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$15,340</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                    <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Michael%20Chen&amp;background=random&amp;size=80" alt="Michael Chen" class="rider-avatar">
+                    <div class="rider-status offline">offline</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Michael Chen</h5>
+                    <p class="rider-id">RIDER-005</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Car</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Eastside</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.6</span>
+                        <span class="rating-reviews">(145 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">876</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$8,760</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                    <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Emma%20Thompson&amp;background=random&amp;size=80" alt="Emma Thompson" class="rider-avatar">
+                    <div class="rider-status online">online</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Emma Thompson</h5>
+                    <p class="rider-id">RIDER-006</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Bicycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Northside</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.8</span>
+                        <span class="rating-reviews">(201 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1345</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$10,890</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                    <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=David%20Lee&amp;background=random&amp;size=80" alt="David Lee" class="rider-avatar">
+                    <div class="rider-status busy">busy</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">David Lee</h5>
+                    <p class="rider-id">RIDER-007</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Motorcycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Southside</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.9</span>
+                        <span class="rating-reviews">(267 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1678</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$13,560</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                     <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=Olivia%20Martinez&amp;background=random&amp;size=80" alt="Olivia Martinez" class="rider-avatar">
+                    <div class="rider-status online">online</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">Olivia Martinez</h5>
+                    <p class="rider-id">RIDER-008</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Scooter</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Central Area</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.7</span>
+                        <span class="rating-reviews">(183 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1123</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$9,450</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                     <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+          <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+            <div class="rider-card">
+                <div class="rider-header">
+                    <img src="https://ui-avatars.com/api/?name=David%20Lee&amp;background=random&amp;size=80" alt="David Lee" class="rider-avatar">
+                    <div class="rider-status busy">busy</div>
+                </div>
+                <div class="rider-body">
+                    <h5 class="rider-name">David Lee</h5>
+                    <p class="rider-id">RIDER-007</p>
+                    
+                    <div class="rider-info mb-3">
+                        <div class="info-item">
+                            <i class="fas fa-motorcycle"></i>
+                            <span>Motorcycle</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Southside</span>
+                        </div>
+                    </div>
+
+                    <div class="rider-rating mb-3">
+                        <span class="rating-star"><i class="fas fa-star"></i> 4.9</span>
+                        <span class="rating-reviews">(267 reviews)</span>
+                    </div>
+
+                    <div class="rider-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1678</div>
+                            <div class="stat-label">Deliveries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">$13,560</div>
+                            <div class="stat-label">Earnings</div>
+                        </div>
+                    </div>
+                     <div class="rider-actions">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#riderDetailsModal">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i> Assign
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+           
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>© 2025 Foodlytix — All Rights Reserved</span>
+                <span class="footer-divider">|</span>
+                <span>Themes By TemplateRise</span>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="riderDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title mb-0">Rider Details</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Assign Order
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-history"></i> History
+                        </button>
+                    </div>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body position-relative">
+                    <div class="text-center mb-4">
+                        <img src="https://ui-avatars.com/api/?name=Alex%20Johnson&amp;background=random&amp;size=128" alt="Alex Johnson" class="rounded-circle" width="128" height="128">
+                        <h4 class="mt-3">Alex Johnson</h4>
+                        <span class="badge bg-secondary">OFFLINE</span>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 mt-3 mb-3 position-absolute top-0 end-0 me-3 mt-5">
+                        <small><i class="fas fa-shipping-fast"></i> Currently delivering ORD-1007</small>
+                    </div>
+
+                    <div class="info-table-wrapper">
+                        <table class="info-table">
+                            <tbody>
+                            <tr class="section">
+                                <td colspan="2">Personal Information</td>
+                            </tr>
+                            <tr>
+                                <th>Rider ID</th>
+                                <td>RIDER-001</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>alex.j@fooddash.com</td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td>+1 555-1001</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Vehicle Information</td>
+                            </tr>
+                            <tr>
+                                <th>Vehicle Type</th>
+                                <td>Motorcycle</td>
+                            </tr>
+                            <tr>
+                                <th>License</th>
+                                <td>DL-12345</td>
+                            </tr>
+                            <tr>
+                                <th>Joined</th>
+                                <td>Jan 10, 2023</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Performance Metrics</td>
+                            </tr>
+                            <tr>
+                                <th>Rating</th>
+                                <td>⭐ 4.9 (234 reviews)</td>
+                            </tr>
+                            <tr>
+                                <th>Total Deliveries</th>
+                                <td>1543</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Earnings & Status</td>
+                            </tr>
+                            <tr>
+                                <th>Total Earnings</th>
+                                <td class="success">$12,450</td>
+                            </tr>
+                            <tr>
+                                <th>Current Location</th>
+                                <td>Downtown Area</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

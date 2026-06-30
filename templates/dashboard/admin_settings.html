@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sozlamalar - Pharmacy Admin</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light: #f8f9fa;
+    --dark-bg: #1a1a2e;
+    --card-bg: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #adb5bd;
+    --border-color: #2d3748;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--dark-bg); color: var(--text-primary); }
+.layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar {
+    background: linear-gradient(180deg, var(--card-bg) 0%, #0f192e 100%);
+    border-right: 1px solid var(--border-color);
+    padding: 16px 12px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+}
+.sidebar-header { padding: 12px 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+.nav-menu { list-style: none; }
+.nav-item { margin-bottom: 4px; }
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+.nav-link:hover { background: var(--border-color); color: var(--text-primary); }
+.nav-link.active { background: var(--primary-color); color: white; }
+.main { grid-column: 2; }
+.top-bar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+.search-bar input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    width: 100%;
+    font-size: 14px;
+}
+.search-bar input::placeholder { color: var(--text-secondary); }
+.top-bar-actions { display: flex; gap: 12px; }
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    position: relative;
+}
+.action-btn:hover { color: var(--text-primary); }
+.content { padding: 32px; }
+.page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+.settings-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+}
+.settings-nav {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0;
+    height: fit-content;
+}
+.settings-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+.settings-nav-link:last-child { border-bottom: none; }
+.settings-nav-link:hover { background: rgba(255,255,255,0.02); color: var(--text-primary); }
+.settings-nav-link.active { background: rgba(13,110,253,0.1); border-left-color: var(--primary-color); color: var(--primary-color); }
+.settings-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 32px;
+}
+.settings-section { display: none; }
+.settings-section.active { display: block; }
+.settings-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+.form-group { margin-bottom: 24px; }
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+}
+.form-control::placeholder { color: var(--text-secondary); }
+.toggle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+.toggle-info { flex: 1; }
+.toggle-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.toggle-description { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    margin-left: 12px;
+}
+.toggle-switch input { display: none; }
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--border-color);
+    transition: all 0.3s;
+    border-radius: 34px;
+}
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    transition: all 0.3s;
+    border-radius: 50%;
+}
+input:checked + .toggle-slider { background: var(--success-color); }
+input:checked + .toggle-slider:before { transform: translateX(22px); }
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-primary { background: var(--primary-color); color: white; }
+.btn-primary:hover { background: #0b5ed7; }
+.btn-secondary { background: var(--border-color); color: var(--text-primary); }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.btn-danger { background: var(--danger-color); color: white; }
+.btn-danger:hover { background: #bd2130; }
+.btn-group { display: flex; gap: 12px; margin-top: 32px; }
+.danger-zone {
+    background: rgba(220,53,69,0.1);
+    border: 1px solid var(--danger-color);
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 32px;
+}
+.danger-title { color: var(--danger-color); font-size: 16px; margin-bottom: 8px; }
+.danger-description { color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; }
+.loading { display: none; text-align: center; padding: 20px; }
+.loading.show { display: block; }
+@media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .settings-container { grid-template-columns: 1fr; }
+    .top-bar { padding: 12px; flex-wrap: wrap; }
+    .search-bar { flex: 1 0 100%; }
+}
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="/admin_dashboard.html">
+                <i class="bi bi-house-door-fill"></i>
+                <span>Pharmacy</span>
+            </a>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/admin_dashboard.html" class="nav-link"><i class="bi bi-bar-chart-fill"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link active"><i class="bi bi-gear-fill"></i> Sozlamalar</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-person-circle"></i> Akkaunt</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-database"></i> Modellar</a></li>
+            <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-box-arrow-right"></i> Chiqish</a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="top-bar">
+            <button class="action-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Qidirish...">
+            </div>
+            <div class="top-bar-actions">
+                <button class="action-btn"><i class="bi bi-bell-fill"></i></button>
+                <button class="action-btn"><i class="bi bi-person-circle"></i></button>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1 class="page-title">⚙️ Loyiha Sozlamalari</h1>
+
+            <div class="settings-container">
+                <!-- SETTINGS NAV -->
+                <div class="settings-nav">
+                    <a class="settings-nav-link active" data-section="general">
+                        <i class="bi bi-gear-fill"></i> Umumiy
+                    </a>
+                    <a class="settings-nav-link" data-section="email">
+                        <i class="bi bi-envelope-fill"></i> Email
+                    </a>
+                    <a class="settings-nav-link" data-section="security">
+                        <i class="bi bi-shield-lock-fill"></i> Xavfsizlik
+                    </a>
+                    <a class="settings-nav-link" data-section="payment">
+                        <i class="bi bi-credit-card-fill"></i> To'lov
+                    </a>
+                    <a class="settings-nav-link" data-section="notification">
+                        <i class="bi bi-bell-fill"></i> Bildirishnomalar
+                    </a>
+                </div>
+
+                <!-- SETTINGS CONTENT -->
+                <div class="settings-content">
+                    <!-- GENERAL SETTINGS -->
+                    <div id="general" class="settings-section active">
+                        <h2 class="settings-title">Umumiy Sozlamalar</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Sayt Nomi</label>
+                            <input type="text" class="form-control" id="siteName" placeholder="Online Pharmacy">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Vaqt Mintaqasi</label>
+                            <select class="form-control" id="timezone">
+                                <option>UTC+5 (Tashkent)</option>
+                                <option>UTC (London)</option>
+                                <option>UTC+3 (Moscow)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Loyihaning Asosiy Tili</label>
+                            <select class="form-control" id="language">
+                                <option>O'zbek (uz)</option>
+                                <option>Ingliz (en)</option>
+                                <option>Rus (ru)</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="saveSettings('general')">💾 Saqlash</button>
+                            <button class="btn btn-secondary" onclick="resetSettings('general')">↩️ Qaytarish</button>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL SETTINGS -->
+                    <div id="email" class="settings-section">
+                        <h2 class="settings-title">📧 Email Konfiguratsiyasi</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">SMTP Host</label>
+                            <input type="text" class="form-control" id="smtpHost" placeholder="smtp.gmail.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">SMTP Port</label>
+                            <input type="number" class="form-control" id="smtpPort" placeholder="587">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="emailAddress" placeholder="admin@pharmacy.uz">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Parol</label>
+                            <input type="password" class="form-control" id="emailPassword" placeholder="••••••••">
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="testEmail()">🧪 Test Yuborish</button>
+                            <button class="btn btn-primary" onclick="saveSettings('email')">💾 Saqlash</button>
+                        </div>
+                    </div>
+
+                    <!-- SECURITY SETTINGS -->
+                    <div id="security" class="settings-section">
+                        <h2 class="settings-title">🔒 Xavfsizlik Sozlamalari</h2>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Two-Factor Authentication (2FA)</div>
+                                <div class="toggle-description">Sms orqali qo'shimcha himoya</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enable2fa">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Minimal Parol Uzunligi</label>
+                            <input type="number" class="form-control" id="minPasswordLength" value="8" min="6">
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Raqamli Parol Talab</div>
+                                <div class="toggle-description">Parol raqam o'z ichiga olishi kerak</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="requireNumbers" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">JWT Secret Key</label>
+                            <input type="password" class="form-control" id="jwtSecret" placeholder="••••••••••••••••">
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="generateJwtKey()">🔑 Yangi Key</button>
+                            <button class="btn btn-primary" onclick="saveSettings('security')">💾 Saqlash</button>
+                        </div>
+                    </div>
+
+                    <!-- PAYMENT SETTINGS -->
+                    <div id="payment" class="settings-section">
+                        <h2 class="settings-title">💳 To'lov Sozlamalari</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Stripe Publishable Key</label>
+                            <input type="password" class="form-control" id="stripePublic" placeholder="pk_test_••••••••">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Stripe Secret Key</label>
+                            <input type="password" class="form-control" id="stripeSecret" placeholder="sk_test_••••••••">
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Stripe To'lovlari</div>
+                                <div class="toggle-description">Plastik karta orqali to'lovlar</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Payme (Uzbekistan)</div>
+                                <div class="toggle-description">O'zbekistonda mobil to'lovlar</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="testPayment()">🧪 Test Transaksiya</button>
+                            <button class="btn btn-primary" onclick="saveSettings('payment')">💾 Saqlash</button>
+                        </div>
+                    </div>
+
+                    <!-- NOTIFICATION SETTINGS -->
+                    <div id="notification" class="settings-section">
+                        <h2 class="settings-title">🔔 Bildirishnoma Sozlamalari</h2>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Yangi Buyurtma Xabari</div>
+                                <div class="toggle-description">Yangi buyurtma kelganda email</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">To'lov Muvaffaqiyati</div>
+                                <div class="toggle-description">Har bir to'lovdan xabar</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Haftalik Report</div>
+                                <div class="toggle-description">Har juma haftalik hisobot</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Browser Bildirishnomasi</div>
+                                <div class="toggle-description">Foydalanuvchi bilgisiga push</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="saveSettings('notification')">💾 Saqlash</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:8000/api/v1';
+
+// Settings Navigation
+document.querySelectorAll('.settings-nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const sectionId = this.getAttribute('data-section');
+
+        document.querySelectorAll('.settings-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+
+        this.classList.add('active');
+        document.getElementById(sectionId).classList.add('active');
+    });
+});
+
+// Save Settings - Database Integration
+async function saveSettings(section) {
+    const loading = document.querySelector('.loading');
+    if (loading) loading.classList.add('show');
+
+    try {
+        const response = await fetch(`${API_BASE}/settings/save/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify({
+                section: section,
+                data: getSectionData(section)
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert(`✅ ${section} sozlamalar saqlandi!`);
+        } else {
+            alert(`❌ Xato: ${data.detail}`);
+        }
+    } catch (error) {
+        console.error('API xato:', error);
+        alert('❌ Serverga ulanib bo\'lmadi');
+    } finally {
+        if (loading) loading.classList.remove('show');
+    }
+}
+
+function getSectionData(section) {
+    const data = {};
+    switch(section) {
+        case 'general':
+            data.siteName = document.getElementById('siteName').value;
+            data.timezone = document.getElementById('timezone').value;
+            data.language = document.getElementById('language').value;
+            break;
+        case 'email':
+            data.smtpHost = document.getElementById('smtpHost').value;
+            data.smtpPort = document.getElementById('smtpPort').value;
+            data.emailAddress = document.getElementById('emailAddress').value;
+            break;
+        case 'security':
+            data.enable2fa = document.getElementById('enable2fa').checked;
+            data.minPasswordLength = document.getElementById('minPasswordLength').value;
+            break;
+        case 'payment':
+            data.stripePublic = document.getElementById('stripePublic').value;
+            data.stripeSecret = document.getElementById('stripeSecret').value;
+            break;
+    }
+    return data;
+}
+
+// Test Email
+async function testEmail() {
+    try {
+        const response = await fetch(`${API_BASE}/settings/test-email/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (response.ok) {
+            alert('✅ Test email yuborildi! Pochta qutisini tekshiring');
+        } else {
+            alert('❌ Email yuborilmadi');
+        }
+    } catch (error) {
+        console.error('Test email xato:', error);
+    }
+}
+
+// Generate JWT Key
+function generateJwtKey() {
+    const randomKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    document.getElementById('jwtSecret').value = randomKey;
+    alert('✅ Yangi JWT key hosil qilindi');
+}
+
+// Test Payment
+async function testPayment() {
+    try {
+        const response = await fetch(`${API_BASE}/payments/test/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (response.ok) {
+            alert('✅ Test transaksiya muvaffaq!');
+        } else {
+            alert('❌ Test transaksiya bajarilmadi');
+        }
+    } catch (error) {
+        console.error('Test payment xato:', error);
+    }
+}
+
+// Reset Settings
+function resetSettings(section) {
+    if (confirm('Sozlamalarni qaytarasizmi?')) {
+        location.reload();
+    }
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Load settings on page load
+window.addEventListener('load', async () => {
+    try {
+        const response = await fetch(`${API_BASE}/settings/`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (response.ok) {
+            const settings = await response.json();
+            // Populate fields
+            if (settings.general) {
+                document.getElementById('siteName').value = settings.general.siteName || '';
+                document.getElementById('timezone').value = settings.general.timezone || '';
+            }
+        }
+    } catch (error) {
+        console.log('Settings yuklash hatasi:', error);
+    }
+});
+</script>
+
+</body>
+</html>

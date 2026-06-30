@@ -1,0 +1,74 @@
+{% load static %}
+{% include 'components/begin.html' %}
+<link rel="stylesheet" href="{% static 'css/account.css' %}">
+<title>Mening Profilim</title>
+</head>
+<body>
+{% include 'header.html' %}
+
+<main class="account-page-main">
+    <div class="account-container">
+        <div class="account-header">
+            <img id="profile-avatar" src="{% static 'images/default_avatar.png' %}" alt="Profil rasmi" class="profile-avatar">
+            <h2 id="profile-full-name" class="profile-full-name"></h2>
+            <p id="profile-email" class="profile-email"></p>
+            <p id="profile-phone-number" class="profile-phone-number"></p>
+        </div>
+
+        <div class="account-actions">
+            <button id="edit-profile-btn" class="btn btn-primary">Profilni tahrirlash</button>
+            <button id="logout-btn" class="btn btn-secondary">Chiqish</button>
+        </div>
+
+        <div class="profile-details">
+            <h3>Shaxsiy ma'lumotlar</h3>
+            <form id="profile-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="full_name">To'liq ism</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Telefon raqam</label>
+                    <input type="text" id="phone_number" name="phone_number" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="avatar_upload">Avatar yuklash</label>
+                    <input type="file" id="avatar_upload" name="avatar" accept="image/*" class="form-control-file">
+                </div>
+                <button type="submit" class="btn btn-primary save-changes-btn">O'zgarishlarni saqlash</button>
+            </form>
+        </div>
+
+        <div class="orders-section">
+            <h3>Mening buyurtmalarim</h3>
+            <div class="orders-table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sana</th>
+                            <th>Holat</th>
+                            <th>Jami</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Buyurtmalar shu yerga JS orqali yuklanadi -->
+                        <tr><td colspan="5" class="no-orders">Buyurtmalar topilmadi.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% include 'components/footer.html' %}
+<script src="{% static 'js/account.js' %}"></script>
+<script src="{% static 'js/header.js' %}"></script>
+</body>
+</html>

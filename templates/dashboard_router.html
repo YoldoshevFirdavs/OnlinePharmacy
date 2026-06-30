@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "components/begin.html" %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Redirect</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .loading-message {
+            font-size: 1.2em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-message">
+        Loading dashboard...
+    </div>
+
+    <script>
+        // changed: dashboard routing logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = '/api/v1'; // Adjust if your API is on a different path
+
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                window.location.href = '/auth/'; // Redirect to login page
+                return;
+            }
+
+            fetch(`${API_BASE_URL}/users/me/`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    // Token expired or invalid, redirect to login
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/auth/';
+                    return;
+                }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user info');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.is_staff) {
+                    window.location.href = '/dashboard/';
+                } else if (data.delivery_driver_profile) {
+                    window.location.href = '/dashboard/driver/';
+                } else {
+                    // User is logged in but neither admin nor driver
+                    window.location.href = '/account/'; // Or a 'no access' page
+                }
+            })
+            .catch(error => {
+                console.error('Error during dashboard routing:', error);
+                // Fallback to login or home page on error
+                window.location.href = '/auth/';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+--- a/tests/conftest.py
++++ b/tests/conftest.py
+@@
++import sys
+ import pytest
+ 
++REQUIRED_PYTHON = (3, 10)
++
++
++def pytest_configure(config):
++    if sys.version_info[:2] != REQUIRED_PYTHON:
++        pytest.exit(
++            f"Tests must run under Python {REQUIRED_PYTHON[0]}.{REQUIRED_PYTHON[1]}. "
++            f"Current: {sys.version_info.major}.{sys.version_info.minor}"
++        )
++
+ @pytest.fixture(autouse=True)
+ def _sqlite_db(settings):

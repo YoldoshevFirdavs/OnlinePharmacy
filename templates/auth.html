@@ -1,0 +1,347 @@
+{% load static %}
+{% include 'components/begin.html' %}
+
+{% include 'components/header.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
+{# Google Fonts - Moved to local static #}
+<link href="{% static 'vendor/fonts/google-fonts.css' %}" rel="stylesheet">
+<style>
+    body {
+        background-color: #f0f2f5; /* Light grey background for the whole page */
+    }
+    .auth-container {
+        max-width: 550px; /* Increased width */
+        margin: 60px auto;
+        padding: 35px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        font-family: Arial, sans-serif;
+    }
+    .auth-subtitle {
+        text-align: center;
+        color: #666;
+        margin-top: -15px;
+        margin-bottom: 30px;
+        font-size: 15px;
+    }
+    .social-auth-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .btn-social {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #eef0f2;
+        background: #ffffff;
+        color: #333;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .btn-social:hover {
+        background: #f8f9fa;
+        border-color: #dcdcdc;
+    }
+    .btn-social.active {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+    .btn-google { color: #ea4335; font-size: 20px; }
+    .btn-telegram { color: #229ED9; font-size: 20px; }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+        color: #999;
+        font-size: 14px;
+    }
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #eef0f2;
+    }
+    .divider:not(:empty)::before { margin-right: .5em; }
+    .divider:not(:empty)::after { margin-left: .5em; }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .phone-input-group {
+        display: flex;
+        gap: 12px;
+        position: relative;
+    }
+    
+    .country-selector-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 160px; /* Adjusted width for prefix input */
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #ffffff;
+        cursor: pointer;
+        user-select: none;
+        transition: border-color 0.2s;
+        padding: 8px 12px;
+    }
+    .country-selector-wrapper:focus-within {
+        border-color: #007bff;
+    }
+    .country-prefix-input {
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        padding: 0;
+        margin: 0;
+    }
+    .country-dropdown {
+        position: absolute;
+        top: 100%; /* Position below the selector */
+        left: 0;
+        width: 160px; /* Adjusted width for dropdown */
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none; /* Hidden by default */
+    }
+    .country-dropdown.show {
+        display: block;
+    }
+    .country-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .country-item:hover {
+        background: #f8f9fa;
+    }
+    .country-item img.flag-icon {
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+        border-radius: 3px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #ffffff;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+    .input-field:focus {
+        border-color: #007bff;
+    }
+    
+    .btn-primary {
+        width: 100%;
+        padding: 15px;
+        background: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-bottom: 15px;
+    }
+    .btn-primary:hover {
+        background: #0069d9;
+    }
+    .hidden-field {
+        display: none;
+    }
+    .error-message {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    /* Styles for OTP popup */
+    .otp-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .otp-popup-content {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        position: relative;
+        max-width: 400px;
+        width: 90%;
+    }
+    .otp-popup-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+    }
+    .otp-popup-close:hover {
+        color: #333;
+    }
+    .otp-popup-title {
+        margin-top: 0;
+        color: #333;
+    }
+    .otp-input-field {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 18px;
+        text-align: center;
+        letter-spacing: 5px;
+    }
+    .otp-timer-container {
+        margin-bottom: 15px;
+    }
+    .otp-resend-btn {
+        background: none;
+        border: none;
+        color: #007bff;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    .otp-resend-btn:disabled {
+        color: #ccc;
+        cursor: not-allowed;
+    }
+
+    /* Error Banner Styles */
+    #auth-error-banner {
+        background-color: #f8d7da; /* Light red background */
+        color: #721c24; /* Dark red text */
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+        display: none; /* Hidden by default */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+<div class="auth-container">
+    <div id="login-section">
+        <h3 style="text-align: center; margin-bottom: 5px; color: #333;">Tizimga kirish</h3>
+        <p class="auth-subtitle">Online Pharmacy — sog‘lom hayot uchun</p>
+        
+        {# Error Banner #}
+        <div id="auth-error-banner" style="display: none;"></div>
+
+        <div class="social-auth-buttons">
+            <a href="#" class="btn-social active" id="gmail-login">
+                <i class="fa-brands fa-google btn-google"></i> Gmail
+            </a>
+            <a href="#" class="btn-social" id="telegram-login">
+                <i class="fa-brands fa-telegram btn-telegram"></i> Telegram
+            </a>
+        </div>
+
+        <form id="auth-form">
+            {% csrf_token %}
+
+            <div class="form-group" id="name-group"> {# Initially hidden #}
+                <label for="full_name">Ism</label>
+                <input type="text" id="full_name" name="full_name" class="input-field" placeholder="Ismingizni kiriting" required>
+            </div>
+
+            <div class="form-group" id="email-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="input-field" placeholder="example@mail.com">
+            </div>
+
+            <div class="form-group hidden-field" id="phone-group">
+                <label for="phone">Telefon raqam</label>
+                <div class="phone-input-group">
+                    <div id="country-selector" class="country-selector-wrapper" tabindex="0">
+                        <img src="{% static 'flags/1x1/uz.svg' %}" alt="Uzbekistan Flag" class="flag-icon" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; border-radius: 3px;">
+                        <input type="text" id="country-prefix-input" class="country-prefix-input" value="+998" maxlength="5">
+                    </div>
+                    <div id="country-dropdown" class="country-dropdown">
+                        <div id="country-list"></div>
+                    </div>
+                    <input type="text" id="phone" name="phone_number" class="input-field" placeholder="99 999 99 99" autocomplete="off">
+                </div>
+                <div id="phone-error-message" class="error-message"></div>
+            </div>
+            
+            <button type="submit" id="get-code" class="btn-primary">Kod olish</button>
+        </form>
+    </div>
+</div>
+
+{# OTP Popup structure #}
+<div class="otp-popup-overlay" id="otp-popup" style="display: none;">
+    <div class="otp-popup-content">
+        <span class="otp-popup-close" id="otp-popup-close-btn">&times;</span>
+        <h2 class="otp-popup-title">OTP kiriting</h2>
+        <p id="otp-message" style="margin: 10px 0; font-size: 14px; color: #555;"></p>
+        <input type="text" id="otp-popup-input" class="form-control otp-input-field" placeholder="XXXXXX" maxlength="6">
+        <div class="otp-timer-container" style="margin: 10px 0;">
+            <span id="otp-timer-display" style="font-weight: bold;"></span>
+            <button id="otp-popup-resend-btn" class="btn btn-link otp-resend-btn" disabled>OTPni qayta yuborish</button>
+        </div>
+        <button id="otp-popup-verify-btn" class="btn btn-primary mt-3" style="width: 100%; padding: 10px; background: #007bff; border: none; border-radius: 5px; color: white;">Tasdiqlash</button>
+    </div>
+</div>
+
+{% include 'components/footer.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{% static 'js/auth.js' %}"></script>
+<script type="module" src="{% static 'js/footer.js' %}"></script>
+{% endblock %}

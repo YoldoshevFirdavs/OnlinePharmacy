@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sozlamalar - Online Pharmacy</title>
+    <link href="{% static 'css/all.min.css' %}" rel="stylesheet"> {# Using local Font Awesome #}
+    <link rel="stylesheet" href="{% static 'css/settings.css' %}"> {# Using extracted CSS #}
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <i class="fas fa-cog"></i>
+            <span>Sozlamalar</span>
+        </div>
+        <div class="header-right">
+            <a href="/account/" class="back-link">
+                <i class="fas fa-arrow-left"></i> Orqaga
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- CONTAINER -->
+<div class="container">
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="general">
+            <i class="fas fa-cog"></i> Umumiy
+        </button>
+        <button class="tab-btn" data-tab="notifications">
+            <i class="fas fa-bell"></i> Bildirishnomalar
+        </button>
+        <button class="tab-btn" data-tab="privacy">
+            <i class="fas fa-shield-alt"></i> Xavfsizlik
+        </button>
+        <button class="tab-btn" data-tab="about">
+            <i class="fas fa-info-circle"></i> Haqida
+        </button>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div class="tab-content">
+        <!-- GENERAL -->
+        <div id="general" class="tab-pane active">
+            <h2>Umumiy Sozlamalar</h2>
+
+            <div class="setting-group">
+                <div class="setting-title">Til</div>
+                <div class="setting-desc">Foydalanuvchi interfeysning tilini tanlang</div>
+                <select id="language" onchange="saveSetting('language', this.value)">
+                    <option value="uz" selected>O'zbekcha</option>
+                    <option value="ru">Ruscha</option>
+                    <option value="en">Inglizcha</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Rang Sxemasi</div>
+                <div class="setting-desc">Yorug' yoki qorong'i rejimni tanlang</div>
+                <div class="setting-option">
+                    <span>Qorong'i rejim</span>
+                    <button class="toggle" id="dark-mode" onclick="toggleDarkMode()"></button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Vaqt Mintaqasi</div>
+                <div class="setting-desc">Sizning vaqt mintaqangizni tanlang</div>
+                <select id="timezone" onchange="saveSetting('timezone', this.value)">
+                    <option value="Asia/Tashkent" selected>Asia/Tashkent (UTC+5)</option>
+                    <option value="Asia/Almaty">Asia/Almaty (UTC+6)</option>
+                    <option value="Europe/Moscow">Europe/Moscow (UTC+3)</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Reklama va Maarketing</div>
+                <div class="setting-desc">Yangi mahsulotlar va taklif haqida xabarlar oling</div>
+                <div class="setting-option">
+                    <span>Reklama E-Postalarini Qabul Qiling</span>
+                    <button class="toggle active" id="marketing-emails" onclick="toggleSetting('marketing-emails')"></button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveAll()">Barcha Sozlamalarni Saqlash</button>
+            <div class="success-msg" id="success-msg">✓ Sozlamalar saqlandi!</div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div id="notifications" class="tab-pane">
+            <h2>Bildirishnoma Sozlamalari</h2>
+
+            <div class="setting-group">
+                <div class="setting-title">Email Bildirishnomalar</div>
+                <div class="setting-option">
+                    <span>Buyurtma Holati</span>
+                    <button class="toggle active" id="order-email" onclick="toggleSetting('order-email')"></button>
+                </div>
+                <div class="setting-option">
+                    <span>Yangi Mahsulotlar</span>
+                    <button class="toggle active" id="new-products-email" onclick="toggleSetting('new-products-email')"></button>
+                </div>
+                <div class="setting-option">
+                    <span>Maxsus Takliflar</span>
+                    <button class="toggle" id="special-offers-email" onclick="toggleSetting('special-offers-email')"></button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Push Bildirishnomalar</div>
+                <div class="setting-option">
+                    <span>Buyurtma O'zgarishlari</span>
+                    <button class="toggle active" id="order-push" onclick="toggleSetting('order-push')"></button>
+                </div>
+                <div class="setting-option">
+                    <span>Yangi Xabarlar</span>
+                    <button class="toggle active" id="message-push" onclick="toggleSetting('message-push')"></button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">SMS Bildirishnomalar</div>
+                <div class="setting-option">
+                    <span>SMS Orqali Bildirishnomalar</span>
+                    <button class="toggle" id="sms-notifications" onclick="toggleSetting('sms-notifications')"></button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveAll()">Saqlash</button>
+            <div class="success-msg" id="success-msg2">✓ Sozlamalar saqlandi!</div>
+        </div>
+
+        <!-- PRIVACY & SECURITY -->
+        <div id="privacy" class="tab-pane">
+            <h2>Xavfsizlik Sozlamalari</h2>
+
+            <div class="setting-group">
+                <div class="setting-title">Parol Keychakligini Yangilash</div>
+                <div class="setting-desc">Barcha cihozlardan chiqing va parolni yangilang</div>
+                <button class="btn btn-danger" onclick="resetPassword()">
+                    <i class="fas fa-key"></i> Parolni Yangilash
+                </button>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Ikki Bosqichli Tekshiruv</div>
+                <div class="setting-desc">Akkauntni qo'shimcha xavfsizlikka ega qiling</div>
+                <div class="setting-option">
+                    <span>Ikki Bosqichli Tekshiruvni Faollashtirish</span>
+                    <button class="toggle" id="two-factor" onclick="toggleSetting('two-factor')"></button>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Akkauntni O'chirish</div>
+                <div class="setting-desc">Bu amalni qaytarib bo'lmaydi. Barcha ma'lumotlar o'chiriladi.</div>
+                <button class="btn btn-danger" onclick="deleteAccount()">
+                    <i class="fas fa-trash"></i> Akkauntni O'chirish
+                </button>
+            </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div id="about" class="tab-pane">
+            <h2>Haqida</h2>
+            <div class="setting-group">
+                <div class="setting-title">Online Pharmacy</div>
+                <div class="setting-desc">Versiya: 1.0.0</div>
+                <p style="color: var(--gray-600); line-height: 1.6; margin-top: 16px;">
+                    Online Pharmacy - sog'ligingiz uchun ishonchli dorilar sotuvining platformasi.
+                    Biz har qachon sizga eng yaxshi xizmatni ko'rsatishga tayyoarmiz.
+                </p>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Qonun Hujjatlari</div>
+                <div style="display: flex; gap: 16px; margin-top: 16px;">
+                    <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Foydalanish Shartlari</a>
+                    <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Shaxsiy Ma'lumotlar Siyosati</a>
+                    <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 600;">Cookies Siyosati</a>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <div class="setting-title">Biz Bilan Bog'lanish</div>
+                <div style="margin-top: 16px;">
+                    <p style="color: var(--gray-600); margin-bottom: 8px;">
+                        <i class="fas fa-envelope"></i> Email: support@pharmacy.uz
+                    </p>
+                    <p style="color: var(--gray-600); margin-bottom: 8px;">
+                        <i class="fas fa-phone"></i> Telefon: +998 71 123 45 67
+                    </p>
+                    <p style="color: var(--gray-600);">
+                        <i class="fas fa-map-marker-alt"></i> Manzil: Toshkent, O'zbekiston
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>&copy; 2026 Online Pharmacy. Barcha huquqlar saqlangan.</p>
+</footer>
+
+<script src="{% static 'js/settings.js' %}"></script>
+
+</body>
+</html>

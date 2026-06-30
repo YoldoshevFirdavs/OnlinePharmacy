@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Kirish - Pharmacy</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --danger-color: #dc3545;
+    --success-color: #198754;
+    --dark-bg: #1a1a2e;
+    --card-bg: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #adb5bd;
+    --border-color: #2d3748;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #0f192e 100%);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+.login-container {
+    width: 100%;
+    max-width: 450px;
+}
+.login-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+}
+.logo-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.logo-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), #00bfff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.logo-text { font-size: 20px; font-weight: 700; color: var(--primary-color); margin-bottom: 8px; }
+.logo-subtitle { font-size: 12px; color: var(--text-secondary); }
+.login-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+}
+.login-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 32px;
+}
+.form-group { margin-bottom: 20px; }
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+.form-control::placeholder { color: rgba(255,255,255,0.3); }
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(13,110,253,0.1);
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+}
+.form-control.error {
+    border-color: var(--danger-color);
+    background: rgba(220,53,69,0.1);
+}
+.form-error {
+    font-size: 12px;
+    color: var(--danger-color);
+    margin-top: 4px;
+    display: none;
+}
+.form-error.show { display: block; }
+.remember-forget {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 24px;
+}
+.remember-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+.remember-checkbox input { cursor: pointer; }
+.forget-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.forget-link:hover { color: #00bfff; }
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #00bfff);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(13,110,253,0.3);
+}
+.btn-login:active { transform: translateY(0); }
+.btn-login.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.btn-login.loading::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+.auth-methods {
+    display: grid;
+    grid-template-columns: 1fr; /* Changed to 1 column */
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.auth-btn {
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.auth-btn:hover { background: rgba(13,110,253,0.2); border-color: var(--primary-color); }
+.signup-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 24px;
+}
+.signup-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.signup-link a:hover { text-decoration: underline; }
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    display: none;
+}
+.alert.show { display: block; }
+.alert-danger { background: rgba(220,53,69,0.2); color: var(--danger-color); border: 1px solid rgba(220,53,69,0.3); }
+.alert-success { background: rgba(25,135,84,0.2); color: var(--success-color); border: 1px solid rgba(25,135,84,0.3); }
+.features {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.feature-item { display: flex; gap: 8px; }
+.feature-icon { color: var(--success-color); }
+@media (max-width: 480px) {
+    .login-card { padding: 24px; }
+    .login-title { font-size: 20px; }
+    .auth-methods { grid-template-columns: 1fr; }
+    .remember-forget { flex-direction: column; gap: 12px; align-items: flex-start; }
+}
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-card">
+        <!-- LOGO SECTION -->
+        <div class="logo-section">
+            <div class="logo-icon">💊</div>
+            <div class="logo-text">Online Pharmacy</div>
+            <div class="logo-subtitle">Admin Panel</div>
+        </div>
+
+        <!-- TITLE -->
+        <h1 class="login-title">Admin Panelga Kirish</h1>
+        <p class="login-subtitle">Iltimos, email va parol bilan kirish</p>
+
+        <!-- ALERT -->
+        <div class="alert alert-danger" id="errorAlert"></div>
+        <div class="alert alert-success" id="successAlert"></div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <!-- EMAIL FIELD -->
+            <div class="form-group">
+                <label class="form-label">📧 Email Manzili</label>
+                <input 
+                    type="email" 
+                    class="form-control" 
+                    id="emailInput"
+                    placeholder="admin@pharmacy.uz"
+                    required
+                >
+                <div class="form-error" id="emailError"></div>
+            </div>
+
+            <!-- PASSWORD FIELD -->
+            <div class="form-group">
+                <label class="form-label">🔐 Parol</label>
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    id="passwordInput"
+                    placeholder="••••••••"
+                    required
+                >
+                <div class="form-error" id="passwordError"></div>
+            </div>
+
+            <!-- REMEMBER & FORGET -->
+            <div class="remember-forget">
+                <label class="remember-checkbox">
+                    <input type="checkbox" id="rememberMe">
+                    <span>Meni eslab qol</span>
+                </label>
+                <a href="#" class="forget-link" onclick="handleForgot(event)">Parolni unutdingizmi?</a>
+            </div>
+
+            <!-- LOGIN BUTTON -->
+            <button type="submit" class="btn-login">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Kirish
+            </button>
+        </form>
+
+        <!-- DIVIDER -->
+        <div class="divider">Boshqa usullar</div>
+
+        <!-- AUTH METHODS -->
+        <div class="auth-methods">
+            <button class="auth-btn" onclick="loginWithOTP()">
+                <i class="bi bi-phone"></i> OTP
+            </button>
+            <!-- Removed Google Login Button -->
+        </div>
+
+        <!-- SIGNUP LINK -->
+        <div class="signup-link">
+            Admin akkauntingiz yo'qmi? 
+            <a href="#" onclick="handleRegister(event)">Ro'yxatdan o'ting</a>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="features">
+            <div class="feature-item">
+                <span class="feature-icon">✅</span>
+                <span>Xavfli</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✅</span>
+                <span>Tezkor</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✅</span>
+                <span>Ishonchli</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+const API_BASE = 'http://localhost:8000/api/v1';
+
+// Handle Login
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const loginBtn = document.querySelector('.btn-login');
+    
+    // Validation
+    if (!email || !password) {
+        showError('Email va parolni kiriting!');
+        return;
+    }
+    
+    // Loading
+    loginBtn.classList.add('loading');
+    loginBtn.disabled = true;
+    
+    try {
+        const response = await fetch(`${API_BASE}/admin/login/`, { // Assuming this endpoint handles credentials login
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'credentials', username: email, password: password }) // Changed to send action: 'credentials'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) { // Check for success field in response
+            // Save tokens (assuming your backend returns tokens for credentials login)
+            // This part needs to be adjusted based on how your backend handles token generation for credentials login
+            // For now, let's assume it returns a redirect and handles session
+            
+            // Remember me
+            if (rememberMe) {
+                localStorage.setItem('rememberEmail', email);
+                localStorage.setItem('rememberMe', 'true');
+            }
+            
+            // Save user info (if returned by backend)
+            // localStorage.setItem('user_role', data.role || 'admin');
+            // localStorage.setItem('user_name', data.full_name || 'Admin');
+            
+            showSuccess('✅ Muvaffaqiyatli kirildi! Yo\'naltirmoqda...');
+            
+            // Redirect after 1 second
+            setTimeout(() => {
+                window.location.href = data.redirect || '/admin/dashboard/'; // Use redirect from backend or default
+            }, 1000);
+        } else {
+            showError(data.error || '❌ Email yoki parol noto\'g\'ri'); // Use data.error for error messages
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showError('❌ Serverga ulanib bo\'lmadi. Keyinroq urinib ko\'ring');
+    } finally {
+        loginBtn.classList.remove('loading');
+        loginBtn.disabled = false;
+    }
+}
+
+// OTP Login
+function loginWithOTP() {
+    alert('📱 OTP orqali kirish (keyin qo\'shiladi)');
+    // TODO: Implement actual OTP login flow
+}
+
+// Removed Google Login function
+
+// Handle Forgot Password
+function handleForgot(e) {
+    e.preventDefault();
+    const email = prompt('Email manzilingizni kiriting:');
+    if (email) {
+        alert(`✅ Parol tiklash havolasi ${email} ga yuborildi`);
+    }
+}
+
+// Handle Register
+function handleRegister(e) {
+    e.preventDefault();
+    window.location.href = '/admin/register/';
+}
+
+// Show Error
+function showError(message) {
+    const alert = document.getElementById('errorAlert');
+    alert.textContent = message;
+    alert.classList.add('show');
+    
+    setTimeout(() => {
+        alert.classList.remove('show');
+    }, 5000);
+}
+
+// Show Success
+function showSuccess(message) {
+    const alert = document.getElementById('successAlert');
+    alert.textContent = message;
+    alert.classList.add('show');
+}
+
+// Load remembered email
+window.addEventListener('load', () => {
+    if (localStorage.getItem('rememberMe') === 'true') {
+        const email = localStorage.getItem('rememberEmail');
+        if (email) {
+            document.getElementById('emailInput').value = email;
+            document.getElementById('rememberMe').checked = true;
+        }
+    }
+});
+
+// Check if already logged in
+window.addEventListener('load', () => {
+    // This part needs to be adjusted based on how your session management works after credentials login
+    // For now, it will rely on server-side session for admin dashboard access.
+    // The previous logic with localStorage.getItem('access_token') might not be relevant if JWT is not used for admin.
+    // If the admin dashboard relies purely on Django sessions, this client-side check might be removed or adapted.
+    // For now, I'll keep it as is, but comment out the token/role check.
+    
+    // const token = localStorage.getItem('access_token');
+    // const role = localStorage.getItem('user_role');
+
+    // if (token && role) {
+    //     // Already logged in
+    //     if (role === 'admin') {
+    //         window.location.href = '/admin/dashboard/';
+    //     } else if (role === 'driver') {
+    //         window.location.href = '/driver/dashboard/';
+    //     }
+    // }
+});
+</script>
+
+</body>
+</html>

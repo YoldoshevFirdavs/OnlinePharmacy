@@ -1,0 +1,113 @@
+{% load static %}
+{% extends 'dashboard/user/base.html' %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+    <!-- TODO: topError in base.html -->
+    <div class="page-wrapper">
+        {% include 'dashboard/user/sidebar.html' %}
+        <div class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h2 class="title-1 m-b-25">Account Settings</h2>
+                            <div class="card">
+                                <div class="card-header">
+                                    <strong class="card-title">Profile Information</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form id="profileForm" method="post">
+                                        <!-- TODO: confirm backend field name for phone_number -->
+                                        <div class="form-group">
+                                            <label for="phone_number" class="control-label mb-1">Phone Number</label>
+                                            <input id="phone_number" name="phone_number" type="text" class="form-control" aria-required="true" aria-invalid="false" value="<!-- TODO: confirm actual model/field name for current phone number -->">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email" class="control-label mb-1">Email</label>
+                                            <input id="email" name="email" type="email" class="form-control" value="<!-- TODO: confirm actual model/field name for current email -->">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="first_name" class="control-label mb-1">First Name</label>
+                                            <input id="first_name" name="first_name" type="text" class="form-control" value="<!-- TODO: confirm actual model/field name for first name -->">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="last_name" class="control-label mb-1">Last Name</label>
+                                            <input id="last_name" name="last_name" type="text" class="form-control" value="<!-- TODO: confirm actual model/field name for last name -->">
+                                        </div>
+                                        <div>
+                                            <!-- TODO: add submit id="accountSaveBtn" data-callback="handleAccountUpdate" -->
+                                            <button id="accountSaveBtn" type="submit" class="btn btn-info btn-block">
+                                                Save Profile
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <strong class="card-title">Change Password</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form id="passwordForm" method="post">
+                                        <!-- TODO: confirm backend field name for old_password -->
+                                        <div class="form-group">
+                                            <label for="old_password" class="control-label mb-1">Old Password</label>
+                                            <input id="old_password" name="old_password" type="password" class="form-control">
+                                        </div>
+                                        <!-- TODO: confirm backend field name for new_password -->
+                                        <div class="form-group">
+                                            <label for="new_password" class="control-label mb-1">New Password</label>
+                                            <input id="new_password" name="new_password" type="password" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirm_password" class="control-label mb-1">Confirm New Password</label>
+                                            <input id="confirm_password" name="confirm_password" type="password" class="form-control">
+                                        </div>
+                                        <div>
+                                            <!-- TODO: add submit id="passwordChangeBtn" data-callback="handlePasswordChange" -->
+                                            <button id="passwordChangeBtn" type="submit" class="btn btn-danger btn-block">
+                                                Change Password
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- TODO: confirm additional static files -->
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            // Assuming handleAccountUpdate is defined in auth.js or account.js
+            if (typeof window.handleAccountUpdate === 'function') {
+                window.handleAccountUpdate(data);
+            } else {
+                window.showInlineError('Account update function not available. Please check auth.js or account.js');
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            // Assuming handlePasswordChange is defined in auth.js or account.js
+            if (typeof window.handlePasswordChange === 'function') {
+                window.handlePasswordChange(data);
+            } else {
+                window.showInlineError('Password change function not available. Please check auth.js or account.js');
+            }
+        });
+    </script>
+{% endblock %}

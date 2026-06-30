@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodlytix - Admin Dashboard</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="./assets/icons/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="index.html">
+                <i class="bi bi-basket2-fill"></i>
+                <span class="logo-text">Foodlytix</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order.html" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="restaurants.html" class="nav-link active">
+                    <i class="bi bi-shop"></i>
+                    <span>Restaurants</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="customer.html" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="riders.html" class="nav-link">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Delivery Riders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="payments.html" class="nav-link">
+                    <i class="bi bi-credit-card-fill"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reviews.html" class="nav-link">
+                    <i class="bi bi-chat-left-dots-fill"></i>
+                    <span>Reviews</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="signup.html" class="nav-link">
+                    <i class="bi bi-person-add"></i>
+                    <span>Signup</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forgot-password.html" class="nav-link">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Forgot password</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="404.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>404</span>
+                </a>
+            </li>
+             <li class="nav-item">
+                <a href="500.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>500</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+         <div class="top-bar">
+            <button class="menu-toggle-mobile" id="MenuToggleMobile">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search orders, customers, restaurants...">
+            </div>
+            
+            <div class="top-bar-actions">
+                 <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                       <button class="action-btn">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge-notification">12</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+
+                
+                <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                        <button class="action-btn">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span class="badge-notification">5</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+                <div class="dropdown profile-dropdown">
+                     <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                         <div class="user-profile">
+                            <div class="user-avatar">AD</div>
+                            <div class="user-info">
+                                <h6>Admin User</h6>
+                                <p>Super Admin</p>
+                            </div>
+                        </div>
+                     </div>
+                     <ul class="dropdown-menu dropdown-menu-end mt-2">
+                         <li><h6 class="dropdown-header">Settings</h6></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user"></i> Profile Settings</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy &amp; Security</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-credit-card"></i> Billing</a></li>
+                         <li>
+                             <div class="sign-out">
+                             <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                             </div>
+                         </li>
+                     </ul>
+                 </div>
+
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Page Header -->
+             <div class="page-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+                    <div>
+                       <h1>Add New Restaurant</h1>
+                    </div>
+                    <div class="d-flex gap-2">
+                         <a href="restaurants.html" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <form id="addRestaurantForm">
+                    <div class="row">
+                        <!-- Basic Information -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-8">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Restaurant Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="restaurantName" placeholder="Enter restaurant name" required="">
+                                            <div class="invalid-feedback">Please enter restaurant name</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Owner Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="ownerName" placeholder="Enter owner name" required="">
+                                            <div class="invalid-feedback">Please enter owner name</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="email" placeholder="restaurant@example.com" required="">
+                                            <div class="invalid-feedback">Please enter valid email</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                            <input type="tel" class="form-control" id="phone" placeholder="+1 (555) 123-4567" required="">
+                                            <div class="invalid-feedback">Please enter phone number</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Cuisine Type <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="cuisineType" required="">
+                                                <option value="">Select Cuisine Type</option>
+                                                <option value="italian">Italian</option>
+                                                <option value="chinese">Chinese</option>
+                                                <option value="indian">Indian</option>
+                                                <option value="mexican">Mexican</option>
+                                                <option value="american">American</option>
+                                                <option value="japanese">Japanese</option>
+                                                <option value="thai">Thai</option>
+                                                <option value="mediterranean">Mediterranean</option>
+                                                <option value="french">French</option>
+                                                <option value="korean">Korean</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select cuisine type</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Restaurant Category <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="category" required="">
+                                                <option value="">Select Category</option>
+                                                <option value="fine-dining">Fine Dining</option>
+                                                <option value="casual-dining">Casual Dining</option>
+                                                <option value="fast-food">Fast Food</option>
+                                                <option value="cafe">Cafe</option>
+                                                <option value="food-truck">Food Truck</option>
+                                                <option value="bakery">Bakery</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select category</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" id="description" rows="4" placeholder="Describe your restaurant..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Information -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-map-marker-alt"></i> Location Information</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Street Address <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="streetAddress" placeholder="123 Main Street" required="">
+                                        <div class="invalid-feedback">Please enter street address</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">City <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="city" placeholder="New York" required="">
+                                            <div class="invalid-feedback">Please enter city</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">State/Province <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="state" placeholder="NY" required="">
+                                            <div class="invalid-feedback">Please enter state</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">ZIP/Postal Code <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="zipCode" placeholder="10001" required="">
+                                            <div class="invalid-feedback">Please enter ZIP code</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Country <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="country" required="">
+                                                <option value="">Select Country</option>
+                                                <option value="usa" selected="">United States</option>
+                                                <option value="canada">Canada</option>
+                                                <option value="uk">United Kingdom</option>
+                                                <option value="australia">Australia</option>
+                                            </select>
+                                            <div class="invalid-feedback">Please select country</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Operating Hours -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-clock"></i> Operating Hours</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="operatingHours">
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="monday" checked="">
+                                                    <label class="form-check-label" for="monday">Monday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="22:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="tuesday" checked="">
+                                                    <label class="form-check-label" for="tuesday">Tuesday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="22:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="wednesday" checked="">
+                                                    <label class="form-check-label" for="wednesday">Wednesday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="22:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="thursday" checked="">
+                                                    <label class="form-check-label" for="thursday">Thursday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="22:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="friday" checked="">
+                                                    <label class="form-check-label" for="friday">Friday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="23:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="saturday" checked="">
+                                                    <label class="form-check-label" for="saturday">Saturday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="09:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="23:00">
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="sunday" checked="">
+                                                    <label class="form-check-label" for="sunday">Sunday</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="10:00">
+                                            </div>
+                                            <div class="col-md-1 text-center">to</div>
+                                            <div class="col-md-4">
+                                                <input type="time" class="form-control" value="22:00">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment & Delivery Settings -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-credit-card"></i> Payment &amp; Delivery Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Commission Rate (%) <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="commissionRate" placeholder="15" min="0" max="100" step="0.1" required="">
+                                            <small class="form-text text-muted">Platform commission percentage</small>
+                                            <div class="invalid-feedback">Please enter commission rate</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Delivery Fee ($)</label>
+                                            <input type="number" class="form-control" id="deliveryFee" placeholder="5.00" min="0" step="0.01">
+                                            <small class="form-text text-muted">Base delivery charge</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Minimum Order Amount ($)</label>
+                                            <input type="number" class="form-control" id="minOrder" placeholder="15.00" min="0" step="0.01">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Estimated Delivery Time (mins)</label>
+                                            <input type="number" class="form-control" id="deliveryTime" placeholder="30" min="0">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Payment Methods</label>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="cashPayment" checked="">
+                                                    <label class="form-check-label" for="cashPayment">
+                                                        <i class="fas fa-money-bill-wave text-success"></i> Cash on Delivery
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="cardPayment" checked="">
+                                                    <label class="form-check-label" for="cardPayment">
+                                                        <i class="fas fa-credit-card text-primary"></i> Credit/Debit Card
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="digitalWallet" checked="">
+                                                    <label class="form-check-label" for="digitalWallet">
+                                                        <i class="fas fa-wallet text-warning"></i> Digital Wallet
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                       <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-4">
+                            <!-- Restaurant Image -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-image"></i> Restaurant Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="image-upload-container">
+                                        <div class="image-preview" id="imagePreview">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Click or drag image here</p>
+                                            <small>Recommended: 800x600px</small>
+                                        </div>
+                                        <input type="file" id="restaurantImage" accept="image/*" style="display: none;">
+                                        <button type="button" class="btn btn-primary w-100 mt-3" onclick="document.getElementById('restaurantImage').click()">
+                                            <i class="fas fa-upload"></i> Choose Image
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Images -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-images"></i> Gallery Images</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="gallery-upload" id="galleryUpload">
+                                        <div class="gallery-item add-gallery-item" onclick="document.getElementById('galleryImages').click()">
+                                            <i class="fas fa-plus"></i>
+                                            <p>Add Images</p>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="galleryImages" accept="image/*" multiple="" style="display: none;">
+                                </div>
+                            </div>
+
+                            <!-- Status & Visibility -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-toggle-on"></i> Status &amp; Visibility</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Restaurant Status</label>
+                                        <select class="form-select" id="status">
+                                            <option value="active" selected="">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                            <option value="pending">Pending Approval</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="featured" checked="">
+                                            <label class="form-check-label" for="featured">
+                                                Featured Restaurant
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="acceptingOrders" checked="">
+                                            <label class="form-check-label" for="acceptingOrders">
+                                                Accepting Orders
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="freeDelivery">
+                                            <label class="form-check-label" for="freeDelivery">
+                                                Free Delivery Available
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-info-circle"></i> Additional Info</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Seating Capacity</label>
+                                        <input type="number" class="form-control" id="seatingCapacity" placeholder="50" min="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Parking Available</label>
+                                        <select class="form-select" id="parking">
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                            <option value="street">Street Parking</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tags</label>
+                                        <input type="text" class="form-control" id="tags" placeholder="vegan, organic, family-friendly">
+                                        <small class="form-text text-muted">Separate tags with commas</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                                        <i class="fas fa-save"></i> Create Restaurant
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="saveDraft">
+                                        <i class="fas fa-file-alt"></i> Save as Draft
+                                    </button>
+                                    <a href="restaurants.html" class="btn btn-outline-danger w-100">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+              
+           
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>© 2025 Foodlytix — All Rights Reserved</span>
+                <span class="footer-divider">|</span>
+                <span>Themes By TemplateRise</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

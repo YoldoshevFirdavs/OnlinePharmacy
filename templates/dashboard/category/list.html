@@ -1,0 +1,76 @@
+{% load static %}
+{% extends 'dashboard/user/base.html' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+    <!-- TODO: topError in base.html -->
+    <div class="page-wrapper">
+        {% include 'dashboard/user/sidebar.html' %}
+        <div class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="overview-wrap">
+                                <h2 class="title-1">Categories</h2>
+                                <a href="{% url 'dashboard:category_create' %}" class="au-btn au-btn-icon au-btn--blue">
+                                    <i class="zmdi zmdi-plus"></i>Add Category
+                                </a>
+                                <!-- TODO: confirm URL name for category_create -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row m-t-30">
+                        <div class="col-md-12">
+                            <div class="table-responsive m-b-40">
+                                <table class="table table-borderless table-data3">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Slug</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                            <!-- TODO: confirm fields -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% comment %}
+                                        <!-- TODO: confirm context variable name: categories -->
+                                        {% for category in categories %}
+                                        <tr>
+                                            <td>{{ category.id }}</td>
+                                            <td>{{ category.name }}</td>
+                                            <td>{{ category.slug }}</td>
+                                            <td>{{ category.created_at }}</td>
+                                            <td>
+                                                <div class="table-data-feature">
+                                                    <a href="{% url 'dashboard:category_edit' pk=category.id %}" class="item" data-toggle="tooltip" data-placement="top" title="Edit">
+                                                        <i class="zmdi zmdi-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'dashboard:category_delete' pk=category.id %}" class="item" data-toggle="tooltip" data-placement="top" title="Delete">
+                                                        <i class="zmdi zmdi-delete"></i>
+                                                    </a>
+                                                    <!-- TODO: confirm URL names for category_edit and category_delete -->
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endcomment %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">
+                                                <!-- TODO: confirm context variable name: categories -->
+                                                No categories available or context variable 'categories' not found.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

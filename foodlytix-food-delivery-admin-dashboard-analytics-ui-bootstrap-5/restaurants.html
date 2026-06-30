@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodlytix - Admin Dashboard</title>
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="./assets/icons/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="./assets/icons/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="index.html">
+                <i class="bi bi-basket2-fill"></i>
+                <span class="logo-text">Foodlytix</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order.html" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="restaurants.html" class="nav-link active">
+                    <i class="bi bi-shop"></i>
+                    <span>Restaurants</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="customer.html" class="nav-link">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Customers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="riders.html" class="nav-link">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Delivery Riders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="payments.html" class="nav-link">
+                    <i class="bi bi-credit-card-fill"></i>
+                    <span>Payments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="reviews.html" class="nav-link">
+                    <i class="bi bi-chat-left-dots-fill"></i>
+                    <span>Reviews</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="signup.html" class="nav-link">
+                    <i class="bi bi-person-add"></i>
+                    <span>Signup</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="forgot-password.html" class="nav-link">
+                    <i class="bi bi-eye-fill"></i>
+                    <span>Forgot password</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="404.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>404</span>
+                </a>
+            </li>
+             <li class="nav-item">
+                <a href="500.html" class="nav-link">
+                    <i class="bi bi-x-circle"></i>
+                    <span>500</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+         <div class="top-bar">
+            <button class="menu-toggle-mobile" id="MenuToggleMobile">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search orders, customers, restaurants...">
+            </div>
+            
+            <div class="top-bar-actions">
+                 <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                       <button class="action-btn">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge-notification">12</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+
+                
+                <div class="dropdown notify-dropdown">
+                      <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                        <button class="action-btn">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span class="badge-notification">5</span>
+                        </button>
+                     </div>
+
+                     <div class="dropdown-menu dropdown-menu-end mt-2">
+                        <div id="Notification" class="h-380 scroll-y p-3 custom-scrollbar">
+                            <ul class="timeline p-0">
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            DR
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Smith uploaded a new report</h6>
+                                            <small class="d-block">10 Dec 2023 - 08:15 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-info">
+                                            AP
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">New Appointment Scheduled</h6>
+                                            <small class="d-block">10 Dec 2023 - 09:45 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-success">
+                                            <i class="fa fa-check-circle"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Patient checked in at reception</h6>
+                                            <small class="d-block">10 Dec 2023 - 10:20 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2">
+                                            AS
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Dr Alice shared a prescription</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:00 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-danger">
+                                            EM
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Emergency Alert: Critical Patient</h6>
+                                            <small class="d-block">10 Dec 2023 - 11:30 AM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="timeline-panel">
+                                        <div class="media me-2 media-primary">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <h6 class="mb-1">Next Appointment Reminder</h6>
+                                            <small class="d-block">10 Dec 2023 - 12:00 PM</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                        </div>
+                        <a class="all-notification" href="#">See all notifications <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                 </div>
+                <div class="dropdown profile-dropdown">
+                     <div class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" role="button">
+                         <div class="user-profile">
+                            <div class="user-avatar">AD</div>
+                            <div class="user-info">
+                                <h6>Admin User</h6>
+                                <p>Super Admin</p>
+                            </div>
+                        </div>
+                     </div>
+                     <ul class="dropdown-menu dropdown-menu-end mt-2">
+                         <li><h6 class="dropdown-header">Settings</h6></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user"></i> Profile Settings</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-solid fa-shield-halved"></i> Privacy &amp; Security</a></li>
+                         <li><a class="dropdown-item" href="#"><i class="fa-regular fa-credit-card"></i> Billing</a></li>
+                         <li>
+                             <div class="sign-out">
+                             <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                             </div>
+                         </li>
+                     </ul>
+                 </div>
+
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+                    <div>
+                        <h1>Restaurant Management</h1>
+                        <p>Welcome back! Here's what's happening with your food delivery platform today.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="add-restaurant.html" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Restaurant
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+                <div class="row mb-4">
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="totalRestaurants">8</h3>
+                                <p>Total Restaurants</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="activeRestaurants">7</h3>
+                                <p>Active</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="fas fa-pause-circle"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="inactiveRestaurants">1</h3>
+                                <p>Inactive</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-3 mb-3">
+                        <div class="filter-card">
+                            <div class="filter-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="filter-info">
+                                <h3 id="avgRating">4.7</h3>
+                                <p>Avg Rating</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+
+               <div class="row" id="restaurantsGrid">
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Pizza Palace</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Italian</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.8</span>
+                                <span class="rating-reviews">(245 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1543 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$45,890</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Burger Haven</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> American</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.6</span>
+                                <span class="rating-reviews">(189 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1234 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$38,750</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Sushi World</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Japanese</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.9</span>
+                                <span class="rating-reviews">(312 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1876 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$62,340</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Taco Fiesta</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Mexican</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.5</span>
+                                <span class="rating-reviews">(167 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>987 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$29,450</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Chinese Garden</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Chinese</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.7</span>
+                                <span class="rating-reviews">(223 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1456 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$41,230</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-secondary status-badge">
+                                inactive
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Pasta Paradise</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Italian</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.4</span>
+                                <span class="rating-reviews">(134 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>876 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$27,890</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Activate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">BBQ Pit</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> American</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.8</span>
+                                <span class="rating-reviews">(198 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1345 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$51,230</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Curry House</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Indian</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.6</span>
+                                <span class="rating-reviews">(176 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1123 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$34,560</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image" style="background-image: url('https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&amp;h=300&amp;fit=crop')">
+                            <span class="badge bg-success status-badge">
+                                active
+                            </span>
+                        </div>
+                        <div class="restaurant-body">
+                            <h5 class="restaurant-name">Curry House</h5>
+                            <p class="restaurant-cuisine"><i class="fas fa-utensils"></i> Indian</p>
+                            <div class="restaurant-rating mb-2">
+                                <span class="rating-star"><i class="fas fa-star"></i> 4.6</span>
+                                <span class="rating-reviews">(176 reviews)</span>
+                            </div>
+                            <div class="restaurant-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>1123 orders</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>$34,560</span>
+                                </div>
+                            </div>
+                            <div class="restaurant-actions">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#DetailsModal">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-toggle-on"></i> Deactivate
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>© 2025 Foodlytix — All Rights Reserved</span>
+                <span class="footer-divider">|</span>
+                <span>Themes By TemplateRise</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <div class="modal fade" id="DetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title mb-0">Restaurant Details</h5>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body position-relative">
+                    <div class="text-center mb-4">
+                        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&amp;h=300&amp;fit=crop" alt="Pizza Palace" class="img-fluid rounded" style="max-height: 200px;">
+                        <h4 class="mt-3">Pizza Palace</h4>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="info-table-wrapper">
+                        <table class="info-table">
+                            <tbody>
+                            <tr class="section">
+                                <td colspan="2">Basic Information</td>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>REST-001</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>alex.j@fooddash.com</td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td>+1 555-1001</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Vehicle Information</td>
+                            </tr>
+                            <tr>
+                                <th>License</th>
+                                <td>DL-12345</td>
+                            </tr>
+                            <tr>
+                                <th>Joined</th>
+                                <td>Jan 10, 2023</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Performance Metrics</td>
+                            </tr>
+                            <tr>
+                                <th>Rating</th>
+                                <td>⭐ 4.9 (234 reviews)</td>
+                            </tr>
+                            <tr>
+                                <th>Total Orders</th>
+                                <td>1543</td>
+                            </tr>
+
+                            <tr class="section">
+                                <td colspan="2">Business Terms</td>
+                            </tr>
+                            <tr>
+                                <th>Commission Rate</th>
+                                <td class="success">15%</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td class="success">Active</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

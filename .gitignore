@@ -1,0 +1,22 @@
+# Environment files
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtualenvs
+venv/
+venvs*/
+\.venv
+.venv310
+# Django
+media/
+staticfiles/
+config/email_config.py # Added this line
+
+# IDEs
+.idea/
+.vscode/
