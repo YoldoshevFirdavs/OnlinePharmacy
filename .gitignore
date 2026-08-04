@@ -17,7 +17,6 @@ venvs*/
 # Django
 media/
 staticfiles/
-mediafiles/
 
 
 # IDEs
