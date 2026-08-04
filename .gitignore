@@ -33,3 +33,5 @@ mediafiles/
 *.zip
 *.tar
 *.gz
+# Kiro IDE
+.kiro/
