@@ -1,6 +1,8 @@
 from functools import wraps
+from rest_framework.permissions import BasePermission
 from django.shortcuts import redirect
 from .views import is_admin, is_deliverer
+
 
 def role_required(*roles):
     def decorator(view_func):
@@ -32,3 +34,33 @@ def role_required(*roles):
 
         return _wrapped_view
     return decorator
+
+
+class IsDashboardAdmin(BasePermission):
+    """
+    Permission class that only allows admin users to access the view.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return is_admin(request.user)
+
+
+class IsDashboardDeliverer(BasePermission):
+    """
+    Permission class that only allows deliverer users to access the view.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return is_deliverer(request.user)
+
+
+class IsDashboardAdminOrDeliverer(BasePermission):
+    """
+    Permission class that allows both admin and deliverer users to access the view.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return is_admin(request.user) or is_deliverer(request.user)
