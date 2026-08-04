@@ -28,6 +28,22 @@ from pharmacy.permissons import IsVerifiedSeller
 from security.locks import is_locked, reset_lockout, record_failed_attempt
 from .models import CustomUser, Seller, SubscribedUser, Deliverer, OnboardToken
 import users.otp_service as otp_service
+
+# Import dashboard permissions
+try:
+    from dashboard.permissions import is_deliverer, is_admin
+except ImportError:
+    # Fallback if dashboard app not available
+    def is_deliverer(user):
+        try:
+            return user.is_authenticated and hasattr(user, "deliverer_profile") and user.deliverer_profile is not None
+        except Exception:
+            return False
+    def is_admin(user):
+        try:
+            return user.is_authenticated and user.is_staff
+        except Exception:
+            return False
 import users.tasks as tasks
 from .otp_service import (
     create_otp_session,
@@ -849,6 +865,17 @@ class UserProfileViewSet(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+
+    def check_permissions(self, request):
+        """Check if user is deliverer or admin before allowing access"""
+        super().check_permissions(request)
+        
+        # Check if user has deliverer or admin role
+        if not is_deliverer(request.user) and not is_admin(request.user):
+            # User is authenticated but not deliverer/admin
+            # Return 403 Forbidden instead of redirect
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to access this resource.")
 
     def get_object(self):
         return self.request.user
