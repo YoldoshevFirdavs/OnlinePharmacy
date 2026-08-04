@@ -830,13 +830,13 @@ def log_error_to_dashboard(component: str, masked_identifier: str, short_error: 
     
     error_file = os.path.join(settings.BASE_DIR, 'errors', 'dashboard_error.md')
     timestamp = datetime.now(timezone.utc).isoformat()
-    
+
     log_entry = f"\nTIMESTAMP: {timestamp}\n"
     log_entry += f"COMPONENT: {component}\n"
     log_entry += f"USER: {masked_identifier}\n"
     log_entry += f"ERROR: {short_error}\n"
     log_entry += "ACTION: OTP verification failed due to error.\n"
-    
+
     try:
         os.makedirs(os.path.dirname(error_file), exist_ok=True)
         with open(error_file, 'a', encoding='utf-8') as f:

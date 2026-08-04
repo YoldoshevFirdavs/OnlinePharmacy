@@ -8195,3 +8195,54 @@ INFO 2026-08-04 13:36:41,861 updater Received signal 15 (SIGTERM), stopping...
 INFO 2026-08-04 13:36:41,892 base Scheduler has been shut down
 INFO 2026-08-04 16:18:19,075 runbot1 Starting bot polling (attempt 1/5)...
 INFO 2026-08-04 16:18:19,076 base Scheduler started
+INFO 2026-08-04 19:18:42,713 updater Received signal 15 (SIGTERM), stopping...
+INFO 2026-08-04 19:18:42,808 base Scheduler has been shut down
+ERROR 2026-08-04 19:18:48,211 signal Signal handler <bound method DjangoFixup.on_import_modules of <celery.fixups.django.DjangoFixup object at 0x7cae6a9b39a0>> raised: ImportError("cannot import name 'IsDashboardAdmin' from 'dashboard.permissions' (/app/dashboard/permissions.py)")
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/site-packages/celery/utils/dispatch/signal.py", line 276, in send
+    response = receiver(signal=self, sender=sender, **named)
+  File "/usr/local/lib/python3.10/site-packages/celery/fixups/django.py", line 97, in on_import_modules
+    self.worker_fixup.validate_models()
+  File "/usr/local/lib/python3.10/site-packages/celery/fixups/django.py", line 137, in validate_models
+    run_checks()
+  File "/usr/local/lib/python3.10/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/usr/local/lib/python3.10/site-packages/django/core/checks/urls.py", line 44, in check_url_namespaces_unique
+    all_namespaces = _load_all_namespaces(resolver)
+  File "/usr/local/lib/python3.10/site-packages/django/core/checks/urls.py", line 63, in _load_all_namespaces
+    url_patterns = getattr(resolver, "url_patterns", [])
+  File "/usr/local/lib/python3.10/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/usr/local/lib/python3.10/site-packages/django/urls/resolvers.py", line 718, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/usr/local/lib/python3.10/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/usr/local/lib/python3.10/site-packages/django/urls/resolvers.py", line 711, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/local/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/config/urls.py", line 62, in <module>
+    path('api/v1/dashboard/', include('dashboard.api_urls', namespace='dashboard_api')),
+  File "/usr/local/lib/python3.10/site-packages/django/urls/conf.py", line 39, in include
+    urlconf_module = import_module(urlconf_module)
+  File "/usr/local/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/app/dashboard/api_urls.py", line 3, in <module>
+    from . import api_views
+  File "/app/dashboard/api_views.py", line 15, in <module>
+    from .permissions import IsDashboardAdmin
+ImportError: cannot import name 'IsDashboardAdmin' from 'dashboard.permissions' (/app/dashboard/permissions.py)
+INFO 2026-08-04 19:18:55,899 runbot1 Starting bot polling (attempt 1/5)...
+INFO 2026-08-04 19:18:55,901 base Scheduler started
