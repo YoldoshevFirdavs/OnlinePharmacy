@@ -8,29 +8,59 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0008_customuser_email_and_nullable_phone'),
+        ("users", "0008_customuser_email_and_nullable_phone"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='avatar',
-            field=models.ImageField(blank=True, null=True, upload_to='users_profile_avatars/'),
+            model_name="customuser",
+            name="avatar",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="users_profile_avatars/"
+            ),
         ),
         migrations.AlterField(
-            model_name='seller',
-            name='avatar',
-            field=models.ImageField(blank=True, null=True, upload_to='users_profile_avatars/'),
+            model_name="seller",
+            name="avatar",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="users_profile_avatars/"
+            ),
         ),
         migrations.CreateModel(
-            name='SubscribedUser',
+            name="SubscribedUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('is_verified', models.BooleanField(default=False)),
-                ('subscribed_at', models.DateTimeField(auto_now_add=True)),
-                ('telegram_user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='subscriptions', to='users.telegrambotuser')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254, unique=True)),
+                ("is_verified", models.BooleanField(default=False)),
+                ("subscribed_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "telegram_user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="subscriptions",
+                        to="users.telegrambotuser",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subscriptions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

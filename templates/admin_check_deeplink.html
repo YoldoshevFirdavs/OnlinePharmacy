@@ -1,0 +1,37 @@
+<!-- templates/admin_check_deeplink.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verifying...</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; background: #f0f2f5; }
+        .message { font-size: 1.2rem; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="message">Tasdiqlanmoqda, iltimos kuting...</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accessToken = '{{ access_token }}';
+            const refreshToken = '{{ refresh_token }}';
+            const username = '{{ username }}';
+            const userRole = '{{ user_role }}';
+
+            if (accessToken && refreshToken) {
+                localStorage.setItem('access_token', accessToken);
+                localStorage.setItem('refresh_token', refreshToken);
+                localStorage.setItem('username', username);
+                localStorage.setItem('user_role', userRole);
+
+                // Asosiy dashboardga yo'naltirish
+                window.location.href = '/dashboard/';
+            } else {
+                // Agar tokenlar bo'lmasa, login sahifasiga qaytish
+                window.location.href = '/auth/';
+            }
+        });
+    </script>
+</body>
+</html>

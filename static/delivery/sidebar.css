@@ -1,0 +1,185 @@
+/* ==========================================================================
+   OnlinePharmacy — sidebar.css (Delivery)
+   Minimal sidebar styles for delivery dashboard
+   ========================================================================== */
+
+/* ── Sidebar Navigation (Minimal) ──────────────────────────────────────── */
+
+.deliverer-sidebar {
+    width: var(--sidebar-width, 260px);
+    min-height: 100vh;
+    background: var(--dashboard-header-bg, #2c3e50);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+/* Collapsed state */
+.deliverer-sidebar.collapsed {
+    width: 64px;
+}
+
+.deliverer-sidebar.collapsed .deliverer-sidebar__brand-text,
+.deliverer-sidebar.collapsed .deliverer-nav__label,
+.deliverer-sidebar.collapsed .deliverer-sidebar__footer-text {
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Brand */
+.deliverer-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    min-height: 64px;
+    text-decoration: none;
+    color: var(--dashboard-header-text, #ecf0f1);
+}
+
+.deliverer-sidebar__brand-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    color: var(--primary, #6a0dad);
+}
+
+.deliverer-sidebar__brand-text {
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+}
+
+/* Nav */
+.deliverer-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.deliverer-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.deliverer-nav__item {
+    padding: 0 10px;
+}
+
+.deliverer-nav__link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm, 8px);
+    text-decoration: none;
+    color: var(--dashboard-header-text, #ecf0f1);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: background 0.18s ease, color 0.18s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.deliverer-nav__link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--primary, #6a0dad);
+}
+
+.deliverer-nav__item.active .deliverer-nav__link {
+    background: var(--primary, #6a0dad);
+    color: #fff;
+    font-weight: 600;
+}
+
+.deliverer-nav__icon {
+    font-size: 17px;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.deliverer-nav__label {
+    transition: opacity 0.2s ease;
+}
+
+/* Sidebar Footer */
+.deliverer-sidebar__footer {
+    padding: 12px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.deliverer-sidebar__footer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm, 8px);
+    text-decoration: none;
+    color: #e74c3c;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: background 0.18s ease;
+    white-space: nowrap;
+}
+
+.deliverer-sidebar__footer-link:hover {
+    background: rgba(231, 76, 60, 0.1);
+    color: #c0392b;
+}
+
+.deliverer-sidebar__footer-text {
+    transition: opacity 0.2s ease;
+}
+
+/* ── Mobile Overlay ────────────────────────────────────────────────────── */
+
+.deliverer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 199;
+}
+
+.deliverer-overlay.active {
+    display: block;
+}
+
+/* ── Responsive Styles ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .deliverer-sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width, 260px) !important;
+    }
+
+    .deliverer-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .deliverer-sidebar.collapsed {
+        width: var(--sidebar-width, 260px) !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .deliverer-overlay {
+        display: none !important;
+    }
+}

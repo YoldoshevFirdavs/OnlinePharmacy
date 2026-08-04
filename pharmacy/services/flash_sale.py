@@ -5,7 +5,7 @@ from rest_framework import status
 from datetime import datetime, timedelta
 from pharmacy.models.medicine import Medicine
 from pharmacy.models.misc import ProductViewHistory, FlashSale
-from  rest_framework import  generics, serializers
+from rest_framework import generics, serializers
 from pharmacy.serializers.misc import FlashSaleSerializer
 
 
@@ -14,31 +14,34 @@ class FlashSaleListCreateView(generics.ListCreateAPIView):
     serializer_class = FlashSaleSerializer
     permission_classes = [permissions.IsStafforReadOnly]
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 def check_flash_sale_status(request, product_id):
     try:
         product = Medicine.objects.get(id=product_id)
     except Medicine.DoesNotExist:
-        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
-    user_viewed = ProductViewHistory.objects.filter(user=request.user, product=product).exists()
+    user_viewed = ProductViewHistory.objects.filter(
+        user=request.user, product=product
+    ).exists()
 
     upcoming_flash_sale = FlashSale.objects.filter(
-        product=product,
-        start_time__lte=datetime.now() + timedelta(hours=24)
+        product=product, start_time__lte=datetime.now() + timedelta(hours=24)
     ).first()
 
     if user_viewed and upcoming_flash_sale:
         discount = upcoming_flash_sale.discount_percentage
         start_time = upcoming_flash_sale.start_time
         end_time = upcoming_flash_sale.end
-        return Response({
-
-            "message":f"This prdouct will be on a {discount}% off flash sale !",
-            "start_time":start_time,
-            "end_time":end_time
-        })
+        return Response(
+            {
+                "message": f"This prdouct will be on a {discount}% off flash sale !",
+                "start_time": start_time,
+                "end_time": end_time,
+            }
+        )
     else:
-        return Response({
-            "message":"No upcoming flash sales for this product"
-        })
+        return Response({"message": "No upcoming flash sales for this product"})

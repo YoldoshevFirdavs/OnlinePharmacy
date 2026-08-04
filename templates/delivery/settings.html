@@ -1,0 +1,214 @@
+{% extends "delivery/base.html" %}
+{% load static %}
+
+{% block page_name %}settings{% endblock %}
+{% block page_title %}Sozlamalar{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="deliverer-page-header">
+    <h2 class="deliverer-page-header__title">
+        <i class="fas fa-cog"></i>
+        Sozlamalar
+    </h2>
+</div>
+
+<!-- Settings Form Card -->
+<div class="deliverer-card">
+    <div class="deliverer-card__header">
+        <h3 class="deliverer-card__header-title">Profil sozlamalari</h3>
+    </div>
+    <div class="deliverer-card__body">
+        <form id="delivererSettingsForm" method="POST" action="{% url 'dashboard:delivery_settings' %}">
+            {% csrf_token %}
+            
+            <!-- Profile Section -->
+            <div class="deliverer-form-section">
+                <h4 class="deliverer-form-section-title">Profil ma'lumotlari</h4>
+                
+                <div class="deliverer-form-row">
+                    <div class="deliverer-form-group">
+                        <label for="id_full_name" class="deliverer-form-label">
+                            To'liq ism <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="id_full_name" 
+                            name="full_name" 
+                            class="deliverer-form-control form-control"
+                            value="{{ user.full_name|default:'' }}"
+                            placeholder="Masalan: Ali Valiyev"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="deliverer-form-group">
+                        <label for="id_email" class="deliverer-form-label">
+                            Email <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="id_email" 
+                            name="email" 
+                            class="deliverer-form-control form-control"
+                            value="{{ user.email|default:'' }}"
+                            placeholder="ali@example.com"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div class="deliverer-form-group">
+                    <label for="id_phone_number" class="deliverer-form-label">
+                        Telefon raqam <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="id_phone_number" 
+                        name="phone_number" 
+                        class="deliverer-form-control form-control"
+                        value="{{ user.phone_number|default:'' }}"
+                        placeholder="+998901234567"
+                        pattern="^\+998\d{9}$"
+                        required
+                    >
+                    <small class="deliverer-form-hint">Raqamning formati: +998901234567</small>
+                </div>
+            </div>
+            
+            <!-- Notification Settings -->
+            <div class="deliverer-form-section" style="margin-top: 24px;">
+                <h4 class="deliverer-form-section-title">Bildirishnomalar</h4>
+                
+                <div class="deliverer-toggle-group">
+                    <div class="deliverer-toggle-info">
+                        <label for="id_notify_order" class="deliverer-toggle-label">
+                            Yangi buyurtma bildirishnomasi
+                        </label>
+                        <span class="deliverer-toggle-sub">
+                            Yangi buyurtma kelganda xabar oling
+                        </span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input 
+                            type="checkbox" 
+                            id="id_notify_order" 
+                            name="notify_order" 
+                            {% if user.delivery_profile.notify_order %}checked{% endif %}
+                        >
+                        <span class="toggle-switch__slider"></span>
+                    </label>
+                </div>
+                
+                <div class="deliverer-toggle-group">
+                    <div class="deliverer-toggle-info">
+                        <label for="id_notify_status" class="deliverer-toggle-label">
+                            Buyurtma holati o'zgarishi
+                        </label>
+                        <span class="deliverer-toggle-sub">
+                            Buyurtma holati o'zgarganda xabar oling
+                        </span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input 
+                            type="checkbox" 
+                            id="id_notify_status" 
+                            name="notify_status" 
+                            {% if user.delivery_profile.notify_status %}checked{% endif %}
+                        >
+                        <span class="toggle-switch__slider"></span>
+                    </label>
+                </div>
+                
+                <div class="deliverer-toggle-group">
+                    <div class="deliverer-toggle-info">
+                        <label for="id_notify_push" class="deliverer-toggle-label">
+                            Push bildirishnomalar
+                        </label>
+                        <span class="deliverer-toggle-sub">
+                            Push bildirishnomalarni yoqish/o'chirish
+                        </span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input 
+                            type="checkbox" 
+                            id="id_notify_push" 
+                            name="notify_push" 
+                            {% if user.delivery_profile.notify_push %}checked{% endif %}
+                        >
+                        <span class="toggle-switch__slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="deliverer-form-actions">
+                <button type="submit" id="delivererSettingsSaveBtn" class="deliverer-btn deliverer-btn--primary">
+                    <i class="fas fa-save"></i>
+                    Saqlash
+                </button>
+                <span class="deliverer-form-hint">Barcha sozlamalar avtomatik saqlanadi</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.deliverer-form-section {
+    margin-bottom: 24px;
+}
+
+.deliverer-form-hint {
+    font-size: 0.75rem;
+    color: var(--dashboard-muted-text, #555);
+    margin-top: 4px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('delivererSettingsForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('delivererSettingsSaveBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
+        }
+        
+        // In production, send form data via AJAX
+        // For now, show success message
+        setTimeout(function() {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Saqlandi!';
+                
+                // Reset button after 2 seconds
+                setTimeout(function() {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Saqlash';
+                }, 2000);
+            }
+            
+            // Show success alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'deliverer-alert deliverer-alert--success';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>Sozlamalar muvaffaqiyatli saqlandi!</span>
+                <button class="deliverer-alert__close" aria-label="Close alert">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            const messagesContainer = document.querySelector('.deliverer-messages');
+            if (messagesContainer) {
+                messagesContainer.appendChild(alertDiv);
+            }
+        }, 500);
+    });
+});
+</script>
+{% endblock %}

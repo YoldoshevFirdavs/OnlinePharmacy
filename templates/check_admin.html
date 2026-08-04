@@ -5,6 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
 <style>
     body {
         background-color: #f0f2f5;
@@ -99,7 +100,7 @@
 
     <div id="admin-check-error-banner" style="display: none;"></div>
 
-    <form id="admin-check-form">
+    <form id="admin-check-form" action="/api/v1/users/admin/check/" method="POST">
         {% csrf_token %}
         <div class="form-group">
             <label for="admin-email">Email</label>
@@ -130,79 +131,106 @@
 {% endblock %}
 
 {% block extra_js %}
-<script type="module" src="{% static 'js/utils.js' %}"></script>
-<script type="module" src="{% static 'js/header.js' %}"></script>
-<script type="module">
-    import { sendRequest, getFingerprint } from '{% static "js/utils.js" %}';
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ADMIN_LOGIN_ENDPOINT = '/api/v1/users/admin/check/';
 
-    const ADMIN_CHECK_ENDPOINT = '/api/v1/users/admin/check/';
-    const ADMIN_DASHBOARD_URL = '/dashboard/'; // Assuming this is the admin dashboard URL
+        const adminCheckForm = document.getElementById('admin-check-form');
+        const adminEmailInput = document.getElementById('admin-email');
+        const adminPhoneInput = document.getElementById('admin-phone');
+        const adminNameInput = document.getElementById('admin-name');
+        const adminPasswordInput = document.getElementById('admin-password');
+        const togglePasswordBtn = document.getElementById('toggle-password');
+        const errorBanner = document.getElementById('admin-check-error-banner');
 
-    const adminCheckForm = document.getElementById('admin-check-form');
-    const adminEmailInput = document.getElementById('admin-email');
-    const adminPhoneInput = document.getElementById('admin-phone');
-    const adminNameInput = document.getElementById('admin-name');
-    const adminPasswordInput = document.getElementById('admin-password');
-    const togglePasswordBtn = document.getElementById('toggle-password');
-    const errorBanner = document.getElementById('admin-check-error-banner');
-
-    function showAdminError(message) {
-        if (errorBanner) {
-            errorBanner.textContent = message;
-            errorBanner.style.display = 'block';
-            setTimeout(() => {
-                errorBanner.style.display = 'none';
-            }, 5000);
-        }
-    }
-
-    if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener('click', () => {
-            const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            adminPasswordInput.setAttribute('type', type);
-            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye');
-            togglePasswordBtn.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-    }
-
-    if (adminCheckForm) {
-        adminCheckForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorBanner.style.display = 'none';
-
-            const email = adminEmailInput.value.trim();
-            const phone_number = adminPhoneInput.value.trim();
-            const full_name = adminNameInput.value.trim();
-            const password = adminPasswordInput.value.trim();
-
-            if (!email || !full_name || !password) {
-                showAdminError("Iltimos, barcha majburiy maydonlarni to'ldiring.");
-                return;
+        function showAdminError(message) {
+            if (errorBanner) {
+                errorBanner.textContent = message;
+                errorBanner.style.display = 'block';
+                setTimeout(() => {
+                    errorBanner.style.display = 'none';
+                }, 5000);
+            } else {
+                console.error("Admin Check Error:", message);
             }
+        }
 
-            try {
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                adminPasswordInput.setAttribute('type', type);
+                togglePasswordBtn.querySelector('i').classList.toggle('fa-eye');
+                togglePasswordBtn.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+
+        if (adminCheckForm) {
+            adminCheckForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorBanner.style.display = 'none';
+
+                const email = adminEmailInput.value.trim();
+                const phone_number = adminPhoneInput.value.trim();
+                const full_name = adminNameInput.value.trim();
+                const password = adminPasswordInput.value.trim();
+
+                if (!email || !full_name || !password) {
+                    showAdminError("Iltimos, barcha majburiy maydonlarni to'ldiring.");
+                    return;
+                }
+
                 const payload = {
                     email: email,
                     phone_number: phone_number,
                     full_name: full_name,
                     password: password,
-                    fingerprint: await getFingerprint()
                 };
 
-                const response = await sendRequest(ADMIN_CHECK_ENDPOINT, 'POST', payload);
+                try {
+                    const response = await fetch(ADMIN_LOGIN_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify(payload)
+                    });
 
-                if (response.success && response.redirect) {
-                    localStorage.setItem('access_token', response.access); // Assuming access token is returned
-                    localStorage.setItem('username', full_name);
-                    localStorage.setItem('user_role', 'admin');
-                    window.location.href = response.redirect;
-                } else {
-                    showAdminError(response.detail || response.message || "Admin ma'lumotlarini tekshirishda xato yuz berdi.");
+                    const data = await response.json();
+
+                    if (response.ok && data.ok && data.next) {
+                        if (data.access) localStorage.setItem('access_token', data.access);
+                        if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+                        localStorage.setItem('username', full_name);
+                        localStorage.setItem('user_role', 'admin');
+                        const _ADMIN_ALLOWED = ['/dashboard/admin/', '/dashboard/'];
+                        window.location.href = _ADMIN_ALLOWED.includes(data.next) ? data.next : '/dashboard/admin/';
+                    } else {
+                        const errorDetail = data.detail || (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(' ') : "Admin ma'lumotlarini tekshirishda xato yuz berdi.");
+                        showAdminError(errorDetail);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showAdminError("Server bilan bog'lanishda kutilmagan xato yuz berdi.");
                 }
-            } catch (error) {
-                showAdminError(error.message || "Server bilan bog'lanishda xato yuz berdi.");
-            }
-        });
-    }
+            });
+        }
+    });
 </script>
 {% endblock %}

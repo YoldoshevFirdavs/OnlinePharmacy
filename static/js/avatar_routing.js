@@ -15,14 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                const user = await callApi('/api/v1/users/me/', 'GET'); // Fetch user data
+                const user = await callApi('/api/v1/users/me/', 'GET', { credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } }); // Fetch user data
                 if (user && user.id) {
                     let redirectUrl = '/account/'; // Default redirect
 
                     if (user.role === 'deliver') {
                         redirectUrl = '/dashboard/delivery/'; // Assuming this is the correct URL
                     } else if (user.role === 'admin') {
-                        redirectUrl = '/dashboard/'; // Assuming this is the correct URL
+                        redirectUrl = '/dashboard/admin/'; // Assuming this is the correct URL
                     }
                     window.location.href = redirectUrl;
                 } else {

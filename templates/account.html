@@ -4,24 +4,31 @@
 <title>Mening Profilim</title>
 </head>
 <body>
-{% include 'header.html' %}
+{% include 'components/header.html' %}
 
 <main class="account-page-main">
     <div class="account-container">
-        <div class="account-header">
-            <img id="profile-avatar" src="{% static 'images/default_avatar.png' %}" alt="Profil rasmi" class="profile-avatar">
-            <h2 id="profile-full-name" class="profile-full-name"></h2>
-            <p id="profile-email" class="profile-email"></p>
-            <p id="profile-phone-number" class="profile-phone-number"></p>
+        <!-- View Mode -->
+        <div id="profile-view-mode">
+            <div class="account-header">
+                <img id="profile-avatar-display" src="{% static 'images/default_avatar.png' %}" alt="Profil rasmi" class="profile-avatar">
+                <h2 id="profile-full-name-display" class="profile-full-name"></h2>
+                <p id="profile-email-display" class="profile-email"></p>
+                <p id="profile-phone-number-display" class="profile-phone-number"></p>
+            </div>
+
+            <div class="account-actions">
+                <button id="edit-profile-btn" class="btn btn-primary">Profilni tahrirlash</button>
+                <button id="logout-btn" class="btn btn-secondary">Chiqish</button>
+            </div>
         </div>
 
-        <div class="account-actions">
-            <button id="edit-profile-btn" class="btn btn-primary">Profilni tahrirlash</button>
-            <button id="logout-btn" class="btn btn-secondary">Chiqish</button>
-        </div>
-
-        <div class="profile-details">
-            <h3>Shaxsiy ma'lumotlar</h3>
+        <!-- Edit Mode -->
+        <div id="profile-edit-mode" style="display: none;">
+            <div class="account-header">
+                <img id="profile-avatar-preview" src="{% static 'images/default_avatar.png' %}" alt="Profil rasmi" class="profile-avatar">
+                <h2 class="profile-full-name">Profilni tahrirlash</h2>
+            </div>
             <form id="profile-form" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
@@ -40,7 +47,10 @@
                     <label for="avatar_upload">Avatar yuklash</label>
                     <input type="file" id="avatar_upload" name="avatar" accept="image/*" class="form-control-file">
                 </div>
-                <button type="submit" class="btn btn-primary save-changes-btn">O'zgarishlarni saqlash</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary save-changes-btn">O'zgarishlarni saqlash</button>
+                    <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Bekor qilish</button>
+                </div>
             </form>
         </div>
 

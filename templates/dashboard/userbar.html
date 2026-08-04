@@ -1,0 +1,40 @@
+{% load static %}
+{# ═══════ User Navigation Bar ═══════ #}
+<nav class="userbar" id="userbar">
+    <div class="userbar-brand">
+        <a href="/">
+            <i class="fa-solid fa-capsules"></i>
+            <span>OnlinePharmacy</span>
+        </a>
+    </div>
+
+    <div class="userbar-links" id="userbarLinks">
+        <a href="/" class="userbar-link">
+            <i class="fa-solid fa-house"></i> Bosh sahifa
+        </a>
+
+        {% if request.user.is_authenticated %}
+            {% if request.user.is_staff %}
+            <a href="{% url 'dashboard:dashboard-admin' %}" class="userbar-link">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            {% endif %}
+
+            <a href="{% url 'dashboard:account_settings' %}" class="userbar-link">
+                <i class="fa-solid fa-user-gear"></i> Account
+            </a>
+
+            <a href="{% url 'dashboard:logout_page' %}" class="userbar-link userbar-link--logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Chiqish
+            </a>
+        {% else %}
+            <a href="/auth/" class="userbar-link">
+                <i class="fa-solid fa-right-to-bracket"></i> Kirish
+            </a>
+        {% endif %}
+    </div>
+
+    <button class="userbar-toggle" id="userbarToggle" type="button" aria-label="Menyuni ochish">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</nav>

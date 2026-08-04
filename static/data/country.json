@@ -1,0 +1,194 @@
+[
+  {
+    "code": "UZ",
+    "dial_code": "+998",
+    "name": "Uzbekistan",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "US",
+    "dial_code": "+1",
+    "name": "United States",
+    "phone_format": "(###) ###-####"
+  },
+  {
+    "code": "RU",
+    "dial_code": "+7",
+    "name": "Russia",
+    "phone_format": "### ###-##-##"
+  },
+  {
+    "code": "GB",
+    "dial_code": "+44",
+    "name": "Great Britain",
+    "phone_format": "#### ######"
+  },
+  {
+    "code": "DE",
+    "dial_code": "+49",
+    "name": "Germany",
+    "phone_format": "#### #######"
+  },
+  {
+    "code": "FR",
+    "dial_code": "+33",
+    "name": "France",
+    "phone_format": "# ## ## ## ##"
+  },
+  {
+    "code": "TR",
+    "dial_code": "+90",
+    "name": "Turkey",
+    "phone_format": "### ### ####"
+  },
+  {
+    "code": "IN",
+    "dial_code": "+91",
+    "name": "India",
+    "phone_format": "#####-#####"
+  },
+  {
+    "code": "CN",
+    "dial_code": "+86",
+    "name": "China",
+    "phone_format": "### #### ####"
+  },
+  {
+    "code": "JP",
+    "dial_code": "+81",
+    "name": "Japan",
+    "phone_format": "## #### ####"
+  },
+  {
+    "code": "KR",
+    "dial_code": "+82",
+    "name": "South Korea",
+    "phone_format": "## #### ####"
+  },
+  {
+    "code": "AE",
+    "dial_code": "+971",
+    "name": "United Arab Emirates",
+    "phone_format": "# ### ####"
+  },
+  {
+    "code": "SA",
+    "dial_code": "+966",
+    "name": "Saudi Arabia",
+    "phone_format": "# ### ####"
+  },
+  {
+    "code": "EG",
+    "dial_code": "+20",
+    "name": "Egypt",
+    "phone_format": "### ### ####"
+  },
+  {
+    "code": "BR",
+    "dial_code": "+55",
+    "name": "Brazil",
+    "phone_format": "## #####-####"
+  },
+  {
+    "code": "CA",
+    "dial_code": "+1",
+    "name": "Canada",
+    "phone_format": "(###) ###-####"
+  },
+  {
+    "code": "AU",
+    "dial_code": "+61",
+    "name": "Australia",
+    "phone_format": "# #### ####"
+  },
+  {
+    "code": "IT",
+    "dial_code": "+39",
+    "name": "Italy",
+    "phone_format": "### #######"
+  },
+  {
+    "code": "ES",
+    "dial_code": "+34",
+    "name": "Spain",
+    "phone_format": "### ### ###"
+  },
+  {
+    "code": "PL",
+    "dial_code": "+48",
+    "name": "Poland",
+    "phone_format": "### ### ###"
+  },
+  {
+    "code": "NL",
+    "dial_code": "+31",
+    "name": "Netherlands",
+    "phone_format": "# ########"
+  },
+  {
+    "code": "SE",
+    "dial_code": "+46",
+    "name": "Sweden",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "NO",
+    "dial_code": "+47",
+    "name": "Norway",
+    "phone_format": "### ## ###"
+  },
+  {
+    "code": "DK",
+    "dial_code": "+45",
+    "name": "Denmark",
+    "phone_format": "## ## ## ##"
+  },
+  {
+    "code": "FI",
+    "dial_code": "+358",
+    "name": "Finland",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "KZ",
+    "dial_code": "+7",
+    "name": "Kazakhstan",
+    "phone_format": "### ### ## ##"
+  },
+  {
+    "code": "UA",
+    "dial_code": "+380",
+    "name": "Ukraine",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "BY",
+    "dial_code": "+375",
+    "name": "Belarus",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "AZ",
+    "dial_code": "+994",
+    "name": "Azerbaijan",
+    "phone_format": "## ### ## ##"
+  },
+  {
+    "code": "KG",
+    "dial_code": "+996",
+    "name": "Kyrgyzstan",
+    "phone_format": "### ### ###"
+  },
+  {
+    "code": "TJ",
+    "dial_code": "+992",
+    "name": "Tajikistan",
+    "phone_format": "## ### ####"
+  },
+  {
+    "code": "TM",
+    "dial_code": "+993",
+    "name": "Turkmenistan",
+    "phone_format": "# ### ####"
+  }
+]

@@ -1,0 +1,21 @@
+{% load static %}
+<!-- NOTE: Account dropdown for logged-in users -->
+<div id="account-dropdown-container" style="display: none;">
+    <button id="account-dropdown-button" class="dropdown-toggle">
+        <img src="{% static 'images/default_avatar.png' %}" alt="User Avatar" class="avatar">
+        <span id="username-display">User</span>
+    </button>
+    <ul id="account-dropdown-menu" class="dropdown-menu">
+        <!-- NOTE: Admin links -->
+        <li class="admin-link" style="display: none;"><a href="/dashboard/admin/"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a></li>
+        <!-- NOTE: Deliverer links -->
+        <li class="deliverer-link" style="display: none;"><a href="/dashboard/delivery/"><i class="fas fa-truck"></i> My Deliveries</a></li>
+        <!-- NOTE: User links -->
+        <li class="user-link" style="display: none;"><a href="/account/"><i class="fas fa-user-circle"></i> My Profile</a></li>
+        <li class="user-link" style="display: none;"><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
+        <!-- NOTE: Logout button -->
+        <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+</div>
+
+{# NOTE: Removed redundant script block, logic moved to header.js #}

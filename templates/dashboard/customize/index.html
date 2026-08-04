@@ -1,0 +1,123 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dizayn sozlamalari{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-palette"></i> Dizayn va brend sozlamalari
+    </h1>
+    <p class="page-subtitle">Dashboard nomi, sticker va rang mavzusini moslashtiring</p>
+</div>
+
+<!-- Live Preview — horizontal -->
+<div class="live-preview-card" id="livePreviewCard">
+    <div class="live-preview-header">
+        <i class="fa-solid fa-eye"></i> Jonli ko'rinish
+    </div>
+    <div class="live-preview-box" id="livePreviewBox">
+        <span class="live-preview-sticker" id="livePreviewSticker">🏥</span>
+        <span class="live-preview-name" id="livePreviewName">OnlinePharmacy</span>
+    </div>
+</div>
+
+<!-- All cards horizontal -->
+<div class="customize-row" id="customizeGrid">
+
+    <!-- Brand Name & Sticker -->
+    <div class="card card--customize" id="brandCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-signature"></i> Dashboard Nomi va Sticker</h2>
+        </div>
+        <div class="card__body">
+            <div class="form-group">
+                <label for="inputBrandName" class="form-label">Dashboard Nomi:</label>
+                <input type="text" id="inputBrandName" class="form-input" placeholder="OnlinePharmacy" autocomplete="off">
+            </div>
+            <div class="sticker-picker-wrapper">
+                <div class="sticker-picker-controls">
+                    <span class="sticker-picker-label">Sticker tanlang:</span>
+                    <button type="button" class="btn-clear-sticker" id="btnClearSticker">
+                        <i class="fa-solid fa-xmark"></i> Tozalash
+                    </button>
+                </div>
+                <div class="sticker-picker" id="stickerPicker" role="radiogroup" aria-label="Sticker picker">
+                    <button type="button" class="sticker-btn sticker-btn--active" data-sticker="🏥">🏥</button>
+                    <button type="button" class="sticker-btn" data-sticker="💊">💊</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩺">🩺</button>
+                    <button type="button" class="sticker-btn" data-sticker="💉">💉</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧪">🧪</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩹">🩹</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧬">🧬</button>
+                    <button type="button" class="sticker-btn" data-sticker="🚑">🚑</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌡️">🌡️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩸">🩸</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧼">🧼</button>
+                    <button type="button" class="sticker-btn" data-sticker="⚕️">⚕️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🏬">🏬</button>
+                    <button type="button" class="sticker-btn" data-sticker="🛒">🛒</button>
+                    <button type="button" class="sticker-btn" data-sticker="📦">📦</button>
+                    <button type="button" class="sticker-btn" data-sticker="⚡">⚡</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌟">🌟</button>
+                    <button type="button" class="sticker-btn" data-sticker="❤️">❤️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌿">🌿</button>
+                    <button type="button" class="sticker-btn" data-sticker="🛡️">🛡️</button>
+                    <button type="button" class="sticker-btn" data-sticker="✨">✨</button>
+                    <button type="button" class="sticker-btn" data-sticker="🎯">🎯</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accent Color -->
+    <div class="card card--customize" id="accentColorCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-droplet"></i> Asosiy rang</h2>
+        </div>
+        <div class="card__body">
+            <div class="color-palette" id="colorPalette">
+                <label class="color-swatch" style="--swatch-color:#6a00f4;" title="Binafsha">
+                    <input type="radio" name="accent" value="#6a00f4" checked>
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color:#0066ff;" title="Ko'k">
+                    <input type="radio" name="accent" value="#0066ff">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color:#00b894;" title="Yashil">
+                    <input type="radio" name="accent" value="#00b894">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color:#e84393;" title="Pushti">
+                    <input type="radio" name="accent" value="#e84393">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color:#fd7e14;" title="To'q sariq">
+                    <input type="radio" name="accent" value="#fd7e14">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color:#e74c3c;" title="Qizil">
+                    <input type="radio" name="accent" value="#e74c3c">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+            </div>
+            <div class="custom-color-input">
+                <label for="customAccent" class="form-label">Maxsus rang:</label>
+                <input type="color" id="customAccent" name="custom_accent" value="#6a00f4" class="form-color-picker">
+            </div>
+        </div>
+    </div>
+
+    <!-- Save -->
+    <div class="card card--customize card--save" id="customizeSaveCard">
+        <div class="card__body">
+            <p class="save-hint"><i class="fa-solid fa-circle-info"></i> O'zgarishlar faqat "Saqlash" bosilganda qo'llaniladi.</p>
+            <button type="button" class="btn btn--primary btn--block" id="btnSaveCustomize">
+                <i class="fa-solid fa-floppy-disk"></i> Sozlamalarni saqlash
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

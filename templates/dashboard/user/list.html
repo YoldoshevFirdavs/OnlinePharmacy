@@ -1,0 +1,78 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Foydalanuvchilar{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-users"></i>
+            Foydalanuvchilar
+        </h1>
+        <p class="page-subtitle">Barcha foydalanuvchilarni boshqarish</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:user_create' %}" class="btn btn--primary">
+            <i class="fa-solid fa-plus"></i>
+            Foydalanuvchi qo'shish
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Foydalanuvchi nomi</th>
+<th>To'liq ism</th>
+<th>Email</th>
+<th>Rol</th>
+<th>Faol</th>
+<th>Ro'yxatdan o'tgan</th>
+<th>Amallar</th>
+{% endblock %}
+
+{% block table_body %}
+{% if users %}
+    {% for u in users %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>
+            <div class="user-cell">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ u.full_name|default:u.email|default:u.phone_number|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ u.get_full_name|default:"—" }}</td>
+        <td>{{ u.email|default:"—" }}</td>
+        <td>
+            <span class="tag tag--{% if u.is_staff %}primary{% elif u.is_superuser %}warning{% else %}info{% endif %}">
+                {% if u.is_superuser %}Superadmin{% elif u.is_staff %}Admin{% else %}Foydalanuvchi{% endif %}
+            </span>
+        </td>
+        <td>
+            {% if u.is_active %}
+            <span class="tag tag--success">Faol</span>
+            {% else %}
+            <span class="tag tag--error">Nofaol</span>
+            {% endif %}
+        </td>
+        <td>{{ u.date_joined|date:"d.m.Y" }}</td>
+        <td>
+            <div class="table-actions">
+                <a href="{% url 'dashboard:user_edit' u.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="8">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Foydalanuvchilar topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}

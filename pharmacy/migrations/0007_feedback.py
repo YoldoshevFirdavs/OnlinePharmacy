@@ -6,26 +6,70 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pharmacy', '0006_review_is_ai_checked'),
+        ("pharmacy", "0006_review_is_ai_checked"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Feedback',
+            name="Feedback",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('full_name', models.CharField(max_length=255, verbose_name='Foydalanuvchi ismi')),
-                ('phone_number', models.CharField(max_length=20, verbose_name='Telefon raqami')),
-                ('email', models.EmailField(blank=True, max_length=254, null=True, verbose_name='Email manzili')),
-                ('subject', models.CharField(choices=[('order', 'Buyurtma haqida'), ('product', 'Mahsulot haqida'), ('complaint', 'Shikoyat'), ('suggestion', 'Taklif'), ('other', 'Boshqa')], default='other', max_length=20, verbose_name='Mavzu')),
-                ('message', models.TextField(verbose_name='Xabar matni')),
-                ('is_replied', models.BooleanField(default=False, verbose_name='Javob berildi')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Yuborilgan vaqt')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "full_name",
+                    models.CharField(max_length=255, verbose_name="Foydalanuvchi ismi"),
+                ),
+                (
+                    "phone_number",
+                    models.CharField(max_length=20, verbose_name="Telefon raqami"),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        blank=True,
+                        max_length=254,
+                        null=True,
+                        verbose_name="Email manzili",
+                    ),
+                ),
+                (
+                    "subject",
+                    models.CharField(
+                        choices=[
+                            ("order", "Buyurtma haqida"),
+                            ("product", "Mahsulot haqida"),
+                            ("complaint", "Shikoyat"),
+                            ("suggestion", "Taklif"),
+                            ("other", "Boshqa"),
+                        ],
+                        default="other",
+                        max_length=20,
+                        verbose_name="Mavzu",
+                    ),
+                ),
+                ("message", models.TextField(verbose_name="Xabar matni")),
+                (
+                    "is_replied",
+                    models.BooleanField(default=False, verbose_name="Javob berildi"),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Yuborilgan vaqt"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fikr-mulohaza',
-                'verbose_name_plural': 'Fikr-mulohazalar',
-                'ordering': ['-created_at'],
+                "verbose_name": "Fikr-mulohaza",
+                "verbose_name_plural": "Fikr-mulohazalar",
+                "ordering": ["-created_at"],
             },
         ),
     ]

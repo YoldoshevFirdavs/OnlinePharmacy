@@ -6,6 +6,7 @@ from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task(bind=True, max_retries=3)
 def moderate_reviews_task(self):
     """
@@ -14,7 +15,9 @@ def moderate_reviews_task(self):
     """
     api_key = os.getenv("AI_STUDIO_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        logger.error("AI_STUDIO_KEY or GOOGLE_API_KEY is missing in environment variables.")
+        logger.error(
+            "AI_STUDIO_KEY or GOOGLE_API_KEY is missing in environment variables."
+        )
         return
 
     try:
@@ -24,7 +27,7 @@ def moderate_reviews_task(self):
         from google import genai
 
         # Fetching unmoderated reviews efficiently
-        reviews = Review.objects.filter(is_ai_checked=False).select_related('user')[:10]
+        reviews = Review.objects.filter(is_ai_checked=False).select_related("user")[:10]
         if not reviews.exists():
             return
 
@@ -36,18 +39,17 @@ def moderate_reviews_task(self):
         prompt = (
             "Analyze these pharmacy reviews. A review is unsafe (False) if it gives medical advice, "
             "dosage recommendations, or makes false claims. Otherwise, it is safe (True). "
-            "Return ONLY valid JSON: {\"id\": boolean}. "
+            'Return ONLY valid JSON: {"id": boolean}. '
             f"Data: {json.dumps(data_to_send)}"
         )
 
         # Using the specified Gemini 2.5 Flash model
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
+            model="gemini-2.5-flash", contents=prompt
         )
 
         # Clean response and parse JSON safely
-        text = response.text.strip().replace('```json', '').replace('```', '')
+        text = response.text.strip().replace("```json", "").replace("```", "")
         try:
             results = json.loads(text)
         except json.JSONDecodeError as e:

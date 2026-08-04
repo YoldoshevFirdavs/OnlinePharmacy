@@ -1,6 +1,7 @@
 # Environment files
 .env
 .env.local
+.env.prod
 
 # Python
 __pycache__/
@@ -12,11 +13,23 @@ venv/
 venvs*/
 \.venv
 .venv310
+
 # Django
 media/
 staticfiles/
-config/email_config.py # Added this line
+mediafiles/
+
 
 # IDEs
 .idea/
 .vscode/
+
+
+*.log
+*.bak
+*.crt
+*.pem
+*.key
+*.zip
+*.tar
+*.gz

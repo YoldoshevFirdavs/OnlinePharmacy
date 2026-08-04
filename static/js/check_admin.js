@@ -110,7 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data) return; // Blocked or other non-JSON response handled
 
             if (data.ok && data.next) {
-                window.location.href = data.next; // Redirect to admin dashboard
+                const ALLOWED = ['/dashboard/admin/'];
+                const safeNext = ALLOWED.includes(data.next) ? data.next : '/dashboard/admin/';
+                window.location.href = safeNext; // Redirect to admin dashboard
             } else {
                 displayError(data.message || 'Login confirmation failed.');
             }

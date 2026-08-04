@@ -9,39 +9,65 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0015_alter_customuser_email'),
+        ("users", "0015_alter_customuser_email"),
     ]
 
     operations = [
         migrations.AlterModelManagers(
-            name='customuser',
+            name="customuser",
             managers=[
-                ('objects', users.models.CustomUserManager()),
+                ("objects", users.models.CustomUserManager()),
             ],
         ),
         migrations.CreateModel(
-            name='AdminLoginAttempt',
+            name="AdminLoginAttempt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fingerprint', models.CharField(db_index=True, max_length=128)),
-                ('ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('attempts', models.IntegerField(default=0)),
-                ('last_attempt', models.DateTimeField(auto_now=True)),
-                ('blocked_until', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("fingerprint", models.CharField(db_index=True, max_length=128)),
+                ("ip", models.GenericIPAddressField(blank=True, null=True)),
+                ("attempts", models.IntegerField(default=0)),
+                ("last_attempt", models.DateTimeField(auto_now=True)),
+                ("blocked_until", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'indexes': [models.Index(fields=['fingerprint'], name='users_admin_fingerp_3e3242_idx')],
+                "indexes": [
+                    models.Index(
+                        fields=["fingerprint"], name="users_admin_fingerp_3e3242_idx"
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='AdminLoginToken',
+            name="AdminLoginToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(max_length=64, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('used', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.CharField(max_length=64, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                ("used", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -1,283 +1,167 @@
-# Online Pharmacy - E-Commerce Platform
+# OnlinePharmacy - To'liq funksiyali elektron dorixona platformasi
 
-Pharmaceutical e-commerce platform built with Django, PostgreSQL, and Docker.
+Ushbu loyiha Django, Django REST Framework, PostgreSQL va Docker kabi zamonaviy texnologiyalar asosida qurilgan to'liq funksiyali elektron tijorat platformasidir. Tizim foydalanuvchilarni ro'yxatdan o'tkazish, mahsulotlar katalogini boshqarish, savatcha, buyurtmalar va to'lovlarni amalga oshirish imkoniyatlarini o'z ichiga oladi.
 
-## Features
-- ✓ User authentication (JWT + OTP)
-- ✓ Product catalog with search & filters
-- ✓ Shopping cart & orders
-- ✓ Admin analytics dashboard
-- ✓ Celery background tasks (email)
-- ✓ Redis caching
-- ✓ Docker containerization
-- ✓ AWS EC2 deployment ready
+Platforma bir nechta foydalanuvchi rollarini (Mijoz, Sotuvchi, Yetkazib beruvchi, Admin) qo'llab-quvvatlaydi va har bir rol uchun maxsus funksionallikni taqdim etadi.
 
-## Tech Stack
+## Asosiy xususiyatlar
+
+- **Ko'p rolli arxitektura:**
+  - **Mijoz:** Mahsulotlarni ko'rish, qidirish, savatchaga qo'shish va buyurtma berish.
+  - **Sotuvchi:** O'z mahsulotlarini boshqarish, buyurtmalarni ko'rish va statistikasini tahlil qilish.
+  - **Yetkazib beruvchi (Deliverer):** O'ziga tayinlangan buyurtmalarni ko'rish, statusini yangilash va yetkazib berish jarayonini boshqarish.
+  - **Admin:** Barcha tizimni to'liq boshqarish, foydalanuvchilar, mahsulotlar, buyurtmalar va faoliyat tarixini kuzatish.
+- **Xavfsiz autentifikatsiya:**
+  - JWT (JSON Web Tokens) orqali API xavfsizligi.
+  - Email yoki Telegram orqali bir martalik parol (OTP) yuborish orqali parolsiz tizimga kirish.
+- **Tahliliy Boshqaruv Paneli (Dashboard):**
+  - Sotuvlar, foydalanuvchilar, mahsulotlar va buyurtmalar bo'yicha real vaqtda yangilanadigan statistik ma'lumotlar.
+  - Interaktiv grafiklar va jadvallar.
+- **Asinxron vazifalar:**
+  - `Celery` va `Redis` yordamida email xabarlari va boshqa resurs talab qiladigan vazifalarni fonga o'tkazish.
+- **Kesh mexanizmi:**
+  - `Redis` yordamida tez-tez so'raladigan ma'lumotlarni (masalan, mahsulotlar ro'yxati) keshda saqlash orqali tizim tezligini oshirish.
+- **To'liq Docker bilan integratsiya:**
+  - `docker-compose` yordamida bir buyruq bilan butun loyihani (web-server, ma'lumotlar bazasi, Redis, Celery) ishga tushirish.
+- **Production'ga tayyor (Production-Ready):**
+  - `Nginx` (reverse proxy va statik fayllar uchun) va `Gunicorn` (WSGI server) bilan production muhitida ishlash uchun to'liq sozlangan.
+
+## Texnologiyalar stekasi
+
 - **Backend**: Django 5.1, Django REST Framework
-- **Database**: PostgreSQL 15
-- **Cache**: Redis 7
-- **Task Queue**: Celery with Redis broker
-- **API Docs**: Swagger/OpenAPI
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Ma'lumotlar bazasi**: PostgreSQL 15
+- **Kesh va Xabar navbati (Broker)**: Redis 7
+- **Fon vazifalari**: Celery
+- **API Hujjatlari**: drf-yasg (Swagger/OpenAPI)
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript (Dashboard uchun)
 - **Deployment**: Docker, Nginx, Gunicorn
-- **Cloud**: AWS EC2 (Ubuntu 22.04)
 
-## Project Structure
+## Loyiha tuzilishi
+
+Loyiha modullarga ajratilgan arxitekturaga asoslangan bo'lib, har bir ilova o'zining aniq vazifasini bajaradi:
+
 ```
 online-pharmacy/
-├── config/              # Django settings
-│   ├── settings.py      # Development
-│   ├── settings_prod.py # Production
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
-├── users/               # Authentication
-│   ├── models.py        # CustomUser
-│   ├── views.py         # Registration, Login
-│   ├── otp_service.py   # OTP logic
-│   └── tests.py
-├── pharmacy/            # Products
-│   ├── models.py        # Product, Category
-│   ├── views.py         # Product API
-│   └── serializers.py
-├── orders/              # Shopping
-│   ├── models.py        # Order, OrderItem
-│   └── views.py         # Order API
-├── frontend/            # UI
-│   ├── html/            # HTML templates
-│   ├── css/             # Stylesheets
-│   └── js/              # JavaScript
-├── docker-compose.yml   # Development
-├── docker-compose.prod.yml # Production
-├── Dockerfile
-├── nginx.conf
-├── requirements.txt
-└── manage.py
+├── config/              # Django loyihasining asosiy sozlamalari, URL'lar va ASGI/WSGI.
+├── dashboard/           # Admin paneli uchun frontend va backend logikasi.
+├── orders/              # Buyurtmalar, savatcha va ular bilan bog'liq amallar.
+├── pharmacy/            # Mahsulotlar, kategoriyalar, sharhlar va boshqa farmatsevtika logikasi.
+├── security/            # Xavfsizlikka oid modullar (AuditLog, middleware, ruxsatlar).
+├── static/              # Global statik fayllar (CSS, JS, rasm).
+├── templates/           # Global HTML andozalar.
+├── telegram_bot/        # Telegram bot logikasi va webhook'lar.
+├── users/               # Foydalanuvchilar, autentifikatsiya, OTP va profillar.
+├── docker-compose.yml   # Development muhiti uchun Docker Compose fayli.
+├── Dockerfile           # Asosiy Django ilovasi uchun Dockerfile.
+├── requirements.txt     # Python kutubxonalari ro'yxati.
+└── manage.py            # Django boshqaruv skripti.
 ```
 
-## Quick Start
+## Tezkor ishga tushirish (Development)
 
-### Development
+1.  **Repozitoriyni kompyuterga yuklab oling:**
+    ```bash
+    git clone https://github.com/yourusername/online-pharmacy.git
+    cd online-pharmacy
+    ```
+
+2.  **`.env` faylini yarating:**
+    `.env.example` faylidan nusxa oling va ichidagi o'zgaruvchilarni o'zingizning sozlamalaringiz bilan to'ldiring. Bu faylda maxfiy kalitlar, ma'lumotlar bazasi parollari va boshqa muhim sozlamalar saqlanadi.
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Docker konteynerlarini ishga tushiring:**
+    Bu buyruq `Dockerfile` va `docker-compose.yml` fayllari asosida kerakli `image`larni quradi va barcha servislarni (web, db, redis, celery) ishga tushiradi.
+    ```bash
+    docker-compose up -d --build
+    ```
+
+4.  **Ma'lumotlar bazasi migratsiyalarini bajaring:**
+    Bu buyruq `web` konteyneri ichida `manage.py migrate` buyrug'ini ishga tushirib, ma'lumotlar bazasi jadvallarini yaratadi.
+    ```bash
+    docker-compose exec web python manage.py migrate
+    ```
+
+5.  **Superfoydalanuvchi yarating:**
+    Admin paneliga kirish uchun superuser yarating.
+    ```bash
+    docker-compose exec web python manage.py createsuperuser
+    ```
+
+6.  **Sayt va API'ga kiring:**
+    -   **Asosiy sayt:** `http://localhost:8000`
+    -   **Admin paneli:** `http://localhost:8000/admin/`
+    -   **API hujjatlari (Swagger):** `http://localhost:8000/api/v1/swagger/`
+
+## Xavfsizlik (Security)
+
+Loyihada zamonaviy veb-ilovalar uchun zarur bo'lgan ko'plab xavfsizlik choralari ko'rilgan va tahlil qilingan:
+
+- **SQL Injection:** Barcha ma'lumotlar bazasi so'rovlari Django ORM orqali amalga oshiriladi. Bu parametrlarni avtomatik ravishda zararsizlantirib, SQL in'ektsiya hujumlaridan yuqori darajada himoya qiladi. Loyihada xom SQL so'rovlari (`.raw()`, `.extra()`) ishlatilmagan.
+
+- **Cross-Site Scripting (XSS):** Django'ning standart andoza tizimi (`auto-escaping`) barcha o'zgaruvchilarni HTML'ga chiqarishdan oldin avtomatik ravishda zararsizlantiradi. `|safe` filtri ishlatilmaganligi sababli, foydalanuvchi kiritgan zararli skriptlarning ishga tushib ketish xavfi minimal darajada.
+
+- **CSRF (Cross-Site Request Forgery):** Django'ning standart `CsrfViewMiddleware` himoyasi barcha `POST`, `PUT`, `DELETE` so'rovlari uchun yoqilgan. Bu so'rovlarning faqat sizning saytingizdan kelganiga ishonch hosil qiladi.
+
+- **Fayl yuklash xavfsizligi:** Foydalanuvchi tomonidan yuklanadigan avatar fayllari `Pillow` kutubxonasi yordamida haqiqiy rasm ekanligi tekshiriladi. Bu faqat fayl kengaytmasiga emas, balki uning ichki tarkibiga asoslanadi va zararli skriptlarni rasm niqobi ostida yuklash xavfini kamaytiradi.
+
+- **Ruxsatlar (Permissions):** API endpoint'lar `IsAuthenticated`, `IsAdminUser`, `IsOwnerOrAdmin` kabi qat'iy ruxsatlar bilan himoyalangan. Bu har bir foydalanuvchi faqat o'ziga tegishli ma'lumotlarni ko'ra olishi va o'zgartira olishini ta'minlaydi. Masalan, obunachilar ro'yxati faqat adminlarga ko'rinadi.
+
+- **Parol xavfsizligi:** Parollar standart `PBKDF2` algoritmi yordamida xeshlangan holda saqlanadi. `AUTH_PASSWORD_VALIDATORS` orqali parollarning murakkabligi (uzunligi, sonlar, belgilar ishtiroki) tekshiriladi.
+
+- **Brute-Force himoyasi:** Noto'g'ri autentifikatsiya urinishlari Redis yordamida sanaladi. Ma'lum bir chegaradan oshganda (masalan, 10 daqiqada 5 ta xato), foydalanuvchi akkaunti vaqtincha bloklanadi.
+
+- **Xavfsizlik sarlavhalari (Security Headers):** Har bir HTTP javobga `Strict-Transport-Security` (HSTS), `X-Content-Type-Options`, `X-Frame-Options` kabi qo'shimcha xavfsizlik sarlavhalari qo'shiladi. Bu "clickjacking" va "MIME-sniffing" kabi brauzerga oid hujumlardan himoya qiladi.
+
+## Testlash
+
+Loyiha uchun yozilgan testlarni ishga tushirish:
 ```bash
-# Clone repo
-git clone https://github.com/yourusername/online-pharmacy.git
-cd online-pharmacy
+# Barcha ilovalar uchun testlarni ishga tushirish
+docker-compose exec web python manage.py test
 
-# Create .env
-cp .env.example .env
-
-# Start containers
-docker-compose up -d
-
-# Run migrations
-docker-compose exec web python manage.py migrate
-
-# Create superuser
-docker-compose exec web python manage.py createsuperuser
-
-# Access app
-http://localhost:8000
-http://localhost:8000/api/v1/  (Swagger)
+# Faqat 'users' ilovasi uchun testlarni ishga tushirish
+docker-compose exec web python manage.py test users
 ```
 
-### Production (AWS EC2)
-See [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)
+## Muhit o'zgaruvchilari (`.env` fayli)
 
-## API Endpoints
+Loyiha sozlamalari uchun `.env` faylida quyidagi o'zgaruvchilarni o'rnatish kerak:
 
-### Authentication
-```
-POST   /api/v1/users/register/       - Register user
-POST   /api/v1/users/login/          - Login with credentials
-POST   /api/v1/users/verify-otp/     - Verify OTP code
-POST   /api/v1/token/refresh/        - Refresh JWT token
-GET    /api/v1/users/me/             - Get current user
-PATCH  /api/v1/users/me/             - Update profile
-```
-
-### Products
-```
-GET    /api/v1/pharmacy/products/    - List products
-GET    /api/v1/pharmacy/products/{id}/ - Get product detail
-GET    /api/v1/pharmacy/categories/  - List categories
-```
-
-### Orders
-```
-POST   /api/v1/orders/create/        - Create order
-GET    /api/v1/orders/               - List user's orders
-GET    /api/v1/orders/{id}/          - Get order detail
-PATCH  /api/v1/orders/{id}/          - Update order status
-```
-
-## Environment Variables (.env)
-```
-# Django
-SECRET_KEY=your-secret-key
+```env
+# Django sozlamalari
+SECRET_KEY=your-super-secret-key-for-production
 DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,localhost
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,localhost
 
-# Database
-DB_NAME=pharmacy
-DB_USER=postgres
-DB_PASSWORD=strong-password
+# Ma'lumotlar bazasi (PostgreSQL)
+DB_NAME=pharmacy_db
+DB_USER=pharmacy_admin
+DB_PASSWORD=your-strong-database-password
 DB_HOST=db
 DB_PORT=5432
 
 # Redis
-REDIS_URL=redis://redis:6379
+REDIS_URL=redis://redis:6379/0
 
-# Email
+# Celery
+CELERY_BROKER_URL=redis://redis:6379/1
+CELERY_RESULT_BACKEND=redis://redis:6379/1
+
+# Email (Gmail uchun misol)
 EMAIL_HOST=smtp.gmail.com
-EMAIL_HOST_USER=your@gmail.com
-EMAIL_HOST_PASSWORD=app-password
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-google-app-password
 
 # JWT
-JWT_SECRET=your-jwt-secret
+JWT_SECRET=another-super-secret-key-for-jwt
 
 # CORS
-CORS_ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
+CORS_ALLOWED_ORIGINS=https://yourfrontenddomain.com,http://localhost:3000
 ```
-
-## Database Models
-
-### Users
-```python
-- id (UUID)
-- email (unique)
-- phone (optional)
-- password (hashed)
-- full_name
-- is_staff
-- is_active
-- created_at
-```
-
-### Products
-```python
-- id
-- name
-- description
-- price
-- stock
-- category (FK)
-- image
-- created_at
-```
-
-### Orders
-```python
-- id
-- user (FK)
-- items (M2M)
-- total_price
-- status (pending/confirmed/delivered)
-- created_at
-```
-
-## Testing
-```bash
-# Run all tests
-docker-compose exec web python manage.py test
-
-# Run specific app
-docker-compose exec web python manage.py test users
-
-# With coverage
-docker-compose exec web coverage run --source='.' manage.py test
-docker-compose exec web coverage report
-```
-
-## Deployment Checklist
-- [ ] SECRET_KEY changed
-- [ ] DEBUG=False
-- [ ] ALLOWED_HOSTS configured
-- [ ] Database created & migrated
-- [ ] Superuser created
-- [ ] Static files collected
-- [ ] Email configured
-- [ ] Celery workers running
-- [ ] Redis cache working
-- [ ] SSL certificate installed
-- [ ] Nginx proxy configured
-
-## Monitoring
-```bash
-# View logs
-docker-compose -f docker-compose.prod.yml logs -f web
-
-# Check container status
-docker-compose -f docker-compose.prod.yml ps
-
-# Database backups
-docker-compose exec db pg_dump -U postgres pharmacy > backup.sql
-```
-
-## Common Issues
-
-### Database connection error
-```bash
-# Check if db container is healthy
-docker-compose logs db
-# Ensure DB_HOST=db in .env
-```
-
-### Static files not loading
-```bash
-docker-compose exec web python manage.py collectstatic --noinput
-```
-
-### Celery not sending emails
-```bash
-# Check Redis connection
-docker-compose logs celery
-# Verify EMAIL settings in .env
-```
-
-### CORS errors
-```bash
-# Update CORS_ALLOWED_ORIGINS in .env
-CORS_ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
-```
-
-## Performance Tips
-- Database indexing on frequently queried fields
-- Redis caching for product lists
-- Celery for email sending (async)
-- Nginx gzip compression
-- CSS/JS minification
-- Database connection pooling
-
-## Security
-- JWT token expiry: 1 hour
-- Refresh token expiry: 7 days
-- OTP expiry: 10 minutes
-- Password hashing: PBKDF2
-- SQL injection protection: ORM parameterized queries
-- CSRF protection: Django middleware
-- XSS protection: Django template escaping
-- Rate limiting: 100 req/hour (anon), 1000 req/hour (user)
-
-## Contributing
-1. Fork the repo
-2. Create feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open Pull Request
-
-## License
-MIT License - See LICENSE.md
-
-## Contact
-- Author: Yoldashev Firdavs
-- Email: firdavs@example.com
-- GitHub: @firdavs_yoldashev
-
-## Acknowledgments
-- Mentor: Komiljon Hamidjonov
-- Django & DRF community
-- Swagger for API documentation
 
 ---
-**Last Updated**: June 2026
-**Version**: 1.0.0 (Production)
+**Oxirgi yangilanish**: 2026-08-03

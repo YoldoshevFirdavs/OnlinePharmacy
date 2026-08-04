@@ -1,0 +1,111 @@
+{% extends "delivery/base.html" %}
+{% load static %}
+
+{% block page_name %}dashboard{% endblock %}
+{% block page_title %}Asosiy{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="deliverer-page-header">
+    <h2 class="deliverer-page-header__title">
+        <i class="fas fa-home"></i>
+        Asosiy
+    </h2>
+    <div class="deliverer-page-header__actions">
+        <span class="deliverer-page-header__subtitle">Hozirgi vaqtda: {{ current_time|date:"H:i" }}</span>
+    </div>
+</div>
+
+<!-- Main Content Card -->
+<div class="deliverer-card">
+    <div class="deliverer-card__header">
+        <h3 class="deliverer-card__header-title">Xush kelibsiz, {{ user.get_full_name|default:user.email }}</h3>
+    </div>
+    <div class="deliverer-card__body">
+        <p>Bu yerda yetkazib beruvchi uchun umumiy ma'lumotlar ko'rsatiladi.</p>
+        <br>
+        <p>Sizning buyurtmalarigiz, xarita holati va sozlamalaringizni boshqarish mumkin.</p>
+    </div>
+</div>
+
+<!-- Quick Actions Card -->
+<div class="deliverer-card" style="margin-top: 20px;">
+    <div class="deliverer-card__header">
+        <h3 class="deliverer-card__header-title">Tez ma'lumot</h3>
+    </div>
+    <div class="deliverer-card__body">
+        <div class="deliverer-stats-grid">
+            <div class="deliverer-stat-item">
+                <i class="fas fa-clipboard-list deliverer-stat-icon"></i>
+                <div class="deliverer-stat-info">
+                    <span class="deliverer-stat-value" id="pendingOrders">0</span>
+                    <span class="deliverer-stat-label">Kutilayotgan buyurtmalar</span>
+                </div>
+            </div>
+            <div class="deliverer-stat-item">
+                <i class="fas fa-check-circle deliverer-stat-icon" style="color: #28a745;"></i>
+                <div class="deliverer-stat-info">
+                    <span class="deliverer-stat-value" id="completedOrders">0</span>
+                    <span class="deliverer-stat-label">Yetkazib berilgan</span>
+                </div>
+            </div>
+            <div class="deliverer-stat-item">
+                <i class="fas fa-map-marked-alt deliverer-stat-icon" style="color: #6a0dad;"></i>
+                <div class="deliverer-stat-info">
+                    <span class="deliverer-stat-value" id="activeDeliveries">0</span>
+                    <span class="deliverer-stat-label">Faol yetkazishlar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.deliverer-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.deliverer-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--dashboard-stat-item-bg, #ecf0f1);
+    border-radius: var(--radius-sm, 8px);
+}
+
+.deliverer-stat-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.deliverer-stat-info {
+    flex: 1;
+}
+
+.deliverer-stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dashboard-stat-color, #3498db);
+}
+
+.deliverer-stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--dashboard-muted-text, #555);
+}
+</style>
+
+<script>
+// Mock data - in production, fetch from API
+document.addEventListener('DOMContentLoaded', function() {
+    // In real app, fetch these from backend API
+    document.getElementById('pendingOrders').textContent = '0';
+    document.getElementById('completedOrders').textContent = '0';
+    document.getElementById('activeDeliveries').textContent = '0';
+});
+</script>
+{% endblock %}

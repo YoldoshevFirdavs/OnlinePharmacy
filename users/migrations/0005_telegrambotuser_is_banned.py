@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_telegrambotuser_last_status'),
+        ("users", "0004_telegrambotuser_last_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='telegrambotuser',
-            name='is_banned',
+            model_name="telegrambotuser",
+            name="is_banned",
             field=models.BooleanField(default=False),
         ),
     ]

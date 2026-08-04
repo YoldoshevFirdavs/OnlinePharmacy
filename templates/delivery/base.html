@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yetkazib Beruvchi Dashboard</title>
+    
+    <!-- Variables CSS -->
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    
+    <!-- Dashboard CSS files -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/deliverer.css' %}">
+    
+    <!-- Delivery specific CSS -->
+    <link rel="stylesheet" href="{% static 'delivery/header.css' %}">
+    <link rel="stylesheet" href="{% static 'delivery/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'delivery/delivery.css' %}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/all.min.css' %}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --delivery-sidebar-width: 260px;
+            --delivery-topbar-height: 64px;
+        }
+    </style>
+</head>
+<body class="deliverer-body" data-page="{% block page_name %}dashboard{% endblock %}">
+    
+    <!-- Mobile Overlay -->
+    <div id="delivererOverlay" class="deliverer-overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside id="delivererSidebar" class="deliverer-sidebar" role="navigation" aria-label="Delivery sidebar">
+        <!-- Sidebar Brand -->
+        <a href="{% url 'dashboard:deliverer_dashboard' %}" class="deliverer-sidebar__brand">
+            <i class="fas fa-bicycle deliverer-sidebar__brand-icon"></i>
+            <span class="deliverer-sidebar__brand-text">Yetkazib Beruvchi</span>
+        </a>
+        
+        <!-- Navigation -->
+        <nav class="deliverer-nav">
+            <ul class="deliverer-nav__list">
+                <li class="deliverer-nav__item">
+                    <a href="{% url 'dashboard:delivery_map' %}" class="deliverer-nav__link{% if page_name == 'map' %} active{% endif %}">
+                        <i class="fas fa-map-marked-alt deliverer-nav__icon"></i>
+                        <span class="deliverer-nav__label">Xarita</span>
+                    </a>
+                </li>
+                <li class="deliverer-nav__item">
+                    <a href="{% url 'dashboard:delivery_settings' %}" class="deliverer-nav__link{% if page_name == 'settings' %} active{% endif %}">
+                        <i class="fas fa-cog deliverer-nav__icon"></i>
+                        <span class="deliverer-nav__label">Sozlamalar</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Sidebar Footer -->
+        <div class="deliverer-sidebar__footer">
+            <a href="{% url 'dashboard:logout_page' %}" class="deliverer-sidebar__footer-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="deliverer-sidebar__footer-text">Chiqish</span>
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Main Area -->
+    <main id="delivererMain" class="deliverer-main" role="main">
+        <!-- Topbar -->
+        <header class="deliverer-topbar">
+            <button id="delivererSidebarToggle" class="deliverer-topbar__toggle" aria-label="Sidebar toggle" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <h1 class="deliverer-topbar__title">
+                {% block page_title %}Yetkazib Beruvchi Dashboard{% endblock %}
+            </h1>
+            
+            <div class="deliverer-topbar__actions">
+                <!-- Profile Dropdown -->
+                <div class="header-right">
+                    <button id="delivererTopbarUser" class="header-right-btn" aria-expanded="false" aria-controls="delivererTopbarDropdown">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="deliverer-topbar__username">{{ user.get_full_name|default:user.email }}</span>
+                    </button>
+                    
+                    <div id="delivererTopbarDropdown" class="deliverer-topbar__dropdown" role="menu">
+                        <a href="{% url 'dashboard:delivery_settings' %}" class="deliverer-topbar__dropdown-item" role="menuitem">
+                            <i class="fas fa-user"></i>
+                            <span>Profil</span>
+                        </a>
+                        <a href="{% url 'dashboard:delivery_settings' %}" class="deliverer-topbar__dropdown-item" role="menuitem">
+                            <i class="fas fa-cog"></i>
+                            <span>Sozlamalar</span>
+                        </a>
+                        <div class="deliverer-topbar__dropdown-divider"></div>
+                        <a href="{% url 'dashboard:logout_page' %}" class="deliverer-topbar__dropdown-item deliverer-topbar__dropdown-item--danger" role="menuitem">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Chiqish</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content -->
+        <div class="deliverer-content">
+            {% block messages %}
+                {% if messages %}
+                <div class="deliverer-messages">
+                    {% for message in messages %}
+                    <div class="deliverer-alert deliverer-alert--{{ message.tags }}">
+                        <i class="fas fa-{{ message.tags|yesno:'check-circle,exclamation-circle,info-circle,exclamation-triangle' }}"></i>
+                        <span>{{ message }}</span>
+                        <button class="deliverer-alert__close" aria-label="Close alert">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endblock %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Scripts -->
+    <script src="{% static 'dashboard/js/deliverer.js' %}"></script>
+    <script src="{% static 'delivery/delivery.js' %}"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

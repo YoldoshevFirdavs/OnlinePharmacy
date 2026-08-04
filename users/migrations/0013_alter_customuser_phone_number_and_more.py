@@ -7,18 +7,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0012_deliverydriver_stripe_account_id'),
+        ("users", "0012_deliverydriver_stripe_account_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='phone_number',
-            field=models.CharField(blank=True, max_length=32, null=True, unique=True, validators=[django.core.validators.RegexValidator(message="Phone number must be entered in the format: '+998901234567'. Up to 32 digits allowed.", regex='^\\+?\\d{7,32}$')]),
+            model_name="customuser",
+            name="phone_number",
+            field=models.CharField(
+                blank=True,
+                max_length=32,
+                null=True,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="Phone number must be entered in the format: '+998901234567'. Up to 32 digits allowed.",
+                        regex="^\\+?\\d{7,32}$",
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='deliverydriver',
-            name='phone',
-            field=models.CharField(help_text='Driver phone number in international format', max_length=32, validators=[django.core.validators.RegexValidator(message="Phone number must be entered in the format: '+998901234567'. Up to 32 digits allowed.", regex='^\\+?\\d{7,32}$')]),
+            model_name="deliverydriver",
+            name="phone",
+            field=models.CharField(
+                help_text="Driver phone number in international format",
+                max_length=32,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="Phone number must be entered in the format: '+998901234567'. Up to 32 digits allowed.",
+                        regex="^\\+?\\d{7,32}$",
+                    )
+                ],
+            ),
         ),
     ]

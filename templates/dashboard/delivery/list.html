@@ -1,0 +1,52 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Yetkazib berish{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Mijoz</th>
+<th>Manzil</th>
+<th>Jami summa</th>
+<th>Status</th>
+<th>Yaratilgan</th>
+<th>Amallar</th>
+{% endblock %}
+
+{% block table_body %}
+{% if orders %}
+    {% for order in orders %}
+    <tr>
+        <td><strong>#{{ order.id }}</strong></td>
+        <td>
+            <div class="user-cell">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ order.address|default:"—" }}</td>
+        <td><strong>{{ order.total_price|default:"0" }} so'm</strong></td>
+        <td>
+            <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Accepted' %}info{% elif order.status == 'Assigned' %}warning{% else %}primary{% endif %}">
+                {{ order.status|default:"—" }}
+            </span>
+        </td>
+        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+        <td>
+            <div class="table-actions">
+                <a href="{% url 'dashboard:deliverer_order_update' order.pk %}" class="btn btn--sm btn--primary" title="Statusni yangilash">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="7">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Buyurtmalar topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}

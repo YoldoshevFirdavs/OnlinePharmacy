@@ -12,6 +12,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Pip-ni yangilaymiz va requirements o'rnatamiz
@@ -24,8 +25,5 @@ COPY . /app/
 
 # Portlarni ochamiz
 EXPOSE 8000
-
-RUN python manage.py collectstatic --noinput
-
-COPY certs/cert.pem /app/certs/cert.pem
-COPY certs/key.pem /app/certs/key.pem
+# NOTE: SSL certs are mounted via docker-compose volumes, not baked into the image.
+# Baking secrets into images is a security risk and breaks builds when certs are missing.

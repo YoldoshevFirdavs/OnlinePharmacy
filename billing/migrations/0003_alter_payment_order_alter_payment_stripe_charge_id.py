@@ -7,19 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('billing', '0002_initial'),
-        ('orders', '0001_initial'),
+        ("billing", "0002_initial"),
+        ("orders", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='orders.order'),
+            model_name="payment",
+            name="order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payments",
+                to="orders.order",
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='stripe_charge_id',
+            model_name="payment",
+            name="stripe_charge_id",
             field=models.CharField(max_length=70),
         ),
     ]

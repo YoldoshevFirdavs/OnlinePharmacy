@@ -1,94 +1,113 @@
 import os
 import sys
-import django
 import logging
+import secrets
+import random
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    CallbackContext,
+)
 from dotenv import load_dotenv
-
-# Django setup
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-django.setup()
-
-from users.otp_service import get_session_meta, create_otp_session, bind_session_to_user
-from users.models import CustomUser
+from pathlib import Path
+import time
+import requests
+from telegram.error import (
+    TelegramError,
+)
 
 load_dotenv()
-BOT_TOKEN = os.getenv("AUTH_BOT_TOKEN")
-WEB_APP_URL = os.getenv("WEB_APP_URL", "http://localhost:8000")
+
+THIS_FILE = Path(__file__).resolve()
+PROJECT_ROOT = THIS_FILE.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+os.chdir(str(PROJECT_ROOT))
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", os.getenv("DJANGO_SETTINGS_MODULE", "config.settings")
+)
+import django
+
+django.setup()
+
+from users.models import CustomUser
+from django.core.cache import cache
+from django.urls import reverse
+
+load_dotenv()
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+BOT_TOKEN = os.getenv("AUTH_BOT_TOKEN", "")
+if not BOT_TOKEN:
+    logger.critical(
+        "BOT_TOKEN not found in environment variables. Please set AUTH_BOT_TOKEN. Exiting."
+    )
+    sys.exit(1)
+
 
 def start_handler(update: Update, context: CallbackContext):
-    args = context.args
-    if not args:
-        update.message.reply_text("Iltimos, veb-saytdan kiring.")
-        return
+    telegram_id = update.message.from_user.id
 
-    session_id = args[0]
-    meta = get_session_meta(session_id)
-    
-    if not meta:
-        update.message.reply_text("Sessiya topilmadi yoki muddati tugagan.")
-        return
+    try:
+        user = CustomUser.objects.get(telegram_id=str(telegram_id))
+        otp = str(random.randint(100000, 999999))
 
-    context.user_data["session_id"] = session_id
-    context.user_data["identifier"] = meta["identifier"]
-    context.user_data["purpose"] = meta["purpose"] # Store purpose to differentiate flows
-
-    btn = [[KeyboardButton("📲 Telefon raqamni yuborish", request_contact=True)]]
-    update.message.reply_text("Tasdiqlash uchun telefon raqamingizni yuboring:", reply_markup=ReplyKeyboardMarkup(btn, one_time_keyboard=True, resize_keyboard=True))
-
-def contact_handler(update: Update, context: CallbackContext):
-    if not update.message.contact: return
-
-    session_id = context.user_data.get("session_id")
-    identifier = context.user_data.get("identifier")
-    purpose = context.user_data.get("purpose")
-
-    if not session_id or not identifier or not purpose:
-        update.message.reply_text("Xatolik! Veb-saytdan qayta boshlang.")
-        return
-
-    phone_number = update.message.contact.phone_number
-    if not phone_number.startswith('+'):
-        phone_number = '+' + phone_number
-
-    if purpose == "admin_telegram_login":
-        try:
-            admin_user = CustomUser.objects.get(phone_number=phone_number, is_staff=True)
-            # Create a new session for the check_admin.html redirect
-            new_session = create_otp_session(purpose="admin_check_redirect")
-            bind_session_to_user(new_session.session_id, admin_user.id, admin_user.email or admin_user.phone_number)
-            
-            deeplink = f"{WEB_APP_URL}/admin/check/?session_id={new_session.session_id}"
+        if user.is_staff:
+            session_id = secrets.token_urlsafe(16)
+            cache.set(f"admin_session:{session_id}", {'otp': otp, 'user_id': user.id}, timeout=300)
+            deeplink = f"{API_BASE_URL}{reverse('admin_check')}?session={session_id}&otp={otp}"
             update.message.reply_text(
-                f"Admin tasdiqlash uchun ushbu linkni bosing: {deeplink}\n\n"
-                f"Ushbu linkni brauzeringizda oching va ma'lumotlaringizni kiriting."
+                f"Salom, {user.full_name or 'Admin'}!\n\n"
+                f"Dashboardga kirish uchun quyidagi havolani bosing:\n\n"
+                f"{deeplink}\n\n"
+                f"⚠️ Bu havola 5 daqiqa davomida amal qiladi."
             )
-            logger.info(f"Admin deeplink sent for {phone_number} with session_id: {new_session.session_id}")
-        except CustomUser.DoesNotExist:
-            update.message.reply_text("Bu telefon raqam bilan admin topilmadi.")
-            logger.warning(f"Admin user not found for Telegram login with phone number: {phone_number}")
-        except Exception as e:
-            update.message.reply_text("Admin login jarayonida xatolik yuz berdi.")
-            logger.error(f"Error during admin Telegram login for {phone_number}: {e}")
-    else:
+        else:
+            cache.set(f"otp_code:{user.email or user.phone_number}", otp, timeout=300)
+            update.message.reply_text(f"Sizning kodingiz: {otp}")
 
-        update.message.reply_text("Bu funksiya hozirda faqat adminlar uchun ishlaydi.")
-        logger.info(f"Non-admin Telegram login attempt for {phone_number} with purpose {purpose}")
+    except CustomUser.DoesNotExist:
+        update.message.reply_text("Siz tizimda ro'yxatdan o'tmagansiz. Iltimos, avval ro'yxatdan o'ting.")
+    except Exception as e:
+        logger.error(f"Error in start_handler for user {telegram_id}: {e}")
+        update.message.reply_text(f"Xatolik yuz berdi: {e}")
 
 
 def main():
-    updater = Updater(BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", start_handler))
-    dp.add_handler(MessageHandler(Filters.contact, contact_handler))
-    updater.start_polling()
-    updater.idle()
+    max_retries = 5
+    retry_delay = 5
+    for attempt in range(max_retries):
+        try:
+            updater = Updater(BOT_TOKEN, use_context=True)
+            dp = updater.dispatcher
+            dp.add_handler(CommandHandler("start", start_handler))
+            logger.info(
+                f"Starting bot polling (attempt {attempt + 1}/{max_retries})..."
+            )
+            updater.start_polling()
+            updater.idle()
+            break
+        except (
+            requests.exceptions.RequestException,
+            TelegramError,
+        ) as e:
+            logger.error(
+                f"Network or Telegram API error during polling (attempt {attempt + 1}/{max_retries}): {e}"
+            )
+            if attempt < max_retries - 1:
+                logger.info(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+                retry_delay *= 2
+            else:
+                logger.critical(
+                    "Max retries reached. Bot could not start polling. Exiting."
+                )
+                sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0006_operator'),
+        ("users", "0006_operator"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customuser',
-            name='bad_comments_count',
+            model_name="customuser",
+            name="bad_comments_count",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='customuser',
-            name='is_banned',
+            model_name="customuser",
+            name="is_banned",
             field=models.BooleanField(default=False),
         ),
     ]

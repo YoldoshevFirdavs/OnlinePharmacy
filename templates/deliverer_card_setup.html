@@ -192,7 +192,7 @@
                         if (response.ok) {
                             statusMessage.textContent = 'Karta ma\'lumotlari muvaffaqiyatli saqlandi!';
                             statusMessage.style.color = 'green';
-                            window.location.href = data.next || '/deliverer/dashboard/'; // Redirect to deliverer dashboard
+                            window.location.href = data.next || '/dashboard/deliverer/'; // Redirect to deliverer dashboard
                         } else {
                             statusMessage.textContent = data.detail || 'Karta ma\'lumotlarini saqlashda xato yuz berdi.';
                             statusMessage.style.color = 'red';

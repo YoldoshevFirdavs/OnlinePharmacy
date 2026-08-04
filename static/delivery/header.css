@@ -1,0 +1,93 @@
+/* ==========================================================================
+   OnlinePharmacy — header.css (Delivery)
+   Header styles for delivery dashboard
+   Reuses admin dashboard header styles
+   ========================================================================== */
+
+/* ── Header Overlay ────────────────────────────────────────────────────── */
+
+#delivererHeaderOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 199;
+    display: none;
+}
+
+#delivererHeaderOverlay.active {
+    display: block;
+}
+
+/* ── Topbar User Dropdown (reuses header styles) ───────────────────────── */
+
+.deliverer-topbar__dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 200px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 201;
+    margin-top: 8px;
+}
+
+.deliverer-topbar__dropdown.active {
+    display: block !important;
+}
+
+.deliverer-topbar__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--dashboard-text, #333);
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.deliverer-topbar__dropdown-item:hover {
+    background: var(--dashboard-sidebar-active-bg, #e9f5ff);
+    color: var(--dashboard-link-active, #2980b9);
+}
+
+.deliverer-topbar__dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.deliverer-topbar__dropdown-divider {
+    height: 1px;
+    background: var(--dashboard-border, #e0e0e0);
+    margin: 8px 0;
+}
+
+.deliverer-topbar__dropdown-item--danger:hover {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+/* ── Responsive Styles ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .deliverer-topbar__username {
+        display: none;
+    }
+    
+    .deliverer-topbar__dropdown {
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        margin-top: 0;
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+    }
+}
+
+@media (min-width: 769px) {
+    .deliverer-topbar__dropdown.active {
+        display: block !important;
+    }
+}

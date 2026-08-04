@@ -34,13 +34,11 @@ INSTALLED_APPS = [
     'pharmacy',
     'orders',
     'billing',
-    'payments.apps.PaymentsConfig',
+    'payments',
     'django_extensions',
-    # 'csp', # Removed for tests to avoid import issues
 ]
 
 MIDDLEWARE = [
-    # 'csp.middleware.CSPMiddleware', # Removed for tests to avoid import issues
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -59,7 +57,7 @@ APPEND_SLASH = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'frontend' / 'html'],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR  / 'html'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,7 +78,7 @@ IS_DOCKER = os.path.exists('/.dockerenv')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'test_pharmacy_db'), # Use a separate test database
+        'NAME': os.getenv('DB_NAME', 'test_pharmacy_db'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
         'HOST': os.getenv('DB_HOST', 'db' if IS_DOCKER else 'localhost'),

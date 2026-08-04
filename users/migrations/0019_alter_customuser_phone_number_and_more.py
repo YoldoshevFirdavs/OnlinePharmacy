@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0018_delete_deliverydriver_and_more'),
+        ("users", "0018_delete_deliverydriver_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='phone_number',
+            model_name="customuser",
+            name="phone_number",
             field=models.CharField(blank=True, max_length=32, null=True, unique=True),
         ),
         migrations.AlterField(
-            model_name='deliverer',
-            name='phone_number',
+            model_name="deliverer",
+            name="phone_number",
             field=models.CharField(max_length=32, unique=True),
         ),
     ]

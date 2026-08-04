@@ -2,23 +2,20 @@
 <html lang="uz">
 <head>
     {% load static %}
-    {% include "header.html" %}
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     {% include "components/begin.html" %}
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Pharmacy - Sog'liq eng katta boylik</title>
-    {# Google Fonts - Moved to local static #}
+    
     <link href="{% static 'vendor/fonts/google-fonts.css' %}" rel="stylesheet">
-    {# FontAwesome - Already using local static #}
+    
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
 
     <style>
-/* =====================================================
-   GLOBAL STYLES & ROOT VARIABLES (1)
-   ===================================================== */
+
 
 * {
     margin: 0;
@@ -50,25 +47,25 @@
     --shadow-lg: 0 20px 60px rgba(106, 0, 244, 0.15);
     --shadow-xl: 0 30px 100px rgba(106, 0, 244, 0.2);
     --transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --header-height: 80px;
 }
 
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--white);
+    background: var(--gray-100); /* Consistent light background */
     color: var(--gray-900);
     line-height: 1.6;
-    overflow-x: hidden;
-    padding-top: 80px;
+    padding-top: var(--header-height); /* Add padding to body for fixed header */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* =====================================================
-   TYPOGRAPHY & TEXT STYLES (2)
-   ===================================================== */
+
 
 h1 {
     font-family: 'Playfair Display', serif;
@@ -133,14 +130,16 @@ p {
     background-clip: text;
 }
 
-/* =====================================================
-   LAYOUT UTILITIES (3)
-   ===================================================== */
+
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
+}
+
+main {
+    flex: 1 0 auto; /* Allow main content to grow and shrink */
 }
 
 section {
@@ -207,9 +206,7 @@ section {
 .mb-40 { margin-bottom: 40px; }
 .mb-60 { margin-bottom: 60px; }
 
-/* =====================================================
-   ANIMATIONS & KEYFRAMES (4)
-   ===================================================== */
+
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(60px); }
@@ -287,9 +284,7 @@ section {
     animation: glow 2s ease-in-out infinite;
 }
 
-/* =====================================================
-   BUTTONS & INTERACTIVE (5)
-   ===================================================== */
+
 
 .btn {
     display: inline-flex;
@@ -372,20 +367,20 @@ section {
     flex-wrap: wrap;
 }
 
-/* =====================================================
-   HEADER & NAVBAR (6)
-   ===================================================== */
 
-header.navbar {
+
+header.navbar, .navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.95);
+    height: var(--header-height);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    z-index: 1000;
+    z-index: 1100;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .navbar-container {
@@ -451,9 +446,7 @@ nav a:hover::after {
     align-items: center;
 }
 
-/* =====================================================
-   HERO SECTION (7)
-   ===================================================== */
+
 
 .hero {
     min-height: 100vh;
@@ -576,9 +569,7 @@ nav a:hover::after {
     background-clip: text;
 }
 
-/* =====================================================
-   FEATURES SECTION (8)
-   ===================================================== */
+
 
 .features {
     background: var(--gray-100);
@@ -627,9 +618,7 @@ nav a:hover::after {
     margin-bottom: 0;
 }
 
-/* =====================================================
-   PRODUCTS SECTION (9)
-   ===================================================== */
+
 
 .products {
     background: var(--white);
@@ -722,9 +711,7 @@ nav a:hover::after {
     justify-content: center;
 }
 
-/* =====================================================
-   HOW IT WORKS SECTION (10)
-   ===================================================== */
+
 
 .how-it-works {
     background: var(--gray-100);
@@ -775,9 +762,7 @@ nav a:hover::after {
     font-size: 0.95rem;
 }
 
-/* =====================================================
-   BENEFITS SECTION (11)
-   ===================================================== */
+
 
 .benefits {
     background: var(--white);
@@ -834,9 +819,7 @@ nav a:hover::after {
     animation: fadeInRight 0.8s ease-out;
 }
 
-/* =====================================================
-   PRICING SECTION (12)
-   ===================================================== */
+
 
 .pricing {
     background: var(--gray-100);
@@ -934,9 +917,7 @@ nav a:hover::after {
     justify-content: center;
 }
 
-/* =====================================================
-   FAQ SECTION (13)
-   ===================================================== */
+
 
 .faq {
     background: var(--white);
@@ -1002,9 +983,7 @@ nav a:hover::after {
     margin-bottom: 0;
 }
 
-/* =====================================================
-   TESTIMONIALS SECTION (14)
-   ===================================================== */
+
 
 .testimonials {
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
@@ -1092,9 +1071,7 @@ nav a:hover::after {
     margin-bottom: 0;
 }
 
-/* =====================================================
-   ABOUT SECTION (15)
-   ===================================================== */
+
 
 .about {
     background: var(--gray-100);
@@ -1165,9 +1142,7 @@ nav a:hover::after {
     animation: fadeInRight 0.8s ease-out;
 }
 
-/* =====================================================
-   BLOG/NEWS SECTION (16)
-   ===================================================== */
+
 
 .blog {
     background: var(--white);
@@ -1236,9 +1211,7 @@ nav a:hover::after {
     color: var(--primary);
 }
 
-/* =====================================================
-   CTA SECTION (17)
-   ===================================================== */
+
 
 .cta {
     background: linear-gradient(135deg, rgba(106, 0, 244, 0.08) 0%, rgba(176, 132, 244, 0.08) 100%);
@@ -1266,15 +1239,18 @@ nav a:hover::after {
     animation: fadeInUp 0.8s ease-out 0.2s backwards;
 }
 
-/* =====================================================
-   FOOTER (18)
-   ===================================================== */
+
 
 footer {
     background: var(--dark);
     color: var(--white);
     padding: 80px 0 30px;
 }
+
+footer, .site-footer {
+    margin-top: auto; /* Push footer to the bottom in a flex container */
+}
+
 
 .footer-content {
     display: grid;
@@ -1347,9 +1323,7 @@ footer {
     font-size: 0.9rem;
 }
 
-/* =====================================================
-   RESPONSIVE DESIGN (19)
-   ===================================================== */
+
 
 @media (max-width: 768px) {
     nav ul {
@@ -1400,12 +1374,10 @@ footer {
 }
 
     </style>
-    <script type="module" src="{% static 'js/api.js' %}"></script>
-    <script type="module" src="{% static 'js/avatar_routing.js' %}"></script>
-    <script type="module" src="{% static 'js/header.js' %}"></script>
+    
 </head>
 <body>
-
+    {% include "components/header.html" %} 
 
 <main>
 
@@ -1690,12 +1662,15 @@ footer {
         <div class="about-content">
             <div class="about-text">
                 <h2>Biz Haqimizda</h2>
-                <p>Online Pharmacy 2026-yildan beri sog'liqni saqlash sohasida faoliyat yuritmoqda.</p>
-                <p>Bizning maqsadimiz har bir xonagonga sifatli, arzon va tezkor dorixona xizmatini taqdim etish.</p>
+                <p>{{ site_config.about_us_text }}</p>
                 <div class="about-stats">
                     <div class="stat-box">
-                        <div class="stat-number">25,000+</div>
+                        <div class="stat-number">{{ site_config.clients_count }}+</div>
                         <div class="stat-label">Baxtli Mijozlar</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">{{ site_config.experience_years }}+</div>
+                        <div class="stat-label">Yillik Tajriba</div>
                     </div>
                 </div>
             </div>
@@ -1720,9 +1695,6 @@ footer {
 </main>
 
 {% include "components/footer.html" %}
-<script type="module" src="{% static 'js/api.js' %}"></script>
-<script type="module" src="{% static 'js/avatar_routing.js' %}"></script>
-<script type="module" src="{% static 'js/header.js' %}"></script>
 
 </body>
 </html>

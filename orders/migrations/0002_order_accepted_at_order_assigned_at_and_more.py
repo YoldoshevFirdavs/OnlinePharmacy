@@ -7,49 +7,70 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0001_initial'),
-        ('users', '0010_deliverydriver'),
+        ("orders", "0001_initial"),
+        ("users", "0010_deliverydriver"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='accepted_at',
+            model_name="order",
+            name="accepted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='order',
-            name='assigned_at',
+            model_name="order",
+            name="assigned_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='order',
-            name='delivered_at',
+            model_name="order",
+            name="delivered_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='order',
-            name='driver',
-            field=models.ForeignKey(blank=True, help_text='The delivery driver assigned to this order.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_orders', to='users.deliverydriver'),
+            model_name="order",
+            name="driver",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The delivery driver assigned to this order.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="assigned_orders",
+                to="users.deliverydriver",
+            ),
         ),
         migrations.AddField(
-            model_name='order',
-            name='driver_notes',
+            model_name="order",
+            name="driver_notes",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='order',
-            name='on_the_way_at',
+            model_name="order",
+            name="on_the_way_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='order',
-            name='picked_up_at',
+            model_name="order",
+            name="picked_up_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[('Pending', 'Pending'), ('Processing', 'Processing'), ('Assigned', 'Assigned to Driver'), ('Accepted', 'Accepted by Driver'), ('Picked Up', 'Picked Up by Driver'), ('On The Way', 'On The Way for Delivery'), ('Delivered', 'Delivered'), ('Canceled', 'Canceled'), ('Returned', 'Returned')], default='Pending', max_length=20),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("Pending", "Pending"),
+                    ("Processing", "Processing"),
+                    ("Assigned", "Assigned to Driver"),
+                    ("Accepted", "Accepted by Driver"),
+                    ("Picked Up", "Picked Up by Driver"),
+                    ("On The Way", "On The Way for Delivery"),
+                    ("Delivered", "Delivered"),
+                    ("Canceled", "Canceled"),
+                    ("Returned", "Returned"),
+                ],
+                default="Pending",
+                max_length=20,
+            ),
         ),
     ]

@@ -8,19 +8,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0003_alter_order_status_orderdelivery'),
+        ("orders", "0003_alter_order_status_orderdelivery"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='driver',
-            field=models.ForeignKey(blank=True, help_text='The delivery driver assigned to this order.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_orders', to=settings.AUTH_USER_MODEL),
+            model_name="order",
+            name="driver",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The delivery driver assigned to this order.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="assigned_orders",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='orderdelivery',
-            name='driver',
-            field=models.ForeignKey(blank=True, help_text='The driver assigned to this specific delivery.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='deliveries', to=settings.AUTH_USER_MODEL),
+            model_name="orderdelivery",
+            name="driver",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The driver assigned to this specific delivery.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="deliveries",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

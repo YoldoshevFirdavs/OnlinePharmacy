@@ -6,17 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0010_deliverydriver'),
+        ("users", "0010_deliverydriver"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deliverydriver',
-            name='license_number',
+            model_name="deliverydriver",
+            name="license_number",
         ),
         migrations.AddField(
-            model_name='deliverydriver',
-            name='license_plate',
-            field=models.CharField(blank=True, help_text='Driver license plate number (optional)', max_length=64, null=True),
+            model_name="deliverydriver",
+            name="license_plate",
+            field=models.CharField(
+                blank=True,
+                help_text="Driver license plate number (optional)",
+                max_length=64,
+                null=True,
+            ),
         ),
     ]

@@ -6,42 +6,42 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('billing', '0003_alter_payment_order_alter_payment_stripe_charge_id'),
-        ('pharmacy', '0002_initial'),
-        ('users', '0002_remove_customuser_cart_alter_customuser_auth_code'),
+        ("billing", "0003_alter_payment_order_alter_payment_stripe_charge_id"),
+        ("pharmacy", "0002_initial"),
+        ("users", "0002_remove_customuser_cart_alter_customuser_auth_code"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='cartitem',
-            name='cart',
+            model_name="cartitem",
+            name="cart",
         ),
         migrations.RemoveField(
-            model_name='cartitem',
-            name='product',
+            model_name="cartitem",
+            name="product",
         ),
         migrations.RemoveField(
-            model_name='order',
-            name='customer',
+            model_name="order",
+            name="customer",
         ),
         migrations.RemoveField(
-            model_name='orderitem',
-            name='order',
+            model_name="orderitem",
+            name="order",
         ),
         migrations.RemoveField(
-            model_name='orderitem',
-            name='product',
+            model_name="orderitem",
+            name="product",
         ),
         migrations.DeleteModel(
-            name='Cart',
+            name="Cart",
         ),
         migrations.DeleteModel(
-            name='CartItem',
+            name="CartItem",
         ),
         migrations.DeleteModel(
-            name='Order',
+            name="Order",
         ),
         migrations.DeleteModel(
-            name='OrderItem',
+            name="OrderItem",
         ),
     ]

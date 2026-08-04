@@ -6,22 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pharmacy', '0004_botmenustep_botinlinebutton'),
+        ("pharmacy", "0004_botmenustep_botinlinebutton"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='botmenustep',
-            old_name='text_en',
-            new_name='text_eng',
+            model_name="botmenustep",
+            old_name="text_en",
+            new_name="text_eng",
         ),
         migrations.RemoveField(
-            model_name='botinlinebutton',
-            name='title_en',
+            model_name="botinlinebutton",
+            name="title_en",
         ),
         migrations.AddField(
-            model_name='botinlinebutton',
-            name='title_eng',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Tugma nomi (EN)'),
+            model_name="botinlinebutton",
+            name="title_eng",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Tugma nomi (EN)"
+            ),
         ),
     ]

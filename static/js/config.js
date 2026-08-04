@@ -1,7 +1,8 @@
 // Global loyiha sozlamalari
 
-// API_BASE_URL ni to'g'ri eksport qilish
-export const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:8001";
+// API_BASE_URL: plain browser JS has no process.env — use window.location.origin
+// so it works on both http://127.0.0.1 (dev) and https://onlinepharmacy.uz (prod)
+export const API_BASE_URL = window.location.origin;
 
 const PROJECT_CONFIG = {
     address: "Navoiy shahar, Zarapetyan ko'chasi",

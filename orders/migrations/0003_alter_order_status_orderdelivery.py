@@ -7,32 +7,94 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0002_order_accepted_at_order_assigned_at_and_more'),
-        ('users', '0011_remove_deliverydriver_license_number_and_more'),
+        ("orders", "0002_order_accepted_at_order_assigned_at_and_more"),
+        ("users", "0011_remove_deliverydriver_license_number_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='status',
-            field=models.CharField(choices=[('Pending', 'Pending'), ('Processing', 'Processing'), ('Assigned', 'Assigned to Driver'), ('Accepted', 'Accepted by Driver'), ('Picked Up', 'Picked Up by Driver'), ('On The Way', 'On The Way for Delivery'), ('Arrived', 'Arrived at Customer Location'), ('Delivered', 'Delivered'), ('Canceled', 'Canceled'), ('Returned', 'Returned')], default='Pending', max_length=20),
+            model_name="order",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("Pending", "Pending"),
+                    ("Processing", "Processing"),
+                    ("Assigned", "Assigned to Driver"),
+                    ("Accepted", "Accepted by Driver"),
+                    ("Picked Up", "Picked Up by Driver"),
+                    ("On The Way", "On The Way for Delivery"),
+                    ("Arrived", "Arrived at Customer Location"),
+                    ("Delivered", "Delivered"),
+                    ("Canceled", "Canceled"),
+                    ("Returned", "Returned"),
+                ],
+                default="Pending",
+                max_length=20,
+            ),
         ),
         migrations.CreateModel(
-            name='OrderDelivery',
+            name="OrderDelivery",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('arrived_at', models.DateTimeField(blank=True, help_text="Timestamp when the driver arrived at the customer's location.", null=True)),
-                ('wait_seconds', models.PositiveIntegerField(default=0, help_text="Time in seconds the driver waited at the customer's location.")),
-                ('driver_earnings', models.DecimalField(decimal_places=2, default=0.0, help_text='Earnings for the driver for this specific delivery.', max_digits=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('driver', models.ForeignKey(blank=True, help_text='The driver assigned to this specific delivery.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='deliveries', to='users.deliverydriver')),
-                ('order', models.OneToOneField(help_text='The order associated with this delivery.', on_delete=django.db.models.deletion.CASCADE, related_name='delivery_details', to='orders.order')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "arrived_at",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Timestamp when the driver arrived at the customer's location.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "wait_seconds",
+                    models.PositiveIntegerField(
+                        default=0,
+                        help_text="Time in seconds the driver waited at the customer's location.",
+                    ),
+                ),
+                (
+                    "driver_earnings",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Earnings for the driver for this specific delivery.",
+                        max_digits=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "driver",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="The driver assigned to this specific delivery.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="deliveries",
+                        to="users.deliverydriver",
+                    ),
+                ),
+                (
+                    "order",
+                    models.OneToOneField(
+                        help_text="The order associated with this delivery.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="delivery_details",
+                        to="orders.order",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Order Delivery',
-                'verbose_name_plural': 'Order Deliveries',
-                'ordering': ['-created_at'],
+                "verbose_name": "Order Delivery",
+                "verbose_name_plural": "Order Deliveries",
+                "ordering": ["-created_at"],
             },
         ),
     ]

@@ -19,9 +19,14 @@ function getCookie(name) {
 // Inlined sendRequest function from utils.js (modified for FormData)
 async function sendRequest(url, method, data = null, isFormData = false) {
     const csrftoken = getCookie('csrftoken');
+    const token = localStorage.getItem('access_token');
     const headers = {
         'Accept': 'application/json'
     };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
     if (csrftoken) {
         headers['X-CSRFToken'] = csrftoken;
@@ -30,20 +35,26 @@ async function sendRequest(url, method, data = null, isFormData = false) {
     const config = {
         method: method,
         headers: headers,
-        credentials: 'same-origin'
+        credentials: 'include'
     };
 
     if (data) {
         if (isFormData) {
-            delete headers['Content-Type']; // Let browser set Content-Type for FormData
+            // Let browser set Content-Type for FormData with boundary
+            delete headers['Content-Type'];
             config.body = data;
         } else {
             headers['Content-Type'] = 'application/json';
             config.body = JSON.stringify(data);
         }
     }
+    
+    let absoluteUrl = url;
+    if (url.startsWith('/')) {
+        absoluteUrl = window.location.origin + url;
+    }
 
-    const response = await fetch(url, config);
+    const response = await fetch(absoluteUrl, config);
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => {
@@ -81,24 +92,54 @@ function _(key) {
 }
 
 // --- DOM Elements ---
-const profileAvatar = document.getElementById('profile-avatar');
-const profileFullName = document.getElementById('profile-full-name');
-const profileEmail = document.getElementById('profile-email');
-const profilePhoneNumber = document.getElementById('profile-phone-number');
+const profileViewMode = document.getElementById('profile-view-mode');
+const profileEditMode = document.getElementById('profile-edit-mode');
+
+const profileAvatarDisplay = document.getElementById('profile-avatar-display');
+const profileFullNameDisplay = document.getElementById('profile-full-name-display');
+const profileEmailDisplay = document.getElementById('profile-email-display');
+const profilePhoneNumberDisplay = document.getElementById('profile-phone-number-display');
+
+const profileAvatarPreview = document.getElementById('profile-avatar-preview');
 const fullNameInput = document.getElementById('full_name');
 const emailInput = document.getElementById('email');
 const phoneNumberInput = document.getElementById('phone_number');
 const avatarUploadInput = document.getElementById('avatar_upload');
 const profileForm = document.getElementById('profile-form');
+
 const editProfileBtn = document.getElementById('edit-profile-btn');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const ordersTableBody = document.getElementById('orders-table-body');
 
+let currentUserData = null; // To store fetched user data
+
 // --- Functions ---
+
+function toggleEditMode(enable) {
+    if (enable) {
+        profileViewMode.style.display = 'none';
+        profileEditMode.style.display = 'block';
+        // Populate form fields when entering edit mode
+        if (currentUserData) {
+            fullNameInput.value = currentUserData.full_name || '';
+            emailInput.value = currentUserData.email || '';
+            phoneNumberInput.value = currentUserData.phone_number || '';
+            profileAvatarPreview.src = currentUserData.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
+        }
+    } else {
+        profileViewMode.style.display = 'block';
+        profileEditMode.style.display = 'none';
+        // Reset avatar upload input when exiting edit mode without saving
+        avatarUploadInput.value = '';
+        profileAvatarPreview.src = currentUserData.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
+    }
+}
 
 async function fetchUserProfile() {
     try {
         const userData = await sendRequest(ACCOUNT_CONFIG.PROFILE_API_URL, 'GET');
+        currentUserData = userData; // Store fetched data
         displayUserProfile(userData);
     } catch (error) {
         console.error(ACCOUNT_CONFIG.I18N.uz.error_fetching_profile, error);
@@ -111,11 +152,14 @@ async function fetchUserProfile() {
 }
 
 function displayUserProfile(user) {
-    if (profileAvatar) profileAvatar.src = user.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
-    if (profileFullName) profileFullName.textContent = user.full_name || '';
-    if (profileEmail) profileEmail.textContent = user.email || '';
-    if (profilePhoneNumber) profilePhoneNumber.textContent = user.phone_number || '';
+    // Update view mode elements
+    if (profileAvatarDisplay) profileAvatarDisplay.src = user.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
+    if (profileFullNameDisplay) profileFullNameDisplay.textContent = user.full_name || '';
+    if (profileEmailDisplay) profileEmailDisplay.textContent = user.email || '';
+    if (profilePhoneNumberDisplay) profilePhoneNumberDisplay.textContent = user.phone_number || '';
 
+    // Update edit mode elements (for initial load or after save)
+    if (profileAvatarPreview) profileAvatarPreview.src = user.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
     if (fullNameInput) fullNameInput.value = user.full_name || '';
     if (emailInput) emailInput.value = user.email || '';
     if (phoneNumberInput) phoneNumberInput.value = user.phone_number || '';
@@ -146,11 +190,26 @@ async function handleProfileUpdate(event) {
             // Optionally redirect to a re-verification flow or show a message
         } else {
             alert(_('profile_updated'));
+            currentUserData = response; // Update stored data
             displayUserProfile(response); // Update UI with new data
+            toggleEditMode(false); // Switch back to view mode
         }
     } catch (error) {
         console.error(ACCOUNT_CONFIG.I18N.uz.error_updating_profile, error);
         alert(error.detail || _('error_updating_profile'));
+    }
+}
+
+function handleAvatarUploadChange() {
+    const file = avatarUploadInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            profileAvatarPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        profileAvatarPreview.src = currentUserData.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR;
     }
 }
 
@@ -191,9 +250,10 @@ async function handleLogout() {
         return;
     }
     try {
-        await sendRequest(ACCOUNT_CONFIG.LOGOUT_API_URL, 'POST', {
-            csrfmiddlewaretoken: getCookie('csrftoken'),
-        });
+        // Assuming a logout API endpoint exists, e.g., /api/v1/auth/logout/
+        // If your logout is handled purely client-side by clearing tokens, this might not be needed.
+        // If it's a server-side logout (e.g., invalidating session/token), uncomment and adjust:
+        // await sendRequest('/api/v1/auth/logout/', 'POST');
         alert(_('logout_success'));
     } catch (error) {
         console.error(ACCOUNT_CONFIG.I18N.uz.logout_error, error);
@@ -219,8 +279,17 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchUserProfile();
     fetchUserOrders();
 
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', () => toggleEditMode(true));
+    }
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => toggleEditMode(false));
+    }
     if (profileForm) {
         profileForm.addEventListener('submit', handleProfileUpdate);
+    }
+    if (avatarUploadInput) {
+        avatarUploadInput.addEventListener('change', handleAvatarUploadChange);
     }
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);

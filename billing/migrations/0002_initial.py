@@ -9,14 +9,18 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('billing', '0001_initial'),
-        ('pharmacy', '0001_initial'),
+        ("billing", "0001_initial"),
+        ("pharmacy", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='payment',
-            name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='pharmacy.order'),
+            model_name="payment",
+            name="order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payments",
+                to="pharmacy.order",
+            ),
         ),
     ]

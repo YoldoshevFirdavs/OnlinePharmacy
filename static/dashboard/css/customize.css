@@ -1,0 +1,183 @@
+/* ── Dashboard Customize & Brand Preview Styles ─────────────────────── */
+
+.dashboard-brand-preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(var(--clr-primary-rgb, 106, 0, 244), 0.1);
+    border: 1px solid rgba(var(--clr-primary-rgb, 106, 0, 244), 0.25);
+    border-radius: 20px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--preview-primary, var(--clr-primary, #6a00f4));
+    transition: all 0.25s ease;
+    margin-right: 12px;
+}
+
+.dashboard-brand-preview span#dashboardBrandName {
+    letter-spacing: 0.2px;
+}
+
+.dashboard-brand-preview span#dashboardBrandSticker {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* ── Live Preview Card on Design Page ─────────────────────────────────── */
+
+.live-preview-card {
+    background: var(--clr-surface, #ffffff);
+    border: 2px dashed rgba(var(--clr-primary-rgb, 106, 0, 244), 0.3);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.live-preview-header {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--clr-muted, #718096);
+    margin-bottom: 12px;
+}
+
+.live-preview-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: rgba(var(--clr-primary-rgb, 106, 0, 244), 0.12);
+    border: 2px solid var(--preview-primary, var(--clr-primary, #6a00f4));
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.live-preview-box .live-preview-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--preview-primary, var(--clr-primary, #6a00f4));
+}
+
+.live-preview-box .live-preview-sticker {
+    font-size: 1.6rem;
+}
+
+/* ── Sticker Picker ────────────────────────────────────────────────── */
+
+.sticker-picker-wrapper {
+    margin-top: 10px;
+    margin-bottom: 16px;
+}
+
+.sticker-picker-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.sticker-picker-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--clr-text, #2d3748);
+}
+
+.btn-clear-sticker {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.btn-clear-sticker:hover {
+    background: rgba(229, 62, 62, 0.1);
+}
+
+.sticker-picker {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 8px 4px 14px 4px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.sticker-picker::-webkit-scrollbar {
+    height: 6px;
+}
+
+.sticker-picker::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.sticker-btn {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 2px solid var(--clr-border, #e2e8f0);
+    background: var(--clr-surface, #ffffff);
+    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.sticker-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--clr-primary, #6a00f4);
+}
+
+.sticker-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(106, 0, 244, 0.3);
+}
+
+.sticker-btn--active {
+    border-color: var(--clr-primary, #6a00f4);
+    background: rgba(var(--clr-primary-rgb, 106, 0, 244), 0.15);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(106, 0, 244, 0.25);
+}
+
+/* ── Toast Notifications ────────────────────────────────────────────── */
+
+.customize-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 22px;
+    background: #2d3748;
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.customize-toast--show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.customize-toast--success {
+    background: #2b6cb0;
+}

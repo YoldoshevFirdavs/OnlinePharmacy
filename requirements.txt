@@ -1,43 +1,65 @@
-python-telegram-bot==13.15
-Django==5.1.1
-djangorestframework==3.15.2
-redis>=4.5.2,!=4.5.5
-celery[redis]==5.3.1
-django-redis==6.0.0
-djangorestframework-simplejwt==5.5.1
-psycopg2-binary==2.9.7
-gunicorn>=22.0
-phonenumbers>=8.13.25
-# Muqim paketlar
-django-filter
-django-cors-headers
-djoser
-PyJWT
-social-auth-app-django
-social-auth-core
-google-genai
-drf-yasg
-uritemplate
-kombu
-billiard
-vine
-amqp
-pillow
-sqlparse
-stripe
-requests
-django-templated-mail
-python-dotenv
-python-dateutil
-pytz
-tzdata
-PyYAML
-cryptography
-openpyxl
-whitenoise
-django-extensions
-Werkzeug
-csp
-django-ratelimit
-pytest==8.3.5
-pytest-django==4.12.0
+# Core framework
+Django==5.1.1                # Main Django web framework
+djangorestframework==3.15.2  # Django REST Framework for APIs
+djangorestframework-simplejwt==5.5.1  # JWT authentication for DRF
+
+# Messaging / Bots
+python-telegram-bot==13.15   # Telegram bot integration
+
+# Database & ORM
+psycopg2-binary==2.9.7       # PostgreSQL database adapter
+redis>=4.5.2,!=4.5.5          # Redis client
+django-redis==6.0.0          # Redis cache backend for Django
+
+# Task queue
+celery[redis]==5.3.1         # Celery task queue with Redis broker
+kombu                        # Messaging library used by Celery
+billiard                     # Multiprocessing library used by Celery
+vine                         # Dependency for Celery
+amqp                         # AMQP protocol library for Celery
+
+# Authentication & Users
+djoser                       # REST implementation of Django auth
+social-auth-app-django       # Social login integration
+social-auth-core             # Core social auth library
+PyJWT                        # JSON Web Token implementation
+
+# API Documentation
+drf-yasg                     # Swagger/OpenAPI generator for DRF
+uritemplate                  # URI template support
+gunicorn
+
+# Security
+django-ratelimit             # Rate limiting for Django views
+cryptography                 # Encryption and security primitives
+csp                          # Content Security Policy middleware
+
+# Utilities
+django-filter                # Filtering support for DRF
+django-cors-headers          # CORS headers middleware
+python-dotenv                # Load environment variables from .env
+sqlparse                     # SQL parsing library
+python-dateutil              # Date/time utilities
+pytz                         # Timezone support
+tzdata                       # Timezone database
+PyYAML                       # YAML parser
+Werkzeug                     # WSGI utilities
+
+# Static files & Extensions
+whitenoise                   # Serve static files in production
+django-extensions            # Extra management commands for Django
+
+# Frontend / Assets
+pillow                       # Image processing library
+openpyxl                     # Excel file support
+stripe                       # Stripe payment integration
+requests                     # HTTP requests library
+
+# Testing
+pytest==8.3.5                # Testing framework
+pytest-django==4.12.0        # Django plugin for pytest
+
+# Other integrations
+phonenumbers>=8.13.25        # Phone number validation
+google-genai                 # Google AI Studio SDK
+django-templated-mail        # Template-based email sending for Django

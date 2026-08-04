@@ -33,28 +33,20 @@
     </nav>
 
     <!-- Right: Actions (auth + cart) -->
-        <div class="header-right">
-            <div id="header-user-block" class="header-user-block" style="display: none;">
-                <div class="header-user-dropdown-trigger">
-                    <img id="header-user-avatar"
-                         src="{% static 'images/default_avatar.png' %}"
-                         alt="User avatar"
-                         class="header-avatar"
-                         onerror="this.onerror=null;this.src='https://via.placeholder.com/40/6a00f4/ffffff?text=U'">
-                    <span id="header-user-name" class="header-user-name"></span>
-                    <i class="fas fa-chevron-down header-dropdown-arrow"></i>
-                </div>
-                {% include "account_dropdown.html" %} {# Include the new dropdown template here #}
-            </div>
+    <div class="header-right">
+        <!-- NOTE: Authentication links for non-logged-in users -->
+        <div id="auth-links">
             <a href="/auth/" id="header-login-btn" class="btn-login-header">Kirish</a>
-
-            <div id="header-cart" class="header-cart" aria-label="Cart" role="group" style="display:none;">
-                <a href="/cart/" class="cart-link" aria-label="View cart">
-                    <span class="cart-icon" aria-hidden="true"><i class="fas fa-shopping-cart"></i></span>
-                    <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span>
-                </a>
-            </div>
         </div>
+
+        <!-- NOTE: Account dropdown for logged-in users -->
+        {% include 'components/account_dropdown.html' %}
+
+                <a href="{% url 'cart' %}" id="cartIcon" class="header-cart cart-link" aria-label="View cart">Cart 🛒 <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span></a>
+    </div>
   </div>
 </header>
 <div id="header-overlay" class="header-overlay"></div>
+
+<!-- NOTE: Include header.js for dynamic header functionality -->
+<script src="{% static 'js/header.js' %}"></script>

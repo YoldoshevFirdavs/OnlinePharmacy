@@ -10,94 +10,150 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('pharmacy', '0001_initial'),
-        ('users', '0001_initial'),
+        ("pharmacy", "0001_initial"),
+        ("users", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cart',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='user_cart', to=settings.AUTH_USER_MODEL),
+            model_name="cart",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="user_cart",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='cartitem',
-            name='cart',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='pharmacy.cart'),
+            model_name="cartitem",
+            name="cart",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="items",
+                to="pharmacy.cart",
+            ),
         ),
         migrations.AddField(
-            model_name='medicine',
-            name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='medicines', to='pharmacy.category'),
+            model_name="medicine",
+            name="category",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="medicines",
+                to="pharmacy.category",
+            ),
         ),
         migrations.AddField(
-            model_name='medicine',
-            name='seller',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='seller', to='users.seller'),
+            model_name="medicine",
+            name="seller",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="seller",
+                to="users.seller",
+            ),
         ),
         migrations.AddField(
-            model_name='flashsale',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pharmacy.medicine'),
+            model_name="flashsale",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
+            ),
         ),
         migrations.AddField(
-            model_name='cartitem',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pharmacy.medicine'),
+            model_name="cartitem",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
+            ),
         ),
         migrations.AddField(
-            model_name='medicineimage',
-            name='medicine',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='pharmacy.medicine'),
+            model_name="medicineimage",
+            name="medicine",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="images",
+                to="pharmacy.medicine",
+            ),
         ),
         migrations.AddField(
-            model_name='order',
-            name='customer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to=settings.AUTH_USER_MODEL),
+            model_name="order",
+            name="customer",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="orders",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='orderitem',
-            name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='order_items', to='pharmacy.order'),
+            model_name="orderitem",
+            name="order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="order_items",
+                to="pharmacy.order",
+            ),
         ),
         migrations.AddField(
-            model_name='orderitem',
-            name='product',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pharmacy.medicine'),
+            model_name="orderitem",
+            name="product",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="pharmacy.medicine",
+            ),
         ),
         migrations.AddField(
-            model_name='productviewhistory',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pharmacy.medicine'),
+            model_name="productviewhistory",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
+            ),
         ),
         migrations.AddField(
-            model_name='productviewhistory',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="productviewhistory",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='review',
-            name='medicine',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to='pharmacy.medicine'),
+            model_name="review",
+            name="medicine",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reviews",
+                to="pharmacy.medicine",
+            ),
         ),
         migrations.AddField(
-            model_name='review',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviews', to=settings.AUTH_USER_MODEL),
+            model_name="review",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="reviews",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='stocklog',
-            name='medicine',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='pharmacy.medicine'),
+            model_name="stocklog",
+            name="medicine",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
+            ),
         ),
         migrations.AddField(
-            model_name='stocklog',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="stocklog",
+            name="user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='flashsale',
-            unique_together={('product', 'start_time', 'end_time')},
+            name="flashsale",
+            unique_together={("product", "start_time", "end_time")},
         ),
     ]

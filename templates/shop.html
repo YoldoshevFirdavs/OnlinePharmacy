@@ -9,10 +9,24 @@
     <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/loader.css' %}">
 </head>
 <body>
 
 {% include 'components/header.html' %}
+
+<div class="tetris-loader-root" id="loader">
+  <div class="tetris-loader">
+    <span class="tetris-block">L</span>
+    <span class="tetris-block">O</span>
+    <span class="tetris-block">A</span>
+    <span class="tetris-block">D</span>
+    <span class="tetris-block">I</span>
+    <span class="tetris-block">N</span>
+    <span class="tetris-block">G</span>
+  </div>
+  <div class="tetris-loader-text">Loading</div>
+</div>
 
 <div class="shop-container">
     <!-- SIDEBAR - CATEGORIES -->
@@ -20,8 +34,7 @@
         <div class="sidebar-header">
             <h3>Kategoriyalar</h3>
         </div>
-        <div class="categories-list" id="categories-list">
-            <div class="loading">Yuklanmoqda...</div>
+        <div class="categories-list" id="categoryList">
         </div>
     </aside>
 
@@ -59,15 +72,26 @@
                     <i class="fas fa-phone"></i> Kirish
                 </button>
             </div>
-        </div>
-
-        <!-- PRODUCTS GRID -->
-        <div class="products-section">
-            <h2 id="section-title">Barcha Mahsulotlar</h2>
-            <div class="products-grid" id="products-grid">
-                <div class="loading">Mahsulotlar yuklanmoqda...</div>
             </div>
-        </div>
+
+            <div class="filter-section">
+            <select id="sortSelect">
+                <option value="newest">Eng yangilari</option>
+                <option value="price_asc">Narx bo'yicha (o'suvchi)</option>
+                <option value="price_desc">Narx bo'yicha (kamayuvchi)</option>
+                <option value="popular">Eng mashhurlari</option>
+            </select>
+            <input type="number" id="minPrice" placeholder="Min narx">
+            <input type="number" id="maxPrice" placeholder="Max narx">
+            <button class="btn btn-primary" id="applyFilter">Filtrni qo'llash</button>
+            </div>
+
+            <!-- PRODUCTS GRID -->
+            <div class="products-section">
+            <h2 id="section-title">Barcha Mahsulotlar</h2>
+            <div class="products-grid" id="productsGrid">
+            </div>
+            </div>
     </main>
 </div>
 
@@ -121,6 +145,31 @@
 
 <script src="{% static 'js/api.js' %}"></script>
 <script src="{% static 'js/shop.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const loader = document.getElementById('loader');
+        const links = document.querySelectorAll('a');
+
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href && href !== '#' && !href.startsWith('javascript:')) {
+                    e.preventDefault();
+                    loader.classList.add('show');
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 1000);
+                }
+            });
+        });
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                loader.classList.remove('show');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
