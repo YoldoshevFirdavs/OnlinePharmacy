@@ -10,14 +10,16 @@ from rest_framework.views import APIView
 
 from orders.models import Order
 from pharmacy.models import Category, Medicine
-from users.models import CustomUser
+from users.models import CustomUser, Deliverer
 
-from .permissions import IsDashboardAdmin
+from .permissions import IsDashboardAdmin, IsDashboardDeliverer
 from .serializers import (
     DashboardCategorySerializer,
     DashboardOrderSerializer,
     DashboardProductSerializer,
     DashboardUserSerializer,
+    DelivererSerializer,
+    DelivererUpdateSerializer,
 )
 
 VALID_ORDER_STATUSES = {choice[0] for choice in Order.STATUS_CHOICES}
@@ -27,6 +29,11 @@ STATUS_ALIASES = {"Cancelled": "Canceled"}
 class DashboardAPIView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsDashboardAdmin]
+
+
+class DelivererAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsDashboardDeliverer]
 
 
 class SessionCheckView(DashboardAPIView):
@@ -158,3 +165,59 @@ class CalendarEventsView(DashboardAPIView):
                 }
             )
         return Response(events)
+
+
+class DelivererProfileView(DelivererAPIView):
+    """
+    Get or update deliverer profile data.
+    Endpoint: /api/v1/dashboard/me/
+    """
+    def get(self, request):
+        """Get deliverer profile data"""
+        try:
+            deliverer = Deliverer.objects.get(user=request.user)
+            serializer = DelivererSerializer(deliverer)
+            return Response(serializer.data)
+        except Deliverer.DoesNotExist:
+            # Return user data only if no deliverer profile
+            return Response({
+                "user": {
+                    "id": request.user.id,
+                    "full_name": request.user.full_name,
+                    "email": request.user.email,
+                    "phone_number": request.user.phone_number,
+                },
+                "notify_order": False,
+                "notify_status": False,
+                "notify_push": False,
+            })
+
+    def put(self, request):
+        """Update deliverer profile data"""
+        try:
+            deliverer = Deliverer.objects.get(user=request.user)
+        except Deliverer.DoesNotExist:
+            return Response(
+                {"detail": "Yetkazib beruvchi profili topilmadi."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = DelivererUpdateSerializer(
+            deliverer, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response(serializer.data)
+            except Exception as e:
+                logger.error(f"Error updating deliverer profile: {str(e)}")
+                return Response(
+                    {"detail": "Profilni yangilashda xatolik yuz berdi."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Re-import logger at the end since it's used by DelivererProfileView
+import logging
+logger = logging.getLogger(__name__)

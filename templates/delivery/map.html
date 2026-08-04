@@ -4,97 +4,7 @@
 {% block page_name %}map{% endblock %}
 {% block page_title %}Xarita{% endblock %}
 
-{% block content %}
-<!-- Page Header -->
-<div class="deliverer-page-header">
-    <h2 class="deliverer-page-header__title">
-        <i class="fas fa-map-marked-alt"></i>
-        Real-time Xarita
-    </h2>
-    <div class="deliverer-page-header__actions">
-        <button class="deliverer-btn deliverer-btn--primary" id="refreshMapBtn">
-            <i class="fas fa-sync-alt"></i>
-            Yangilash
-        </button>
-    </div>
-</div>
-
-<!-- Map Card -->
-<div class="deliverer-card">
-    <div class="deliverer-card__header">
-        <h3 class="deliverer-card__header-title">Sizning joylashuvingiz va yo'llar</h3>
-    </div>
-    <div class="deliverer-card__body">
-        <!-- Map Placeholder -->
-        <div id="deliveryMap">
-            <i class="fas fa-map-marked-alt map-placeholder-icon"></i>
-            <span class="map-placeholder-text">Interaktiv Xarita</span>
-            <span class="map-placeholder-sub">
-                Bu yerda Real-time xarita integratsiyasi joylashadi.
-                <br>
-                Keyinchalik Google Maps yoki Leaflet orqali yo'llar ko'rsatiladi.
-            </span>
-            <span class="map-placeholder-badge">Preview</span>
-        </div>
-        
-        <!-- Map Controls -->
-        <div class="deliverer-map-controls" style="margin-top: 20px;">
-            <div class="deliverer-map-controls-header">
-                <h4 class="deliverer-form-section-title">Xarita sozlamalari</h4>
-            </div>
-            
-            <div class="deliverer-form-group">
-                <label for="mapMode" class="deliverer-form-label">Xarita rejimi</label>
-                <select id="mapMode" class="deliverer-form-control form-control">
-                    <option value="delivery">Yetkazib beruvchi rejimi</option>
-                    <option value="routing">Yo'l rejalashtirish</option>
-                    <option value="tracking">Kuzatuv rejimi</option>
-                </select>
-            </div>
-            
-            <div class="deliverer-form-group">
-                <label for="autoRefresh" class="deliverer-form-label">Avtomatik yangilanish</label>
-                <select id="autoRefresh" class="deliverer-form-control form-control">
-                    <option value="0">O'chirilgan</option>
-                    <option value="30">Har 30 soniya</option>
-                    <option value="60">Har 1 daqiqa</option>
-                    <option value="300">Har 5 daqiqa</option>
-                </select>
-            </div>
-            
-            <div class="deliverer-form-group">
-                <label class="deliverer-toggle-label">Joylashuvni aniqlash</label>
-                <label class="toggle-switch" style="display: inline-block;">
-                    <input type="checkbox" id="enableLocation">
-                    <span class="toggle-switch__slider"></span>
-                </label>
-                <button id="getLocationBtn" class="deliverer-btn deliverer-btn--ghost" style="margin-left: 10px;">
-                    <i class="fas fa-crosshairs"></i>
-                    Joriy joylashuvni aniqlash
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-.deliverer-map-controls {
-    margin-top: 20px;
-}
-
-.deliverer-map-controls-header {
-    margin-bottom: 16px;
-}
-
-.deliverer-map-controls .deliverer-form-group {
-    margin-bottom: 12px;
-}
-
-#mapMode, #autoRefresh {
-    width: 100%;
-}
-</style>
-
+{% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const refreshBtn = document.getElementById('refreshMapBtn');
@@ -117,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (getLocationBtn) {
         getLocationBtn.addEventListener('click', function() {
             if (!navigator.geolocation) {
-                alert('Sizning brauzeringiz geolokatsiyani qo\\'llab-quvvatlamaydi.');
+                alert('Sizning brauzeringiz geolokatsiyani qo`llab-quvvatlamaydi.');
                 return;
             }
             
@@ -184,4 +94,96 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="deliverer-page-header">
+    <h2 class="deliverer-page-header__title">
+        <i class="fas fa-map-marked-alt"></i>
+        Real-time Xarita
+    </h2>
+    <div class="deliverer-page-header__actions">
+        <button class="deliverer-btn deliverer-btn--primary" id="refreshMapBtn">
+            <i class="fas fa-sync-alt"></i>
+            Yangilash
+        </button>
+    </div>
+</div>
+
+<!-- Map Card -->
+<div class="deliverer-card">
+    <div class="deliverer-card__header">
+        <h3 class="deliverer-card__header-title">Sizning joylashuvingiz va yo'llar</h3>
+    </div>
+    <div class="deliverer-card__body">
+        <!-- Map Placeholder -->
+        <div id="deliveryMap">
+            <i class="fas fa-map-marked-alt map-placeholder-icon"></i>
+            <span class="map-placeholder-text">Interaktiv Xarita</span>
+            <span class="map-placeholder-sub">
+                Bu yerda Real-time xarita integratsiyasi joylashadi.
+                <br>
+                Keyinchalik Google Maps yoki Leaflet orqali yo'llar ko'rsatiladi.
+            </span>
+            <span class="map-placeholder-badge">Preview</span>
+        </div>
+        
+        <!-- Map Controls -->
+        <div class="deliverer-map-controls" style="margin-top: 20px;">
+            <div class="deliverer-map-controls-header">
+                <h4 class="deliverer-form-section-title">Xarita sozlamalari</h4>
+            </div>
+            
+            <div class="deliverer-form-group">
+                <label for="mapMode" class="deliverer-form-label">Xarita rejimi</label>
+                <select id="mapMode" class="deliverer-form-control form-control">
+                    <option value="delivery">Yetkazib beruvchi rejimi</option>
+                    <option value="routing">Yo'l rejalashtirish</option>
+                    <option value="tracking">Kuzatuv rejimi</option>
+                </select>
+            </div>
+            
+            <div class="deliverer-form-group">
+                <label for="autoRefresh" class="deliverer-form-label">Avtomatik yangilanish</label>
+                <select id="autoRefresh" class="deliverer-form-control form-control">
+                    <option value="0">O'chirilgan</option>
+                    <option value="30">Har 30 soniya</option>
+                    <option value="60">Har 1 daqiqa</option>
+                    <option value="300">Har 5 daqiqa</option>
+                </select>
+            </div>
+            
+            <div class="deliverer-form-group">
+                <label class="deliverer-form-label">Joylashuvni aniqlash</label>
+                <label class="toggle-switch" style="display: inline-block;">
+                    <input type="checkbox" id="enableLocation">
+                    <span class="toggle-switch__slider"></span>
+                </label>
+                <button id="getLocationBtn" class="deliverer-btn deliverer-btn--ghost" style="margin-left: 10px;">
+                    <i class="fas fa-crosshairs"></i>
+                    Joriy joylashuvni aniqlash
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.deliverer-map-controls {
+    margin-top: 20px;
+}
+
+.deliverer-map-controls-header {
+    margin-bottom: 16px;
+}
+
+.deliverer-map-controls .deliverer-form-group {
+    margin-bottom: 12px;
+}
+
+#mapMode, #autoRefresh {
+    width: 100%;
+}
+</style>
 {% endblock %}

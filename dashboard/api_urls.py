@@ -19,4 +19,5 @@ urlpatterns = [
     path("users/", api_views.UserListView.as_view(), name="users"),
     path("settings/", api_views.SettingsView.as_view(), name="settings"),
     path("calendar/events/", api_views.CalendarEventsView.as_view(), name="calendar_events"),
+    path("me/", api_views.DelivererProfileView.as_view(), name="deliverer_me"),
 ]

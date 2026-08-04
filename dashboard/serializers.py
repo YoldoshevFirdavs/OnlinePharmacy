@@ -145,3 +145,74 @@ class DashboardUserSerializer(serializers.ModelSerializer):
 
     def get_edit_url(self, obj):
         return reverse("dashboard:user_edit", kwargs={"pk": obj.pk})
+
+from users.models import Deliverer
+
+
+class DelivererSerializer(serializers.ModelSerializer):
+    """Serializer for deliverer profile data"""
+    user = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Deliverer
+        fields = [
+            'id',
+            'user',
+            'phone_number',
+            'vehicle_info',
+            'status',
+            'rate_per_hour',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'status']
+    
+    def get_user(self, obj):
+        """Get user details"""
+        return {
+            'id': obj.user.id,
+            'full_name': obj.user.full_name,
+            'email': obj.user.email,
+            'phone_number': obj.user.phone_number,
+            'avatar': obj.user.get_avatar_url if hasattr(obj.user, 'get_avatar_url') else None,
+        }
+
+
+class DelivererUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating deliverer profile"""
+    full_name = serializers.CharField(source='user.full_name', required=False)
+    email = serializers.EmailField(source='user.email', required=False)
+    phone_number = serializers.CharField(source='user.phone_number', required=False)
+    
+    class Meta:
+        model = Deliverer
+        fields = [
+            'phone_number',
+            'vehicle_info',
+            'user',
+            'full_name',
+            'email',
+        ]
+    
+    def update(self, instance, validated_data):
+        """Update deliverer and user data"""
+        user_data = validated_data.pop('user', {})
+        full_name = user_data.get('full_name')
+        email = user_data.get('email')
+        phone_number = user_data.get('phone_number')
+        
+        # Update user fields
+        if full_name is not None:
+            instance.user.full_name = full_name
+        if email is not None:
+            instance.user.email = email
+        if phone_number is not None:
+            instance.user.phone_number = phone_number
+        
+        instance.user.save()
+        
+        # Update deliverer fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance

@@ -4,6 +4,31 @@
    Reuses admin dashboard header styles
    ========================================================================== */
 
+/* ── Deliverer Profile Display ─────────────────────────────────────────── */
+
+.deliverer-topbar__profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.deliverer-topbar__profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.deliverer-topbar__profile-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--dashboard-text, #333);
+}
+
+.deliverer-topbar__profile-phone {
+    font-size: 0.75rem;
+    color: var(--dashboard-muted-text, #555);
+}
+
 /* ── Header Overlay ────────────────────────────────────────────────────── */
 
 #delivererHeaderOverlay {
@@ -71,7 +96,11 @@
 /* ── Responsive Styles ─────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-    .deliverer-topbar__username {
+    .deliverer-topbar__profile {
+        gap: 8px;
+    }
+    
+    .deliverer-topbar__profile-info {
         display: none;
     }
     

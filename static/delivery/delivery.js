@@ -2,8 +2,9 @@
  * OnlinePharmacy — delivery.js
  * Delivery dashboard specific JavaScript
  * - Sidebar toggle functionality
- * - Form submit handling
+ * - Settings form submit handling
  * - Map placeholder animations
+ * - /me/ API integration
  */
 
 (function () {
@@ -113,7 +114,6 @@
             var isOpen = dropdown.style.display === 'block';
             dropdown.style.display = isOpen ? 'none' : 'block';
             topbarUser.setAttribute('aria-expanded', String(!isOpen));
-            topbarUser.classList.toggle('active', !isOpen);
         }
 
         topbarUser.addEventListener('click', toggleDropdown);
@@ -125,7 +125,6 @@
             if (e.key === 'Escape') {
                 dropdown.style.display = 'none';
                 topbarUser.setAttribute('aria-expanded', 'false');
-                topbarUser.classList.remove('active');
                 topbarUser.focus();
             }
         });
@@ -134,7 +133,6 @@
             if (!topbarUser.contains(event.target) && !dropdown.contains(event.target)) {
                 dropdown.style.display = 'none';
                 topbarUser.setAttribute('aria-expanded', 'false');
-                topbarUser.classList.remove('active');
             }
         });
     }
@@ -185,9 +183,38 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
             }
 
-            // In production, send form data via AJAX
-            // For now, show success message after delay
-            setTimeout(function () {
+            // Collect form data
+            var formData = {
+                full_name: document.getElementById('id_full_name').value.trim(),
+                email: document.getElementById('id_email').value.trim(),
+                phone_number: document.getElementById('id_phone_number').value.trim(),
+                vehicle_info: document.getElementById('id_vehicle_info').value.trim(),
+                notify_order: document.getElementById('id_notify_order').checked,
+                notify_status: document.getElementById('id_notify_status').checked,
+                notify_push: document.getElementById('id_notify_push').checked,
+            };
+
+            var csrftoken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrftoken) return;
+            csrftoken = csrftoken.getAttribute('content');
+
+            // Send to /me/ endpoint
+            fetch('/api/v1/dashboard/me/', {
+                method: 'PUT',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                credentials: 'same-origin'
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Failed to save');
+                }
+                return response.json();
+            })
+            .then(function (data) {
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-check"></i> Saqlandi!';
@@ -199,19 +226,30 @@
                 // Show success alert
                 var alertDiv = document.createElement('div');
                 alertDiv.className = 'deliverer-alert deliverer-alert--success';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle"></i>
-                    <span>Sozlamalar muvaffaqiyatli saqlandi!</span>
-                    <button class="deliverer-alert__close" aria-label="Close alert">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+                alertDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Profil muvaffaqiyatli saqlandi!</span><button class="deliverer-alert__close" aria-label="Close alert"><i class="fas fa-times"></i></button>';
 
                 var messagesContainer = document.querySelector('.deliverer-messages');
                 if (messagesContainer) {
                     messagesContainer.appendChild(alertDiv);
                 }
-            }, 500);
+            })
+            .catch(function (error) {
+                console.error('Error saving profile:', error);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Saqlash';
+                }
+
+                // Show error alert
+                var alertDiv = document.createElement('div');
+                alertDiv.className = 'deliverer-alert deliverer-alert--error';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Profilni saqlashda xatolik yuz berdi.</span><button class="deliverer-alert__close" aria-label="Close alert"><i class="fas fa-times"></i></button>';
+
+                var messagesContainer = document.querySelector('.deliverer-messages');
+                if (messagesContainer) {
+                    messagesContainer.appendChild(alertDiv);
+                }
+            });
         });
     }
 
