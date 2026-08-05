@@ -1198,3 +1198,32 @@ async function initAuthPage() {
 }
 
 document.addEventListener('DOMContentLoaded', initAuthPage);
+    // Initial UI update based on default state
+    updateLoginModeUI();
+}
+
+/**
+ * Get redirect URL based on user role
+ * @param {string} role - User role (admin, deliverer, seller, user)
+ * @returns {string} Redirect URL
+ */
+function getRedirectUrlByRole(role) {
+    if (!role) {
+        console.warn("No role provided, defaulting to account page");
+        return '/account/';
+    }
+    
+    const redirectMap = {
+        'admin': '/dashboard/admin/',
+        'deliverer': '/dashboard/delivery/',
+        'seller': '/dashboard/seller/',
+        'user': '/account/',
+        'driver': '/dashboard/driver/'
+    };
+    
+    const redirectUrl = redirectMap[role] || redirectMap['user'];
+    console.log(`Redirecting user with role '${role}' to: ${redirectUrl}`);
+    return redirectUrl;
+}
+
+document.addEventListener('DOMContentLoaded', initAuthPage);
