@@ -1198,8 +1198,6 @@ async function initAuthPage() {
 }
 
 document.addEventListener('DOMContentLoaded', initAuthPage);
-    // Initial UI update based on default state
-    updateLoginModeUI();
 }
 
 /**
@@ -1212,7 +1210,7 @@ function getRedirectUrlByRole(role) {
         console.warn("No role provided, defaulting to account page");
         return '/account/';
     }
-    
+
     const redirectMap = {
         'admin': '/dashboard/admin/',
         'deliverer': '/dashboard/delivery/',
@@ -1220,7 +1218,7 @@ function getRedirectUrlByRole(role) {
         'user': '/account/',
         'driver': '/dashboard/driver/'
     };
-    
+
     const redirectUrl = redirectMap[role] || redirectMap['user'];
     console.log(`Redirecting user with role '${role}' to: ${redirectUrl}`);
     return redirectUrl;
