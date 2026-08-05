@@ -853,14 +853,14 @@ def dashboard_customize(request):
 
 
 @login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_deliverer, login_url="dashboard:login_page")
+@user_passes_test(is_deliverer, login_url="auth")
 def deliverer_dashboard(request):
     try:
         try:
             deliverer_profile = request.user.deliverer_profile
             if deliverer_profile is None:
                 messages.warning(request, "Yetkazib beruvchi profilingiz ro'yxatdan o'tmagan. Iltimos, admin bilan bog'laning.")
-                return redirect("dashboard:login_page")
+                return redirect("auth")
 
             orders = Order.objects.filter(driver=deliverer_profile).order_by("-created_at")
             ctx = {
@@ -890,14 +890,14 @@ def deliverer_dashboard(request):
 
 
 @login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_deliverer, login_url="dashboard:login_page")
+@user_passes_test(is_deliverer, login_url="auth")
 def deliverer_order_list(request):
     try:
         try:
             deliverer_profile = request.user.deliverer_profile
             if deliverer_profile is None:
                 messages.warning(request, "Yetkazib beruvchi profilingiz ro'yxatdan o'tmagan. Iltimos, admin bilan bog'laning.")
-                return redirect("dashboard:login_page")
+                return redirect("auth")
 
             orders = Order.objects.filter(driver=deliverer_profile).order_by("-created_at")
             ctx = {"orders": orders}
@@ -998,8 +998,8 @@ def not_allowed(request):
 # ──────────────────────────────────────────────────────────────────────
 
 
-@login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_deliverer, login_url="dashboard:login_page")
+@login_required_decorator(login_url="auth")
+@user_passes_test(is_deliverer, login_url="auth")
 def delivery_dashboard(request):
     """Main delivery dashboard page"""
     try:
@@ -1018,7 +1018,7 @@ def delivery_dashboard(request):
 
 
 @login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_deliverer, login_url="dashboard:login_page")
+@user_passes_test(is_deliverer, login_url="auth")
 def delivery_settings(request):
     """Delivery settings page"""
     try:
@@ -1034,7 +1034,7 @@ def delivery_settings(request):
 
 
 @login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_deliverer, login_url="dashboard:login_page")
+@user_passes_test(is_deliverer, login_url="auth")
 def delivery_map(request):
     """Delivery map page with placeholder for real-time map"""
     try:
