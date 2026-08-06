@@ -273,11 +273,47 @@
         }
     }
 
+    /* ── Profile Display ─────────────────────────────────────────────── */
+
+    function loadUserProfile() {
+        var profileName = document.getElementById('delivererName');
+        var profilePhone = document.getElementById('delivererPhone');
+
+        if (!profileName) return;
+
+        fetch('/api/v1/users/me/', {
+            credentials: 'same-origin'
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // User not authenticated, redirect to auth
+                    window.location.href = '/auth/';
+                }
+                throw new Error('Failed to load profile');
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            // Extract user info - /me/ returns user data
+            var name = data.full_name || data.email || 'Foydalanuvchi';
+            var phone = data.phone_number || data.email || '';
+
+            if (profileName) profileName.textContent = name;
+            if (profilePhone) profilePhone.textContent = phone;
+        })
+        .catch(function (error) {
+            console.error('Error loading profile:', error);
+            if (profileName) profileName.textContent = 'Yuklanmoqda...';
+        });
+    }
+
     /* ── Initialize All ──────────────────────────────────────────────── */
 
     document.addEventListener('DOMContentLoaded', function () {
         initSidebar();
         initTopbarDropdown();
+        loadUserProfile();  // Load user profile from /me/ endpoint
         initAlerts();
         initSettingsForm();
         initMapPlaceholder();
