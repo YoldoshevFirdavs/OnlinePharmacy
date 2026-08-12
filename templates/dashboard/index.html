@@ -1,0 +1,310 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title"><i class="fa-solid fa-gauge-high"></i> Dashboard</h1>
+    <p class="page-subtitle">Umumiy ko'rsatkichlar va statistika</p>
+</div>
+
+<!-- ═══════ Stat Cards ═══════ -->
+<div class="stats-grid" id="statsGrid" style="gap: 1.25rem;">
+    <div class="stat-card stat-card--categories" id="statCategories">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_categories|default:"0" }}</span>
+            <span class="stat-card__label">Kategoriyalar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--products" id="statProducts">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-pills"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_medicines|default:"0" }}</span>
+            <span class="stat-card__label">Mahsulotlar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--customers" id="statCustomers">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_customers|default:"0" }}</span>
+            <span class="stat-card__label">Mijozlar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--orders" id="statOrders">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_orders|default:"0" }}</span>
+            <span class="stat-card__label">Buyurtmalar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--pending" id="statPending">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ pending_orders|default:"0" }}</span>
+            <span class="stat-card__label">Kutilmoqda</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--delivered" id="statDelivered">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ delivered_orders|default:"0" }}</span>
+            <span class="stat-card__label">Yetkazilgan</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--users" id="statUsers">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-user-group"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_users|default:"0" }}</span>
+            <span class="stat-card__label">Jami Foydalanuvchilar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--deliverers" id="statDeliverers">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-truck"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_deliverers|default:"0" }}</span>
+            <span class="stat-card__label">Kuryerlar</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--outofstock" id="statOutOfStock">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ out_of_stock|default:"0" }}</span>
+            <span class="stat-card__label">Tugagan Dori</span>
+        </div>
+    </div>
+
+    <div class="stat-card stat-card--staff" id="statStaff">
+        <div class="stat-card__icon">
+            <i class="fa-solid fa-user-tie"></i>
+        </div>
+        <div class="stat-card__info">
+            <span class="stat-card__value">{{ total_staff|default:"0" }}</span>
+            <span class="stat-card__label">Xodimlar</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════ Charts Row 2 ═══════ -->
+<div class="dashboard-grid" id="chartsGrid2" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+    <div class="card card--chart">
+        <div class="card__header"><h2 class="card__title"><i class="fa-solid fa-chart-pie"></i> To'lov Turi</h2></div>
+        <div class="card__body chart-container"><canvas id="paymentTypeChart"></canvas></div>
+    </div>
+    <div class="card card--chart">
+        <div class="card__header"><h2 class="card__title"><i class="fa-solid fa-chart-bar"></i> Kategoriya Bo'yicha Daromad</h2></div>
+        <div class="card__body chart-container"><canvas id="categoryRevenueChart"></canvas></div>
+    </div>
+</div>
+
+<!-- ═══════ Charts Row 3 ═══════ -->
+<div class="dashboard-grid" id="chartsGrid3" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+    <div class="card card--chart">
+        <div class="card__header"><h2 class="card__title"><i class="fa-solid fa-ranking-star"></i> Mahsulot Daromadi (Top 5)</h2></div>
+        <div class="card__body chart-container"><canvas id="productRevenueChart"></canvas></div>
+    </div>
+    <div class="card card--chart">
+        <div class="card__header"><h2 class="card__title"><i class="fa-solid fa-calendar-days"></i> So'nggi 14 Kun Buyurtmalar</h2></div>
+        <div class="card__body chart-container"><canvas id="last14DaysOrdersChart"></canvas></div>
+    </div>
+</div>
+
+<!-- ═══════ Top Products Table ═══════ -->
+<div class="card card--table" id="topProductsCard">
+    <div class="card__header"><h2 class="card__title"><i class="fa-solid fa-trophy"></i> Top 10 Sotilgan Mahsulotlar</h2></div>
+    <div class="card__body table-responsive">
+        <table class="data-table" id="topProductsTable">
+            <thead><tr><th>#</th><th>Mahsulot</th><th>Sotilgan (dona)</th></tr></thead>
+            <tbody>
+                <tr class="data-table__empty">
+                    <td colspan="3"><i class="fa-solid fa-spinner fa-spin"></i> Ma'lumotlar yuklanmoqda...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══════ Chart + Widgets Row ═══════ -->
+<div class="dashboard-grid" id="dashboardGrid">
+
+    <!-- Sales Chart -->
+    <div class="card card--chart" id="salesChartCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-chart-line"></i> Sotuvlar grafigi</h2>
+            <div class="card__actions">
+                <select id="chartPeriod" class="card__select">
+                    <option value="7">Oxirgi 7 kun</option>
+                    <option value="30" selected>Oxirgi 30 kun</option>
+                    <option value="90">Oxirgi 90 kun</option>
+                </select>
+            </div>
+        </div>
+        <div class="card__body chart-container" id="chartContainer">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Categories Widget -->
+    <div class="card card--widget" id="categoriesWidgetCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-layer-group"></i> Kategoriyalar</h2>
+        </div>
+        <div class="card__body" id="categoriesWidget">
+            <p class="widget-placeholder">Kategoriyalar ma'lumotlari yuklanmoqda…</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════ Recent Orders Table ═══════ -->
+<div class="card card--table" id="recentOrdersCard">
+    <div class="card__header">
+        <h2 class="card__title"><i class="fa-solid fa-clock-rotate-left"></i> Oxirgi buyurtmalar</h2>
+        <a href="{% url 'dashboard:order_list' %}" class="card__link">
+            Barchasini ko'rish <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="card__body table-responsive">
+        <table class="data-table" id="recentOrders">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Mijoz</th>
+                    <th>Jami</th>
+                    <th>Status</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {# Orders will be populated by the context or JS #}
+                <tr class="data-table__empty">
+                    <td colspan="5">
+                        <i class="fa-solid fa-inbox"></i>
+                        <span>Hozircha buyurtmalar yo'q</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const ctx = document.getElementById('salesChart');
+    if (!ctx) return;
+
+    const salesChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan', 'Yak'],
+            datasets: [{
+                label: 'Sotuvlar',
+                data: [12, 19, 8, 15, 22, 30, 18],
+                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--clr-primary').trim() || '#6a00f4',
+                backgroundColor: 'rgba(106, 0, 244, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Dummy data for new charts
+    const dummyData = {
+        paymentTypes: { labels: ['Naqd', 'Click', 'Payme'], values: [120, 85, 60] },
+        categoryRevenue: { labels: ['Vitaminlar', 'Og\'riq qoldiruvchi', 'Antibiotiklar', 'Shamollashga qarshi'], values: [550000, 420000, 310000, 250000] },
+        productRevenue: { labels: ['Paracetamol', 'Ambroxol', 'Aspirin', 'Vitamin C', 'Ibuprofen'], values: [150000, 120000, 95000, 80000, 75000] },
+        last14Days: { labels: Array.from({length: 14}, (_, i) => new Date(Date.now() - (13-i) * 86400000).toLocaleDateString('uz-UZ', {day:'2-digit', month:'short'})), values: [5, 8, 6, 10, 12, 9, 15, 11, 14, 10, 18, 20, 17, 22] },
+        topProducts: [
+            { rank: 1, name: 'Pitsa', sold: 120 },
+            { rank: 2, name: '2 qavatli Burger', sold: 98 },
+            { rank: 3, name: 'Coca Cola', sold: 250 },
+            { rank: 4, name: 'Amoxicillin', sold: 85 },
+            { rank: 5, name: 'Vitamin D3', sold: 78 },
+        ]
+    };
+
+    // Render new charts
+    const paymentTypeCtx = document.getElementById('paymentTypeChart');
+    if(paymentTypeCtx) new Chart(paymentTypeCtx, {
+        type: 'pie',
+        data: { labels: dummyData.paymentTypes.labels, datasets: [{ data: dummyData.paymentTypes.values, backgroundColor: ['#3b82f6', '#8b5ef6', '#10b981'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+    });
+
+    const categoryRevenueCtx = document.getElementById('categoryRevenueChart');
+    if(categoryRevenueCtx) new Chart(categoryRevenueCtx, {
+        type: 'doughnut',
+        data: { labels: dummyData.categoryRevenue.labels, datasets: [{ data: dummyData.categoryRevenue.values, backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+    });
+
+    const productRevenueCtx = document.getElementById('productRevenueChart');
+    if(productRevenueCtx) new Chart(productRevenueCtx, {
+        type: 'bar',
+        data: { labels: dummyData.productRevenue.labels, datasets: [{ label: 'Daromad (so\'m)', data: dummyData.productRevenue.values, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--clr-primary').trim() || '#6a00f4' }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    const last14DaysCtx = document.getElementById('last14DaysOrdersChart');
+    if(last14DaysCtx) new Chart(last14DaysCtx, {
+        type: 'line',
+        data: { labels: dummyData.last14Days.labels, datasets: [{ label: 'Buyurtmalar', data: dummyData.last14Days.values, borderColor: '#10b981', tension: 0.3, fill: false }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // Render Top Products Table
+    const topProductsTable = document.getElementById('topProductsTable')?.querySelector('tbody');
+    if (topProductsTable) {
+        topProductsTable.innerHTML = dummyData.topProducts.map(p => `
+            <tr>
+                <td>${p.rank}</td>
+                <td>${p.name}</td>
+                <td>${p.sold}</td>
+            </tr>
+        `).join('');
+    }
+
+})();
+</script>
+{% endblock %}

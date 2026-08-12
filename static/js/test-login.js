@@ -1,0 +1,1 @@
+// Simple fetch to /auth/test-login/ or form submit; on success redirect to /dashboard/.

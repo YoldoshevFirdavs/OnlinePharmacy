@@ -1,0 +1,141 @@
+/* static/css/cart.css */
+
+body {
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+.cart-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+h1 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+#cart-items-container .loading,
+#cart-items-container .empty-cart {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+    color: #777;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.cart-item-info {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+}
+
+.cart-item-name {
+    font-weight: 600;
+}
+
+.cart-item-price {
+    font-weight: 500;
+    color: #007bff;
+}
+
+.cart-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qty-btn {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.remove-item-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.cart-summary {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 300px;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#proceed-to-order {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 600px) {
+    .cart-container {
+        margin: 20px 10px;
+        padding: 15px;
+    }
+
+    .cart-item-info {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .cart-item-quantity {
+        justify-content: center;
+    }
+}

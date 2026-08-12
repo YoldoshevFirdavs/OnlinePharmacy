@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% include "components/begin.html" %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yordam va Aloqa | Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-page="contact">
+
+    {% include "components/header.html" %}
+
+    <main id="main-content">
+        <section class="hero-section" style="padding: 140px 0 60px;">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Yordam <span>markazi</span></h1>
+                    <p class="hero-tagline">Xabaringizni yozing, biz tezda javob beramiz.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="apple-section">
+            <div class="container">
+                <div class="legal-card" style="max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 24px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                    <!-- 🔐 Login Warning -->
+                    <div id="login-notice" style="display:none; text-align:center; padding: 2rem;">
+                        <h3 style="margin-bottom: 1.5rem;">Murojaat yuborish uchun tizimga kiring</h3>
+                        <a href="/auth/" class="btn-primary-gradient" style="display:inline-block; text-decoration: none;">Kirish sahifasiga o'tish</a>
+                    </div>
+
+                    <!-- 📝 Contact Form -->
+                    <form id="contact-form" style="display:none;">
+                        <h2 style="text-align: center; margin-bottom: 2rem;">Xabar yuboring</h2>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <input type="text" placeholder="Ismingiz" required style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 1px solid #ddd; outline: none;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <input type="email" placeholder="Emailingiz" required style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 1px solid #ddd; outline: none;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <textarea rows="6" placeholder="Xabaringizni yozing..." required style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 1px solid #ddd; outline: none; resize: vertical;"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary-gradient" style="width:100%; border: none; cursor: pointer;">Xabarni yuborish</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script src="/static/js/header.js"></script>
+    <script src="/static/js/footer.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+          const contactForm = document.querySelector("#contact-form");
+          const loginNotice = document.querySelector("#login-notice");
+          try {
+            const user = await (window.api ? window.api.getProfile() : null);
+            if (user) {
+              contactForm.style.display = "block";
+              loginNotice.style.display = "none";
+            } else {
+              contactForm.style.display = "none";
+              loginNotice.style.display = "block";
+            }
+          } catch (err) {
+            contactForm.style.display = "none";
+            loginNotice.style.display = "block";
+          }
+        });
+    </script>
+</body>
+</html>

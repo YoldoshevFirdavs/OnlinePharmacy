@@ -1,0 +1,30 @@
+--- a/README.md
++++ b/README.md
+@@
+ ## Use Python 3.10 (strict)
+ 
+ This project is pinned to **Python 3.10** for local development, Docker, and CI.
+ Tests will exit immediately if not run under Python 3.10.
++Primary local workflow is **PowerShell + virtual environment**. Docker is optional.
+@@
+ ### Windows (PowerShell)
+ 
+ ```powershell
+ py -3.10 -m venv .venv310
+ .\.venv310\Scripts\Activate.ps1
+ python --version
+-python -m pip install --upgrade pip
+-python -m pip install -r requirements.txt
+-python -m pytest -q
++.\scripts\run_tests.ps1
+ ```
++
++If you need diagnostics:
++
++```powershell
++.\scripts\diagnose_python.ps1
++```
+@@
+ - `Dockerfile` is pinned to `python:3.10-slim`.
+ - `docker-compose.yml` uses `build: .`, so containers inherit Python 3.10 from the Dockerfile.
++- Docker is optional for running tests locally.

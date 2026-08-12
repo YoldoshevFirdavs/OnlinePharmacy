@@ -1,0 +1,166 @@
+{% load static %}
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/font-face.css' %}"> {# Yangi qo'shildi #}
+  <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+  <title>Admin login</title>
+  <style>
+    /* admin.css uchun minimal stil, variables.css dan foydalanadi */
+    body.auth-page {
+      font-family: var(--font-family, sans-serif); /* Font family o'zgaruvchidan olindi */
+      background-color: var(--background); /* O'zgaruvchidan olindi */
+      color: var(--text-color); /* O'zgaruvchidan olindi */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      transition: background-color 0.3s ease, color 0.3s ease; /* Tema o'zgarishi uchun */
+    }
+    .auth-container {
+      background-color: var(--card-background); /* O'zgaruvchidan olindi */
+      padding: 40px;
+      border-radius: var(--border-radius-md); /* O'zgaruvchidan olindi */
+      box-shadow: var(--shadow-md); /* O'zgaruvchidan olindi */
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Tema o'zgarishi uchun */
+    }
+    h1 {
+      color: var(--primary); /* O'zgaruvchidan olindi */
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+    form label {
+      display: block;
+      text-align: left;
+      margin-bottom: 8px;
+      color: var(--text-color); /* O'zgaruvchidan olindi */
+      font-weight: bold;
+    }
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="tel"],
+    form input[type="password"] {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color); /* O'zgaruvchidan olindi */
+      border-radius: var(--border-radius-sm); /* O'zgaruvchidan olindi */
+      font-size: 16px;
+      background-color: var(--background); /* O'zgaruvchidan olindi */
+      color: var(--text-color); /* O'zgaruvchidan olindi */
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    form input[type="text"]:focus,
+    form input[type="email"]:focus,
+    form input[type="tel"]:focus,
+    form input[type="password"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), .25);
+        outline: none;
+    }
+    .actions {
+      margin-top: 20px;
+    }
+    .btn {
+      background-color: var(--primary); /* O'zgaruvchidan olindi */
+      color: var(--background-light); /* O'zgaruvchidan olindi */
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--border-radius-sm); /* O'zgaruvchidan olindi */
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-dark); /* O'zgaruvchidan olindi */
+    }
+    .top-error {
+      background-color: rgba(var(--danger-color-rgb), 0.1); /* O'zgaruvchidan olindi */
+      color: var(--danger-color); /* O'zgaruvchidan olindi */
+      padding: 10px;
+      border-radius: var(--border-radius-sm); /* O'zgaruvchidan olindi */
+      margin-bottom: 20px;
+      border: 1px solid var(--danger-color); /* O'zgaruvchidan olindi */
+      text-align: left;
+    }
+    .muted {
+      color: var(--text-muted); /* O'zgaruvchidan olindi */
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .muted a {
+      color: var(--primary); /* O'zgaruvchidan olindi */
+      text-decoration: none;
+    }
+    .muted a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body class="auth-page" data-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}" data-theme="light"> {# data-theme qo'shildi #}
+  <main class="auth-container">
+    <h1>Admin login</h1>
+    <div id="topError" class="top-error" role="alert" aria-live="assertive" hidden></div>
+
+    <form id="adminLoginForm" onsubmit="return false;">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" />
+
+      <label for="phone_number">Telefon raqam</label>
+      <input id="phone_number" name="phone_number" type="tel" placeholder="+998901234567" />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" />
+
+      <div class="actions">
+        <button id="loginBtn" class="btn btn-primary">Kirish</button>
+      </div>
+    </form>
+
+    <p class="muted">Agar siz bloklangan bo‘lsangiz, <a href="/not_allowed/">bu yerga</a> qarang.</p>
+  </main>
+
+  <script src="{% static 'js/api.js' %}"></script>
+  {# <script src="{% static 'js/otp.js' %}"></script> #} {# O'chirildi #}
+  <script src="{% static 'js/auth.js' %}"></script>
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', function(){
+      const payload = {
+        action: 'credentials',
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value,
+        email: document.getElementById('email').value.trim(),
+        phone_number: document.getElementById('phone_number').value.trim()
+      };
+      window.handleAdminLogin(payload);
+    });
+
+    // helper to show top error
+    window.showInlineError = function(msg){
+      const el = document.getElementById('topError');
+      el.textContent = msg;
+      el.hidden = false;
+      el.style.display = 'block';
+      el.classList.add('error-visible');
+    };
+
+    // Theme initialization (example, assuming a theme toggle somewhere)
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.dataset.theme = savedTheme;
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+    }
+  </script>
+</body>
+</html>

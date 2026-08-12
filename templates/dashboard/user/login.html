@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OnlinePharmacy — Tizimga kirish">
+    <title>Kirish — OnlinePharmacy</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Dashboard Theme CSS -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/theme.css' %}">
+</head>
+<body class="login-body">
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login-card" id="loginCard">
+            <!-- Logo / Brand -->
+            <div class="login-brand" id="loginBrand">
+                <i class="fa-solid fa-capsules"></i>
+                <h1>OnlinePharmacy</h1>
+                <p>Boshqaruv paneliga kirish</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% if messages %}
+            <div class="login-messages" id="loginMessages">
+                {% for msg in messages %}
+                <div class="alert alert--{{ msg.tags }}" role="alert">
+                    <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% elif msg.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-info{% endif %}"></i>
+                    <span>{{ msg }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" class="login-form" id="loginForm" novalidate>
+                {% csrf_token %}
+
+                <div class="form-group" id="group_username">
+                    <label for="id_username" class="form-label">
+                        <i class="fa-solid fa-user"></i> Foydalanuvchi nomi
+                    </label>
+                    <input type="text" name="username" id="id_username" class="form-input"
+                           placeholder="admin" autocomplete="username" required>
+                </div>
+
+                <div class="form-group" id="group_password">
+                    <label for="id_password" class="form-label">
+                        <i class="fa-solid fa-lock"></i> Parol
+                    </label>
+                    <div class="form-password-wrapper">
+                        <input type="password" name="password" id="id_password" class="form-input"
+                               placeholder="••••••••" autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Parolni ko'rsatish">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-checkbox" id="group_remember">
+                    <label>
+                        <input type="checkbox" name="remember" id="id_remember">
+                        <span>Meni eslab qolish</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block" id="btnLogin">
+                    <i class="fa-solid fa-right-to-bracket"></i> Kirish
+                </button>
+            </form>
+
+            <div class="login-footer" id="loginFooter">
+                <a href="/auth/">Asosiy sahifaga qaytish</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const toggle = document.getElementById('passwordToggle');
+        const pwd = document.getElementById('id_password');
+        if (toggle && pwd) {
+            toggle.addEventListener('click', function() {
+                const isPassword = pwd.type === 'password';
+                pwd.type = isPassword ? 'text' : 'password';
+                toggle.querySelector('i').classList.toggle('fa-eye', !isPassword);
+                toggle.querySelector('i').classList.toggle('fa-eye-slash', isPassword);
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

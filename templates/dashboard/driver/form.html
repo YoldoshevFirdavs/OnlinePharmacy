@@ -1,0 +1,6 @@
+{% extends 'dashboard/form.html' %}
+{% load static %}
+
+{% block form_title %}{% if driver %}Haydovchini tahrirlash{% else %}Yangi haydovchi{% endif %}{% endblock %}
+{% block form_icon %}fa-solid fa-truck{% endblock %}
+{% block back_url %}{% url 'dashboard:driver_list' %}{% endblock %}

@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    {% include "components/begin.html" %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Pharmacy - Sog'liq eng katta boylik</title>
+    
+    <link href="{% static 'vendor/fonts/google-fonts.css' %}" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+
+    <style>
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #6a00f4;
+    --primary-dark: #5000d4;
+    --primary-light: #b084f4;
+    --accent: #ff6b6b;
+    --success: #34c759;
+    --warning: #ff9500;
+    --info: #00b4ff;
+    --dark: #0f1120;
+    --gray-900: #1a1a1a;
+    --gray-800: #2d2d3d;
+    --gray-700: #3e3e4e;
+    --gray-600: #666666;
+    --gray-500: #999999;
+    --gray-300: #e5e5ea;
+    --gray-200: #f5f5f7;
+    --gray-100: #fafafa;
+    --white: #ffffff;
+    --radius: 20px;
+    --radius-lg: 32px;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 20px 60px rgba(106, 0, 244, 0.15);
+    --shadow-xl: 0 30px 100px rgba(106, 0, 244, 0.2);
+    --transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --header-height: 80px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gray-100); /* Consistent light background */
+    color: var(--gray-900);
+    line-height: 1.6;
+    padding-top: var(--header-height); /* Add padding to body for fixed header */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 10vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 6vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+h4 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1.05rem;
+    color: var(--gray-600);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.text-light {
+    color: var(--gray-500);
+    font-size: 0.95rem;
+}
+
+.text-small {
+    font-size: 0.9rem;
+}
+
+.text-large {
+    font-size: 1.2rem;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+main {
+    flex: 1 0 auto; /* Allow main content to grow and shrink */
+}
+
+section {
+    padding: 120px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-intro {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.section-intro h2 {
+    margin-bottom: 16px;
+}
+
+.section-intro p {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--gray-600);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gap-20 { gap: 20px; }
+.gap-30 { gap: 30px; }
+.gap-40 { gap: 40px; }
+
+.mt-20 { margin-top: 20px; }
+.mt-40 { margin-top: 40px; }
+.mt-60 { margin-top: 60px; }
+
+.mb-20 { margin-bottom: 20px; }
+.mb-40 { margin-bottom: 40px; }
+.mb-60 { margin-bottom: 60px; }
+
+
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-60px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(106, 0, 244, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(106, 0, 244, 0.8); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes ping {
+    75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-fade-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-fade-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-fade-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--white);
+    box-shadow: 0 10px 30px rgba(106, 0, 244, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(106, 0, 244, 0.4);
+}
+
+.btn-secondary {
+    background: var(--gray-100);
+    color: var(--gray-900);
+    border: 2px solid var(--gray-300);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-900);
+    color: var(--white);
+    border-color: var(--gray-900);
+}
+
+.btn-text {
+    background: transparent;
+    color: var(--primary);
+    font-weight: 700;
+    padding: 12px 0;
+}
+
+.btn-text:hover {
+    color: var(--primary-dark);
+    transform: translateX(4px);
+}
+
+.btn-small {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+
+
+header.navbar, .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    z-index: 1100;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo span {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 40px;
+    align-items: center;
+}
+
+nav a {
+    color: var(--gray-900);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    transition: color 0.3s;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+.nav-cta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.05) 0%, rgba(176, 132, 244, 0.05) 100%);
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(106, 0, 244, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(176, 132, 244, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 10s ease-in-out infinite 1s;
+    pointer-events: none;
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-text h1 {
+    margin-bottom: 24px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    margin-bottom: 40px;
+    color: var(--gray-600);
+    animation: fadeInUp 0.8s ease-out 0.1s backwards;
+    max-width: 500px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+.hero-visual {
+    position: relative;
+    animation: fadeInRight 0.8s ease-out 0.3s backwards;
+}
+
+.hero-box {
+    width: 100%;
+    height: 500px;
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.1) 0%, rgba(176, 132, 244, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 200px;
+    animation: float 5s ease-in-out infinite;
+}
+
+.hero-badge {
+    position: absolute;
+    background: var(--white);
+    padding: 24px 32px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    animation: float 5s ease-in-out infinite;
+}
+
+.hero-badge.badge-1 {
+    top: 10%;
+    right: 5%;
+    animation-delay: 0s;
+}
+
+.hero-badge.badge-2 {
+    bottom: 15%;
+    left: 5%;
+    animation-delay: 1s;
+}
+
+.badge-label {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.badge-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
+
+.features {
+    background: var(--gray-100);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.feature-card {
+    background: var(--white);
+    padding: 48px 36px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: var(--transition);
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0s; }
+.feature-card:nth-child(2) { animation-delay: 0.1s; }
+.feature-card:nth-child(3) { animation-delay: 0.2s; }
+
+.feature-card:hover {
+    transform: translateY(-16px);
+    box-shadow: var(--shadow-xl);
+}
+
+.feature-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.feature-card h3 {
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+}
+
+.feature-card p {
+    color: var(--gray-600);
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+
+
+.products {
+    background: var(--white);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    animation: fadeInUp 0.8s ease-out backwards;
+    border: 2px solid rgba(106, 0, 244, 0.05);
+}
+
+.product-card:nth-child(1) { animation-delay: 0s; }
+.product-card:nth-child(2) { animation-delay: 0.1s; }
+.product-card:nth-child(3) { animation-delay: 0.2s; }
+.product-card:nth-child(4) { animation-delay: 0.3s; }
+.product-card:nth-child(5) { animation-delay: 0.4s; }
+.product-card:nth-child(6) { animation-delay: 0.5s; }
+
+.product-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.1) 0%, rgba(176, 132, 244, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.product-info {
+    padding: 28px;
+}
+
+.product-info h3 {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.product-desc {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.product-rating {
+    font-size: 0.9rem;
+    color: var(--warning);
+    margin-bottom: 16px;
+}
+
+.product-card .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+
+
+.how-it-works {
+    background: var(--gray-100);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.step-card {
+    position: relative;
+    padding: 40px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.step-card:nth-child(1) { animation-delay: 0s; }
+.step-card:nth-child(2) { animation-delay: 0.1s; }
+.step-card:nth-child(3) { animation-delay: 0.2s; }
+.step-card:nth-child(4) { animation-delay: 0.3s; }
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0 auto 24px;
+}
+
+.step-card h3 {
+    margin-bottom: 12px;
+}
+
+.step-card p {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+}
+
+
+
+.benefits {
+    background: var(--white);
+}
+
+.benefits-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.benefits-text h2 {
+    margin-bottom: 24px;
+    animation: fadeInLeft 0.8s ease-out;
+}
+
+.benefits-list {
+    list-style: none;
+    animation: fadeInLeft 0.8s ease-out 0.1s backwards;
+}
+
+.benefits-list li {
+    padding: 16px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.benefits-list li:last-child {
+    border-bottom: none;
+}
+
+.benefits-icon {
+    font-size: 24px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.benefits-text-item h4 {
+    margin-bottom: 6px;
+}
+
+.benefits-text-item p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 0;
+}
+
+.benefits-visual {
+    font-size: 250px;
+    text-align: center;
+    animation: fadeInRight 0.8s ease-out;
+}
+
+
+
+.pricing {
+    background: var(--gray-100);
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.pricing-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 48px 40px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    animation: fadeInUp 0.8s ease-out backwards;
+    position: relative;
+}
+
+.pricing-card:nth-child(1) { animation-delay: 0s; }
+.pricing-card:nth-child(2) { animation-delay: 0.1s; }
+.pricing-card:nth-child(3) { animation-delay: 0.2s; }
+
+.pricing-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-xl);
+}
+
+.pricing-card.featured {
+    border: 2px solid var(--primary);
+    transform: scale(1.05);
+}
+
+.pricing-badge {
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--white);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pricing-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    margin-top: 12px;
+}
+
+.pricing-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.pricing-period {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 24px;
+}
+
+.pricing-features {
+    list-style: none;
+    margin-bottom: 32px;
+}
+
+.pricing-features li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pricing-features li::before {
+    content: '✓';
+    color: var(--success);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.pricing-card .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+
+
+.faq {
+    background: var(--white);
+}
+
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    margin-bottom: 24px;
+    border-radius: var(--radius);
+    border: 2px solid var(--gray-200);
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.faq-item:nth-child(1) { animation-delay: 0s; }
+.faq-item:nth-child(2) { animation-delay: 0.1s; }
+.faq-item:nth-child(3) { animation-delay: 0.2s; }
+.faq-item:nth-child(4) { animation-delay: 0.3s; }
+.faq-item:nth-child(5) { animation-delay: 0.4s; }
+
+.faq-question {
+    padding: 24px;
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.faq-question:hover {
+    background: var(--gray-100);
+}
+
+.faq-icon {
+    font-size: 1.2rem;
+    transition: var(--transition);
+}
+
+.faq-item.active .faq-icon {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 24px;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 300px;
+    padding: 0 24px 24px 24px;
+}
+
+.faq-answer p {
+    color: var(--gray-600);
+    margin-bottom: 0;
+}
+
+
+
+.testimonials {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: var(--white);
+}
+
+.testimonials .section-intro h2,
+.testimonials .section-intro p {
+    color: var(--white);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 36px;
+    margin-top: 60px;
+}
+
+.testimonial-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.testimonial-card:nth-child(1) { animation-delay: 0s; }
+.testimonial-card:nth-child(2) { animation-delay: 0.1s; }
+.testimonial-card:nth-child(3) { animation-delay: 0.2s; }
+.testimonial-card:nth-child(4) { animation-delay: 0.3s; }
+
+.testimonial-rating {
+    font-size: 1.1rem;
+    color: var(--warning);
+    margin-bottom: 16px;
+}
+
+.testimonial-quote {
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    line-height: 1.7;
+    position: relative;
+    padding-left: 36px;
+}
+
+.testimonial-quote::before {
+    content: '"';
+    position: absolute;
+    left: 0;
+    top: -10px;
+    font-size: 3.5rem;
+    font-weight: 700;
+    opacity: 0.25;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.author-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.author-info h4 {
+    color: var(--white);
+    margin-bottom: 3px;
+}
+
+.author-info p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0;
+}
+
+
+
+.about {
+    background: var(--gray-100);
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.about-text h2 {
+    margin-bottom: 24px;
+    animation: fadeInLeft 0.8s ease-out;
+}
+
+.about-text p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    animation: fadeInLeft 0.8s ease-out backwards;
+}
+
+.about-text p:nth-of-type(2) { animation-delay: 0.1s; }
+.about-text p:nth-of-type(3) { animation-delay: 0.2s; }
+
+.about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.stat-box {
+    background: var(--white);
+    padding: 32px;
+    border-radius: 16px;
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow);
+    animation: fadeInLeft 0.8s ease-out backwards;
+}
+
+.stat-box:nth-child(1) { animation-delay: 0.3s; }
+.stat-box:nth-child(2) { animation-delay: 0.4s; }
+.stat-box:nth-child(3) { animation-delay: 0.5s; }
+.stat-box:nth-child(4) { animation-delay: 0.6s; }
+
+.stat-number {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.about-visual {
+    font-size: 250px;
+    text-align: center;
+    animation: fadeInRight 0.8s ease-out;
+}
+
+
+
+.blog {
+    background: var(--white);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.blog-card {
+    background: var(--gray-100);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.blog-card:nth-child(1) { animation-delay: 0s; }
+.blog-card:nth-child(2) { animation-delay: 0.1s; }
+.blog-card:nth-child(3) { animation-delay: 0.2s; }
+
+.blog-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-xl);
+}
+
+.blog-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.1) 0%, rgba(176, 132, 244, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+}
+
+.blog-content {
+    padding: 32px;
+}
+
+.blog-date {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.blog-card h3 {
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+}
+
+.blog-card p {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.blog-card .btn-text {
+    color: var(--primary);
+}
+
+
+
+.cta {
+    background: linear-gradient(135deg, rgba(106, 0, 244, 0.08) 0%, rgba(176, 132, 244, 0.08) 100%);
+    text-align: center;
+    padding: 100px 0;
+}
+
+.cta-content h2 {
+    margin-bottom: 20px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.cta-content p {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto 50px;
+    animation: fadeInUp 0.8s ease-out 0.1s backwards;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+
+
+footer {
+    background: var(--dark);
+    color: var(--white);
+    padding: 80px 0 30px;
+}
+
+footer, .site-footer {
+    margin-top: auto; /* Push footer to the bottom in a flex container */
+}
+
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+.footer-column h4 {
+    color: var(--white);
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+}
+
+.footer-column p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: var(--primary-light);
+    transform: translateX(4px);
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.social-link {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.social-link:hover {
+    background: var(--primary);
+    transform: translateY(-4px);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 30px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+
+
+@media (max-width: 768px) {
+    nav ul {
+        display: none;
+    }
+
+    section {
+        padding: 80px 0;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .hero-box {
+        height: 350px;
+        font-size: 120px;
+    }
+
+    .about-content,
+    .benefits-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .about-visual,
+    .benefits-visual {
+        font-size: 150px;
+    }
+
+    .hero-actions,
+    .cta-buttons {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn,
+    .cta-buttons .btn {
+        width: 100%;
+    }
+
+    .pricing-card.featured {
+        transform: scale(1);
+    }
+}
+
+    </style>
+    
+</head>
+<body>
+    {% include "components/header.html" %} 
+
+<main>
+
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Sog'lig'ingiz bizning <span class="gradient-text">ustuvorligimiz</span></h1>
+                <p>Online Pharmacy — tezkor yetkazib berish, sertifikatlangan dorilar va 24/7 foydalanuvchi qo'llab-quvvatlashi bilan tanilgan ishonchli platform.</p>
+                <div class="hero-actions">
+                    <a href="/shop/" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag"></i> Dorilarni ko'rish
+                    </a>
+                    <a href="#how" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right"></i> Qanday ishlaydi
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-box"><i class="fas fa-pills"></i></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Nega Online Pharmacy?</h2>
+            <p>Eng yaxshi xizmatlar, eng arzon narxlar, eng sifatli dorilar</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                <h3>Tez Yetkazib Berish</h3>
+                <p>Toshkent bo'ylab 1 soat ichida sizning esingizga yetkazamiz</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-check-circle"></i></div>
+                <h3>Sertifikatlangan</h3>
+                <p>Barcha dorilar 100% original va sifat kafolatiga ega</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                <h3>24/7 Yordam</h3>
+                <p>Har qanday vaqtda biz bilan bog'laning, mutaxassislar yordam beradi</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="products">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Ommabop Mahsulotlar</h2>
+            <p>Eng ko'p buyurtma berilgan va foydalanuvchilar tafakkuri bilan tanlangan dorilar</p>
+        </div>
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-pills"></i></div>
+                <div class="product-info">
+                    <h3>Paracetamol 500mg</h3>
+                    <p class="product-desc">Og'riq va isitma uchun zaruriy dori</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (240)</div>
+                    <div class="product-price">12,000 so'm</div>
+                    <a href="/shop/products/1/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-fist-raised"></i></div>
+                <div class="product-info">
+                    <h3>Vitamin C 1000mg</h3>
+                    <p class="product-desc">Immunitet mustahkamlash uchun</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (189)</div>
+                    <div class="product-price">25,000 so'm</div>
+                    <a href="/shop/products/2/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-fire"></i></div>
+                <div class="product-info">
+                    <h3>Ibuprofen 400mg</h3>
+                    <p class="product-desc">Yallig'lanishga qarshi dori</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (156)</div>
+                    <div class="product-price">18,000 so'm</div>
+                    <a href="/shop/products/3/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-leaf"></i></div>
+                <div class="product-info">
+                    <h3>Aspirin 500mg</h3>
+                    <p class="product-desc">Qon tushiruvchi dori</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (203)</div>
+                    <div class="product-price">9,000 so'm</div>
+                    <a href="/shop/products/4/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-syringe"></i></div>
+                <div class="product-info">
+                    <h3>Qandli Migli Dori</h3>
+                    <p class="product-desc">Qandli miglining darajasini boshqarish</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (178)</div>
+                    <div class="product-price">35,000 so'm</div>
+                    <a href="/shop/products/5/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image"><i class="fas fa-brain"></i></div>
+                <div class="product-info">
+                    <h3>Stress Bartaraf Dori</h3>
+                    <p class="product-desc">Stressni kamaytiradigan preparit</p>
+                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (142)</div>
+                    <div class="product-price">22,000 so'm</div>
+                    <a href="/shop/products/6/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works" id="how">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Qanday Ishlaydi?</h2>
+            <p>Sodda 4 bosqichda dori olishni boshlaymiz</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Ro'yxatdan O'ting</h3>
+                <p>Mobil ilovaga yoki web-saytga kirib akkaunt oching</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Dori Tanlang</h3>
+                <p>Katalogdan kerakli dorini qidiring va tanlang</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>To'lov Qiling</h3>
+                <p>Savatga qo'shib, xavfsiz to'liq shaklidagi to'lov qiling</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>Olib Qo'ying</h3>
+                <p>1 soat ichida dori eshikni orqasida bo'ladi</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="benefits">
+    <div class="container">
+        <div class="benefits-content">
+            <div class="benefits-text">
+                <h2>Nima Uchun Faqat Biz?</h2>
+                <ul class="benefits-list">
+                    <li>
+                        <div class="benefits-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="benefits-text-item">
+                            <h4>Eng Tez Yetkazib Berish</h4>
+                            <p>1 soat ichida yetkazib beriamiz, shuni biz kafolatlamiz</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="benefits-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="benefits-text-item">
+                            <h4>Eng Arzon Narxlar</h4>
+                            <p>Bazarda eng arzon narxlari bilan ishlaymiz</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="benefits-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="benefits-text-item">
+                            <h4>100% Xavfsiz Sotib Olish</h4>
+                            <p>Barcha dorilar sertifikatlangan, original va sifatli</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="benefits-icon"><i class="fas fa-user-md"></i></div>
+                        <div class="benefits-text-item">
+                            <h4>Mutaxassis Konsultatsiya</h4>
+                            <p>Farmatsevtlar har doim yordam beradi va maslahat beradi</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="benefits-visual"><i class="fas fa-trophy"></i></div>
+        </div>
+    </div>
+</section>
+
+<section class="pricing">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Tariflar va Planlar</h2>
+            <p>O'zingizga mos tarifni tanlang</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-name">Oddiy</div>
+                <div class="pricing-price">Bepul</div>
+                <div class="pricing-period">Doimiy foydalanish</div>
+                <ul class="pricing-features">
+                    <li>Istalgan dori sotib olish</li>
+                    <li>Tez yetkazib berish</li>
+                    <li>24/7 yordam</li>
+                    <li>Buyurtmalar tarixi</li>
+                </ul>
+                <a href="/shop/" class="btn btn-secondary">Do'konga o'tish</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-name">Premium</div>
+                <div class="pricing-price">49,000 so'm</div>
+                <div class="pricing-period">oyiga</div>
+                <ul class="pricing-features">
+                    <li>10% chegirma</li>
+                    <li>Bepul yetkazib berish</li>
+                    <li>Maxsus maslahat</li>
+                </ul>
+                <a href="/shop/" class="btn btn-primary">Do'konda ko'rish</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Savol-Javob</h2>
+            <p>Eng ko'p so'raladigan savollar</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Dorilar haqiqatan aslmi?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Ha, barcha dorilar litsenziyaga ega farmatsevtik kompaniyalaridan sotib olinadi.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Yetkazib berish vaqti qancha?</span>
+                    <span class="faq-icon">▼</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Toshkent shahrida 1 soat ichida yetkazib beramiz.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials">
+    <div class="container">
+        <div class="section-intro">
+            <h2>Mijozlarimiz Fikri</h2>
+            <p>Haqiqiy foydalanuvchilardan real fikrlar</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <div class="testimonial-quote">Juda ajoyib xizmat! Dorilar o'z vaqtida keldi.</div>
+                <div class="testimonial-author">
+                    <div class="author-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="author-info">
+                        <h4>Firdavs Y.</h4>
+                        <p>Toshkent</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="about">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>Biz Haqimizda</h2>
+                <p>{{ site_config.about_us_text }}</p>
+                <div class="about-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">{{ site_config.clients_count }}+</div>
+                        <div class="stat-label">Baxtli Mijozlar</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">{{ site_config.experience_years }}+</div>
+                        <div class="stat-label">Yillik Tajriba</div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-visual"><i class="fas fa-hospital"></i></div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Sog'ligingizni Asrashni Hozir Boshlang</h2>
+            <p>Hozir ro'yxatdan o'ting va birinchi buyurtmangiz uchun chegirma oling.</p>
+            <div class="cta-buttons">
+                <a href="/shop/" class="btn btn-primary">Do'konga o'tish</a>
+                <a href="/about/" class="btn btn-secondary">Biz haqimizda</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+
+{% include "components/footer.html" %}
+<script src="{% static 'js/header.js' %}"></script>
+
+</body>
+</html>

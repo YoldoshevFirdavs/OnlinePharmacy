@@ -1,0 +1,57 @@
+--- a/scripts/run_tests.ps1
++++ b/scripts/run_tests.ps1
+@@
+-$ErrorActionPreference = "Stop"
+-
+-$pyMinor = python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+-if ($pyMinor -ne "3.10") {
+-    Write-Error "Tests must run with Python 3.10, current: $pyMinor"
+-    exit 1
+-}
+-
+-python --version
+-python -m pytest -q $args
++$ErrorActionPreference = "Stop"
++
++function Fail([string]$Message) {
++    Write-Host "[ERROR] $Message" -ForegroundColor Red
++    exit 1
++}
++
++function Info([string]$Message) {
++    Write-Host "[INFO] $Message" -ForegroundColor Cyan
++}
++
++$required = "3.10"
++$venvPath = ".venv310"
++$venvPython = Join-Path $venvPath "Scripts\python.exe"
++$activateScript = Join-Path $venvPath "Scripts\Activate.ps1"
++
++$py310Version = py -3.10 --version 2>&1
++if ($LASTEXITCODE -ne 0) { Fail "Python 3.10 is not available via 'py -3.10'" }
++
++if (-not (Test-Path $venvPython)) {
++    Info "Creating virtual environment at $venvPath"
++    py -3.10 -m venv $venvPath
++}
++
++. $activateScript
++
++$minor = python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
++if ($minor -ne $required) { Fail "Tests must run with Python $required, current: $minor" }
++
++python -m pip install --upgrade pip
++python -m pip install -r requirements.txt
++python -m pytest -q @args
++
+--- /dev/null
++++ b/scripts/diagnose_python.ps1
+@@
++$ErrorActionPreference = "Continue"
++Write-Host "== Python diagnostics ==" -ForegroundColor Cyan
++python --version
++py -0p
++where.exe python
++python -c "import sys; print(sys.executable)"
++python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
++python -m pip show python-telegram-bot

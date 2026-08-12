@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% include "components/begin.html" %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxfiylik siyosati | OnlinePharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="/static/css/footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-text: #2c3e50;
+            --secondary-text: #34495e;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --line-height: 1.6;
+            --container-width: 900px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--secondary-text);
+            line-height: var(--line-height);
+            margin: 0;
+            padding: 0;
+        }
+
+        .legal-container {
+            max-width: var(--container-width);
+            margin: 120px auto 80px;
+            padding: 0 20px;
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary-text);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--primary-text);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6a00f4;
+            padding-left: 15px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+
+        .privacy-highlight {
+            background: rgba(106, 0, 244, 0.03);
+            border: 1px solid rgba(106, 0, 244, 0.1);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .btn-secure {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-card { padding: 30px; }
+        }
+    </style>
+</head>
+<body data-page="privacy">
+
+    {% include "components/header.html" %}
+
+    <main class="legal-container">
+        <article class="content-card">
+            <h1>Maxfiylik Siyosati</h1>
+            <p style="text-align:center; color:#666; margin-bottom:40px;"><strong>Sana:</strong> 14.06.2026</p>
+
+            <section>
+                <h2>1. Kirish</h2>
+                <p><strong>Online Pharmacy</strong> loyihasiga xush kelibsiz. Ushbu Maxfiylik Siyosati sizning shaxsiy ma’lumotlaringiz qanday to‘planishi, ishlatilishi va himoyalanishini tushuntiradi.</p>
+                <p><strong>Muhim eslatma:</strong> Loyiha faqat o‘quv maqsadida yaratilgan bo‘lib, real dorixona faoliyatini ifodalamaydi. Bu — talaba loyihasi (Yoldashev Firdavs, Komiljon Hamidjonovning 10.3 Python Backend kursi).</p>
+                <p class="privacy-highlight" style="text-align:center; font-weight:600;">
+                    “Loyiha o‘quv maqsadida yaratilgan, real dorixona faoliyatini ifodalamaydi.”
+                </p>
+            </section>
+
+            <section>
+                <h2>2. Ma’lumot to‘plash</h2>
+                <p>Biz quyidagi turdagi ma’lumotlarni to‘playmiz:</p>
+                <ul>
+                    <li><strong>Ro‘yxatdan o‘tish ma’lumotlari:</strong> ism, familiya, email manzili, telefon raqami, parol.</li>
+                    <li><strong>Buyurtma ma’lumotlari:</strong> yetkazib berish manzili, buyurtma tarkibi.</li>
+                    <li><strong>Texnik ma’lumotlar:</strong> IP manzil, brauzer turi, qurilma ma’lumotlari, cookie fayllari.</li>
+                    <li><strong>OTP kodlari</strong> (ikkilamchi tasdiqlash uchun).</li>
+                </ul>
+            </section>
+
+            <section class="privacy-highlight">
+                <h2>3. Ma’lumotdan foydalanish</h2>
+                <p>Biz to‘plangan ma’lumotlardan quyidagi maqsadlarda foydalanamiz:</p>
+                <ul>
+                    <li>Foydalanuvchi hisobini yaratish va boshqarish</li>
+                    <li>Buyurtmalarni qayta ishlash va yetkazib berishni tashkillashtirish</li>
+                    <li>OTP orqali xavfsiz kirishni ta’minlash</li>
+                    <li>Saytni yaxshilash va texnik muammolarni hal qilish</li>
+                    <li>Huquqiy talablarga rioya qilish</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>4. Ma’lumotni himoya qilish</h2>
+                <p>Biz sizning ma’lumotlaringizni himoya qilish uchun zamonaviy choralarni qo‘llaymiz:</p>
+                <ul>
+                    <li>JWT tokenlar orqali autentifikatsiya</li>
+                    <li>Parollar PBKDF2 algoritmi yordamida hashlanadi</li>
+                    <li>Ma’lumotlar PostgreSQL bazasida xavfsiz saqlanadi</li>
+                    <li>SSL/TLS shifrlashdan foydalaniladi</li>
+                    <li>Uchinchi shaxslarga sizning roziligingizsiz ma’lumot berilmaydi</li>
+                </ul>
+                <p>Sizning shaxsiy ma’lumotlaringiz (email, telefon, manzil) hech qachon uchinchi tomonlarga sotilmaydi yoki berilmaydi.</p>
+            </section>
+
+            <section>
+                <h2>5. Cookie va sessiyalar</h2>
+                <p>Saytimiz cookie fayllaridan foydalanadi. Ular orqali foydalanuvchi sessiyasini saqlash, sayt ishlashini yaxshilash va statistik ma’lumotlarni yig‘ish amalga oshiriladi. Siz brauzer sozlamalari orqali cookie'larni boshqarishingiz mumkin.</p>
+            </section>
+
+            <section>
+                <h2>6. Uchinchi tomon xizmatlari</h2>
+                <p>Loyiha o‘quv maqsadida bo‘lgani uchun hozirda real uchinchi tomon xizmatlari (to‘lov tizimlari, yetkazib berish kompaniyalari) ulanmagan. Kelajakda ulanishi mumkin bo‘lgan xizmatlar ham ushbu siyosatga bo‘ysunadi.</p>
+            </section>
+
+            <section>
+                <h2>7. Foydalanuvchi huquqlari</h2>
+                <p>Siz quyidagi huquqlarga egasiz:</p>
+                <ul>
+                    <li>O‘z shaxsiy ma’lumotlaringizni ko‘rish</li>
+                    <li>Ma’lumotlaringizni tahrirlash</li>
+                    <li>Hisobingizni o‘chirish (administrator orqali)</li>
+                    <li>Ma’lumotlaringizni qayta ishlashni cheklash</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>8. O‘zgartirishlar</h2>
+                <p>Biz ushbu Maxfiylik Siyosatini vaqti-vaqti bilan yangilab turishimiz mumkin. O‘zgartirishlar sayt orqali e’lon qilinadi. Davomiy foydalanish yangi siyosatni qabul qilganingizni bildiradi.</p>
+            </section>
+
+            <section>
+                <h2>9. Aloqa</h2>
+                <p>Maxfiylik siyosati bo‘yicha savollaringiz bo‘lsa, quyidagi ma’lumotlar orqali bog‘laning:</p>
+                <p><strong>Yoldashev Firdavs</strong><br>
+                Email: <a href="mailto:firdavsyoldoshevpython@gmail.com">firdavsyoldoshevpython@gmail.com</a><br>
+                Telefon: +998 97 770 55 58</p>
+            </section>
+
+            <p style="margin-top: 50px; font-size: 0.95rem; color: #666; text-align: center;">
+                Oxirgi yangilanish: 2026-yil 14-iyun<br>
+                Ushbu loyiha faqat o‘quv maqsadida yaratilgan bo‘lib, tijorat maqsadida ishlatilmaydi.
+            </p>
+
+            <button class="btn-secure" id="privacyBtn">Ma'lumotlarim xavfsizligini tasdiqlash</button>
+        </article>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script src="/static/js/header.js"></script>
+    <script src="/static/js/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('privacyBtn').addEventListener('click', () => {
+                alert('Shaxsiy ma\'lumotlaringiz yuqori darajadagi shifrlash tizimi bilan himoyalangan! 🔒');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+pytest
+pytest-django
+playwright
+flake8 # For linting
+black # For formatting
+isort # For import sorting
+coverage # For test coverage
+Django==4.2.14
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.5.1

@@ -1,0 +1,77 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Ro'yxat" }}{% endblock %}
+
+{% block content %}
+{% block page_header %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid {{ page_icon|default:'fa-table-list' }}"></i>
+        {{ page_title|default:"Ro'yxat" }}
+    </h1>
+    {% if create_url %}
+    <a href="{{ create_url }}" class="btn btn--primary" id="btnCreate">
+        <i class="fa-solid fa-plus"></i> Qo'shish
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+<!-- ═══════ Filter / Search Bar ═══════ -->
+<div class="list-toolbar" id="listToolbar">
+    <div class="list-toolbar__search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="tableSearch" placeholder="Jadvalda qidirish…" autocomplete="off">
+    </div>
+    <div class="list-toolbar__actions">
+        <span class="list-toolbar__count" id="tableCount"></span>
+    </div>
+</div>
+
+<!-- ═══════ Data Table ═══════ -->
+<div class="card card--table" id="listTableCard">
+    <div class="card__body table-responsive">
+        <table class="data-table" id="dataTable">
+            <thead>
+                <tr>
+                    {% block table_head %}
+                    <th>ID</th>
+                    <th>Nomi</th>
+                    <th>Status</th>
+                    <th>Sana</th>
+                    <th>Amallar</th>
+                    {% endblock %}
+                </tr>
+            </thead>
+            <tbody>
+                {% block table_body %}
+                <tr class="data-table__empty">
+                    <td colspan="5">
+                        <i class="fa-solid fa-inbox"></i>
+                        <span>Ma'lumot topilmadi</span>
+                    </td>
+                </tr>
+                {% endblock %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ═══════ Pagination ═══════ -->
+{% if page_obj %}
+<nav class="pagination-wrapper" id="paginationWrapper" aria-label="Sahifalar">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li><a href="?page={{ num }}" class="pagination__link{% if page_obj.number == num %} active{% endif %}">{{ num }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-right"></i></a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+# Environment files
+.env
+.env.local
+.env.prod
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtualenvs
+venv/
+venvs*/
+\.venv
+.venvs310
+
+# Django
+media/
+staticfiles/
+
+
+# IDEs
+.idea/
+.vscode/
+.kiro/
+
+*.log
+*.bak
+*.crt
+*.pem
+*.key
+*.zip
+*.tar
+*.gz
+

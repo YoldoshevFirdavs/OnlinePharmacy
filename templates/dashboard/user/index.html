@@ -1,0 +1,48 @@
+{% extends 'dashboard/user/base.html' %}
+{% load static %}
+
+{% block title %}Mening kabinetim{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-house-user"></i> Mening kabinetim
+    </h1>
+</div>
+
+<div class="user-dashboard-grid" id="userDashboardGrid">
+    <!-- Profile Summary -->
+    <div class="card card--profile" id="userProfileCard">
+        <div class="card__body">
+            <div class="profile-avatar" id="userAvatar">
+                <i class="fa-solid fa-circle-user"></i>
+            </div>
+            <h3 class="profile-name">{{ request.user.full_name|default:request.user.email|default:request.user.phone_number|default:"User" }}</h3>
+            <p class="profile-email">{{ request.user.email|default:"—" }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card" id="userActionsCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-bolt"></i> Tezkor harakatlar</h2>
+        </div>
+        <div class="card__body">
+            <div class="quick-actions">
+                <a href="{% url 'dashboard:account_settings' %}" class="quick-action">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Sozlamalar</span>
+                </a>
+                <a href="{% url 'dashboard:order_list' %}" class="quick-action">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Buyurtmalar</span>
+                </a>
+                <a href="{% url 'dashboard:logout_page' %}" class="quick-action quick-action--danger">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Chiqish</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

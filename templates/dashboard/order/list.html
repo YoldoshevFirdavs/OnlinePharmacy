@@ -1,0 +1,65 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Buyurtmalar{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Buyurtmalar
+        </h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Mijoz</th>
+<th>Mahsulotlar soni</th>
+<th>Jami summa</th>
+<th>Status</th>
+<th>Yetkazuvchi</th>
+<th>Yaratilgan sana</th>
+<th>Amallar</th>
+{% endblock %}
+
+{% block table_body %}
+{% if orders %}
+    {% for order in orders %}
+    <tr>
+        <td><strong>#{{ order.id }}</strong></td>
+        <td>
+            <div class="user-cell">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ order.items.count|default:"0" }}</td>
+        <td><strong>{{ order.total_price|default:"0" }} so'm</strong></td>
+        <td>
+            <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Pending' %}warning{% elif order.status == 'Cancelled' %}error{% else %}info{% endif %}">
+                {{ order.status|default:"—" }}
+            </span>
+        </td>
+        <td>{{ order.driver|default:"Tayinlanmagan" }}</td>
+        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+        <td>
+            <div class="table-actions">
+                <button class="btn btn--sm btn--ghost" title="Ko'rish">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="8">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Buyurtmalar topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}

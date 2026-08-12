@@ -1,0 +1,53 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Faoliyat tarixi{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Faoliyat tarixi
+        </h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Foydalanuvchi</th>
+<th>Harakat</th>
+<th>Tavsif</th>
+<th>IP manzil</th>
+<th>Sana</th>
+{% endblock %}
+
+{% block table_body %}
+{% if audit_logs %}
+    {% for log in audit_logs %}
+    <tr>
+        <td>{{ log.id }}</td>
+        <td>
+            <div class="user-cell">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ log.user|default:"Tizim" }}</span>
+            </div>
+        </td>
+        <td>
+            <span class="tag tag--{{ log.action_type|default:'info' }}">{{ log.action|default:"—" }}</span>
+        </td>
+        <td>{{ log.description|default:"—" }}</td>
+        <td><code>{{ log.ip_address|default:"—" }}</code></td>
+        <td>{{ log.timestamp|date:"d.m.Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="6">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Faoliyat tarixi bo'sh</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}

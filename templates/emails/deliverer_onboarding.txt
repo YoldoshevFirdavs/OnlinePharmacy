@@ -1,0 +1,13 @@
+Hello,
+
+You have been registered as a Deliverer for OnlinePharmacy.
+
+Please use the following link to complete your onboarding and set your password:
+{{ link }}
+
+This link is valid for {{ token_lifetime_minutes }} minutes and can be used only once.
+If you did not expect this email, please contact support immediately.
+
+Thank you,
+OnlinePharmacy Team
+Support Contact: yoldoshevf@proton.me

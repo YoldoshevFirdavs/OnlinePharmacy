@@ -1,0 +1,51 @@
+{% load static %}
+<header class="site-header navbar" role="banner" aria-label="Main header">
+  <div class="header-inner container">
+    <!-- Left: Logo -->
+    <div class="header-left">
+      <a href="/" class="header-logo" aria-label="Pharmacy home">
+        <svg class="logo-svg" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#logo_grad)"/>
+          <path d="M20 10V30M10 20H30" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="logo_grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6a00f4"/>
+              <stop offset="1" stop-color="#b084f4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">Pharmacy</span>
+      </a>
+    </div>
+
+    <!-- Center: Navigation -->
+    <nav id="header-nav" class="header-nav" role="navigation" aria-label="Primary">
+      <button id="header-hamburger" class="header-hamburger" aria-expanded="false" aria-controls="header-nav-menu" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul id="header-nav-menu" class="header-nav-menu" role="menubar">
+        <li role="none"><a role="menuitem" id="nav-home" data-nav="home" class="header-nav-link" href="/">Bosh sahifa</a></li>
+        <li role="none"><a role="menuitem" id="nav-shop" data-nav="shop" class="header-nav-link" href="/shop/">Do'kon</a></li>
+        <li role="none"><a role="menuitem" id="nav-about" data-nav="about" class="header-nav-link" href="/about/">Biz haqimizda</a></li>
+        <li role="none"><a role="menuitem" id="nav-contact" data-nav="contact" class="header-nav-link" href="/contact/">Aloqa</a></li>
+      </ul>
+    </nav>
+
+    <!-- Right: Actions (auth + cart) -->
+    <div class="header-right">
+        <!-- NOTE: Authentication links for non-logged-in users -->
+        <div id="auth-links">
+            <a href="/auth/" id="header-login-btn" class="btn-login-header">Kirish</a>
+        </div>
+
+        <!-- NOTE: Account dropdown for logged-in users -->
+        {% include 'components/account_dropdown.html' %}
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'cart' %}" id="cartIcon" class="header-cart cart-link" aria-label="View cart">Cart 🛒 <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span></a>
+        {% endif %}
+    </div>
+  </div>
+</header>
+<div id="header-overlay" class="header-overlay"></div>

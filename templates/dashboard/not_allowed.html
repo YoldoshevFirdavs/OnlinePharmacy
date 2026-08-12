@@ -1,0 +1,72 @@
+{% load static %}
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/font-face.css' %}"> {# Yangi qo'shildi #}
+  <title>Kirish taqiqlangan</title>
+  <style>
+    body {
+      font-family: var(--font-family, sans-serif); /* Font family o'zgaruvchidan olindi */
+      background-color: var(--background); /* O'zgaruvchidan olindi */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text-color); /* O'zgaruvchidan olindi */
+      text-align: center;
+      transition: background-color 0.3s ease, color 0.3s ease; /* Tema o'zgarishi uchun */
+    }
+    main {
+      background-color: var(--card-background); /* O'zgaruvchidan olindi */
+      padding: 40px;
+      border-radius: var(--border-radius-md); /* O'zgaruvchidan olindi */
+      box-shadow: var(--shadow-md); /* O'zgaruvchidan olindi */
+      max-width: 500px;
+      width: 100%;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Tema o'zgarishi uchun */
+    }
+    h1 {
+      color: var(--danger-color); /* O'zgaruvchidan olindi */
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .from-info {
+      font-style: italic;
+      color: var(--text-muted); /* O'zgaruvchidan olindi */
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body data-theme="light"> {# data-theme qo'shildi #}
+  <main>
+    <h1>Siz bloklandingiz</h1>
+    <p>Hozir siz bu sahifaga kira olmaysiz. Sabab: ko‘p marta noto‘g‘ri urinishlar.</p>
+    <p class="from-info">Manba: <span id="fromSource">{{ request.GET.from|default:"noma'lum" }}</span></p>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromParam = urlParams.get('from');
+      if (fromParam) {
+        document.getElementById('fromSource').textContent = fromParam.replace(/_/g, ' ');
+      }
+
+      // Theme initialization
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.body.dataset.theme = savedTheme;
+      if (savedTheme === 'dark') {
+          document.body.classList.add('dark');
+      }
+    });
+  </script>
+</body>
+</html>

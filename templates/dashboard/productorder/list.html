@@ -1,0 +1,35 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Mahsulot buyurtmalari{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Buyurtma</th>
+<th>Mahsulot</th>
+<th>Miqdori</th>
+<th>Narxi</th>
+<th>Jami</th>
+{% endblock %}
+
+{% block table_body %}
+{% if product_orders %}
+    {% for item in product_orders %}
+    <tr>
+        <td>{{ item.id }}</td>
+        <td><strong>#{{ item.order.id|default:"—" }}</strong></td>
+        <td>{{ item.product.name|default:item.medicine.name|default:"—" }}</td>
+        <td>{{ item.quantity|default:"0" }}</td>
+        <td>{{ item.price|default:"0" }} so'm</td>
+        <td><strong>{{ item.total|default:"0" }} so'm</strong></td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="6">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Mahsulot buyurtmalari topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}

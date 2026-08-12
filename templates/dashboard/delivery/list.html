@@ -1,0 +1,97 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Delivery List{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">
+        <i class="fa-solid fa-truck-fast"></i> Delivery Orders
+    </h2>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
+            <i class="fa-solid fa-plus"></i> Add New Delivery
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card__body">
+        <div class="table-responsive">
+            <table class="data-table drivers-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Driver</th>
+                        <th>Vehicle</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if deliveries %}
+                        {% for delivery in deliveries %}
+                        <tr data-delivery-id="{{ delivery.id }}">
+                            <td>{{ delivery.id }}</td>
+                            <td>
+                                {% if delivery.customer %}
+                                    {{ delivery.customer.full_name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if delivery.driver %}
+                                    {{ delivery.driver.full_name }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ delivery.get_vehicle_display }}</td>
+                            <td>
+                                {% if delivery.customer %}
+                                    {{ delivery.customer.phone_number }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ delivery.address }}</td>
+                            <td>
+                                <span class="tag tag--{{ delivery.get_status_tag_class }}">
+                                    {{ delivery.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="table-actions">
+                                <a href="{% url 'dashboard:delivery_update' delivery.id %}" class="btn btn--sm btn--ghost" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <form action="{% url 'dashboard:delivery_delete' delivery.id %}" method="post" class="inline-form delete-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn--sm btn--ghost btn--danger" title="Delete">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="data-table__empty">
+                                <i class="fa-solid fa-box-open"></i>
+                                No delivery orders found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'dashboard/js/delivery.js' %}"></script>
+{% endblock %}

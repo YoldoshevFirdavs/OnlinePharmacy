@@ -1,0 +1,41 @@
+/*!
+ * Font Awesome Free 6.x — LOCAL VENDOR PLACEHOLDER
+ *
+ * This file must be replaced with the real Font Awesome CSS bundle.
+ *
+ * HOW TO OBTAIN:
+ *   1. Download Font Awesome Free from https://fontawesome.com/download
+ *   2. Extract the ZIP and copy:
+ *        css/all.min.css    → static/vendor/fontawesome/css/all.min.css
+ *        webfonts/          → static/vendor/webfonts/
+ *
+ *   OR use npm:
+ *     npm install @fortawesome/fontawesome-free
+ *     copy node_modules/@fortawesome/fontawesome-free/css/all.min.css
+ *          → static/vendor/fontawesome/css/all.min.css
+ *     copy node_modules/@fortawesome/fontawesome-free/webfonts/
+ *          → static/vendor/webfonts/
+ *
+ * REQUIRED WEBFONT FILES (place in static/vendor/webfonts/):
+ *   fa-solid-900.woff2
+ *   fa-solid-900.ttf
+ *   fa-regular-400.woff2
+ *   fa-regular-400.ttf
+ *   fa-brands-400.woff2
+ *   fa-brands-400.ttf
+ *
+ * IMPORTANT: After placing the real CSS, update the @font-face src paths inside it
+ * to point to ../webfonts/ (relative) or use Django {% static %} in a custom CSS file.
+ *
+ * The webfonts @font-face must reference the local path, e.g.:
+ *   src: url('../webfonts/fa-solid-900.woff2') format('woff2');
+ */
+
+/*
+  Minimal stub — renders icons as Unicode boxes until real file is installed.
+  This prevents broken page rendering during development.
+*/
+.fa-solid, .fa-regular, .fa-brands, .fas, .far, .fab {
+  font-style: normal;
+  display: inline-block;
+}

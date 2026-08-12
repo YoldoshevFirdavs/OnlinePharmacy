@@ -1,0 +1,24 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+
+<div class="sidebar d-flex flex-column" id="sidebar">
+    <div class="sidebar-header p-3 text-center">
+        <h4 class="text-white"><i class="bi bi-shop"></i> PharmacyAdmin</h4>
+    </div>
+    <ul class="nav flex-column mb-auto">
+        <li class="nav-item"><a href="{% url 'dashboard:main_dashboard' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:main_dashboard' %}active{% endif %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li class="nav-item"><a href="{% url 'dashboard:order_list' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:order_list' %}active{% endif %}"><i class="bi bi-box-seam"></i> Orders</a></li>
+        <li class="nav-item"><a href="{% url 'dashboard:category_list' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:category_list' %}active{% endif %}"><i class="bi bi-shop-window"></i> Categories</a></li>
+        <li class="nav-item"><a href="{% url 'dashboard:user_list' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:user_list' %}active{% endif %}"><i class="bi bi-people"></i> Customers</a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-bicycle"></i> Delivery Riders</a></li> {# No specific view for this yet #}
+        <li class="nav-item"><a href="{% url 'dashboard:audit_log_list' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:audit_log_list' %}active{% endif %}"><i class="bi bi-graph-up"></i> Audit Logs</a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-credit-card"></i> Payments</a></li> {# No specific view for this yet #}
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-star"></i> Reviews</a></li> {# No specific view for this yet #}
+        <li class="nav-item"><a href="{% url 'dashboard:account_settings' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:account_settings' %}active{% endif %}"><i class="bi bi-gear"></i> Settings</a></li>
+        <li class="nav-item"><a href="{% url 'dashboard:account_settings' %}" class="nav-link {% if request.resolver_match.view_name == 'dashboard:account_settings' %}active{% endif %}"><i class="bi bi-person"></i> Account</a></li> {# Assuming admin_account points to general settings for now #}
+        <li class="nav-item"><a href="{% url 'dashboard:login_page' %}" class="nav-link"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-person-plus"></i> Signup</a></li> {# No specific view for this yet #}
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-question-circle"></i> Forgot Password</a></li> {# No specific view for this yet #}
+        <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-exclamation-triangle"></i> 404</a></li> {# No specific view for this yet #}
+    </ul>
+</div>

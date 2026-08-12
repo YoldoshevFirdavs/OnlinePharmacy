@@ -1,0 +1,58 @@
+users/models.py — line 238 — class Deliverer(models.Model):
+users/models.py — line 262 — return f"Deliverer: {self.user.full_name or self.user.email}"
+users/models.py — line 280 — DeliveryDriver = Deliverer
+users/models.py — line 299 — deliverer = models.ForeignKey(Deliverer, on_delete=models.CASCADE, related_name="salary_records")
+users/models.py — line 312 — return f"Salary for {self.deliverer.user.full_name} ({self.period_start} to {self.period_end})"
+orders/models.py — line 40 — ("On The Way", "On The Way for Delivery"),
+orders/models.py — line 41 — ("Arrived", "Arrived at Customer Location"),
+orders/models.py — line 42 — ("Delivered", "Delivered"),
+orders/models.py — line 53 — help_text="The delivery driver assigned to this order.",
+orders/models.py — line 60 — delivered_at = models.DateTimeField(null=True, blank=True)
+dashboard/views.py — line 23 — from users.models import CustomUser, Seller, Deliverer
+dashboard/views.py — line 248 — delivered_orders = Order.objects.filter(status="Delivered").count()
+dashboard/views.py — line 250 — total_deliverers = Deliverer.objects.count()
+dashboard/views.py — line 265 — "delivered_orders": delivered_orders,
+dashboard/views.py — line 267 — "total_deliverers": total_deliverers,
+dashboard/views.py — line 995 — def driver_list(request):
+dashboard/views.py — line 997 — drivers = Deliverer.objects.select_related('user').all().order_by('id')
+dashboard/views.py — line 1011 — def driver_create(request):
+dashboard/views.py — line 1032 — def driver_edit(request, pk):
+dashboard/views.py — line 1033 — driver = get_object_or_404(Deliverer, pk=pk)
+dashboard/views.py — line 1054 — def delivery_list(request):
+dashboard/views.py — line 1055 — deliveries = Deliverer.objects.all().order_by('-created_at')
+dashboard/views.py — line 1056 — return render(request, 'dashboard/delivery/list.html', {'deliveries': deliveries})
+dashboard/views.py — line 1060 — def delivery_create(request):
+dashboard/views.py — line 1065 — messages.success(request, 'Yetkazib berish muvaffaqiyatli yaratildi.')
+dashboard/views.py — line 1066 — return redirect('dashboard:delivery_list')
+dashboard/views.py — line 1069 — return render(request, 'dashboard/delivery/create.html', {'form': form})
+dashboard/views.py — line 1073 — def delivery_update(request, pk):
+dashboard/views.py — line 1074 — delivery = get_object_or_404(Deliverer, pk=pk)
+dashboard/views.py — line 1079 — messages.success(request, 'Yetkazib berish muvaffaqiyatli yangilandi.')
+dashboard/views.py — line 1080 — return redirect('dashboard:delivery_list')
+dashboard/views.py — line 1083 — return render(request, 'dashboard/delivery/update.html', {'form': form, 'delivery': delivery})
+dashboard/views.py — line 1087 — def delivery_delete(request, pk):
+dashboard/views.py — line 1088 — delivery = get_object_or_404(Deliverer, pk=pk)
+dashboard/views.py — line 1091 — delivery.delete()
+dashboard/views.py — line 1092 — messages.success(request, 'Yetkazib berish muvaffaqiyatli o\'chirildi.')
+dashboard/views.py — line 1093 — return redirect('dashboard:delivery_list')
+dashboard/views.py — line 1094 — return redirect('dashboard:delivery_list')
+dashboard/forms.py — line 2 — from users.models import CustomUser, Deliverer
+dashboard/forms.py — line 90 — model = Deliverer
+dashboard/urls.py — line 21 — delivery_list,
+dashboard/urls.py — line 22 — delivery_create,
+dashboard/urls.py — line 23 — delivery_update,
+dashboard/urls.py — line 24 — delivery_delete,
+dashboard/urls.py — line 50 — path("delivery/", delivery_list, name="delivery_list"),
+dashboard/urls.py — line 51 — path("delivery/create/", delivery_create, name="delivery_create"),
+dashboard/urls.py — line 52 — path("delivery/<int:pk>/update/", delivery_update, name="delivery_update"),
+dashboard/urls.py — line 53 — path("delivery/<int:pk>/delete/", delivery_delete, name="delivery_delete"),
+templates/dashboard/delivery/list.html — line 4 — {% block title %}Delivery List{% endblock %}
+templates/dashboard/delivery/list.html — line 8 — <i class="fa-solid fa-truck-fast"></i> Delivery Orders
+templates/dashboard/delivery/list.html — line 11 — <i class="fa-solid fa-plus"></i> Add New Delivery
+templates/dashboard/delivery/list.html — line 23 — <tr data-delivery-id="{{ delivery.id }}">
+templates/dashboard/delivery/list.html — line 61 — No delivery orders found.
+templates/dashboard/delivery/list.html — line 69 — <script src="{% static 'dashboard/js/delivery.js' %}"></script>
+dashboard/serializers.py — line 5 — from users.models import CustomUser, Deliverer
+dashboard/serializers.py — line 125 — class DelivererSerializer(serializers.ModelSerializer):
+dashboard/serializers.py — line 127 — """Serializer for deliverer profile data"""
+dashboard/serializers.py — line 131 — model = Deliverer

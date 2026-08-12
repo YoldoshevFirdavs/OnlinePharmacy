@@ -1,0 +1,5 @@
+{% extends 'dashboard/form.html' %}
+{% load static %}
+
+{% block title %}{% if category %}Kategoriyani tahrirlash{% else %}Yangi kategoriya{% endif %}{% endblock %}
+{% block back_url %}{% url 'dashboard:category_list' %}{% endblock %}
