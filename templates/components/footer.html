@@ -1,0 +1,231 @@
+{% load static %}
+<footer class="footer-ecom" role="contentinfo">
+    <div class="container">
+        <div class="footer-ecom__main">
+            <!-- Col 1: Brand -->
+            <div class="footer-ecom__links">
+                <div class="footer-logo">
+                  <svg class="logo-svg" width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;">
+                    <rect width="40" height="40" rx="10" fill="url(#footer_logo_grad)"/>
+                    <path d="M20 10V30M10 20H30" stroke="white" stroke-width="4" stroke-linecap="round"/>
+                    <defs>
+                      <linearGradient id="footer_logo_grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#6a00f4"/>
+                        <stop offset="1" stop-color="#b084f4"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span class="logo-text">Pharmacy</span>
+                </div>
+                <p class="footer-desc">Pharmacy — ishonchli dorixona, 2026-yildan beri xizmatingizda. Sifat va ishonch bizning ustuvorligimiz.</p>
+            </div>
+
+            <!-- Col 2: Links -->
+            <div class="footer-ecom__links">
+                <h3 class="footer-ecom__heading">Foydali havolalar</h3>
+                <ul>
+                    <li><a href="/">Bosh sahifa</a></li>
+                    <li><a href="/shop/">Shop</a></li>
+                    <li><a href="/about/">Biz haqimizda</a></li>
+                    <li><a href="/contact/">Aloqa</a></li>
+                    <li><a href="/privacy/">Maxfiylik siyosati</a></li>
+                    <li><a href="/terms/">Foydalanish shartlari</a></li>
+                </ul>
+            </div>
+
+            <!-- Col 3: Contact -->
+            <div class="footer-ecom__links">
+                <h3 class="footer-ecom__heading">Kontaktlar</h3>
+                <ul>
+                    <li><img src="/static/images/gmail_icon.png" alt="Gmail" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"> <a href="mailto:firdavsyoldoshevpython@gmail.com">firdavsyoldoshevpython@gmail.com</a></li>
+                    <li><a href="tel:+998977705558">+998 97 770 55 58</a></li>
+                    <li>Navoiy shahar, Zarafpeyan ko‘chasi</li>
+                </ul>
+            </div>
+
+            <!-- Col 4: Newsletter & Socials -->
+            <div class="footer-ecom__links">
+                <div class="footer-ecom__newsletter">
+                    <h3 class="footer-ecom__heading">Obuna bo'ling</h3>
+                    <form id="subscribe-form" class="footer-ecom__newsletter-form">
+                        <input type="email" id="subscribe-email" class="footer-ecom__newsletter-input" placeholder="Gmail manzilingizni kiriting" required>
+                        <button type="submit" class="footer-ecom__newsletter-button">Obuna bo'lish</button>
+                    </form>
+                </div>
+
+                <!-- Social Media (Obuna qismidan pastda) -->
+                <div class="footer-ecom__socials" style="margin-top: 30px;">
+                    <h3 class="footer-ecom__heading" style="margin-bottom: 15px;">Bizni kuzatib boring</h3>
+                    <div class="socials">
+                        {% if SOCIAL_TELEGRAM %}<a href="{{ SOCIAL_TELEGRAM }}" target="_blank" class="social-icon telegram"><i class="fab fa-telegram"></i></a>{% endif %}
+                        {% if SOCIAL_INSTAGRAM %}<a href="{{ SOCIAL_INSTAGRAM }}" target="_blank" class="social-icon instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+                        {% if SOCIAL_FACEBOOK %}<a href="{{ SOCIAL_FACEBOOK }}" target="_blank" class="social-icon facebook"><i class="fab fa-facebook"></i></a>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-ecom__bottom">
+            <p class="footer-ecom__copyright">&copy; 2026 Pharmacy. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </div>
+</footer>
+
+<style>
+:root {
+    --footer-bg: #0f1120;
+    --footer-text: #ffffff;
+    --footer-heading: #b084f4;
+    --footer-border: rgba(255,255,255,0.05);
+    --form-button-bg: #ffffff;
+    --form-button-text: #0f1120;
+}
+
+.footer-ecom {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding-top: 3rem;
+    border-top: 1px solid var(--footer-border);
+}
+
+.footer-ecom__main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-bottom: 3rem;
+}
+
+.footer-ecom__heading {
+    color: var(--footer-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1.5rem 0;
+}
+
+.footer-ecom__links ul { margin: 0; padding: 0; list-style: none; }
+.footer-ecom__links li:not(:last-child) { margin-bottom: 0.75rem; }
+.footer-ecom__links a { color: rgba(255,255,255,0.6); text-decoration: none !important; transition: color 0.2s; }
+.footer-ecom__links a:hover { color: #ffffff; }
+
+.footer-ecom__newsletter-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    color: #fff;
+    margin-bottom: 12px;
+    outline: none;
+    font-size: 0.9rem;
+}
+.footer-ecom__newsletter-button {
+    width: 100%;
+    background: var(--form-button-bg);
+    color: var(--form-button-text);
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.footer-ecom__newsletter-button:hover { opacity: 0.9; }
+
+.footer-ecom__bottom {
+    padding: 2rem 0;
+    text-align: center;
+    border-top: 1px solid var(--footer-border);
+}
+.footer-ecom__copyright { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+
+/* Social Icons */
+.socials {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.socials a {
+    text-decoration: none !important;
+    font-size: 1.6rem;
+    transition: transform 0.2s;
+}
+
+.socials a:hover {
+    transform: translateY(-4px);
+}
+
+.social-icon.telegram { color: #0088cc !important; }
+.social-icon.instagram { color: #e1306c !important; }
+.social-icon.facebook { color: #1877f2 !important; }
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #6a00f4, #b084f4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.footer-desc { color: rgba(255,255,255,0.5); margin-top: 10px; font-size: 0.85rem; line-height: 1.6; }
+
+@media (min-width: 600px) {
+    .footer-ecom__main { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 992px) {
+    .footer-ecom__main { grid-template-columns: 1.2fr 0.8fr 1fr 1fr; }
+}
+
+/* Global Blocker */
+.sticker, .badge:not(.cart-badge), .chip, .promo, .floating-badge, .ribbon, .label,
+.sale-badge, .new-badge, .product-badge, .category-label, .trust-badge {
+  display: none !important;
+}
+</style>
+
+<script src="{% static 'js/api.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("subscribe-form");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById("subscribe-email");
+    const email = emailInput.value.trim();
+
+    if (!email.toLowerCase().endsWith("@gmail.com")) {
+      alert("Iltimos, faqat Gmail manzilini kiriting (masalan: foydalanuvchi@gmail.com)");
+      return;
+    }
+
+    try {
+      if (typeof window !== 'undefined' && window.api && window.api.subscribe) {
+          const data = await window.api.subscribe(email);
+          alert("Email yuborildi, tasdiqlash uchun Gmail’ni tekshiring! ✅");
+          window.location.href = "/";
+      } else {
+          const response = await fetch("/api/v1/users/subscribers/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email })
+          });
+          if (response.ok) {
+            alert("Email yuborildi, tasdiqlash uchun Gmail’ni tekshiring! ✅");
+            window.location.href = "/";
+          } else {
+            const err = await response.json();
+            alert("Xato: " + (err.detail || err.email || "Nimadir xato ketdi"));
+          }
+      }
+    } catch (err) {
+      console.error("Subscription error:", err);
+      alert("Xatolik yuz berdi, qayta urinib ko'ring.");
+    }
+  });
+});
+</script>

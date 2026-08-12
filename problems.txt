@@ -1,0 +1,1006 @@
+================================================================================
+ONLINEPHARMACY LOYIHASI - TO'LIQ MUAMMO TAHLILI VA TUZATISH YO'LLARI
+================================================================================
+
+📋 LOYIHA HOLATI: Django web-aplikacija + Admin Dashboard + Deliverer modul
+
+================================================================================
+1. DJANGO TEMPLATE SYNTAX XATALARI
+================================================================================
+
+❌ MUAMMO #1: base.html - Django filter JS string ichida -- SKIPPED (code not found)
+   JOYLASHUVI: templates/base.html (line 70)
+   
+   ASLIDA:
+   ```html
+   {% block js_config %}
+   <script>
+       window.APP_CONFIG = {
+           csrfToken: '{{ csrf_token }}',
+           username: '{{ user.username|default:'' }}'
+       };
+   </script>
+   {% endblock %}
+   ```
+   
+   SABABI: |default:'' filter JavaScript string ichida Django syntax xatosi yaratadi
+   
+   ✅ TUZATISH:
+   ```html
+   {% block js_config %}
+   <script>
+       window.APP_CONFIG = {
+           csrfToken: '{{ csrf_token }}',
+           username: '{{ user.username }}'
+       };
+   </script>
+   {% endblock %}
+   ```
+   
+   YO'L: Default filtrni olib tashlab, username bo'sh bo'lsa JS-da tekshirish qil
+
+================================================================================
+2. JAVASCRIPT CSRF HEADER INJEKSIYASI MUAMMOSI
+================================================================================
+
+❌ MUAMMO #2: Fetch requestlarda CSRF header yo'q
+   JOYLASHUVI: static/js/api.js, static/dashboard/js/base.js
+   
+   ASLIDA:
+   ```javascript
+   fetch('/api/deliverers/', {
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/json'
+       },
+       body: JSON.stringify(data)
+   })
+   ```
+   
+   SABABI: Django CSRF protection POST/PUT/DELETE requestlarni rad qiladi
+   
+   ✅ TUZATISH - base.html-ga automatic injection qo'shish:
+   ```html
+   <script>
+       // CSRF token extracting
+       function getCsrfToken() {
+           return window.APP_CONFIG?.csrfToken || 
+                  document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+       }
+       
+       // Intercepting all fetch calls
+       const originalFetch = window.fetch;
+       window.fetch = function(...args) {
+           const [url, config = {}] = args;
+           const method = (config.method || 'GET').toUpperCase();
+           
+           if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+               config.headers = config.headers || {};
+               config.headers['X-CSRFToken'] = getCsrfToken();
+           }
+           
+           return originalFetch.apply(this, args);
+       };
+   </script>
+   ```
+
+================================================================================
+3. STATIC FILES INCLUSION KONFLIKT
+================================================================================
+
+❌ MUAMMO #3: Dashboard JS fayllari ikki joyda
+   JOYLASHUVI:
+   - static/js/mentor/main.js (Asosiy - ISHLATILISHI KERAK)
+   - static/dashboard/js/main.js (Eski - O'CHIRILISHI KERAK)
+   
+   SABABI: Ikki main.js fayli bir-birini override qiladi
+   
+   ✅ TUZATISH:
+   1. static/dashboard/js/main.js o'chiring
+   2. templates/dashboard/base.html-da shuni tekshiring:
+      ```html
+      {% load static %}
+      <script src="{% static 'js/mentor/main.js' %}"></script>
+      <!-- static/dashboard/js/main.js OCHIRILSIN -->
+      ```
+   
+   3. Barcha dashboard JS fayllarini biriktiring:
+      ```html
+      <script src="{% static 'js/mentor/main.js' %}"></script>
+      <script src="{% static 'dashboard/js/base.js' %}"></script>
+      <script src="{% static 'dashboard/js/deliverer.js' %}"></script>
+      <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+      ```
+
+================================================================================
+4. DELIVERER MODUL - URLS ROUTING MUAMMOSI
+================================================================================
+
+❌ MUAMMO #4: dashboard/urls.py - Deliverer URLs noto'g'ri
+   JOYLASHUVI: dashboard/urls.py
+   
+   ASLIDA (Noto'g'ri):
+   ```python
+   urlpatterns = [
+       path('deliverers/', views.deliverer_list, name='deliverer_list'),
+       path('deliverers/<int:id>/edit/', views.deliverer_edit, name='deliverer_edit'),
+       path('deliverers/<int:id>/delete/', views.deliverer_delete, name='deliverer_delete'),
+   ]
+   ```
+   
+   ✅ TUZATISH - Django URL beste practices:
+   ```python
+   from django.urls import path
+   from . import views
+   
+   app_name = 'dashboard'
+   
+   urlpatterns = [
+       # Deliverer URLs
+       path('deliverers/', views.deliverer_list, name='deliverer_list'),
+       path('deliverers/create/', views.deliverer_create, name='deliverer_create'),
+       path('deliverers/<int:pk>/edit/', views.deliverer_edit, name='deliverer_edit'),
+       path('deliverers/<int:pk>/delete/', views.deliverer_delete, name='deliverer_delete'),
+       path('deliverers/<int:pk>/detail/', views.deliverer_detail, name='deliverer_detail'),
+       
+       # API URLs (deprecated - api_urls.py ishlatish kerak)
+       path('api/deliverers/', views.api_deliverers, name='api_deliverers'),
+   ]
+   ```
+   
+   MUHIM: Primary key `id` emas `pk` bo'lsin
+
+================================================================================
+5. DASHBOARD VIEWS - PERMISSION XATALARI
+================================================================================
+
+❌ MUAMMO #5: Views-da role-based access control yo'q
+   JOYLASHUVI: dashboard/views.py
+   
+   SABABI: Admin va manager o'rtasida permissiya farqi yo'q
+   
+   ✅ TUZATISH:
+   ```python
+   from django.contrib.auth.decorators import login_required, user_passes_test
+   from dashboard.permissions import is_admin, is_manager
+   
+   @login_required
+   @user_passes_test(is_admin)
+   def deliverer_delete(request, pk):
+       """Faqat admin o'chira oladi"""
+       deliverer = get_object_or_404(Deliverer, pk=pk)
+       if request.method == 'POST':
+           deliverer.delete()
+           return redirect('dashboard:deliverer_list')
+       return render(request, 'dashboard/deliverer/delete.html', {'deliverer': deliverer})
+   
+   @login_required
+   @user_passes_test(is_manager)
+   def deliverer_edit(request, pk):
+       """Admin va manager edit qila oladi"""
+       # View logic...
+   ```
+
+================================================================================
+6. SERIALIZER VALIDATION MUAMMOSI
+================================================================================
+
+❌ MUAMMO #6: dashboard/serializers.py - Nested serializers noto'g'ri
+   JOYLASHUVI: dashboard/serializers.py
+   
+   ASLIDA:
+   ```python
+   class DelivererSerializer(serializers.ModelSerializer):
+       avatar = serializers.ImageField(required=False)
+       
+       class Meta:
+           model = Deliverer
+           fields = ['id', 'name', 'phone', 'avatar']
+   ```
+   
+   SABABI: Avatar image validation qilinmaydi
+   
+   ✅ TUZATISH:
+   ```python
+   from rest_framework import serializers
+   from users.models import Deliverer
+   
+   class DelivererSerializer(serializers.ModelSerializer):
+       avatar = serializers.ImageField(
+           required=False,
+           allow_null=True,
+           max_length=None,
+           allow_empty_file=False
+       )
+       
+       class Meta:
+           model = Deliverer
+           fields = ['id', 'name', 'phone', 'phone_number', 'avatar', 'status']
+           read_only_fields = ['id']
+       
+       def validate_phone(self, value):
+           """Phone number validation"""
+           if not value or len(value) < 10:
+               raise serializers.ValidationError("Telefon raqami noto'g'ri")
+           return value
+       
+       def validate_avatar(self, value):
+           """Avatar size check"""
+           if value and value.size > 5 * 1024 * 1024:  # 5MB
+               raise serializers.ValidationError("Rasm 5MB dan katta bo'lmasligi kerak")
+           return value
+   ```
+
+================================================================================
+7. AUTHENTICATION FLOW MUAMMOSI
+================================================================================
+
+❌ MUAMMO #7: users/otp_service_v2.py - OTP validation noto'g'ri
+   JOYLASHUVI: users/otp_service_v2.py
+   
+   SABABI: OTP timeout va retry limit yo'q
+   
+   ✅ TUZATISH:
+   ```python
+   import hashlib
+   import secrets
+   from datetime import timedelta
+   from django.utils import timezone
+   from django.core.cache import cache
+   
+   class OTPService:
+       OTP_LENGTH = 6
+       OTP_TIMEOUT = 300  # 5 minutes
+       MAX_ATTEMPTS = 3
+       CACHE_PREFIX = 'otp_'
+       
+       @staticmethod
+       def send_otp(phone_number):
+           """OTP yuborish"""
+           otp = ''.join([str(secrets.randbelow(10)) for _ in range(OTPService.OTP_LENGTH)])
+           
+           cache_key = f"{OTPService.CACHE_PREFIX}{phone_number}"
+           cache_data = {
+               'otp': otp,
+               'attempts': 0,
+               'created_at': timezone.now().isoformat()
+           }
+           
+           cache.set(cache_key, cache_data, OTPService.OTP_TIMEOUT)
+           
+           # SMS yuborish logic
+           return True
+       
+       @staticmethod
+       def verify_otp(phone_number, otp):
+           """OTP tekshirish"""
+           cache_key = f"{OTPService.CACHE_PREFIX}{phone_number}"
+           cache_data = cache.get(cache_key)
+           
+           if not cache_data:
+               return False, "OTP expired"
+           
+           if cache_data['attempts'] >= OTPService.MAX_ATTEMPTS:
+               cache.delete(cache_key)
+               return False, "Max attempts exceeded"
+           
+           if cache_data['otp'] != otp:
+               cache_data['attempts'] += 1
+               cache.set(cache_key, cache_data, OTPService.OTP_TIMEOUT)
+               return False, "Invalid OTP"
+           
+           cache.delete(cache_key)
+           return True, "OTP verified"
+   ```
+
+================================================================================
+8. SIDEBAR MENU ITEMS - NOTO'G'RI ICON CLASSLAR
+================================================================================
+
+❌ MUAMMO #8: templates/dashboard/sidebar.html - Font awesome iconlar
+   JOYLASHUVI: templates/dashboard/sidebar.html
+   
+   ASLIDA:
+   ```html
+   <li>
+       <a href="{% url 'dashboard:deliverer_list' %}">
+           <i class="fa fa-truck"></i> <!-- NOTO'G'RI -->
+           <span>Yetkazib beruvchilar</span>
+       </a>
+   </li>
+   ```
+   
+   SABABI: Font Awesome 5+ versiyasida icon class nomi o'zgargan
+   
+   ✅ TUZATISH:
+   ```html
+   <li class="nav-item">
+       <a class="nav-link" href="{% url 'dashboard:deliverer_list' %}">
+           <i class="fas fa-truck"></i>  <!-- Font Awesome 5+ -->
+           <span>Yetkazib beruvchilar</span>
+       </a>
+   </li>
+   ```
+   
+   YO'L: static/css/all.min.css FontAwesome 5+ ekanligini tekshiring
+
+================================================================================
+9. FORM VALIDATION - CLIENT SIDE
+================================================================================
+
+❌ MUAMMO #9: templates/dashboard/deliverer/form.html - Validation yo'q
+   JOYLASHUVI: templates/dashboard/deliverer/form.html
+   
+   ASLIDA:
+   ```html
+   <form method="POST">
+       {% csrf_token %}
+       <input type="text" name="name" required>
+       <input type="tel" name="phone">
+       <input type="file" name="avatar">
+       <button type="submit">Saqlash</button>
+   </form>
+   ```
+   
+   ✅ TUZATISH - Full validation:
+   ```html
+   <form method="POST" enctype="multipart/form-data" id="delivererForm">
+       {% csrf_token %}
+       
+       <div class="form-group">
+           <label for="name">Ism *</label>
+           <input 
+               type="text" 
+               id="name"
+               name="name" 
+               required 
+               minlength="3"
+               maxlength="255"
+               pattern="[A-Za-z0-9\s\-\u0401\u0451\u0410-\u044F]+"
+               placeholder="To'liq ism"
+               class="form-control"
+           >
+           <small class="form-text text-muted">Kamida 3 ta belgidan iborat</small>
+       </div>
+       
+       <div class="form-group">
+           <label for="phone">Telefon raqami *</label>
+           <input 
+               type="tel" 
+               id="phone"
+               name="phone" 
+               required 
+               pattern="^\+?[0-9]{10,15}$"
+               placeholder="+998 90 123 45 67"
+               class="form-control"
+           >
+       </div>
+       
+       <div class="form-group">
+           <label for="avatar">Profil rasm</label>
+           <input 
+               type="file" 
+               id="avatar"
+               name="avatar" 
+               accept="image/*"
+               class="form-control"
+           >
+           <small class="form-text text-muted">JPG, PNG format, max 5MB</small>
+       </div>
+       
+       <button type="submit" class="btn btn-primary">Saqlash</button>
+   </form>
+   
+   <script>
+   document.getElementById('delivererForm').addEventListener('submit', function(e) {
+       const avatar = document.getElementById('avatar').files[0];
+       if (avatar && avatar.size > 5 * 1024 * 1024) {
+           e.preventDefault();
+           alert('Rasm 5MB dan katta bo\'lmasligi kerak');
+       }
+   });
+   </script>
+   ```
+
+================================================================================
+10. API RESPONSE STRUCTURE - NOTO'G'RI FORMAT
+================================================================================
+
+❌ MUAMMO #10: dashboard/api_views.py - Response format noto'g'ri
+   JOYLASHUVI: dashboard/api_views.py
+   
+   ASLIDA:
+   ```python
+   def api_deliverers(request):
+       deliverers = Deliverer.objects.all()
+       return JsonResponse([
+           {'id': d.id, 'name': d.name}
+           for d in deliverers
+       ], safe=False)
+   ```
+   
+   ✅ TUZATISH - Standard REST format:
+   ```python
+   from rest_framework.decorators import api_view
+   from rest_framework.response import Response
+   from rest_framework import status
+   
+   @api_view(['GET', 'POST'])
+   def api_deliverers(request):
+       if request.method == 'GET':
+           deliverers = Deliverer.objects.all()
+           serializer = DelivererSerializer(deliverers, many=True)
+           return Response({
+               'success': True,
+               'data': serializer.data,
+               'count': len(serializer.data)
+           })
+       
+       elif request.method == 'POST':
+           serializer = DelivererSerializer(data=request.data)
+           if serializer.is_valid():
+               serializer.save()
+               return Response({
+                   'success': True,
+                   'data': serializer.data,
+                   'message': 'Yetkazib beruvchi muvaffaqiyatli qo\'shildi'
+               }, status=status.HTTP_201_CREATED)
+           return Response({
+               'success': False,
+               'errors': serializer.errors
+           }, status=status.HTTP_400_BAD_REQUEST)
+   ```
+
+================================================================================
+11. IMAGE UPLOAD - SECURITY VA PATH MUAMMOSI
+================================================================================
+
+❌ MUAMMO #11: Avatar upload - Path traversal risk
+   JOYLASHUVI: dashboard/views.py (deliverer_edit view)
+   
+   SABABI: Faylning original nomi saqlanayotgan bo'lsa XSS risk
+   
+   ✅ TUZATISH:
+   ```python
+   from django.core.files.base import ContentFile
+   from PIL import Image
+   import os
+   
+   def deliverer_edit(request, pk):
+       deliverer = get_object_or_404(Deliverer, pk=pk)
+       
+       if request.method == 'POST':
+           form = DelivererForm(request.POST, request.FILES, instance=deliverer)
+           if form.is_valid():
+               # Avatar processing
+               if 'avatar' in request.FILES:
+                   avatar_file = request.FILES['avatar']
+                   
+                   # Size check
+                   if avatar_file.size > 5 * 1024 * 1024:
+                       form.add_error('avatar', 'Rasm 5MB dan katta')
+                       return render(request, 'dashboard/deliverer/form.html', {'form': form})
+                   
+                   # Format check
+                   allowed_formats = ['image/jpeg', 'image/png', 'image/webp']
+                   if avatar_file.content_type not in allowed_formats:
+                       form.add_error('avatar', 'Faqat JPG, PNG, WebP format qabul')
+                       return render(request, 'dashboard/deliverer/form.html', {'form': form})
+                   
+                   # Image validation
+                   try:
+                       img = Image.open(avatar_file)
+                       img.verify()
+                   except:
+                       form.add_error('avatar', 'Noto\'g\'ri rasm fayli')
+                       return render(request, 'dashboard/deliverer/form.html', {'form': form})
+               
+               deliverer = form.save()
+               messages.success(request, 'Yetkazib beruvchi muvaffaqiyatli yangilandi')
+               return redirect('dashboard:deliverer_detail', pk=deliverer.pk)
+       
+       else:
+           form = DelivererForm(instance=deliverer)
+       
+       return render(request, 'dashboard/deliverer/form.html', {'form': form, 'deliverer': deliverer})
+   ```
+
+================================================================================
+12. DATABASE MIGRATION - DELIVERER MODEL
+================================================================================
+
+❌ MUAMMO #12: users/migrations/0017_deliverer_*.py - Incomplete fields
+   JOYLASHUVI: users/migrations/0017_deliverer_onboardtoken_payrollstats_and_more.py
+   
+   SABABI: Deliverer model-da ba'zi fieldlar yo'q
+   
+   ✅ TUZATISH - users/models.py-da Deliverer model:
+   ```python
+   from django.db import models
+   from django.contrib.auth import get_user_model
+   from django.core.validators import MinValueValidator
+   
+   User = get_user_model()
+   
+   class Deliverer(models.Model):
+       STATUS_CHOICES = [
+           ('active', 'Faol'),
+           ('inactive', 'Nofaol'),
+           ('suspended', 'Pauza'),
+       ]
+       
+       user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='deliverer')
+       phone_number = models.CharField(max_length=20, unique=True)
+       status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+       avatar = models.ImageField(upload_to='deliverers/avatars/', null=True, blank=True)
+       vehicle_type = models.CharField(max_length=50, blank=True)
+       vehicle_number = models.CharField(max_length=20, blank=True)
+       
+       # Rating va statistics
+       total_deliveries = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+       rating = models.DecimalField(max_digits=3, decimal_places=2, default=5.0, validators=[MinValueValidator(0)])
+       
+       # Onboarding
+       is_verified = models.BooleanField(default=False)
+       verified_at = models.DateTimeField(null=True, blank=True)
+       
+       created_at = models.DateTimeField(auto_now_add=True)
+       updated_at = models.DateTimeField(auto_now=True)
+       
+       class Meta:
+           ordering = ['-created_at']
+           verbose_name = 'Yetkazib beruvchi'
+           verbose_name_plural = 'Yetkazib beruvchilar'
+       
+       def __str__(self):
+           return f"{self.user.get_full_name()} ({self.phone_number})"
+       
+       def get_avatar_url(self):
+           if self.avatar:
+               return self.avatar.url
+           return '/static/images/default-avatar.png'
+   
+   
+   class OnboardToken(models.Model):
+       deliverer = models.OneToOneField(Deliverer, on_delete=models.CASCADE)
+       token = models.CharField(max_length=100, unique=True)
+       created_at = models.DateTimeField(auto_now_add=True)
+       expires_at = models.DateTimeField()
+       is_used = models.BooleanField(default=False)
+       
+       class Meta:
+           verbose_name = 'Onboard Token'
+   ```
+
+================================================================================
+13. EMAIL TEMPLATES - DYNAMIC CONTENT MUAMMOSI
+================================================================================
+
+❌ MUAMMO #13: templates/emails/deliverer_onboarding.* - Missing variables
+   JOYLASHUVI: templates/emails/deliverer_onboarding.html/txt
+   
+   ASLIDA:
+   ```html
+   <h1>Xush kelibsiz {{ name }}!</h1>
+   <p>Your onboarding link: {{ link }}</p>
+   ```
+   
+   ✅ TUZATISH:
+   
+   templates/emails/deliverer_onboarding.html:
+   ```html
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <meta charset="UTF-8">
+       <style>
+           body { font-family: Arial, sans-serif; }
+           .container { max-width: 600px; margin: 0 auto; }
+           .header { background-color: #007bff; color: white; padding: 20px; }
+           .content { padding: 20px; }
+           .button { 
+               background-color: #28a745; 
+               color: white; 
+               padding: 10px 20px; 
+               text-decoration: none;
+               border-radius: 5px;
+               display: inline-block;
+           }
+           .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+       </style>
+   </head>
+   <body>
+       <div class="container">
+           <div class="header">
+               <h1>Onlayn Farmatsiya - Yetkazib beruvchining Ro'yxati</h1>
+           </div>
+           <div class="content">
+               <p>Salom {{ deliverer.user.first_name }},</p>
+               <p>Bizning platformasiga kirganingiz uchun tashakkur! 🎉</p>
+               
+               <p>Ro'yxat jarayonini yakunlash uchun quyidagi tugmani bosing:</p>
+               
+               <p style="text-align: center; margin: 30px 0;">
+                   <a href="{{ onboard_link }}" class="button">Ro'yxatni Yakunlash</a>
+               </p>
+               
+               <p style="font-size: 12px; color: #666;">
+                   Agar tugma ishlamasa, quyidagi havolani nusxala qiling:<br>
+                   <code>{{ onboard_link }}</code>
+               </p>
+               
+               <p style="color: #666;">
+                   Ushbu havola 24 soat davomida amal qiladi.
+               </p>
+               
+               <p>Agar savol bo'lsa, biz bilan bog'laning: support@onlinepharmacy.uz</p>
+           </div>
+           <div class="footer">
+               <p>&copy; 2024 Onlayn Farmatsiya. Barcha huquqlar himoyalangan.</p>
+           </div>
+       </div>
+   </body>
+   </html>
+   ```
+   
+   templates/emails/deliverer_onboarding.txt:
+   ```
+   Salom {{ deliverer.user.first_name }},
+   
+   Ro'yxat jarayonini yakunlash uchun quyidagi havolani oching:
+   {{ onboard_link }}
+   
+   Ushbu havola 24 soat davomida amal qiladi.
+   
+   Agar savol bo'lsa, biz bilan bog'laning: support@onlinepharmacy.uz
+   
+   Onlayn Farmatsiya jamoasi
+   ```
+   
+   users/views.py-da email yuborish:
+   ```python
+   from django.core.mail import send_mail
+   from django.template.loader import render_to_string
+   
+   def send_deliverer_onboarding_email(deliverer, onboard_token):
+       context = {
+           'deliverer': deliverer,
+           'onboard_link': f"https://yourdomain.com/deliverer/onboard/{onboard_token.token}/"
+       }
+       
+       html_message = render_to_string('emails/deliverer_onboarding.html', context)
+       text_message = render_to_string('emails/deliverer_onboarding.txt', context)
+       
+       send_mail(
+           subject='Ro\'yxat jarayonini yakunlang',
+           message=text_message,
+           from_email='noreply@onlinepharmacy.uz',
+           recipient_list=[deliverer.user.email],
+           html_message=html_message,
+           fail_silently=False
+       )
+   ```
+
+================================================================================
+14. ADMIN INTERFACE - CUSTOMIZATION
+================================================================================
+
+❌ MUAMMO #14: dashboard/admin.py - Incomplete admin classes
+   JOYLASHUVI: dashboard/admin.py
+   
+   ✅ TUZATISH:
+   ```python
+   from django.contrib import admin
+   from users.models import Deliverer, OnboardToken
+   
+   @admin.register(Deliverer)
+   class DelivererAdmin(admin.ModelAdmin):
+       list_display = ['get_full_name', 'phone_number', 'status', 'rating', 'total_deliveries', 'created_at']
+       list_filter = ['status', 'is_verified', 'created_at']
+       search_fields = ['user__first_name', 'user__last_name', 'phone_number']
+       readonly_fields = ['total_deliveries', 'rating', 'created_at', 'updated_at']
+       
+       fieldsets = (
+           ('Shaxsiy Ma\'lumotlar', {
+               'fields': ('user', 'phone_number', 'avatar')
+           }),
+           ('Holat', {
+               'fields': ('status', 'is_verified', 'verified_at')
+           }),
+           ('Transport', {
+               'fields': ('vehicle_type', 'vehicle_number')
+           }),
+           ('Statistika', {
+               'fields': ('total_deliveries', 'rating')
+           }),
+           ('Sanalar', {
+               'fields': ('created_at', 'updated_at')
+           }),
+       )
+       
+       def get_full_name(self, obj):
+           return obj.user.get_full_name()
+       get_full_name.short_description = 'Ism'
+       
+       def get_queryset(self, request):
+           qs = super().get_queryset(request)
+           return qs.select_related('user')
+   
+   
+   @admin.register(OnboardToken)
+   class OnboardTokenAdmin(admin.ModelAdmin):
+       list_display = ['deliverer', 'is_used', 'created_at', 'expires_at']
+       list_filter = ['is_used', 'created_at']
+       search_fields = ['deliverer__user__email', 'token']
+       readonly_fields = ['token', 'created_at']
+   ```
+
+================================================================================
+15. TESTING - COVERAGE VA QUALITY
+================================================================================
+
+❌ MUAMMO #15: tests/ - Tests incomplete yoki missing
+   JOYLASHUVI: tests/viewtests/, tests/serializertests/
+   
+   ✅ TUZATISH - tests/viewtests/test_deliverer_views.py:
+   ```python
+   from django.test import TestCase, Client
+   from django.urls import reverse
+   from django.contrib.auth import get_user_model
+   from users.models import Deliverer
+   
+   User = get_user_model()
+   
+   class DelivererViewsTestCase(TestCase):
+       def setUp(self):
+           self.client = Client()
+           self.admin_user = User.objects.create_superuser(
+               username='admin',
+               email='admin@test.com',
+               password='testpass123'
+           )
+           self.deliverer = Deliverer.objects.create(
+               user=self.admin_user,
+               phone_number='+998901234567'
+           )
+       
+       def test_deliverer_list_view_requires_login(self):
+           response = self.client.get(reverse('dashboard:deliverer_list'))
+           self.assertEqual(response.status_code, 302)  # Redirect to login
+       
+       def test_deliverer_list_view_admin_access(self):
+           self.client.login(username='admin', password='testpass123')
+           response = self.client.get(reverse('dashboard:deliverer_list'))
+           self.assertEqual(response.status_code, 200)
+           self.assertContains(response, 'Yetkazib beruvchilar')
+       
+       def test_deliverer_create_view(self):
+           self.client.login(username='admin', password='testpass123')
+           data = {
+               'phone_number': '+998909876543',
+               'vehicle_type': 'Motorcycle',
+               'status': 'active'
+           }
+           response = self.client.post(
+               reverse('dashboard:deliverer_create'),
+               data=data
+           )
+           self.assertEqual(Deliverer.objects.count(), 2)
+       
+       def test_deliverer_edit_view(self):
+           self.client.login(username='admin', password='testpass123')
+           data = {
+               'phone_number': '+998901234567',
+               'status': 'inactive'
+           }
+           response = self.client.post(
+               reverse('dashboard:deliverer_edit', args=[self.deliverer.pk]),
+               data=data
+           )
+           self.deliverer.refresh_from_db()
+           self.assertEqual(self.deliverer.status, 'inactive')
+       
+       def test_deliverer_delete_view(self):
+           self.client.login(username='admin', password='testpass123')
+           response = self.client.post(
+               reverse('dashboard:deliverer_delete', args=[self.deliverer.pk])
+           )
+           self.assertEqual(Deliverer.objects.count(), 0)
+   ```
+
+================================================================================
+16. SECURITY - CSRF VA XSS PROTECTION
+================================================================================
+
+❌ MUAMMO #16: Security headers to'liq emas
+   JOYLASHUVI: config/settings.py
+   
+   ✅ TUZATISH:
+   ```python
+   # settings.py-da qo'shish:
+   
+   # Security settings
+   SECURE_SSL_REDIRECT = True  # Production-da
+   SESSION_COOKIE_SECURE = True
+   CSRF_COOKIE_SECURE = True
+   CSRF_COOKIE_HTTPONLY = True
+   SECURE_HSTS_SECONDS = 31536000  # 1 year
+   SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+   SECURE_HSTS_PRELOAD = True
+   X_FRAME_OPTIONS = 'DENY'
+   SECURE_CONTENT_SECURITY_POLICY = {
+       "default-src": ("'self'",),
+       "script-src": ("'self'", "'unsafe-inline'"),
+       "style-src": ("'self'", "'unsafe-inline'"),
+       "img-src": ("'self'", "data:", "https:"),
+   }
+   
+   MIDDLEWARE = [
+       'django.middleware.security.SecurityMiddleware',
+       'django.contrib.sessions.middleware.SessionMiddleware',
+       'django.middleware.common.CommonMiddleware',
+       'django.middleware.csrf.CsrfViewMiddleware',
+       'django.contrib.auth.middleware.AuthenticationMiddleware',
+       'django.contrib.messages.middleware.MessageMiddleware',
+       'django.middleware.clickjacking.XFrameOptionsMiddleware',
+       'security.middleware.SecurityHeadersMiddleware',  # Custom
+   ]
+   ```
+
+================================================================================
+17. LOGGING VA MONITORING
+================================================================================
+
+❌ MUAMMO #17: Logging configuration to'liq emas
+   JOYLASHUVI: config/settings.py
+   
+   ✅ TUZATISH:
+   ```python
+   LOGGING = {
+       'version': 1,
+       'disable_existing_loggers': False,
+       'formatters': {
+           'verbose': {
+               'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+               'style': '{',
+           },
+           'simple': {
+               'format': '{levelname} {asctime} {message}',
+               'style': '{',
+           },
+       },
+       'handlers': {
+           'console': {
+               'class': 'logging.StreamHandler',
+               'formatter': 'simple',
+           },
+           'file': {
+               'class': 'logging.handlers.RotatingFileHandler',
+               'filename': 'logs/django.log',
+               'maxBytes': 1024 * 1024 * 15,  # 15MB
+               'backupCount': 10,
+               'formatter': 'verbose',
+           },
+           'security_file': {
+               'class': 'logging.handlers.RotatingFileHandler',
+               'filename': 'logs/security.log',
+               'maxBytes': 1024 * 1024 * 15,
+               'backupCount': 10,
+               'formatter': 'verbose',
+           },
+       },
+       'loggers': {
+           'django': {
+               'handlers': ['console', 'file'],
+               'level': 'INFO',
+           },
+           'django.security': {
+               'handlers': ['security_file'],
+               'level': 'WARNING',
+               'propagate': False,
+           },
+           'users': {
+               'handlers': ['console', 'file'],
+               'level': 'DEBUG',
+           },
+       },
+   }
+   ```
+
+================================================================================
+UMUMIY TUZATISH PROSSESINING KETMA-KETLIGI
+================================================================================
+
+1. FIRST - Django settings.py-ni sozlash:
+   ✓ CSRF, CORS, HTTPS o'rnatish
+   ✓ Database connection
+   ✓ Static files konfiguratsiya
+
+2. SECOND - Models va Migrations:
+   ✓ Deliverer model yaratish
+   ✓ Migration run qilish
+   ✓ Admin registration
+
+3. THIRD - Views va URLs:
+   ✓ Views yozish (CRUD)
+   ✓ URLs router
+   ✓ Permissions qa'y qilish
+
+4. FOURTH - Serializers:
+   ✓ REST serializers
+   ✓ Validation logic
+   ✓ API endpoints
+
+5. FIFTH - Templates:
+   ✓ HTML forms
+   ✓ Validation messages
+   ✓ CSRF token
+
+6. SIXTH - JavaScript:
+   ✓ CSRF header injection
+   ✓ Form validation
+   ✓ API calls
+
+7. SEVENTH - Testing:
+   ✓ Unit tests
+   ✓ Integration tests
+   ✓ Coverage
+
+8. EIGHTH - Security:
+   ✓ SSL/HTTPS
+   ✓ CSP headers
+   ✓ Input validation
+
+================================================================================
+FAYL STRUKTURA OPTIMAL
+================================================================================
+
+OnlinePharmacy/
+├── config/
+│   ├── settings.py (✓ CORRECTED)
+│   ├── urls.py
+│   └── wsgi.py
+├── dashboard/
+│   ├── views.py (✓ CORRECTED with permissions)
+│   ├── urls.py (✓ CORRECTED routing)
+│   ├── serializers.py (✓ CORRECTED validation)
+│   ├── forms.py (✓ NEW)
+│   └── templates/dashboard/
+│       ├── base.html (✓ CORRECTED syntax)
+│       ├── sidebar.html (✓ CORRECTED icons)
+│       └── deliverer/
+│           ├── list.html
+│           ├── form.html (✓ CORRECTED validation)
+│           └── detail.html
+├── users/
+│   ├── models.py (✓ CORRECTED Deliverer model)
+│   ├── views.py
+│   ├── serializers.py
+│   └── otp_service_v2.py (✓ CORRECTED timeout logic)
+├── static/
+│   ├── js/
+│   │   ├── mentor/main.js (✓ PRIMARY)
+│   │   └── api.js (✓ CORRECTED CSRF injection)
+│   └── css/
+│       └── all.min.css (Font Awesome 5+)
+└── templates/
+    ├── emails/
+    │   └── deliverer_onboarding.html (✓ CORRECTED)
+    └── ...
+
+================================================================================
+NEXT STEPS - DARHOL QILISH KERAK
+================================================================================
+
+1. □ base.html-da Django template syntax xatasini tuzating
+2. □ base.html-ga automatic CSRF header injection qo'shing
+3. □ deliverer_list template va CSS-ni yaratish
+4. □ Deliverer model migration-larini check qiling
+5. □ Test suite-larni write qiling
+6. □ Security headers-ni enable qiling
+7. □ Email templates-ni test qiling
+8. □ Logging configuration-ni o'rnatish
+9. □ Docker compose-ni update qiling
+10. □ Production deployment-ni tekshiring
+
+================================================================================

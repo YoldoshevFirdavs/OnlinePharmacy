@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  {% include "components/begin.html" %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>404 - Sahifa topilmadi | OnlinePharmacy</title>
+
+  <!-- Google Fonts & FontAwesome (CDN) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'css/header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+  <link rel="icon" href="{% static 'images/favicon.ico' %}">
+
+  <style>
+    :root {
+      --accent: #6a00f4;
+      --accent-light: #b084f4;
+      --bg: linear-gradient(135deg, #6a00f4 0%, #b084f4 100%);
+      --muted: #6b7280;
+    }
+    html,body { height:100%; margin:0; font-family: 'Inter', sans-serif; background:#f7f7fb; color:#111827; }
+    .error-page { min-height:100vh; display:flex; flex-direction:column; }
+    .error-hero {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      background: var(--bg);
+      color:#fff; text-align:center; padding:80px 20px;
+    }
+    .error-box {
+      background: rgba(255,255,255,0.06);
+      padding:40px; border-radius:12px; backdrop-filter: blur(6px);
+      max-width:900px; width:100%;
+    }
+    .error-code { font-size:8rem; font-weight:800; margin:0; line-height:1; }
+    .error-title { font-size:1.75rem; margin:12px 0 8px; font-weight:700; }
+    .error-desc { color: rgba(255,255,255,0.9); margin-bottom:20px; font-size:1.05rem; }
+    .error-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+    .btn { display:inline-block; padding:12px 22px; border-radius:8px; text-decoration:none; font-weight:600; }
+    .btn-primary { background:#fff; color:var(--accent); }
+    .btn-secondary { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.18); }
+    main { flex:1; }
+    .container { max-width:1100px; margin:0 auto; padding:0 16px; }
+    @media (max-width:600px) {
+      .error-code { font-size:4.5rem; }
+      .error-box { padding:24px; }
+    }
+    /* small footer spacing fix when footer CSS missing */
+    .site-footer { margin-top: auto; }
+  </style>
+</head>
+<body data-page="404">
+  <div class="error-page">
+    {% include "components/header.html" %}
+
+    <main class="error-hero">
+      <div class="container">
+        <div class="error-box">
+          <h1 class="error-code">404</h1>
+          <h2 class="error-title">Sahifa topilmadi</h2>
+          <p class="error-desc">Kiritilgan manzil mavjud emas yoki sahifa ko‘chirib yuborilgan. Iltimos, manzilni tekshiring yoki quyidagi bo‘limlardan biriga o‘ting.</p>
+
+          <div class="error-actions">
+            <a href="/" class="btn btn-primary" aria-label="Bosh sahifaga qaytish">Bosh sahifaga qaytish</a>
+            <a href="/shop/" class="btn btn-secondary" aria-label="Do'konga o'tish">Do'konga o'tish</a>
+            <a href="/contact/" class="btn btn-secondary" aria-label="Kontakt">Kontakt</a>
+          </div>
+
+          <div style="margin-top:18px; color:rgba(255,255,255,0.85); font-size:0.95rem;">
+            <span style="opacity:0.9;">Agar siz admin bo‘lsangiz:</span>
+            <div style="margin-top:8px; color:var(--muted); font-size:0.85rem;">DEBUG=True holatda batafsil xatolik ko‘rsatiladi. Productionda DEBUG=False va handler404 ishlaydi.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    {% include "components/footer.html" %}
+  </div>
+
+  <!-- Local JS -->
+  <script src="{% static 'js/api.js' %}"></script>
+  <script src="{% static 'js/header.js' %}"></script>
+  <script src="{% static 'js/footer.js' %}"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      try { console.log('404 page loaded'); } catch (e) {}
+    });
+  </script>
+</body>
+</html>
+<!-- changed: full 404 template using static templatetag and header/footer includes -->

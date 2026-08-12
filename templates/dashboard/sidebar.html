@@ -1,0 +1,104 @@
+{% load static %}
+{# ═══════ Dashboard Sidebar ═══════ #}
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand" id="sidebarBrand">
+        <span class="sidebar-brand-text">PharmacyAdmin</span>
+        <span class="sidebar-brand-sticker" aria-hidden="true">🏥</span>
+    </div>
+    <script>
+        (function () {
+            var n = localStorage.getItem('dashboard-brand-name');
+            var s = localStorage.getItem('dashboard-brand-sticker');
+            var t = document.querySelector('#sidebarBrand .sidebar-brand-text');
+            var st = document.querySelector('#sidebarBrand .sidebar-brand-sticker');
+            if (t && n) t.textContent = n;
+            if (st && s !== null) st.textContent = s;
+        })();
+    </script>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+        <ul class="sidebar-menu">
+            <!-- Dashboard -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'dashboard-admin' %} active{% endif %}">
+                <a href="{% url 'dashboard:dashboard-admin' %}" class="sidebar-link">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Kategoriyalar -->
+            <li class="sidebar-item{% if 'category' in request.resolver_match.url_name %} active{% endif %}">
+                <a href="{% url 'dashboard:category_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Kategoriyalar</span>
+                </a>
+            </li>
+
+            <!-- Mahsulotlar (Medicines) -->
+            <li class="sidebar-item{% if 'medicine' in request.resolver_match.url_name %} active{% endif %}">
+                <a href="{% url 'dashboard:medicine_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-pills"></i>
+                    <span>Mahsulotlar</span>
+                </a>
+            </li>
+
+            <!-- Foydalanuvchilar -->
+            <li class="sidebar-item{% if 'user' in request.resolver_match.url_name %} active{% endif %}">
+                <a href="{% url 'dashboard:user_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Foydalanuvchilar</span>
+                </a>
+            </li>
+
+            <!-- Haydovchilar (Drivers) -->
+            <li class="sidebar-item{% if 'driver' in request.resolver_match.url_name %} active{% endif %}">
+                <a href="{% url 'dashboard:driver_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-truck"></i>
+                    <span>Haydovchilar</span>
+                </a>
+            </li>
+
+            <!-- Buyurtmalar -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'order_list' %} active{% endif %}">
+                <a href="{% url 'dashboard:order_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Buyurtmalar</span>
+                </a>
+            </li>
+
+            <li class="sidebar-divider"></li>
+
+            <!-- Faoliyat tarixi (Audit Log) -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'audit_log_list' %} active{% endif %}">
+                <a href="{% url 'dashboard:audit_log_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Faoliyat tarixi</span>
+                </a>
+            </li>
+
+            <!-- Account -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'account_settings' %} active{% endif %}">
+                <a href="{% url 'dashboard:account_settings' %}" class="sidebar-link">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Account</span>
+                </a>
+            </li>
+
+            <!-- Dizayn (Customize) -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'dashboard_customize' %} active{% endif %}">
+                <a href="{% url 'dashboard:dashboard_customize' %}" class="sidebar-link">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Dizayn</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar footer — logout -->
+    <div class="sidebar-footer" id="sidebarFooter">
+        <a href="{% url 'dashboard:logout_page' %}" class="sidebar-link sidebar-link--logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Chiqish</span>
+        </a>
+    </div>
+</aside>

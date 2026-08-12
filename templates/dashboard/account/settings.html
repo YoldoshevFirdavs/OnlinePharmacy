@@ -1,0 +1,159 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Account sozlamalari{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-user-gear"></i> Account sozlamalari
+    </h1>
+</div>
+
+<div class="settings-grid" id="settingsGrid">
+    <!-- Profile Card -->
+    <div class="card card--profile" id="profileCard">
+        <div class="card__body">
+            <div class="profile-avatar" id="profileAvatar" style="position: relative; display: inline-block; margin-bottom: 15px;">
+                {% if user_display.avatar_url %}
+                    <img src="{{ user_display.avatar_url }}" alt="Avatar" class="profile-avatar-img" id="profileAvatarImg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--clr-primary, #6a00f4); display: block;">
+                {% else %}
+                    <img src="{% static 'dashboard/images/default_avatar.png' %}" alt="Avatar" class="profile-avatar-img" id="profileAvatarImg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--clr-primary, #6a00f4); display: block;">
+                {% endif %}
+                <button type="button" class="avatar-edit-btn" id="btnEditAvatar" title="Rasmni o'zgartirish" style="position: absolute; bottom: 6px; right: 6px; background: var(--clr-primary, #6a00f4); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+            </div>
+            <h3 class="profile-name">{{ user_display.full_name|default:request.user.full_name|default:request.user.email|default:request.user.phone_number|default:"User" }}</h3>
+            <p class="profile-role">
+                {% if request.user.is_staff %}Administrator{% else %}Foydalanuvchi{% endif %}
+            </p>
+            <p class="profile-email">{{ request.user.email|default:"Email ko'rsatilmagan" }}</p>
+        </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="card card--form" id="settingsFormCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-sliders"></i> Shaxsiy ma'lumotlar</h2>
+        </div>
+        <div class="card__body">
+            <form method="post" enctype="multipart/form-data" class="dashboard-form" id="settingsForm" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="form-errors" id="formErrors">
+                    {% for error in form.non_field_errors %}
+                    <div class="alert alert--error" role="alert">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="form-group{% if field.errors %} form-group--error{% endif %}" id="group_{{ field.html_name }}" {% if field.html_name == 'avatar' %}style="display:none;"{% endif %}>
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <p class="form-hint">{{ field.help_text }}</p>
+                    {% endif %}
+
+                    {% if field.errors %}
+                    <ul class="form-error-list">
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="form-actions" id="formActions">
+                    <button type="submit" class="btn btn--primary" id="btnSaveSettings">
+                        <i class="fa-solid fa-floppy-disk"></i> Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Avatar preview
+    var btnEdit = document.getElementById('btnEditAvatar');
+    var avatarInput = document.getElementById('id_avatar');
+    if (btnEdit && avatarInput) {
+        btnEdit.addEventListener('click', function(e) {
+            e.preventDefault();
+            avatarInput.click();
+        });
+        avatarInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = document.getElementById('profileAvatarImg');
+                    if (img) img.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+
+    // Password strength checker — faqat new_password1 uchun
+    var RULES = [
+        { key: 'len',   label: 'Kamida 8 ta belgi',       test: function(v){ return v.length >= 8; } },
+        { key: 'upper', label: 'Kamida 1 ta katta harf',  test: function(v){ return /[A-Z]/.test(v); } },
+        { key: 'lower', label: 'Kamida 1 ta kichik harf', test: function(v){ return /[a-z]/.test(v); } },
+        { key: 'digit', label: 'Kamida 1 ta raqam',       test: function(v){ return /[0-9]/.test(v); } },
+    ];
+
+    var pwdInput = document.getElementById('id_new_password1');
+    if (pwdInput) {
+        var reqBox = document.createElement('ul');
+        reqBox.className = 'pwd-requirements';
+        reqBox.setAttribute('aria-live', 'polite');
+        reqBox.innerHTML = RULES.map(function(r) {
+            return '<li class="pwd-req pwd-req--fail" data-key="' + r.key + '">' +
+                   '<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>' +
+                   '<span>' + r.label + '</span></li>';
+        }).join('');
+        pwdInput.parentNode.insertBefore(reqBox, pwdInput.nextSibling);
+
+        var submitBtn = document.getElementById('btnSaveSettings');
+
+        function update() {
+            var val = pwdInput.value;
+            var visible = val.length > 0;
+            reqBox.classList.toggle('pwd-requirements--visible', visible);
+            var allPass = true;
+            RULES.forEach(function(r) {
+                var li = reqBox.querySelector('[data-key="' + r.key + '"]');
+                var pass = r.test(val);
+                if (!pass) allPass = false;
+                li.className = 'pwd-req ' + (pass ? 'pwd-req--pass' : 'pwd-req--fail');
+                li.querySelector('i').className = 'fa-solid ' + (pass ? 'fa-circle-check' : 'fa-circle-xmark');
+            });
+            if (submitBtn) {
+                submitBtn.disabled = visible && !allPass;
+                submitBtn.classList.toggle('btn--disabled', visible && !allPass);
+            }
+        }
+
+        pwdInput.addEventListener('input', update);
+        pwdInput.addEventListener('focus', update);
+        pwdInput.addEventListener('blur', function() {
+            if (!pwdInput.value) reqBox.classList.remove('pwd-requirements--visible');
+        });
+    }
+});
+</script>
+{% endblock %}

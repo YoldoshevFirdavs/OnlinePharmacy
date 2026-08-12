@@ -1,0 +1,121 @@
+/* From Uiverse.io by miroslav_3015 */
+/* vse je scoped na .tetris-loader-root – ni body, *, vh, vw */
+
+.tetris-loader-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tetris-loader-root.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* vrstica Tetris kock */
+
+.tetris-loader {
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-end;
+}
+
+/* ena Tetris kocka = ena črka */
+
+.tetris-block {
+  --tetris-size: 2.2rem;
+
+  width: var(--tetris-size);
+  height: var(--tetris-size);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  color: #f6f7ff;
+
+  background: linear-gradient(135deg, #5b68ff, #b54dff);
+  border-radius: 0.45rem;
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.7),
+    0 0 0 2px rgba(8, 10, 26, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+
+  transform-origin: center;
+  animation: tetris-loader-drop 2.4s cubic-bezier(0.25, 0.7, 0.2, 1.05) infinite;
+}
+
+/* fazni zamik padanja */
+
+.tetris-block:nth-child(1) {
+  animation-delay: 0s;
+}
+.tetris-block:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.tetris-block:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.tetris-block:nth-child(4) {
+  animation-delay: 0.45s;
+}
+.tetris-block:nth-child(5) {
+  animation-delay: 0.6s;
+}
+.tetris-block:nth-child(6) {
+  animation-delay: 0.75s;
+}
+.tetris-block:nth-child(7) {
+  animation-delay: 0.9s;
+}
+
+/* animacija: pade od zgoraj, se zavrti, odskoči kot v Tetrisu */
+
+@keyframes tetris-loader-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-7rem) rotate(-90deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-2rem) rotate(-40deg);
+  }
+  55% {
+    transform: translateY(0) rotate(0deg);
+  }
+  65% {
+    /* bounce */
+    transform: translateY(0.35rem) rotate(0deg);
+  }
+  75% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* napis spodaj */
+
+.tetris-loader-text {
+  margin-top: 0.9rem;
+  color: #c4cad9;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}

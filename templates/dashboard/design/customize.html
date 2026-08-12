@@ -1,0 +1,202 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dizayn sozlamalari{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-palette"></i> Dizayn va brend sozlamalari
+    </h1>
+    <p class="page-subtitle">Dashboard nomi, sticker va rang mavzusini moslashtiring</p>
+</div>
+
+<!-- ═══════ Live Brand Preview Area ═══════ -->
+<div class="live-preview-card" id="livePreviewCard">
+    <div class="live-preview-header">
+        <i class="fa-solid fa-eye"></i> Jonli ko'rinish (Preview)
+    </div>
+    <div class="live-preview-box" id="livePreviewBox">
+        <span class="live-preview-name" id="livePreviewName">OnlinePharmacy</span>
+        <span class="live-preview-sticker" id="livePreviewSticker">🏥</span>
+    </div>
+</div>
+
+<div class="customize-grid" id="customizeGrid">
+
+    <!-- ═══════ Brand Name & Sticker Selector ═══════ -->
+    <div class="card card--customize" id="brandCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-signature"></i> Dashboard Nomi va Sticker</h2>
+        </div>
+        <div class="card__body">
+            <div class="form-group" id="group_brand_name">
+                <label for="inputBrandName" class="form-label">Dashboard Nomi:</label>
+                <input type="text" id="inputBrandName" class="form-input" placeholder="OnlinePharmacy" value="OnlinePharmacy" autocomplete="off">
+            </div>
+
+            <div class="sticker-picker-wrapper" id="stickerPickerWrapper">
+                <div class="sticker-picker-controls">
+                    <span class="sticker-picker-label">Sticker tanlang (kamida 20 ta variant):</span>
+                    <button type="button" class="btn-clear-sticker" id="btnClearSticker" title="Stickerni tozalash">
+                        <i class="fa-solid fa-xmark"></i> Tozalash
+                    </button>
+                </div>
+                <div class="sticker-picker" id="stickerPicker" role="radiogroup" aria-label="Sticker picker">
+                    <button type="button" class="sticker-btn sticker-btn--active" data-sticker="🏥" aria-label="Kasalxona sticker">🏥</button>
+                    <button type="button" class="sticker-btn" data-sticker="💊" aria-label="Dori sticker">💊</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩺" aria-label="Stetoskop sticker">🩺</button>
+                    <button type="button" class="sticker-btn" data-sticker="💉" aria-label="Shpris sticker">💉</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧪" aria-label="Kolba sticker">🧪</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩹" aria-label="Plastir sticker">🩹</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧬" aria-label="DNK sticker">🧬</button>
+                    <button type="button" class="sticker-btn" data-sticker="🪥" aria-label="Cho'tka sticker">🪥</button>
+                    <button type="button" class="sticker-btn" data-sticker="🚑" aria-label="Tez yordam sticker">🚑</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌡️" aria-label="Termometr sticker">🌡️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🩸" aria-label="Qon sticker">🩸</button>
+                    <button type="button" class="sticker-btn" data-sticker="🧼" aria-label="Sobun sticker">🧼</button>
+                    <button type="button" class="sticker-btn" data-sticker="⚕️" aria-label="Tibbiyot belgi sticker">⚕️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🏬" aria-label="Magazin sticker">🏬</button>
+                    <button type="button" class="sticker-btn" data-sticker="🛒" aria-label="Savat sticker">🛒</button>
+                    <button type="button" class="sticker-btn" data-sticker="📦" aria-label="Quti sticker">📦</button>
+                    <button type="button" class="sticker-btn" data-sticker="⚡" aria-label="Chaqmoq sticker">⚡</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌟" aria-label="Yulduz sticker">🌟</button>
+                    <button type="button" class="sticker-btn" data-sticker="❤️" aria-label="Yurak sticker">❤️</button>
+                    <button type="button" class="sticker-btn" data-sticker="🌿" aria-label="O'simlik sticker">🌿</button>
+                    <button type="button" class="sticker-btn" data-sticker="🛡️" aria-label="Qalqon sticker">🛡️</button>
+                    <button type="button" class="sticker-btn" data-sticker="✨" aria-label="Nur sticker">✨</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ Theme Selector ═══════ -->
+    <div class="card card--customize" id="themeSelectorCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-moon"></i> Mavzu tanlash</h2>
+        </div>
+        <div class="card__body">
+            <div class="theme-options" id="themeOptions">
+                <label class="theme-option" id="themeLight">
+                    <input type="radio" name="theme" value="light" checked>
+                    <div class="theme-option__preview theme-option__preview--light">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <span class="theme-option__label">Yorug'</span>
+                </label>
+
+                <label class="theme-option" id="themeDark">
+                    <input type="radio" name="theme" value="dark">
+                    <div class="theme-option__preview theme-option__preview--dark">
+                        <i class="fa-solid fa-moon"></i>
+                    </div>
+                    <span class="theme-option__label">Qorong'u</span>
+                </label>
+
+                <label class="theme-option" id="themeAuto">
+                    <input type="radio" name="theme" value="auto">
+                    <div class="theme-option__preview theme-option__preview--auto">
+                        <i class="fa-solid fa-circle-half-stroke"></i>
+                    </div>
+                    <span class="theme-option__label">Avtomatik</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ Accent Color ═══════ -->
+    <div class="card card--customize" id="accentColorCard">
+        <div class="card__header">
+            <h2 class="card__title"><i class="fa-solid fa-droplet"></i> Asosiy rang</h2>
+        </div>
+        <div class="card__body">
+            <div class="color-palette" id="colorPalette">
+                <!-- 16 primary colors -->
+                <label class="color-swatch" style="--swatch-color: #4f46e5;" title="Indigo">
+                    <input type="radio" name="accent" value="#4f46e5" checked>
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #8b5ef6;" title="Violet">
+                    <input type="radio" name="accent" value="#8b5ef6">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #ec4899;" title="Pink">
+                    <input type="radio" name="accent" value="#ec4899">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #ef4444;" title="Red">
+                    <input type="radio" name="accent" value="#ef4444">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #fb923c;" title="Orange">
+                    <input type="radio" name="accent" value="#fb923c">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #f59e0b;" title="Yellow">
+                    <input type="radio" name="accent" value="#f59e0b">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #22c55e;" title="Green">
+                    <input type="radio" name="accent" value="#22c55e">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #10b981;" title="Emerald">
+                    <input type="radio" name="accent" value="#10b981">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #14b8a6;" title="Teal">
+                    <input type="radio" name="accent" value="#14b8a6">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #06b6d4;" title="Cyan">
+                    <input type="radio" name="accent" value="#06b6d4">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #3b82f6;" title="Blue">
+                    <input type="radio" name="accent" value="#3b82f6">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #0ea5e9;" title="Sky">
+                    <input type="radio" name="accent" value="#0ea5e9">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #7c3aed;" title="Purple">
+                    <input type="radio" name="accent" value="#7c3aed">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #f43f5e;" title="Rose">
+                    <input type="radio" name="accent" value="#f43f5e">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #84cc16;" title="Lime">
+                    <input type="radio" name="accent" value="#84cc16">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+                <label class="color-swatch" style="--swatch-color: #64748b;" title="Slate">
+                    <input type="radio" name="accent" value="#64748b">
+                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
+                </label>
+            </div>
+
+            <div class="custom-color-input" id="customColorInput">
+                <label for="customAccent" class="form-label">Maxsus rang:</label>
+                <input type="color" id="customAccent" name="custom_accent" value="#6a00f4" class="form-color-picker">
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ Save ═══════ -->
+    <div class="card card--customize" id="customizeSaveCard">
+        <div class="card__body">
+            <div style="display:flex; gap:12px;">
+                <button type="button" class="btn btn--primary btn--block" id="btnSaveCustomize">
+                    <i class="fa-solid fa-floppy-disk"></i> Sozlamalarni saqlash
+                </button>
+                <button type="button" class="btn btn--secondary btn--block" id="btnCancelCustomize">
+                    <i class="fa-solid fa-xmark"></i> Bekor qilish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

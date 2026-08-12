@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OnlinePharmacy — Foydalanuvchi sahifasi">
+    <title>{% block title %}OnlinePharmacy{% endblock %}</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Dashboard Theme CSS -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/theme.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="user-body">
+    {# ── Auth guard ── #}
+    {% if not request.user.is_authenticated %}
+        <script>window.location.replace("/auth/");</script>
+    {% endif %}
+
+    <!-- Userbar Navigation -->
+    {% include 'dashboard/userbar.html' %}
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="dashboard-messages" id="dashboardMessages">
+        {% for msg in messages %}
+        <div class="alert alert--{{ msg.tags }}" role="alert">
+            <i class="fa-solid {% if msg.tags == 'success' %}fa-circle-check{% elif msg.tags == 'error' %}fa-circle-xmark{% elif msg.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+            <span>{{ msg }}</span>
+            <button class="alert-close" type="button" aria-label="Yopish">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="user-content" id="userContent">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="user-footer" id="userFooter">
+        <p>&copy; OnlinePharmacy &middot; Barcha huquqlar himoyalangan.</p>
+    </footer>
+
+    <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Drivers{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-header__title">
+            <i class="fa-solid fa-truck"></i>
+            Drivers
+        </h1>
+        <p class="page-header__subtitle">Manage all drivers</p>
+    </div>
+    <div class="page-header__actions">
+        <a href="{% url 'dashboard:driver_create' %}" class="btn btn--primary" id="btnCreateDriver">
+            <i class="fa-solid fa-plus"></i>
+            Add New Driver
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Name</th>
+<th>Phone</th>
+<th>Vehicle</th>
+<th>Actions</th>
+{% endblock %}
+
+{% block table_body %}
+{% if drivers %}
+    {% for driver in drivers %}
+    <tr data-driver-id="{{ driver.pk }}">
+        <td>{{ driver.id }}</td>
+        <td>
+            <div class="table__cell table__cell--user">
+                <i class="fa-solid fa-truck"></i>
+                <span>{{ driver.user.full_name|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ driver.phone_number|default:"—" }}</td>
+        <td>{{ driver.vehicle_info|default:"—" }}</td>
+        <td>
+            <div class="table__actions">
+                <a href="{% url 'dashboard:driver_edit' driver.pk %}" class="btn btn--sm btn--ghost driver-edit-btn" title="Update">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button type="button"
+                        class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
+                        data-driver-id="{{ driver.pk }}"
+                        title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="table__empty-row">
+        <td colspan="5">
+            <i class="fa-solid fa-inbox"></i>
+            <span>No drivers found</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'dashboard/js/drivers.js' %}"></script>
+{% endblock %}

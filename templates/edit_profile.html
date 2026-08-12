@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% include "components/begin.html" %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tahrirlash | OnlinePharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.3">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}?v=2.3">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <style>
+        body { background-color: #f9fafb; }
+
+        .edit-page-container {
+            max-width: 1100px;
+            margin: 5rem auto;
+            padding: 4rem;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(106, 0, 244, 0.08);
+            border: 1px solid #f0f0ff;
+        }
+
+        .edit-title {
+            color: #1f2937;
+            font-weight: 800;
+            font-size: 38px;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 5rem;
+        }
+
+        @media (max-width: 900px) {
+            .edit-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .avatar-edit-section {
+                border-bottom: 1px solid #f3f4f6;
+                padding-bottom: 3rem;
+            }
+        }
+
+        .avatar-edit-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar-preview {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #6a00f4;
+            box-shadow: 0 15px 35px rgba(106, 0, 244, 0.15);
+            margin-bottom: 2.5rem;
+            transition: 0.3s ease-in-out;
+        }
+
+        .avatar-preview:hover {
+            transform: scale(1.03);
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 14px 28px;
+            background: white;
+            border: 2px solid #6a00f4;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            color: #6a00f4;
+            transition: 0.3s;
+        }
+        .file-input-label:hover {
+            background: #6a00f4;
+            color: white;
+            box-shadow: 0 8px 20px rgba(106, 0, 244, 0.2);
+        }
+
+        /* FORM STYLES */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 3rem;
+            row-gap: 2.5rem;
+        }
+
+        @media (max-width: 650px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                row-gap: 2rem;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #374151;
+            font-size: 16px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1.1rem 1.3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 14px;
+            background: #f9fafb;
+            font-size: 16px;
+            transition: 0.3s;
+            color: #111827;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6a00f4;
+            box-shadow: 0 0 0 4px rgba(106, 0, 244, 0.1);
+            background: white;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 1.3rem;
+            background: linear-gradient(135deg, #6a00f4 0%, #b084f4 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 19px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 2rem;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(106, 0, 244, 0.25);
+        }
+
+        .btn-save:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Alert Notifications */
+        .custom-alert {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 1.3rem 2.5rem;
+            border-radius: 15px;
+            color: white;
+            font-weight: 700;
+            z-index: 3000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+
+        .alert-success { background: #10b981; }
+        .alert-error { background: #ef4444; }
+    </style>
+</head>
+<body data-page="account">
+
+    {% include "components/header.html" %}
+
+    <main class="page-content" style="padding-top: 100px;">
+        <div class="edit-page-container">
+            <h2 class="edit-title">Profilni tahrirlash</h2>
+
+            <div class="edit-grid">
+                <div class="avatar-edit-section">
+                    <img id="avatarPreview" src="/static/images/default_avatar.png" class="avatar-preview">
+                    <div>
+                        <label for="avatarInput" class="file-input-label">Suratni yangilash</label>
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    </div>
+                    <p style="margin-top: 1.5rem; font-size: 14px; color: #6b7280; line-height: 1.5;">Tavsiya etiladi: Yuqori sifatli,<br>kvadrat shaklidagi rasm</p>
+                </div>
+
+                <form id="editForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>To'liq ism</label>
+                            <input type="text" id="name" class="form-control" placeholder="Ismingizni kiriting">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email manzil</label>
+                            <input type="email" id="email" class="form-control" placeholder="example@mail.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Telefon raqam</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="+998 90 123 45 67">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Manzil</label>
+                            <input type="text" id="address" class="form-control" placeholder="Shahar, tuman, ko'cha">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-save">O'zgarishlarni saqlash</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="alertBox" class="custom-alert"></div>
+
+    {% include "components/footer.html" %}
+
+    <script src="{% static 'js/api.js' %}?v=2.3"></script>
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/footer.js' %}"></script>
+    <script src="{% static 'js/main.js' %}?v=2.3"></script>
+    <script src="{% static 'js/edit_profile.js' %}?v=2.3"></script>
+</body>
+</html>

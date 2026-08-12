@@ -1,0 +1,84 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Mahsulotlar{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-pills"></i>
+            Mahsulotlar
+        </h1>
+        <p class="page-subtitle">Barcha mahsulotlarni boshqarish</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:medicine_create' %}" class="btn btn--primary">
+            <i class="fa-solid fa-plus"></i>
+            Mahsulot qo'shish
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Rasm</th>
+<th>Nomi</th>
+<th>Kategoriya</th>
+<th>Narxi</th>
+<th>Miqdori</th>
+<th>Status</th>
+<th>Amallar</th>
+{% endblock %}
+
+{% block table_body %}
+{% if medicines %}
+    {% for medicine in medicines %}
+    <tr>
+        <td>{{ medicine.id }}</td>
+        <td>
+            <div class="table-image">
+                {% if medicine.image %}
+                <img src="{{ medicine.image.url }}" alt="{{ medicine.name }}" loading="lazy">
+                {% else %}
+                <div class="table-image__placeholder">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+                {% endif %}
+            </div>
+        </td>
+        <td><strong>{{ medicine.name }}</strong></td>
+        <td>{{ medicine.category.name|default:"—" }}</td>
+        <td>{{ medicine.price|default:"0" }} so'm</td>
+        <td>{{ medicine.stock|default:"0" }}</td>
+        <td>
+            <span class="tag tag--{% if medicine.stock > 0 %}success{% else %}error{% endif %}">
+                {% if medicine.stock > 0 %}Mavjud{% else %}Tugagan{% endif %}
+            </span>
+        </td>
+        <td>
+            <div class="table-actions">
+                <a href="{% url 'dashboard:medicine_edit' medicine.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <form method="post" action="{% url 'dashboard:medicine_delete' medicine.pk %}" class="inline-form"
+                      onsubmit="return confirm('Ushbu mahsulotni o\'chirmoqchimisiz?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--sm btn--ghost btn--danger" title="O'chirish">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="8">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Mahsulotlar topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}
