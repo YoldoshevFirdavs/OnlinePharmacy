@@ -160,13 +160,12 @@ class DeviceFingerprintMiddleware:
             
         cache_key = f"rate_fp:{fp}"
         try:
-            # Increment counter with 1 second TTL
-            current_count = cache.incr(cache_key)
-            if current_count == 1:
-                cache.expire(cache_key, 1)
-            else:
-                # Ensure TTL exists (in case key was set elsewhere)
-                cache.expire(cache_key, 1)
+            # Get current count safely
+            current_count = cache.get(cache_key, 0)
+            current_count += 1
+            
+            # Set with 1 second TTL
+            cache.set(cache_key, current_count, timeout=1)
             
             if current_count > self.RATE_THRESHOLD:
                 # Rate limit exceeded - ban fingerprint and block IP
@@ -236,12 +235,12 @@ class DeviceFingerprintMiddleware:
         cache_key = f"admin_unban:{admin_id}"
         
         try:
-            current_count = cache.incr(cache_key)
-            if current_count == 1:
-                cache.expire(cache_key, 3600)  # 1 hour TTL
-            else:
-                # Ensure TTL exists (in case key was set elsewhere)
-                cache.expire(cache_key, 3600)
+            # Get current count safely
+            current_count = cache.get(cache_key, 0)
+            current_count += 1
+            
+            # Set with 1 hour TTL
+            cache.set(cache_key, current_count, timeout=3600)
             
             return current_count > self.ADMIN_UNBAN_LIMIT
         except Exception as e:
