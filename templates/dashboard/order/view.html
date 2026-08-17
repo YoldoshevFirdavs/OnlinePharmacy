@@ -1,0 +1,205 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Buyurtma #{{ order.id }} - Ko'rish{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-receipt"></i>
+            Buyurtma #{{ order.id }}
+        </h1>
+        <p class="page-subtitle">Buyurtma tafsilotlari va xolati</p>
+    </div>
+</div>
+
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+    <!-- Order Info Card -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Asosiy ma'lumotlar</h2>
+        </div>
+        <div class="card__body">
+            <div class="info-row">
+                <span class="info-label">Buyurtma ID:</span>
+                <span class="info-value">#{{ order.id }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Statusu:</span>
+                <span class="info-value">
+                    <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Pending' %}warning{% elif order.status == 'Cancelled' %}error{% else %}info{% endif %}">
+                        {{ order.status }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Jami summa:</span>
+                <span class="info-value"><strong>{{ order.total_price }} so'm</strong></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Yaratilgan sana:</span>
+                <span class="info-value">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            {% if order.delivered_at %}
+            <div class="info-row">
+                <span class="info-label">Yetkazilgan sana:</span>
+                <span class="info-value">{{ order.delivered_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Customer Info Card -->
+    <div class="card">
+        <div class="card__header">
+            <h2 class="card__title">Mijozning ma'lumotlari</h2>
+        </div>
+        <div class="card__body">
+            <div class="info-row">
+                <span class="info-label">F.I.Sh:</span>
+                <span class="info-value">{{ order.user.full_name|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ order.user.email|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Telefon:</span>
+                <span class="info-value">{{ order.user.phone_number|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Manzil:</span>
+                <span class="info-value">{{ order.address|default:"—" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items Card -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card__header">
+            <h2 class="card__title">Mahsulotlar</h2>
+        </div>
+        <div class="card__body table-responsive">
+            {% if order.order_items.all %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mahsulot</th>
+                        <th>Miqdori</th>
+                        <th>Narxi</th>
+                        <th>Jami</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.order_items.all %}
+                    <tr>
+                        <td>{{ item.product.name|default:"Ochirilgan mahsulot" }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price_at_order }} so'm</td>
+                        <td><strong>{{ item.quantity|multiply:item.price_at_order }} so'm</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color: #999; text-align: center;">Buyurtmada mahsulot yo'q.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div style="display: flex; gap: 1rem; margin-top: 2rem;">
+    <a href="{% url 'dashboard:order_edit' order.id %}" class="btn btn--primary">
+        <i class="fa-solid fa-pen"></i>
+        Tahrirlash
+    </a>
+    <a href="{% url 'dashboard:order_list' %}" class="btn btn--secondary">
+        <i class="fa-solid fa-arrow-left"></i>
+        Ro'yxatga qaytish
+    </a>
+</div>
+
+<style>
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: #666;
+    }
+
+    .info-value {
+        color: #333;
+        text-align: right;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .tag--success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .tag--warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .tag--error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .tag--info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn--primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn--primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn--secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn--secondary:hover {
+        background-color: #545b62;
+    }
+</style>
+{% endblock %}

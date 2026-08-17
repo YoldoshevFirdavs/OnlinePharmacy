@@ -28,10 +28,15 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Medicine)
 class MedicineAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "stock", "is_active"]
+    list_display = ["name", "price", "stock", "is_active", "average_rating", "reviews_count"]
     list_filter = ["is_active", "category"]
     search_fields = ["name"]
+    list_per_page = 50
+    list_max_show_all = 50  # Limit "Show all" to prevent loading all records
     prepopulated_fields = {"slug": ("name",)}
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('category').prefetch_related('images')
 
 
 class BotInlineButtonInline(admin.TabularInline):

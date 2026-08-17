@@ -3,6 +3,73 @@
 
 {% block title %}{% if user %}Foydalanuvchini tahrirlash{% else %}Yangi foydalanuvchi{% endif %}{% endblock %}
 
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-top: 30px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-section-title i {
+        color: var(--primary, #007bff);
+        font-size: 1.2rem;
+    }
+
+    .pwd-requirements {
+        list-style: none;
+        margin: 12px 0 0 0;
+        padding: 12px;
+        background: var(--gray-100);
+        border-radius: 6px;
+        border-left: 4px solid var(--gray-300);
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: none;
+    }
+
+    .pwd-requirements--visible {
+        opacity: 1;
+        display: block;
+    }
+
+    .pwd-req {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: var(--gray-700);
+    }
+
+    .pwd-req:last-child {
+        margin-bottom: 0;
+    }
+
+    .pwd-req i {
+        font-size: 0.9rem;
+        width: 18px;
+        flex-shrink: 0;
+    }
+
+    .pwd-req--fail i {
+        color: #ef4444;
+    }
+
+    .pwd-req--pass i {
+        color: #34c759;
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 {{ block.super }}
 <script>
@@ -52,6 +119,25 @@
     pwdInput.addEventListener('blur', function() {
         if (!pwdInput.value) reqBox.classList.remove('pwd-requirements--visible');
     });
+
+    // Ban section visibility toggle
+    var isPermanentBanCheckbox = document.getElementById('id_is_permanent_ban');
+    var banUntilField = document.getElementById('id_ban_until');
+    
+    if (isPermanentBanCheckbox && banUntilField) {
+        function toggleBanUntilField() {
+            if (isPermanentBanCheckbox.checked) {
+                banUntilField.parentElement.style.display = 'none';
+                banUntilField.value = '';
+            } else {
+                banUntilField.parentElement.style.display = 'block';
+            }
+        }
+        isPermanentBanCheckbox.addEventListener('change', toggleBanUntilField);
+        toggleBanUntilField();
+    }
 })();
 </script>
+<script src="{% static 'dashboard/js/account-validation.js' %}" defer></script>
 {% endblock %}
+

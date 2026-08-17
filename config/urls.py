@@ -76,6 +76,7 @@ urlpatterns = [
     path("api/v1/orders/", include("orders.urls")),
     path("api/v1/payments/", include("payments.urls")),
     path("api/v1/dashboard/", include("dashboard.api_urls", namespace="dashboard_api")),
+    path("api/v1/security/", include("security.urls", namespace="security")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),

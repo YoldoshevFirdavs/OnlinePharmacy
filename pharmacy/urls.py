@@ -11,6 +11,8 @@ from .views.product import (
     product_list
 )
 
+from .api_views import MedicineListView
+
 app_name = 'pharmacy'
 router = DefaultRouter()
 router.register(r"products", MedicineViewSet)
@@ -20,6 +22,9 @@ router.register(r"flash-sales", FlashSaleViewSet)
 router.register(r"images", MedicineImageViewSet)
 
 urlpatterns = [
+    # DRF API endpoint - must be before /products/ to avoid HTML fallback
+    path("products/", MedicineListView.as_view(), name="product_list_api"),
+    path("products/<int:pk>/", MedicineListView.as_view(), name="product_detail_api"),
     path("products/", product_list, name="product_list"),
     path(
         "categories/",

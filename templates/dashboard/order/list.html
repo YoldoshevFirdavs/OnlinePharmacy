@@ -11,6 +11,12 @@
             Buyurtmalar
         </h1>
     </div>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:order_create' %}" class="btn btn--primary">
+            <i class="fa-solid fa-plus"></i>
+            Qo'shish
+        </a>
+    </div>
 </div>
 {% endblock %}
 
@@ -53,19 +59,19 @@
         <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
         <td>
             <div class="table-actions">
-                <button class="btn btn--sm btn--ghost order-view-btn" 
-                        type="button" 
-                        data-order-id="{{ order.id }}"
-                        title="Ko'rish">
+                <a href="{% url 'dashboard:order_view' order.id %}" 
+                   class="btn btn--sm btn--ghost" 
+                   title="Ko'rish">
                     <i class="fa-solid fa-eye"></i>
-                </button>
-                <button class="btn btn--sm btn--ghost" 
-                        type="button"
-                        title="Tahrirlash">
+                </a>
+                <a href="{% url 'dashboard:order_edit' order.id %}" 
+                   class="btn btn--sm btn--ghost" 
+                   title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="btn btn--sm btn--ghost btn--danger" 
-                        type="button"
+                </a>
+                <button type="button" 
+                        class="btn btn--sm btn--ghost btn--danger order-delete-btn"
+                        data-order-id="{{ order.id }}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>

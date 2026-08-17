@@ -71,10 +71,15 @@ class UserForm(forms.ModelForm):
             "address",
             "avatar",
             "is_staff",
+            "is_superuser",
             "is_active",
             "is_verified",
             "role",
             "password",
+            "banned_for",
+            "ban_reason",
+            "ban_until",
+            "is_permanent_ban",
         ]
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -83,9 +88,14 @@ class UserForm(forms.ModelForm):
             "address": forms.TextInput(attrs={"class": "form-control"}),
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "is_superuser": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_verified": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "role": forms.Select(attrs={"class": "form-control"}),
+            "banned_for": forms.TextInput(attrs={"class": "form-control", "placeholder": "Masalan: admin_login, dashboard, etc."}),
+            "ban_reason": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Ban berilgan sababi"}),
+            "ban_until": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "is_permanent_ban": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def save(self, commit=True):
@@ -149,3 +159,15 @@ class AccountSettingsForm(forms.ModelForm):
             self.add_error("old_password", "Eski parol noto'g'ri.")
 
         return cleaned_data
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ["user", "total_price", "status", "address"]
+        widgets = {
+            "user": forms.Select(attrs={"class": "form-control"}),
+            "total_price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "address": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }

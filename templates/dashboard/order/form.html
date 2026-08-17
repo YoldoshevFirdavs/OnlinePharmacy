@@ -1,0 +1,166 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if order %}
+        Buyurtmani tahrirlash #{{ order.id }}
+    {% else %}
+        Yangi buyurtma qo'shish
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-cart-shopping"></i>
+            {% if order %}
+                Buyurtmani tahrirlash #{{ order.id }}
+            {% else %}
+                Yangi buyurtma qo'shish
+            {% endif %}
+        </h1>
+    </div>
+</div>
+
+<div class="card card--form">
+    <div class="card__body">
+        <form method="post" class="form-group">
+            {% csrf_token %}
+
+            <!-- User Field -->
+            <div class="form-field">
+                <label for="{{ form.user.id_for_label }}" class="form-label">Foydalanuvchi *</label>
+                {% if form.user.errors %}
+                    {{ form.user }}
+                    <div class="form-error">{{ form.user.errors.0 }}</div>
+                {% else %}
+                    {{ form.user }}
+                {% endif %}
+            </div>
+
+            <!-- Total Price Field -->
+            <div class="form-field">
+                <label for="{{ form.total_price.id_for_label }}" class="form-label">Jami summa (so'm) *</label>
+                {% if form.total_price.errors %}
+                    {{ form.total_price }}
+                    <div class="form-error">{{ form.total_price.errors.0 }}</div>
+                {% else %}
+                    {{ form.total_price }}
+                {% endif %}
+            </div>
+
+            <!-- Status Field -->
+            <div class="form-field">
+                <label for="{{ form.status.id_for_label }}" class="form-label">Status *</label>
+                {% if form.status.errors %}
+                    {{ form.status }}
+                    <div class="form-error">{{ form.status.errors.0 }}</div>
+                {% else %}
+                    {{ form.status }}
+                {% endif %}
+            </div>
+
+            <!-- Address Field -->
+            <div class="form-field">
+                <label for="{{ form.address.id_for_label }}" class="form-label">Manzil</label>
+                {% if form.address.errors %}
+                    {{ form.address }}
+                    <div class="form-error">{{ form.address.errors.0 }}</div>
+                {% else %}
+                    {{ form.address }}
+                {% endif %}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn--primary">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    {% if order %}
+                        Yangilash
+                    {% else %}
+                        Yaratish
+                    {% endif %}
+                </button>
+                <a href="{% url 'dashboard:order_list' %}" class="btn btn--secondary">
+                    <i class="fa-solid fa-times"></i>
+                    Bekor qilish
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-field {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .form-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn--primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn--primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn--secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn--secondary:hover {
+        background-color: #545b62;
+    }
+</style>
+{% endblock %}

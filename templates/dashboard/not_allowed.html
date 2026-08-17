@@ -4,69 +4,337 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}">
-  <link rel="stylesheet" href="{% static 'css/font-face.css' %}"> {# Yangi qo'shildi #}
+  <link rel="stylesheet" href="{% static 'css/font-face.css' %}">
   <title>Kirish taqiqlangan</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: var(--font-family, sans-serif); /* Font family o'zgaruvchidan olindi */
-      background-color: var(--background); /* O'zgaruvchidan olindi */
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
-      color: var(--text-color); /* O'zgaruvchidan olindi */
-      text-align: center;
-      transition: background-color 0.3s ease, color 0.3s ease; /* Tema o'zgarishi uchun */
+      padding: 20px;
     }
-    main {
-      background-color: var(--card-background); /* O'zgaruvchidan olindi */
-      padding: 40px;
-      border-radius: var(--border-radius-md); /* O'zgaruvchidan olindi */
-      box-shadow: var(--shadow-md); /* O'zgaruvchidan olindi */
-      max-width: 500px;
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      max-width: 600px;
       width: 100%;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Tema o'zgarishi uchun */
+      padding: 50px 40px;
+      text-align: center;
     }
-    h1 {
-      color: var(--danger-color); /* O'zgaruvchidan olindi */
+
+    .icon {
+      font-size: 80px;
+      color: #ef4444;
       margin-bottom: 20px;
-      font-size: 28px;
+      animation: shake 0.5s ease-in-out;
     }
-    p {
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      font-weight: 800;
+    }
+
+    .message {
       font-size: 16px;
-      line-height: 1.5;
-      margin-bottom: 10px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 30px;
     }
-    .from-info {
-      font-style: italic;
-      color: var(--text-muted); /* O'zgaruvchidan olindi */
+
+    .ban-details {
+      background: #f9f9f9;
+      border-left: 4px solid #ef4444;
+      padding: 20px;
+      border-radius: 6px;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+
+    .detail-item {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #1a1a1a;
+      display: inline-block;
+      width: 140px;
+    }
+
+    .detail-value {
+      color: #ef4444;
+      font-family: 'Courier New', monospace;
+    }
+
+    .time-info {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-home {
+      background: #6a00f4;
+      color: white;
+    }
+
+    .btn-home:hover {
+      background: #5500d8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 0, 244, 0.3);
+    }
+
+    .btn-unban {
+      background: #34c759;
+      color: white;
+    }
+
+    .btn-unban:hover {
+      background: #2aaa43;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+    }
+
+    .btn-unban:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .admin-note {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #856404;
+      padding: 15px;
+      border-radius: 6px;
       margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .icon {
+        font-size: 60px;
+      }
+
+      .detail-label {
+        width: 100%;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
-<body data-theme="light"> {# data-theme qo'shildi #}
-  <main>
-    <h1>Siz bloklandingiz</h1>
-    <p>Hozir siz bu sahifaga kira olmaysiz. Sabab: ko‘p marta noto‘g‘ri urinishlar.</p>
-    <p class="from-info">Manba: <span id="fromSource">{{ request.GET.from|default:"noma'lum" }}</span></p>
-  </main>
+<body>
+  <div class="container">
+    <!-- Icon -->
+    <div class="icon">
+      <i class="fa-solid fa-ban"></i>
+    </div>
+
+    <!-- Title -->
+    <h1>Kirish taqiqlangan</h1>
+
+    <!-- Main Message -->
+    <p class="message">
+      Siz bloklandingiz. Hozir bu sahifaga kira olmaysiz.
+    </p>
+
+    <!-- Ban Details -->
+    {% if ban_info %}
+      <div class="ban-details">
+        <div class="detail-item">
+          <span class="detail-label">Sabab:</span>
+          <span class="detail-value">{{ ban_info.ban_reason|default:"Noma'lum" }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Ban o'rni:</span>
+          <span class="detail-value">{{ ban_info.banned_for|default:"Noma'lum" }}</span>
+        </div>
+
+        {% if path_attempted %}
+        <div class="detail-item">
+          <span class="detail-label">Manba URL:</span>
+          <span class="detail-value" style="word-break: break-all;">{{ path_attempted }}</span>
+        </div>
+        {% endif %}
+
+        <div class="detail-item">
+          <span class="detail-label">Ban turi:</span>
+          <span class="detail-value">
+            {% if ban_info.is_permanent %}Doimiy{% else %}Vaqtli{% endif %}
+          </span>
+        </div>
+
+        {% if ban_info.ban_until %}
+        <div class="detail-item">
+          <span class="detail-label">Tugash vaqti:</span>
+          <span class="detail-value">{{ ban_info.ban_until|date:"d.m.Y H:i" }}</span>
+          <div class="time-info" id="countdown"></div>
+        </div>
+        {% endif %}
+
+        {% if ban_info.banned_by %}
+        <div class="detail-item">
+          <span class="detail-label">Ban qo'ygan:</span>
+          <span class="detail-value">{{ ban_info.banned_by }}</span>
+        </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="message" style="color: #ef4444;">
+        Noma'lum xatolik yuz berdi. Admin bilan bog'laning.
+      </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="btn-group">
+      <a href="/" class="btn btn-home">
+        <i class="fa-solid fa-home"></i> Bosh sahifaga
+      </a>
+
+      {% if user.is_staff or user.is_superuser %}
+        <button class="btn btn-unban" id="unbanBtn" onclick="unbanUser()">
+          <i class="fa-solid fa-unlock"></i> Unban qilish
+        </button>
+      {% endif %}
+    </div>
+
+    <!-- Admin Note -->
+    {% if not user.is_staff and not user.is_superuser %}
+      <div class="admin-note">
+        <i class="fa-solid fa-info-circle"></i>
+        Agar bu xato deb hisoblasangiz, admin bilan bog'laning.
+      </div>
+    {% endif %}
+
+    {% if user.is_staff or user.is_superuser %}
+      <div class="admin-note" style="background: #d4edda; border-color: #28a745; color: #155724;">
+        <i class="fa-solid fa-crown"></i>
+        Siz admin. Unban tugmasi bilan bu foydalanuvchini ochishingiz mumkin.
+      </div>
+    {% endif %}
+  </div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const fromParam = urlParams.get('from');
-      if (fromParam) {
-        document.getElementById('fromSource').textContent = fromParam.replace(/_/g, ' ');
+    // Countdown timer
+    {% if ban_info.ban_until %}
+      function updateCountdown() {
+        const banUntil = new Date('{{ ban_info.ban_until|date:"c" }}').getTime();
+        const now = new Date().getTime();
+        const distance = banUntil - now;
+
+        if (distance <= 0) {
+          document.getElementById('countdown').textContent = 'Ban tugadi!';
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        let text = 'Qolgan vaqt: ';
+        if (days > 0) text += days + ' kun ';
+        if (hours > 0) text += hours + ' soat ';
+        if (minutes > 0) text += minutes + ' minut ';
+        text += seconds + ' sekund';
+
+        document.getElementById('countdown').textContent = text;
       }
 
-      // Theme initialization
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.body.dataset.theme = savedTheme;
-      if (savedTheme === 'dark') {
-          document.body.classList.add('dark');
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    {% endif %}
+
+    // Unban function
+    {% if user.is_staff or user.is_superuser %}
+      function unbanUser() {
+        const btn = document.getElementById('unbanBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="loading-spinner"></div> Ochilmoqda...';
+
+        // Admin uchun unban API call (agar API yo'q bo'lsa, POST orqali)
+        // Hozircha, refresh qiladi (admin paneldagi unban tugmasi orqali boshqarish mumkin)
+        alert('Bu sahifada unban tugmasi hali ishlamaydi. Admin paneldan unban qiling.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-unlock"></i> Unban qilish';
       }
-    });
+    {% endif %}
   </script>
 </body>
 </html>

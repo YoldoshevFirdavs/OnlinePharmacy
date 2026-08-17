@@ -25,6 +25,7 @@ from .forms import (
     CategoryForm,
     DeliveryDriverForm,
     MedicineForm,
+    OrderForm,
     UserForm,
 )
 
@@ -568,31 +569,27 @@ def category_edit(request, pk):
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def category_delete(request, pk):
     try:
         try:
             category = get_object_or_404(Category, pk=pk)
 
-            if request.method == "POST":
-                try:
-                    with transaction.atomic():
-                        category_name = category.name
-                        category.delete()
-                        messages.success(
-                            request,
-                            f"'{category_name}' kategoriya muvaffaqiyatli o'chirildi.",
-                        )
-                        return redirect("dashboard:category_list")
-                except Exception as delete_error:
-                    logger.error(f"Error deleting category: {str(delete_error)}")
-                    messages.error(
-                        request, "Kategoriyani o'chirishda xatolik yuz berdi."
+            try:
+                with transaction.atomic():
+                    category_name = category.name
+                    category.delete()
+                    messages.success(
+                        request,
+                        f"'{category_name}' kategoriya muvaffaqiyatli o'chirildi.",
                     )
                     return redirect("dashboard:category_list")
-            else:
-                ctx = {"category": category}
-                return render(request, "dashboard/category/list.html", ctx)
+            except Exception as delete_error:
+                logger.error(f"Error deleting category: {str(delete_error)}")
+                messages.error(
+                    request, "Kategoriyani o'chirishda xatolik yuz berdi."
+                )
+                return redirect("dashboard:category_list")
 
         except Exception as query_error:
             logger.error(f"Database query error in category_delete: {str(query_error)}")
@@ -602,6 +599,7 @@ def category_delete(request, pk):
     except Exception as e:
         logger.error(f"Unexpected error in category_delete: {str(e)}")
         messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:category_list")
         return redirect("dashboard:category_list")
 
 
@@ -750,29 +748,25 @@ def medicine_edit(request, pk):
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def medicine_delete(request, pk):
     try:
         try:
             medicine = get_object_or_404(Medicine, pk=pk)
 
-            if request.method == "POST":
-                try:
-                    with transaction.atomic():
-                        medicine_name = medicine.name
-                        medicine.delete()
-                        messages.success(
-                            request,
-                            f"'{medicine_name}' dori muvaffaqiyatli o'chirildi.",
-                        )
-                        return redirect("dashboard:medicine_list")
-                except Exception as delete_error:
-                    logger.error(f"Error deleting medicine: {str(delete_error)}")
-                    messages.error(request, "Dorini o'chirishda xatolik yuz berdi.")
+            try:
+                with transaction.atomic():
+                    medicine_name = medicine.name
+                    medicine.delete()
+                    messages.success(
+                        request,
+                        f"'{medicine_name}' dori muvaffaqiyatli o'chirildi.",
+                    )
                     return redirect("dashboard:medicine_list")
-            else:
-                ctx = {"medicine": medicine}
-                return render(request, "dashboard/product/list.html", ctx)
+            except Exception as delete_error:
+                logger.error(f"Error deleting medicine: {str(delete_error)}")
+                messages.error(request, "Dorini o'chirishda xatolik yuz berdi.")
+                return redirect("dashboard:medicine_list")
 
         except Exception as query_error:
             logger.error(f"Database query error in medicine_delete: {str(query_error)}")
@@ -1041,13 +1035,63 @@ def dashboard_customize(request):
 
 
 def not_allowed(request):
+    """Ban/Blocked sahifasi - Enhanced with fingerprint ban support"""
     try:
-        from_page = request.GET.get("from", "noma'lum sahifa")
-        ctx = {"from_page": from_page}
+        from users.services import BanService
+        
+        user = request.user if request.user.is_authenticated else None
+        path_attempted = request.GET.get("next", request.path)
+        
+        # Ban tafsilotlarini olish
+        ban_info = None
+        fp_ban_info = None
+        
+        if user:
+            ban_info = BanService.get_ban_info(user)
+        
+        # Device fingerprint ban tekshirish
+        fp = getattr(request, 'device_fingerprint', None)
+        if not fp:
+            fp = request.COOKIES.get('device_fp') or request.META.get('HTTP_AUTHORIZATION_FINGERPRINT')
+        
+        if fp:
+            fp_ban_info = BanService.get_fp_ban_info(fp)
+            
+            # Agar user va fingerprint mapping bo'lsa, set up mapping
+            if user and not ban_info:
+                BanService.map_fp_to_user(fp, user)
+        
+        ctx = {
+            "path_attempted": path_attempted,
+            "ban_info": ban_info,
+            "fp_ban_info": fp_ban_info,
+            "user": user,
+            "device_fingerprint": fp[:8] + '...' if fp and len(fp) > 8 else fp,
+        }
+        
+        if ban_info:
+            ctx.update({
+                "ban_reason": ban_info.get('ban_reason', 'Noma\'lum'),
+                "banned_for": ban_info.get('banned_for', 'Noma\'lum'),
+                "ban_until": ban_info.get('ban_until'),
+                "is_permanent": ban_info.get('is_permanent', False),
+            })
+        
+        if fp_ban_info:
+            ctx.update({
+                "fp_ban_reason": fp_ban_info.get('ban_reason', 'Noma\'lum'),
+                "fp_banned_for": fp_ban_info.get('banned_for', 'Noma\'lum'),
+                "fp_ban_expires_at": fp_ban_info.get('ban_expires_at'),
+                "fp_is_permanent": fp_ban_info.get('is_permanent', False),
+            })
+        
         return render(request, "dashboard/not_allowed.html", ctx)
     except Exception as e:
         logger.error(f"Error in not_allowed: {str(e)}")
-        return render(request, "dashboard/not_allowed.html", {"from_page": "noma'lum"})
+        return render(request, "dashboard/not_allowed.html", {
+            "path_attempted": request.path,
+            "error": "Xatolik yuz berdi"
+        })
 
 
 @login_required_decorator(login_url="dashboard:login_page")
@@ -1130,3 +1174,240 @@ def ban_list(request):
         logger.error(f"Database query error in ban_list: {str(query_error)}")
         messages.error(request, "Banlar ro'yxatini yuklashda xatolik yuz berdi.")
         return render(request, "dashboard/bans/list.html", {"banned_users": []})
+
+
+
+# ═══════ ORDER CRUD VIEWS ═══════
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def order_create(request):
+    """Order yaratish."""
+    try:
+        if request.method == "POST":
+            try:
+                form = OrderForm(request.POST)
+                if form.is_valid():
+                    try:
+                        with transaction.atomic():
+                            form.save()
+                            messages.success(request, "Buyurtma muvaffaqiyatli yaratildi.")
+                            return redirect("dashboard:order_list")
+                    except Exception as save_error:
+                        logger.error(f"Error saving order: {str(save_error)}")
+                        messages.error(request, "Buyurtmani saqlashda xatolik yuz berdi.")
+                        return render(request, "dashboard/order/form.html", {"form": form})
+                else:
+                    for field, errors in form.errors.items():
+                        for error in errors:
+                            messages.error(request, f"{field}: {error}")
+                    return render(request, "dashboard/order/form.html", {"form": form})
+            except Exception as form_error:
+                logger.error(f"Form processing error in order_create: {str(form_error)}")
+                messages.error(request, "Buyurtma yaratishda xatolik yuz berdi.")
+                form = OrderForm()
+                return render(request, "dashboard/order/form.html", {"form": form})
+        else:
+            try:
+                form = OrderForm()
+                ctx = {"form": form}
+                return render(request, "dashboard/order/form.html", ctx)
+            except Exception as get_error:
+                logger.error(f"Error loading form in order_create: {str(get_error)}")
+                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                return redirect("dashboard:order_list")
+    except Exception as e:
+        logger.error(f"Unexpected error in order_create: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:order_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def order_edit(request, pk):
+    """Order tahrirlash."""
+    try:
+        try:
+            order = get_object_or_404(Order, pk=pk)
+
+            if request.method == "POST":
+                try:
+                    form = OrderForm(request.POST, instance=order)
+                    if form.is_valid():
+                        try:
+                            with transaction.atomic():
+                                form.save()
+                                messages.success(request, "Buyurtma muvaffaqiyatli yangilandi.")
+                                return redirect("dashboard:order_list")
+                        except Exception as save_error:
+                            logger.error(f"Error updating order: {str(save_error)}")
+                            messages.error(request, "Buyurtmani yangilashda xatolik yuz berdi.")
+                            return render(
+                                request,
+                                "dashboard/order/form.html",
+                                {"form": form, "order": order},
+                            )
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                messages.error(request, f"{field}: {error}")
+                        return render(
+                            request,
+                            "dashboard/order/form.html",
+                            {"form": form, "order": order},
+                        )
+                except Exception as form_error:
+                    logger.error(f"Form processing error in order_edit: {str(form_error)}")
+                    messages.error(request, "Buyurtma yangilashda xatolik yuz berdi.")
+                    form = OrderForm(instance=order)
+                    return render(
+                        request,
+                        "dashboard/order/form.html",
+                        {"form": form, "order": order},
+                    )
+            else:
+                try:
+                    form = OrderForm(instance=order)
+                    ctx = {"form": form, "order": order}
+                    return render(request, "dashboard/order/form.html", ctx)
+                except Exception as get_error:
+                    logger.error(f"Error loading form in order_edit: {str(get_error)}")
+                    messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                    return redirect("dashboard:order_list")
+
+        except Exception as query_error:
+            logger.error(f"Database query error in order_edit: {str(query_error)}")
+            messages.error(request, "Buyurtmani yuklashda xatolik yuz berdi.")
+            return redirect("dashboard:order_list")
+
+    except Exception as e:
+        logger.error(f"Unexpected error in order_edit: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:order_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET"])
+def order_view(request, pk):
+    """Order ko'rish (detail view)."""
+    try:
+        try:
+            order = get_object_or_404(Order, pk=pk)
+            ctx = {"order": order}
+            return render(request, "dashboard/order/view.html", ctx)
+        except Exception as query_error:
+            logger.error(f"Database query error in order_view: {str(query_error)}")
+            messages.error(request, "Buyurtmani yuklashda xatolik yuz berdi.")
+            return redirect("dashboard:order_list")
+    except Exception as e:
+        logger.error(f"Unexpected error in order_view: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:order_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["POST"])
+def order_delete(request, pk):
+    """Order o'chirish."""
+    try:
+        try:
+            order = get_object_or_404(Order, pk=pk)
+
+            try:
+                with transaction.atomic():
+                    order_id = order.id
+                    order.delete()
+                    messages.success(request, f"Buyurtma #{order_id} muvaffaqiyatli o'chirildi.")
+                    return redirect("dashboard:order_list")
+            except Exception as delete_error:
+                logger.error(f"Error deleting order: {str(delete_error)}")
+                messages.error(request, "Buyurtmani o'chirishda xatolik yuz berdi.")
+                return redirect("dashboard:order_list")
+
+        except Exception as query_error:
+            logger.error(f"Database query error in order_delete: {str(query_error)}")
+            messages.error(request, "Buyurtmani yuklashda xatolik yuz berdi.")
+            return redirect("dashboard:order_list")
+
+    except Exception as e:
+        logger.error(f"Unexpected error in order_delete: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:order_list")
+
+
+
+# ═══════ USER DELETE VIEW ═══════
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["POST"])
+def user_delete(request, pk):
+    """Foydalanuvchini o'chirish."""
+    try:
+        try:
+            user = get_object_or_404(CustomUser, pk=pk)
+
+            try:
+                with transaction.atomic():
+                    user_display = user.full_name or user.email or user.phone_number
+                    user.delete()
+                    messages.success(
+                        request,
+                        f"'{user_display}' foydalanuvchi muvaffaqiyatli o'chirildi.",
+                    )
+                    return redirect("dashboard:user_list")
+            except Exception as delete_error:
+                logger.error(f"Error deleting user: {str(delete_error)}")
+                messages.error(request, "Foydalanuvchini o'chirishda xatolik yuz berdi.")
+                return redirect("dashboard:user_list")
+
+        except Exception as query_error:
+            logger.error(f"Database query error in user_delete: {str(query_error)}")
+            messages.error(request, "Foydalanuvchini yuklashda xatolik yuz berdi.")
+            return redirect("dashboard:user_list")
+
+    except Exception as e:
+        logger.error(f"Unexpected error in user_delete: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:user_list")
+
+
+
+# ═══════ DELIVERY DELETE VIEW ═══════
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["POST"])
+def delivery_delete(request, pk):
+    """Yetkazib beruvchini o'chirish."""
+    try:
+        try:
+            driver = get_object_or_404(DeliveryDriver, pk=pk)
+
+            try:
+                with transaction.atomic():
+                    driver_name = driver.user.full_name if driver.user else "Noma'lum haydovchi"
+                    driver.delete()
+                    messages.success(
+                        request,
+                        f"'{driver_name}' yetkazib beruvchi muvaffaqiyatli o'chirildi.",
+                    )
+                    return redirect("dashboard:delivery_list")
+            except Exception as delete_error:
+                logger.error(f"Error deleting delivery driver: {str(delete_error)}")
+                messages.error(request, "Yetkazib beruvchini o'chirishda xatolik yuz berdi.")
+                return redirect("dashboard:delivery_list")
+
+        except Exception as query_error:
+            logger.error(f"Database query error in delivery_delete: {str(query_error)}")
+            messages.error(request, "Yetkazib beruvchini yuklashda xatolik yuz berdi.")
+            return redirect("dashboard:delivery_list")
+
+    except Exception as e:
+        logger.error(f"Unexpected error in delivery_delete: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:delivery_list")

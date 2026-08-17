@@ -203,3 +203,74 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+    <script>
+        // ═════════════════════════════════════════════════════════════════════════
+        // SESSION CHECK TIMER - Har 5 daqiqada session tekshirish
+        // ═════════════════════════════════════════════════════════════════════════
+        
+        let sessionCheckTimer = null;
+        
+        // Sessionni tekshirish funksiyasi
+        async function checkSession() {
+            try {
+                const response = await fetch('/dashboard/api/session/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.status === 401) {
+                    // Session expired!
+                    const data = await response.json();
+                    console.warn('Session expired:', data.message);
+                    
+                    // Alert va redirect
+                    if (confirm(data.message || 'Sessiya tugagan. Qayta login qilishni xohlaysizmi?')) {
+                        window.location.replace('/auth/');
+                    }
+                    return;
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Session active:', data);
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+        
+        // CSRF token olish
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Start session check timer when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Har 5 daqiqada (300000ms) tekshirish
+            sessionCheckTimer = setInterval(checkSession, 5 * 60 * 1000);
+            
+            // Birinchi tekshirish darhol
+            checkSession();
+        });
+        
+        // Page unmount da timer to'xtatish (agar kerak bo'lsa)
+        window.addEventListener('beforeunload', function() {
+            if (sessionCheckTimer) {
+                clearInterval(sessionCheckTimer);
+            }
+        });
+    </script>

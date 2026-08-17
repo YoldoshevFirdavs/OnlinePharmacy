@@ -3,7 +3,12 @@ from django.views.generic import TemplateView
 
 from users.views import TestAdminLoginView
 
-from .api_views import DeliveryDriverViewSet
+from .api_views import (
+    DeliveryDriverViewSet, SessionCheckView, SalesStatsView, CategoryListView,
+    ProductListView, OrderListView, RecentOrderListView, OrderStatusUpdateView,
+    UserListView, SettingsView, CalendarEventsView, DashboardStatsApiView,
+    DriverApiView, BannedUsersListView, BanUserView, UnbanUserView, UserBanDetailView
+)
 from .views import seller_dashboard  # Added seller_dashboard
 from .views import (
     account_settings,
@@ -14,6 +19,7 @@ from .views import (
     category_list,
     dashboard_customize,
     delivery_create,
+    delivery_delete,
     delivery_edit,
     delivery_list,
     login_page,
@@ -24,8 +30,13 @@ from .views import (
     medicine_edit,
     medicine_list,
     not_allowed,
+    order_create,
+    order_delete,
+    order_edit,
     order_list,
+    order_view,
     user_create,
+    user_delete,
     user_edit,
     user_list,
     ban_list,  # Added ban list view
@@ -53,19 +64,26 @@ urlpatterns = [
     path("users/", user_list, name="user_list"),
     path("users/create/", user_create, name="user_create"),
     path("users/<int:pk>/edit/", user_edit, name="user_edit"),
+    path("users/<int:pk>/delete/", user_delete, name="user_delete"),
     path("orders/", order_list, name="order_list"),
+    path("orders/create/", order_create, name="order_create"),
+    path("orders/<int:pk>/edit/", order_edit, name="order_edit"),
+    path("orders/<int:pk>/view/", order_view, name="order_view"),
+    path("orders/<int:pk>/delete/", order_delete, name="order_delete"),
     path("audit-log/", audit_log_list, name="audit_log_list"),
     path("bans/", ban_list, name="ban_list"),  # Added ban list URL
     path("customize/", dashboard_customize, name="dashboard_customize"),
     path("delivery/", delivery_list, name="delivery_list"),
     path("delivery/create/", delivery_create, name="delivery_create"),
     path("delivery/<int:pk>/edit/", delivery_edit, name="delivery_edit"),
+    path("delivery/<int:pk>/delete/", delivery_delete, name="delivery_delete"),
     path("api/delivery/", DeliveryDriverViewSet.as_view(), name="delivery-list-create"),
     path(
         "api/delivery/<int:pk>/",
         DeliveryDriverViewSet.as_view(),
         name="delivery-detail",
     ),
+    path("api/session/", SessionCheckView.as_view(), name="api_session"),
     path("not-allowed/", not_allowed, name="not_allowed"),
     path(
         "test-admin-login/",

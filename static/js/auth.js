@@ -1124,15 +1124,14 @@ const _REDIRECT_WHITELIST = [
     '/dashboard/driver/',
     '/account/',
     '/auth/',
-    '/shop/'
 ];
 
 let isRedirecting = false; // Flag to prevent multiple redirects
 
 function _safeRedirectUrl(url) {
     if (!url || typeof url !== 'string') {
-        console.warn(`[Auth] Invalid or empty redirect URL provided. Defaulting to /shop/`);
-        return '/shop/';
+        console.warn(`[Auth] Invalid or empty redirect URL provided. Defaulting to /auth/`);
+        return '/auth/';
     }
     try {
         const cleanedUrl = new URL(url, window.location.origin).pathname;
@@ -1142,11 +1141,11 @@ function _safeRedirectUrl(url) {
             console.debug(`[Auth] Redirect URL ${cleanedUrl} is whitelisted.`);
             return cleanedUrl;
         }
-        console.warn(`[Auth] Redirect URL ${cleanedUrl} not in whitelist. Defaulting to /shop/`);
-        return '/shop/';
+        console.warn(`[Auth] Redirect URL ${cleanedUrl} not in whitelist. Defaulting to /auth/`);
+        return '/auth/';
     } catch (e) {
-        console.error(`[Auth] Invalid redirect URL format: ${url}. Defaulting to /shop/`);
-        return '/shop/';
+        console.error(`[Auth] Invalid redirect URL format: ${url}. Defaulting to /auth/`);
+        return '/auth/';
     }
 }
 
@@ -1174,15 +1173,13 @@ function showSuccessAnimationAndRedirect(redirectUrl) {
 function getRedirectUrlByRole(role) {
     if (!role) {
         console.warn("[Auth] No role provided, defaulting to shop page");
-        return '/shop/';
+        return '/auth/';
     }
 
     const redirectMap = {
         'admin': '/dashboard/admin/',
         'seller': '/dashboard/seller/',
-        'user': '/shop/',
-        'deliverer': '/dashboard/delivery/',
-        'driver': '/dashboard/driver/'
+        'user': '/auth/',
     };
 
     const redirectUrl = redirectMap[role] || redirectMap['user'];
