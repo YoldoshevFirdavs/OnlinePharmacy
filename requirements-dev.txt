@@ -5,4 +5,3 @@ flake8 # For linting
 black # For formatting
 isort # For import sorting
 coverage # For test coverage
-django-csp==3.0.0 # Added for CSP middleware compatibility
