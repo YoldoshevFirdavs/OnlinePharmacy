@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import traceback
@@ -10,6 +9,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Count
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -18,9 +18,15 @@ from django.views.decorators.http import require_http_methods
 from orders.models import Order
 from pharmacy.models import Category, Medicine
 from security.models import AuditLog
-from users.models import CustomUser, Deliverer, Seller
+from users.models import CustomUser, DeliveryDriver, Seller
 
-from .forms import AccountSettingsForm, CategoryForm, DriverForm, MedicineForm, UserForm
+from .forms import (
+    AccountSettingsForm,
+    CategoryForm,
+    DeliveryDriverForm,
+    MedicineForm,
+    UserForm,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +155,18 @@ def is_admin(user):
         return False
 
 
+def is_seller(user):
+    try:
+        return (
+            user.is_authenticated
+            and hasattr(user, "seller")
+            and user.seller is not None
+        )
+    except Exception as e:
+        logger.error(f"Error checking seller status: {str(e)}")
+        return False
+
+
 def login_page(request):
     try:
         if request.method == "POST":
@@ -185,8 +203,14 @@ def login_page(request):
 
                         if is_admin(user):
                             return redirect("dashboard:dashboard-admin")
+                        elif is_seller(user):
+                            return redirect(
+                                "dashboard:seller_dashboard"
+                            )  # Redirect to seller dashboard
                         else:
-                            messages.error(request, "Sizda admin huquqlari yo'q.")
+                            messages.error(
+                                request, "Sizda admin yoki sotuvchi huquqlari yo'q."
+                            )
                             logout(request)
                             return redirect("/auth/")
                     except Exception as login_error:
@@ -216,8 +240,12 @@ def login_page(request):
             try:
                 if is_admin(request.user):
                     return redirect("dashboard:dashboard-admin")
+                elif is_seller(request.user):
+                    return redirect(
+                        "dashboard:seller_dashboard"
+                    )  # Redirect to seller dashboard
                 else:
-                    messages.error(request, "Sizda admin huquqlari yo'q.")
+                    messages.error(request, "Sizda admin yoki sotuvchi huquqlari yo'q.")
                     logout(request)
                     return redirect("/auth/")
             except Exception as auth_check_error:
@@ -261,6 +289,8 @@ def logout_page(request):
         return redirect("dashboard:login_page")
 
 
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
 def main_dashboard(request):
     try:
         user = request.user
@@ -296,7 +326,7 @@ def main_dashboard(request):
             pending_orders = Order.objects.filter(status="Pending").count()
             delivered_orders = Order.objects.filter(status="Delivered").count()
             total_users = CustomUser.objects.count()
-            total_deliverers = Deliverer.objects.count()
+            total_drivers = DeliveryDriver.objects.count()
             out_of_stock = Medicine.objects.filter(stock=0).count()
             total_staff = CustomUser.objects.filter(is_staff=True).count()
 
@@ -309,7 +339,7 @@ def main_dashboard(request):
                 "pending_orders": pending_orders,
                 "delivered_orders": delivered_orders,
                 "total_users": total_users,
-                "total_deliverers": total_deliverers,
+                "total_drivers": total_drivers,
                 "out_of_stock": out_of_stock,
                 "total_staff": total_staff,
             }
@@ -334,7 +364,7 @@ def main_dashboard(request):
                 "pending_orders": 0,
                 "delivered_orders": 0,
                 "total_users": 0,
-                "total_deliverers": 0,
+                "total_drivers": 0,
                 "out_of_stock": 0,
                 "total_staff": 0,
             }
@@ -343,6 +373,41 @@ def main_dashboard(request):
     except Exception as e:
         log_dashboard_error(
             "main_dashboard",
+            getattr(request, "user", None),
+            e,
+            action="Redirected to /auth/",
+        )
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("/auth/")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(
+    is_seller, login_url="dashboard:not_allowed"
+)  # Protected by is_seller
+def seller_dashboard(request):
+    try:
+        user = request.user
+        if (
+            not user
+            or not getattr(user, "is_authenticated", False)
+            or not is_seller(user)
+        ):
+            return redirect("/auth/")
+
+        user_display = get_user_display(user)
+        # You can add seller-specific data here if needed
+        ctx = {
+            "user_display": user_display,
+            "seller_name": (
+                user.seller.shop_name if hasattr(user, "seller") else user.full_name
+            ),
+            # Add other seller-specific data
+        }
+        return render(request, "dashboard/seller/index.html", ctx)
+    except Exception as e:
+        log_dashboard_error(
+            "seller_dashboard",
             getattr(request, "user", None),
             e,
             action="Redirected to /auth/",
@@ -905,37 +970,54 @@ def audit_log_list(request):
         return render(request, "dashboard/audit/list.html", {"audit_logs": []})
 
 
-@login_required
-def account_view(request):
-    orders = Order.objects.filter(user=request.user).order_by("-created_at")
-    orders_data = []
-    for order in orders:
-        orders_data.append(
-            {
-                "id": order.id,
-                "created_at": order.created_at.isoformat(),
-                "total_price": order.total_price,
-                "status_display": order.get_status_display(),
-                "status_tag_class": order.get_status_tag_class(),
-            }
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def account_settings(request):
+    user = request.user
+    if not user or not getattr(user, "is_authenticated", False):
+        logger.error("account_settings: unauthenticated or invalid request.user")
+        messages.error(request, "Iltimos tizimga qayta kiring.")
+        return redirect("dashboard:login_page")
+
+    try:
+        user_display = get_user_display(user)
+        if request.method == "POST":
+            form = AccountSettingsForm(request.POST, request.FILES, instance=user)
+            if form.is_valid():
+                with transaction.atomic():
+                    user_obj = form.save(commit=False)
+                    new_password1 = form.cleaned_data.get("new_password1")
+                    if new_password1:
+                        user_obj.set_password(new_password1)
+                    user_obj.save()
+                    messages.success(
+                        request, "Hisob sozlamalari muvaffaqiyatli yangilandi."
+                    )
+                    return redirect("dashboard:account_settings")
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
+                return render(
+                    request,
+                    "dashboard/account/settings.html",
+                    {"form": form, "user_display": user_display},
+                )
+        else:
+            form = AccountSettingsForm(instance=user)
+            return render(
+                request,
+                "dashboard/account/settings.html",
+                {"form": form, "user_display": user_display},
+            )
+
+    except Exception as e:
+        log_dashboard_error(
+            "account_settings", user, e, action="Redirected to login_page"
         )
-    orders_json = json.dumps(orders_data)
-    return render(
-        request, "dashboard/account/account.html", {"orders_json": orders_json}
-    )
-
-
-@login_required
-def account_edit_view(request):
-    if request.method == "POST":
-        form = AccountSettingsForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Akkaunt muvaffaqiyatli yangilandi.")
-            return redirect("dashboard:account")
-    else:
-        form = AccountSettingsForm(instance=request.user)
-    return render(request, "dashboard/account/account_edit.html", {"form": form})
+        messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+        return redirect("dashboard:login_page")
 
 
 @login_required_decorator(login_url="dashboard:login_page")
@@ -971,106 +1053,56 @@ def not_allowed(request):
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
-def driver_list(request):
-    """Driver list page for admin"""
+def delivery_list(request):
+    """Delivery list page for admin"""
     try:
-        drivers = Deliverer.objects.select_related("user").all().order_by("id")
+        drivers = DeliveryDriver.objects.select_related("user").all().order_by("id")
         ctx = {"drivers": drivers}
-        return render(request, "dashboard/drivers/list.html", ctx)
+        return render(request, "dashboard/delivery/list.html", ctx)
     except Exception as e:
-        logger.error(f"Error in driver_list: {str(e)}")
+        logger.error(f"Error in delivery_list: {str(e)}")
         messages.error(request, "Haydovchilar ro'yxatini yuklashda xatolik yuz berdi.")
-        return render(request, "dashboard/drivers/list.html", {"drivers": []})
+        return render(request, "dashboard/delivery/list.html", {"drivers": []})
 
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
 @require_http_methods(["GET", "POST"])
-def driver_create(request):
+def delivery_create(request):
     if request.method == "POST":
-        form = DriverForm(request.POST)
+        form = DeliveryDriverForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, "Haydovchi muvaffaqiyatli yaratildi.")
-            return redirect("dashboard:driver_list")
+            return redirect("dashboard:delivery_list")
     else:
-        form = DriverForm()
-    ctx = {
-        "form": form,
-        "form_title": "Yangi haydovchi qo'shish",
-        "form_icon": "fa-truck",
-        "back_url": reverse("dashboard:driver_list"),
-    }
-    return render(request, "dashboard/drivers/create.html", ctx)
+        form = DeliveryDriverForm()
+    return render(request, "dashboard/delivery/form.html", {"form": form})
 
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
 @require_http_methods(["GET", "POST"])
-def driver_edit(request, pk):
-    driver = get_object_or_404(Deliverer, pk=pk)
+def delivery_edit(request, pk):
+    driver = get_object_or_404(DeliveryDriver, pk=pk)
     if request.method == "POST":
-        form = DriverForm(request.POST, instance=driver)
+        form = DeliveryDriverForm(request.POST, request.FILES, instance=driver)
         if form.is_valid():
             form.save()
             messages.success(request, "Haydovchi muvaffaqiyatli yangilandi.")
-            return redirect("dashboard:driver_list")
-    else:
-        form = DriverForm(instance=driver)
-    ctx = {
-        "form": form,
-        "form_title": "Haydovchini tahrirlash",
-        "form_icon": "fa-truck",
-        "back_url": reverse("dashboard:driver_list"),
-        "driver": driver,
-    }
-    return render(request, "dashboard/drivers/edit.html", ctx)
-
-
-@login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_admin, login_url="dashboard:not_allowed")
-def delivery_list(request):
-    deliveries = Deliverer.objects.all().order_by("-created_at")
-    return render(request, "dashboard/delivery/list.html", {"deliveries": deliveries})
-
-
-@login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_admin, login_url="dashboard:not_allowed")
-def delivery_create(request):
-    if request.method == "POST":
-        form = DriverForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Yetkazib berish muvaffaqiyatli yaratildi.")
             return redirect("dashboard:delivery_list")
     else:
-        form = DriverForm()
-    return render(request, "dashboard/delivery/create.html", {"form": form})
-
-
-@login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_admin, login_url="dashboard:not_allowed")
-def delivery_update(request, pk):
-    delivery = get_object_or_404(Deliverer, pk=pk)
-    if request.method == "POST":
-        form = DriverForm(request.POST, instance=delivery)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Yetkazib berish muvaffaqiyatli yangilandi.")
-            return redirect("dashboard:delivery_list")
-    else:
-        form = DriverForm(instance=delivery)
+        form = DeliveryDriverForm(instance=driver)
     return render(
-        request, "dashboard/delivery/update.html", {"form": form, "delivery": delivery}
+        request, "dashboard/delivery/form.html", {"form": form, "driver": driver}
     )
 
 
-@login_required_decorator(login_url="dashboard:login_page")
-@user_passes_test(is_admin, login_url="dashboard:not_allowed")
-def delivery_delete(request, pk):
-    delivery = get_object_or_404(Deliverer, pk=pk)
-    if request.method == "POST":
-        delivery.delete()
-        messages.success(request, "Yetkazib berish muvaffaqiyatli o'chirildi.")
-        return redirect("dashboard:delivery_list")
-    return redirect("dashboard:delivery_list")
+def is_deliverer(user):
+    """
+    Return True if the user has a related Deliverer profile.
+    """
+    try:
+        return hasattr(user, "deliverer") and user.deliverer is not None
+    except Exception:
+        return False

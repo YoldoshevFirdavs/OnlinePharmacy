@@ -1,2 +1,0 @@
-- dashboard/views.py: Keraksiz `HttpResponseForbidden` va `JsonResponse` importlari olib tashlandi. Barcha `delivery` va `driver` bilan bog'liq view'lar `@user_passes_test(is_admin)` dekoratori bilan himoyalanganligi tasdiqlandi.
-- dashboard/serializers.py: `DashboardOrderSerializer` dan ortiqcha `deliverer` va `item_count` maydonlari olib tashlandi.

@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("payments", "0001_initial"),
         ("users", "0017_deliverer_onboardtoken_payrollstats_salaryrecord_and_more"),

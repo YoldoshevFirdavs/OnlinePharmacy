@@ -108,32 +108,16 @@
             </div>
         </div>
     </div>
-</div>
 
-<div class="form-actions" style="margin-top: 2rem; justify-content: flex-end;">
-    <button type="button" class="btn btn--primary" id="btnSaveCustomize">
-        <i class="fa-solid fa-floppy-disk"></i> Saqlash
-    </button>
-    <button type="button" class="btn btn--cancel" id="btnCancelCustomize">
-        <i class="fa-solid fa-times"></i> Bekor qilish
-    </button>
-</div>
-{% endblock %}
+    <!-- Save -->
+    <div class="card card--customize card--save" id="customizeSaveCard">
+        <div class="card__body">
+            <p class="save-hint"><i class="fa-solid fa-circle-info"></i> O'zgarishlar faqat "Saqlash" bosilganda qo'llaniladi.</p>
+            <button type="button" class="btn btn--primary btn--block" id="btnSaveCustomize">
+                <i class="fa-solid fa-floppy-disk"></i> Save changes
+            </button>
+        </div>
+    </div>
 
-{% block extra_css %}
-<style>
-.customize-row {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-}
-.btn--cancel {
-    background-color: #888888;
-    color: #fff;
-    border: none;
-}
-.btn--cancel:hover {
-    background-color: #666666;
-}
-</style>
+</div>
 {% endblock %}

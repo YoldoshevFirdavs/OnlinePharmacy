@@ -1,18 +1,17 @@
 from rest_framework import serializers
 
-from .models import Payout
+from .models import Salary
 
 
-class PayoutSerializer(serializers.ModelSerializer):
+class SalarySerializer(serializers.ModelSerializer):
     driver_full_name = serializers.SerializerMethodField()
     currency = serializers.SerializerMethodField()
 
     class Meta:
-        model = Payout
+        model = Salary
         fields = [
             "id",
-            "amount_gross",
-            "net_amount",
+            "amount",
             "currency",
             "status",
             "driver_full_name",
@@ -20,8 +19,7 @@ class PayoutSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
-            "amount_gross",
-            "net_amount",
+            "amount",
             "currency",
             "status",
             "driver_full_name",
@@ -37,12 +35,8 @@ class PayoutSerializer(serializers.ModelSerializer):
         return "usd"
 
 
-class AdminPayoutCreateSerializer(serializers.Serializer):
+class AdminSalaryCreateSerializer(serializers.Serializer):
     driver_id = serializers.IntegerField()
-    amount_gross = serializers.DecimalField(max_digits=10, decimal_places=2)
-    tax_amount = serializers.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    commission_amount = serializers.DecimalField(
-        max_digits=10, decimal_places=2, default=0.00
-    )
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     period_start = serializers.DateField(required=False)
     period_end = serializers.DateField(required=False)

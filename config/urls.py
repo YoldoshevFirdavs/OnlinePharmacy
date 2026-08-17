@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.shortcuts import render
+from django.contrib.auth import logout as auth_logout
+from django.shortcuts import redirect, render
 from django.urls import include, path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 from drf_yasg import openapi
 from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
@@ -35,6 +36,12 @@ schema_view = get_schema_view(
     generator_class=JWTSchemaGenerator,
 )
 
+
+def custom_logout_view(request):
+    auth_logout(request)
+    return redirect("/auth/")
+
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="main.html"), name="home"),
     path("shop/", TemplateView.as_view(template_name="shop.html"), name="shop"),
@@ -52,6 +59,8 @@ urlpatterns = [
     path("account/", AccountView.as_view(), name="account"),
     path("check/admin/", AdminCheckView.as_view(), name="admin_check"),
     path("admin/", admin.site.urls),
+    path("dashboard/login/", RedirectView.as_view(url="/auth/")),
+    path("dashboard/logout/", custom_logout_view),
     path("dashboard/", include("dashboard.urls", namespace="dashboard")),
     path(
         "accounts/login/", TemplateView.as_view(template_name="auth.html"), name="login"
@@ -59,7 +68,7 @@ urlpatterns = [
     path("api/v1/users/", include("users.urls")),
     path(
         "api/v1/admin/login/",
-        AdminLoginViewSet.as_view({"post": "login"}),
+        AdminLoginViewSet.as_view({"post": "create"}),
         name="admin_login_alias",
     ),
     path("api/v1/pharmacy/", include("pharmacy.urls")),

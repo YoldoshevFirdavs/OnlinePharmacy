@@ -12,11 +12,15 @@ from pharmacy.models.medicine import Medicine
 
 from .models import Cart, CartItem, Order, OrderItem
 from .serializers import (
+    ArrivalSerializer,
     CartItemSerializer,
     CartSummarySerializer,
+    DeliveryOrderSerializer,
+    LocationSerializer,
     OrderDetailSerializer,
     OrderItemSerializer,
     OrderListSerializer,
+    OrderStatusUpdateSerializer,
 )
 
 
@@ -124,7 +128,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # Check if the user is authenticated
         if self.request.user.is_authenticated:
-            return self.queryset.filter(customer=self.request.user)
+            return self.queryset.filter(user=self.request.user)
         return (
             self.queryset.none()
         )  # Return an empty queryset for unauthenticated users
@@ -135,11 +139,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         return self.serializer_class
 
     def perform_create(self, serializer):
-        serializer.save(customer=self.request.user)
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
-        order = get_object_or_404(Order, pk=pk, customer=request.user)
+        order = get_object_or_404(Order, pk=pk, user=request.user)
         if order.status in ["Pending", "Processing"]:
             order.status = "Canceled"
             order.save()
@@ -148,3 +152,86 @@ class OrderViewSet(viewsets.ModelViewSet):
             {"error": "Order cannot be canceled at this stage."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Viewset for drivers to see their assigned orders.
+    """
+
+    queryset = Order.objects.all().order_by("-created_at")
+    permission_classes = [IsAuthenticated]
+    serializer_class = DeliveryOrderSerializer
+
+    def get_queryset(self):
+        # Swagger uchun workaround
+        if getattr(self, "swagger_fake_view", False):
+            return self.queryset.none()
+
+        # Faqat login bo‘lgan userning driver sifatida assign qilingan orderlari
+        return self.queryset.filter(driver=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="update-status")
+    def update_status(self, request, pk=None):
+        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        serializer = OrderStatusUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order.status = serializer.validated_data["status"]
+        order.save()
+        return Response({"status": order.status})
+
+    @action(detail=True, methods=["post"], url_path="arrived")
+    def mark_arrived(self, request, pk=None):
+        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        serializer = ArrivalSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order.arrived_at = serializer.validated_data["arrived_at"]
+        order.save()
+        return Response({"status": "Arrived", "arrived_at": order.arrived_at})
+
+    @action(detail=True, methods=["post"], url_path="location")
+    def update_location(self, request, pk=None):
+        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        serializer = LocationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Bu yerda location logikasi yoziladi (masalan, DBga saqlash yoki cache)
+        return Response(
+            {"status": "Location updated", "location": serializer.validated_data}
+        )
+
+
+class OrderAcceptView(APIView):
+    """
+    API endpoint for drivers to accept an order.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+        if order.driver and order.driver != request.user:
+            return Response(
+                {"error": "Order already assigned to another driver."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        order.driver = request.user
+        order.accepted_at = timezone.now()
+        order.status = "Accepted"
+        order.save()
+        return Response({"status": "Order accepted"})
+
+
+class OrderStatusUpdateView(APIView):
+    """
+    API endpoint for drivers to update the status of an order.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        serializer = OrderStatusUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order.status = serializer.validated_data["status"]
+        order.save()
+        return Response({"status": order.status})

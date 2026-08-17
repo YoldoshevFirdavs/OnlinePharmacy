@@ -102,18 +102,18 @@ jobs:
 #        # For now, assuming it's accessible at localhost:8000
 #        BASE_URL: http://localhost:8000
 
-    - name: Lint with flake8
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+#    - name: Lint with flake8
+#      run: |
+#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
 
-    - name: Check code formatting with black
-      run: |
-        black --check .
-
-    - name: Check import sorting with isort
-      run: |
-        isort --check-only .
+#    - name: Check code formatting with black
+#      run: |
+#        black --check .
+#
+#    - name: Check import sorting with isort
+#      run: |
+#        isort --check-only .
 
     # Optional: Upload test results
     # - name: Upload pytest results

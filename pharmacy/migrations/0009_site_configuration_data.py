@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("pharmacy", "0008_alter_category_options_category_is_default_and_more"),
     ]

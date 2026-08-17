@@ -29,6 +29,7 @@ const AUTH_CONFIG = {
     PHONE_PATTERNS: {
         // These will be dynamically loaded from countries.json
     },
+    ALLOWED_DOMAINS: ['gmail.com', 'yahoo.com', 'mail.ru', 'ok.ru', 'hotmail.com'],
     ENABLE_BLOCKING: true, // AUTH_BLOCK_USER=True/False ga mos keladi. Backend tomonidan o'rnatilishi kerak.
     SECURITY: {
         max_attempts_before_block: 5,
@@ -74,7 +75,11 @@ const AUTH_CONFIG = {
             login_with_password: "Parol bilan kirish",
             login_with_otp: "OTP bilan kirish",
             login_failed_try_again: "Login failed, please try again.",
-            otp_session_expired: "OTP session has expired. Please request a new one."
+            otp_session_expired: "OTP session has expired. Please request a new one.",
+            email_valid: "Email to'g'ri.",
+            email_invalid: "Email noto'g'ri. Faqat ruxsat etilgan domenlardan foydalaning.",
+            phone_valid: "Telefon raqam to'g'ri.",
+            phone_invalid: "Telefon raqam noto'g'ri. Format: +998 XX XXX XX XX"
         },
         uz: {
             login_title: "Admin Kirish",
@@ -112,7 +117,11 @@ const AUTH_CONFIG = {
             login_with_password: "Parol bilan kirish",
             login_with_otp: "OTP bilan kirish",
             login_failed_try_again: "Kirish amalga oshmadi, iltimos qayta urinib ko'ring.",
-            otp_session_expired: "OTP sessiyasi muddati tugadi. Iltimos, yangi OTP so‘rang."
+            otp_session_expired: "OTP sessiyasi muddati tugadi. Iltimos, yangi OTP so‘rang.",
+            email_valid: "Email to‘g‘ri.",
+            email_invalid: "Email noto‘g‘ri. Faqat ruxsat etilgan domenlardan foydalaning.",
+            phone_valid: "Telefon raqam to‘g‘ri.",
+            phone_invalid: "Telefon raqam noto‘g‘ri. Format: +998 XX XXX XX XX"
         }
     },
     DEFAULT_LANG: 'uz',
@@ -622,23 +631,32 @@ async function handleOtpVerification() {
             };
         }
 
+        console.debug('[Auth] Verifying OTP with payload:', payload);
         const response = await sendRequest(endpoint, 'POST', payload);
+        console.debug('[Auth] OTP verification response:', response);
 
-        // Handle both `response.ok` and `response.success` for different backend response styles
-        if (response.ok || response.success) {
+        if (response.success || response.ok) {
             if (otpPopupInput) otpPopupInput.style.borderColor = AUTH_CONFIG.TIMER_SETTINGS.colors.green;
             hideOtpPopup();
             resetBlock(currentIdentifier);
             resetFieldLock('otp_input');
-            
+
+            // Store token, refresh, user_id, role, and avatar_url
             if (response.token) localStorage.setItem('access_token', response.token);
             if (response.refresh) localStorage.setItem('refresh_token', response.refresh);
+            if (response.user_id) localStorage.setItem('user_id', response.user_id);
             if (response.full_name) localStorage.setItem('username', response.full_name);
-            
+
             const role = response.role || currentUserRole;
             localStorage.setItem('user_role', role);
-            
-            const redirectUrl = response.redirect_url || response.redirect || response.next || getRedirectUrlByRole(role);
+            if (response.avatar_url) localStorage.setItem('avatar_url', response.avatar_url);
+
+            // FIX: Update header immediately after saving tokens
+            if (typeof window.updateHeaderAfterLogin === 'function') {
+                window.updateHeaderAfterLogin();
+            }
+
+            const redirectUrl = response.redirect || getRedirectUrlByRole(role);
             showSuccessAnimationAndRedirect(redirectUrl);
         } else {
             const errorMessage = response.error || response.detail || _('otp_incorrect');
@@ -734,18 +752,30 @@ async function determineUserRole(identifier) {
 let pollingInterval = null;
 
 function startSessionPolling(sessionId) {
+    console.debug(`[Auth] Starting session polling for session_id: ${sessionId}`);
     if (pollingInterval) clearInterval(pollingInterval);
+
     pollingInterval = setInterval(async () => {
         try {
             const response = await fetch(`/api/v1/users/login/check-session/?session_id=${sessionId}`);
             const data = await response.json();
             if (data.success && data.verified) {
+                console.debug('[Auth] Session verified via polling. Completing login.');
                 clearInterval(pollingInterval);
+                pollingInterval = null;
                 hideOtpPopup();
                 if (data.access) localStorage.setItem('access_token', data.access);
                 if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+                if (data.user_id) localStorage.setItem('user_id', data.user_id);
                 if (data.username) localStorage.setItem('username', data.username);
                 if (data.role) localStorage.setItem('user_role', data.role);
+                if (data.avatar_url) localStorage.setItem('avatar_url', data.avatar_url);
+
+                // FIX: Update header immediately after saving tokens
+                if (typeof window.updateHeaderAfterLogin === 'function') {
+                    window.updateHeaderAfterLogin();
+                }
+
                 const redirectUrl = getRedirectUrlByRole(data.role);
                 showSuccessAnimationAndRedirect(redirectUrl);
             }
@@ -753,18 +783,36 @@ function startSessionPolling(sessionId) {
             console.error("Polling error:", error);
         }
     }, 2000);
+
+    // FIX: Add a listener to clear the interval if the user navigates away
+    window.addEventListener('beforeunload', () => {
+        if (pollingInterval) {
+            console.debug('[Auth] Clearing polling interval due to page unload.');
+            clearInterval(pollingInterval);
+        }
+    });
 }
 
 async function handleAdminTelegramOtpRequest() {
-    const fullPhoneNumber = countryPrefixInput.value.replace(/\s+/g, '') + phoneInput.value.replace(/\s+/g, '');
+    const localPhoneInput = document.getElementById('phone');
+    const localCountryPrefixInput = document.getElementById('country-prefix-input');
+    const localPhoneErrorMessage = document.getElementById('phone-error-message');
+
+    if (!localPhoneInput || !localCountryPrefixInput || !localPhoneErrorMessage) {
+        showErrorBanner("Tizim xatosi: Telefon raqam kiritish maydonlari topilmadi.");
+        console.error("Phone input elements not found for admin telegram OTP request.");
+        return;
+    }
+
+    const fullPhoneNumber = localCountryPrefixInput.value.replace(/\s+/g, '') + localPhoneInput.value.replace(/\s+/g, '');
     const fieldId = 'phone_input';
 
     if (!fullPhoneNumber) {
-        phoneErrorMessage.textContent = _('phone_required');
+        localPhoneErrorMessage.textContent = _('phone_required');
         return;
     }
-    if (!validatePhoneNumber(phoneInput.value)) {
-        phoneErrorMessage.textContent = _('no_such_number');
+    if (!validatePhoneNumber(localPhoneInput.value)) {
+        localPhoneErrorMessage.textContent = _('no_such_number');
         recordFieldFailedAttempt(fieldId);
         return;
     }
@@ -810,6 +858,12 @@ async function handleAdminEmailOtpRequest() {
     const emailVal = emailInputEl ? emailInputEl.value.trim() : '';
     const fieldId = 'email_input';
 
+    if (!emailInputEl) {
+        showErrorBanner("Tizim xatosi: Email kiritish maydoni topilmadi.");
+        console.error("Email input not found for admin email OTP request.");
+        return;
+    }
+
     if (!emailVal) {
         showErrorBanner(_('email_required'));
         return;
@@ -854,6 +908,12 @@ async function handleAdminPasswordLogin() {
     const passwordVal = passwordInputEl ? passwordInputEl.value : '';
     const fieldId = 'admin_password_login';
 
+    if (!emailInputEl || !passwordInputEl) {
+        showErrorBanner("Tizim xatosi: Email yoki parol kiritish maydonlari topilmadi.");
+        console.error("Email or password input not found for admin password login.");
+        return;
+    }
+
     if (!emailVal) {
         showErrorBanner(_('email_required'));
         return;
@@ -878,23 +938,49 @@ async function handleAdminPasswordLogin() {
 
         const response = await sendRequest(AUTH_CONFIG.AUTH_ENDPOINTS.admin_login, 'POST', payload);
 
-        if (response.ok) {
+        if (response.success) {
             resetBlock(emailVal);
             resetFieldLock(fieldId);
+            // Store token, refresh, user_id, role, and avatar_url
             if (response.token) localStorage.setItem('access_token', response.token);
             if (response.refresh) localStorage.setItem('refresh_token', response.refresh);
+            if (response.user_id) localStorage.setItem('user_id', response.user_id);
             if (response.full_name) localStorage.setItem('username', response.full_name);
             if (response.role) localStorage.setItem('user_role', response.role);
+            if (response.avatar_url) localStorage.setItem('avatar_url', response.avatar_url);
+
+            // FIX: Update header immediately after saving tokens
+            if (typeof window.updateHeaderAfterLogin === 'function') {
+                window.updateHeaderAfterLogin();
+            }
+
             const redirectUrl = getRedirectUrlByRole(response.role);
             showSuccessAnimationAndRedirect(redirectUrl);
         } else if (response.session_id) {
+            // FIXED: Don't hardcode currentUserRole as 'admin'
+            // Call determine_role to get actual role from server
+            try {
+                const rolePayload = { email: emailVal };
+                const roleResponse = await sendRequest(AUTH_CONFIG.AUTH_ENDPOINTS.determine_role, 'POST', rolePayload);
+                if (roleResponse.role) {
+                    currentUserRole = roleResponse.role;
+                    localStorage.setItem('user_role', roleResponse.role);
+                } else {
+                    // Fallback to 'user' if role determination fails
+                    currentUserRole = 'user';
+                    localStorage.setItem('user_role', 'user');
+                }
+            } catch (err) {
+                console.warn('Failed to determine role, defaulting to user', err);
+                currentUserRole = 'user';
+                localStorage.setItem('user_role', 'user');
+            }
+
             currentSessionId = response.session_id;
             currentIdentifier = emailVal;
-            currentUserRole = 'admin';
             localStorage.setItem('currentSessionId', currentSessionId);
             localStorage.setItem('currentIdentifier', currentIdentifier);
             localStorage.setItem('currentAuthMethod', 'gmail');
-            localStorage.setItem('user_role', 'admin');
             localStorage.setItem('showOtpPopup', 'true');
             showOtpPopup(response.message || _('otp_sent'));
         } else {
@@ -909,100 +995,91 @@ async function handleAdminPasswordLogin() {
     }
 }
 
+// FIX: Added debounce to prevent spamming the OTP request button.
+let isRequestingOtp = false;
+const otpRequestDebounceTime = 5000; // 5 seconds
 
-async function handleOtpRequest(e) {
-    e.preventDefault();
-    phoneErrorMessage.textContent = '';
-    const fullNameInputEl = document.getElementById('full_name');
-    const fullNameVal = fullNameInputEl ? fullNameInputEl.value.trim() : '';
-
-    if (!fullNameVal) {
-        showErrorBanner(_('name_required'));
+async function handleOtpRequest() {
+    if (isRequestingOtp) {
+        console.warn('[Auth] OTP request is already in progress. Please wait.');
+        showErrorBanner('Iltimos, biroz kuting...');
         return;
     }
 
-    let identifier;
-    let fieldId;
-    const csrfToken = getCookie('csrftoken');
-    let payload = {
-        fingerprint: await getFingerprint(),
-        full_name: fullNameVal,
-        csrfmiddlewaretoken: csrfToken,
-    };
-    let endpoint;
+    isRequestingOtp = true;
+    const getCodeBtn = document.getElementById('get-code-btn');
+    if (getCodeBtn) getCodeBtn.disabled = true;
 
-    if (currentAuthMethod === 'gmail') {
-        const emailInputEl = document.getElementById('email');
-        identifier = emailInputEl ? emailInputEl.value.trim() : '';
-        fieldId = 'email_input';
+    setTimeout(() => {
+        isRequestingOtp = false;
+        if (getCodeBtn) getCodeBtn.disabled = false;
+    }, otpRequestDebounceTime);
 
-        if (!identifier) {
-            showErrorBanner(_('email_required'));
-            return;
-        }
-        payload.email = identifier;
-        payload.phone_number = document.getElementById('phone')?.value.trim() || '';
-    } else if (currentAuthMethod === 'telegram') {
-        let rawPhoneNumber = phoneInput.value.replace(/\s+/g, '');
-        let prefix = countryPrefixInput.value.trim();
-
-        if (!prefix.startsWith('+')) {
-            prefix = '+' + prefix.replace(/\D/g, '');
-        }
-
-        if ((!prefix || !AUTH_CONFIG.PHONE_PATTERNS[selectedCountry] || !AUTH_CONFIG.PHONE_PATTERNS[selectedCountry].prefixes.includes(prefix)) && rawPhoneNumber.length === 9 && /^\d+$/.test(rawPhoneNumber)) {
-            identifier = '+998' + rawPhoneNumber;
-            if (countryPrefixInput) countryPrefixInput.value = '+998';
-            selectedCountry = 'uz';
-            updateCountryDisplay(selectedCountry);
-        } else {
-            identifier = prefix + rawPhoneNumber;
-        }
-
-        fieldId = 'phone_input';
-
-        if (!identifier || identifier === '+') {
-            phoneErrorMessage.textContent = _('phone_required');
-            return;
-        }
-        if (!validatePhoneNumber(phoneInput.value)) {
-            phoneErrorMessage.textContent = _('no_such_number');
-            recordFieldFailedAttempt(fieldId);
-            return;
-        }
-        payload.phone_number = identifier;
-    } else {
-        showErrorBanner("Unknown authentication method.");
-        return;
-    }
-
-    if (isBlocked(identifier) || isFieldLocked(fieldId)) {
-        showErrorBanner(_('account_locked'));
-        return;
-    }
+    // Clear previous errors
+    const phoneErrorMessage = document.getElementById('phone-error-message');
+    if (phoneErrorMessage) phoneErrorMessage.textContent = '';
+    const emailValidator = document.getElementById('email-validator');
+    if (emailValidator) emailValidator.textContent = '';
+    const authErrorBanner = document.getElementById('auth-error-banner');
+    if (authErrorBanner) authErrorBanner.style.display = 'none';
 
     try {
+        const fullNameInputEl = document.getElementById('full_name');
+        if (!fullNameInputEl) {
+            throw new Error("Tizim xatosi: Ism kiritish maydoni topilmadi.");
+        }
+        const fullNameVal = fullNameInputEl.value.trim();
+        if (!fullNameVal) {
+            throw new Error(_('name_required'));
+        }
+
+        let identifier;
+        let fieldId;
+        const payload = {
+            fingerprint: await getFingerprint(),
+            full_name: fullNameVal,
+            csrfmiddlewaretoken: getCookie('csrftoken'),
+        };
+
+        if (currentAuthMethod === 'gmail') {
+            const emailInputEl = document.getElementById('email');
+            if (!emailInputEl) throw new Error("Tizim xatosi: Email kiritish maydoni topilmadi.");
+            identifier = emailInputEl.value.trim();
+            if (!identifier) throw new Error(_('email_required'));
+            payload.email = identifier;
+            fieldId = 'email_input';
+        } else if (currentAuthMethod === 'telegram') {
+            const localPhoneInput = document.getElementById('phone');
+            const localCountryPrefixInput = document.getElementById('country-prefix-input');
+            if (!localPhoneInput || !localCountryPrefixInput) throw new Error("Tizim xatosi: Telefon raqam kiritish maydonlari topilmadi.");
+
+            let rawPhoneNumber = localPhoneInput.value.replace(/\s+/g, '');
+            let prefix = localCountryPrefixInput.value.trim();
+            if (!prefix.startsWith('+')) prefix = '+' + prefix.replace(/\D/g, '');
+
+            identifier = prefix + rawPhoneNumber;
+            if (!identifier || identifier === '+') throw new Error(_('phone_required'));
+            if (!validatePhoneNumber(localPhoneInput.value)) throw new Error(_('no_such_number'));
+
+            payload.phone_number = identifier;
+            fieldId = 'phone_input';
+        } else {
+            throw new Error("Noma'lum autentifikatsiya usuli.");
+        }
+
+        if (isBlocked(identifier) || isFieldLocked(fieldId)) {
+            throw new Error(_('account_locked'));
+        }
+
         const role = await determineUserRole(identifier);
         if (role === 'admin') {
-            if (currentAuthMethod === 'gmail') {
-                await handleAdminEmailOtpRequest();
-            } else if (currentAuthMethod === 'telegram') {
-                await handleAdminTelegramOtpRequest();
-            }
+            if (currentAuthMethod === 'gmail') await handleAdminEmailOtpRequest();
+            else if (currentAuthMethod === 'telegram') await handleAdminTelegramOtpRequest();
             return;
         }
-    } catch (error) {
-        showErrorBanner(error.message || _('login_failed_try_again'));
-        return;
-    }
 
-    if (currentAuthMethod === 'gmail') {
-        endpoint = AUTH_CONFIG.AUTH_ENDPOINTS.user_email_login;
-    } else if (currentAuthMethod === 'telegram') {
-        endpoint = AUTH_CONFIG.AUTH_ENDPOINTS.user_telegram_login;
-    }
-
-    try {
+        const endpoint = currentAuthMethod === 'gmail' ? AUTH_CONFIG.AUTH_ENDPOINTS.user_email_login : AUTH_CONFIG.AUTH_ENDPOINTS.user_telegram_login;
+        console.debug("Sending OTP request to:", endpoint);
         const response = await sendRequest(endpoint, 'POST', payload);
 
         if (response.session_id) {
@@ -1011,12 +1088,10 @@ async function handleOtpRequest(e) {
             currentIdentifier = identifier;
             localStorage.setItem('currentSessionId', currentSessionId);
             localStorage.setItem('currentIdentifier', currentIdentifier);
-            
+
             if (currentAuthMethod === 'telegram') {
                 const link = response.deeplink || response.verification_link;
-                if (link) {
-                    window.open(link, '_blank');
-                }
+                if (link) window.open(link, '_blank');
                 showOtpPopup("Telegram orqali tasdiqlash kutilmoqda...");
                 startSessionPolling(currentSessionId);
             } else {
@@ -1025,14 +1100,14 @@ async function handleOtpRequest(e) {
         } else if (response.redirect) {
             window.location.href = _safeRedirectUrl(response.redirect);
         } else {
-            showErrorBanner(response.message || _('error_requesting_otp'));
-            recordFailedAttempt(identifier);
-            recordFieldFailedAttempt(fieldId);
+            throw new Error(response.message || _('error_requesting_otp'));
         }
     } catch (err) {
-        showErrorBanner(err.message || _('error_requesting_otp'));
-        recordFailedAttempt(identifier);
-        recordFieldFailedAttempt(fieldId);
+        console.error("Error in handleOtpRequest:", err);
+        showErrorBanner(err.message || "Noma'lum xatolik yuz berdi.");
+        // Re-enable button immediately on error
+        isRequestingOtp = false;
+        if (getCodeBtn) getCodeBtn.disabled = false;
     }
 }
 
@@ -1041,42 +1116,78 @@ async function handleOtpRequest(e) {
 // Success Animation and Redirection
 // =============================================================================
 
-const _REDIRECT_WHITELIST = ['/dashboard/admin/', '/dashboard/delivery/', '/account/', '/auth/'];
+// FIX: Expanded the redirect whitelist to include all valid dashboard URLs.
+const _REDIRECT_WHITELIST = [
+    '/dashboard/admin/',
+    '/dashboard/seller/',
+    '/dashboard/delivery/',
+    '/dashboard/driver/',
+    '/account/',
+    '/auth/',
+    '/shop/'
+];
+
+let isRedirecting = false; // Flag to prevent multiple redirects
 
 function _safeRedirectUrl(url) {
-    if (!url || typeof url !== 'string') return '/';
-    const cleanedUrl = new URL(url, window.location.origin).pathname;
-    return _REDIRECT_WHITELIST.find(w => cleanedUrl.startsWith(w)) || '/account/';
+    if (!url || typeof url !== 'string') {
+        console.warn(`[Auth] Invalid or empty redirect URL provided. Defaulting to /shop/`);
+        return '/shop/';
+    }
+    try {
+        const cleanedUrl = new URL(url, window.location.origin).pathname;
+        // Find if the cleaned URL starts with any of the whitelisted paths
+        const matchedPath = _REDIRECT_WHITELIST.find(w => cleanedUrl.startsWith(w));
+        if (matchedPath) {
+            console.debug(`[Auth] Redirect URL ${cleanedUrl} is whitelisted.`);
+            return cleanedUrl;
+        }
+        console.warn(`[Auth] Redirect URL ${cleanedUrl} not in whitelist. Defaulting to /shop/`);
+        return '/shop/';
+    } catch (e) {
+        console.error(`[Auth] Invalid redirect URL format: ${url}. Defaulting to /shop/`);
+        return '/shop/';
+    }
 }
 
 function showSuccessAnimationAndRedirect(redirectUrl) {
+    if (isRedirecting) {
+        console.warn('[Auth] Redirect already in progress. Ignoring duplicate call.');
+        return;
+    }
+    isRedirecting = true;
+    console.debug(`[Auth] Login successful. Preparing to redirect to: ${redirectUrl}`);
+
     hideOtpPopup();
     const loader = document.getElementById('loader');
     if (loader) {
         loader.classList.add('show');
     }
     const safeUrl = _safeRedirectUrl(redirectUrl);
+    console.debug(`[Auth] Safe redirect URL resolved to: ${safeUrl}`);
+
     setTimeout(() => {
+        // No reload, just navigate
         window.location.href = safeUrl;
     }, 1500);
 }
 
 function getRedirectUrlByRole(role) {
     if (!role) {
-        console.warn("No role provided, defaulting to account page");
-        return '/account/';
+        console.warn("[Auth] No role provided, defaulting to shop page");
+        return '/shop/';
     }
 
     const redirectMap = {
         'admin': '/dashboard/admin/',
-        'deliverer': '/dashboard/delivery/',
         'seller': '/dashboard/seller/',
-        'user': '/account/',
+        'user': '/shop/',
+        'deliverer': '/dashboard/delivery/',
         'driver': '/dashboard/driver/'
     };
 
     const redirectUrl = redirectMap[role] || redirectMap['user'];
-    console.log(`Redirecting user with role '${role}' to: ${redirectUrl}`);
+    console.debug(`[Auth] Redirecting user with role '${role}' to: ${redirectUrl}`);
     return redirectUrl;
 }
 
@@ -1089,7 +1200,7 @@ let loginModeToggleBtn; // Button to switch between OTP and Password login
 
 function updateLoginModeUI() {
     const passwordGroup = document.getElementById('password-group'); // Assuming this exists
-    const getCodeBtn = document.getElementById('get-code');
+    const getCodeBtn = document.getElementById('get-code-btn');
     const loginWithPasswordBtn = document.getElementById('login-with-password-btn'); // Assuming this exists
 
     if (currentUserRole === 'admin' && currentAuthMethod === 'gmail') {
@@ -1117,16 +1228,78 @@ function updateLoginModeUI() {
     }
 }
 
+function validateEmail(email) {
+    if (!email) return false;
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!re.test(String(email).toLowerCase())) return false;
+    const domain = email.split('@')[1];
+    return AUTH_CONFIG.ALLOWED_DOMAINS.includes(domain);
+}
 
-async function initAuthPage() {
+function validatePhoneNumberFormat() {
+    const countryData = AUTH_CONFIG.PHONE_PATTERNS[selectedCountry];
+    if (!countryData || !countryData.regex) return false;
+    const cleanNum = countryPrefixInput.value + phoneInput.value.replace(/\s+/g, '');
+    return countryData.regex.test(cleanNum);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     await loadCountriesData();
     createOtpPopup();
     setupPhoneInputAndCountrySelector();
 
+    const emailInput = document.getElementById('email');
+    const emailValidator = document.getElementById('email-validator');
+    const phoneInput = document.getElementById('phone');
+    const phoneValidator = document.getElementById('phone-validator');
+    const getCodeBtn = document.getElementById('get-code-btn');
+
+    let isEmailValid = false;
+    let isPhoneValid = false;
+
+    function checkFormValidity() {
+        if (!getCodeBtn) return;
+        if (currentAuthMethod === 'gmail') {
+            getCodeBtn.disabled = !isEmailValid;
+        } else if (currentAuthMethod === 'telegram') {
+            getCodeBtn.disabled = !isPhoneValid;
+        } else {
+            getCodeBtn.disabled = true;
+        }
+    }
+
+    if (emailInput && emailValidator) {
+        emailInput.addEventListener('input', () => {
+            const email = emailInput.value;
+            isEmailValid = validateEmail(email);
+            if (isEmailValid) {
+                emailValidator.textContent = _('email_valid');
+                emailValidator.style.color = AUTH_CONFIG.TIMER_SETTINGS.colors.green;
+            } else {
+                emailValidator.textContent = _('email_invalid');
+                emailValidator.style.color = AUTH_CONFIG.TIMER_SETTINGS.colors.red;
+            }
+            checkFormValidity();
+        });
+    }
+
+    if (phoneInput && phoneValidator) {
+        phoneInput.addEventListener('input', () => {
+            isPhoneValid = validatePhoneNumberFormat();
+            if (isPhoneValid) {
+                phoneValidator.textContent = _('phone_valid');
+                phoneValidator.style.color = AUTH_CONFIG.TIMER_SETTINGS.colors.green;
+            } else {
+                phoneValidator.textContent = _('phone_invalid');
+                phoneValidator.style.color = AUTH_CONFIG.TIMER_SETTINGS.colors.red;
+            }
+            checkFormValidity();
+        });
+    }
+
+
     const gmailLoginBtn = document.getElementById('gmail-login');
     const telegramLoginBtn = document.getElementById('telegram-login');
-    const getCodeBtn = document.getElementById('get-code');
-    const authForm = document.getElementById('auth-form');
     passwordInput = document.getElementById('password'); // Assuming this exists
     loginModeToggleBtn = document.getElementById('login-mode-toggle-btn'); // Assuming this exists
     const loginWithPasswordBtn = document.getElementById('login-with-password-btn'); // Assuming this exists
@@ -1143,10 +1316,16 @@ async function initAuthPage() {
         emailGroup.classList.remove('hidden-field');
         phoneGroup.classList.add('hidden-field');
         nameGroup.classList.remove('hidden-field');
-        if (passwordGroup) passwordGroup.classList.add('hidden-field'); // Hide password initially
+        if(phoneErrorMessage) phoneErrorMessage.textContent = '';
         currentAuthMethod = 'gmail';
-        otpPopupInput.maxLength = 6;
-        otpPopupInput.placeholder = 'XXXXXX';
+        if (otpPopupInput) {
+            otpPopupInput.maxLength = 6;
+            otpPopupInput.placeholder = 'XXXXXX';
+        }
+        // Removed premature determineUserRole call
+        currentUserRole = 'user'; // Default to user until OTP request
+        updateLoginModeUI();
+        checkFormValidity();
     }
 
     // Event listener for "Kod olish" button (now handleOtpRequest)
@@ -1167,18 +1346,6 @@ async function initAuthPage() {
         });
     }
 
-    // Event listener for form submission (to prevent default if button is type="submit")
-    if (authForm) {
-        authForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (currentUserRole === 'admin' && currentAuthMethod === 'gmail' && currentLoginMode === 'password') {
-                handleAdminPasswordLogin();
-            } else {
-                handleOtpRequest(e);
-            }
-        });
-    }
-
     // Gmail button binding
     if (gmailLoginBtn) {
         gmailLoginBtn.addEventListener('click', async (e) => {
@@ -1188,7 +1355,7 @@ async function initAuthPage() {
             emailGroup.classList.remove('hidden-field');
             phoneGroup.classList.add('hidden-field');
             nameGroup.classList.remove('hidden-field');
-            phoneErrorMessage.textContent = '';
+            if(phoneErrorMessage) phoneErrorMessage.textContent = '';
             currentAuthMethod = 'gmail';
             if (otpPopupInput) {
                 otpPopupInput.maxLength = 6;
@@ -1197,6 +1364,7 @@ async function initAuthPage() {
             // Removed premature determineUserRole call
             currentUserRole = 'user'; // Default to user until OTP request
             updateLoginModeUI();
+            checkFormValidity();
         });
     }
 
@@ -1209,7 +1377,7 @@ async function initAuthPage() {
             phoneGroup.classList.remove('hidden-field');
             emailGroup.classList.add('hidden-field');
             nameGroup.classList.remove('hidden-field');
-            phoneErrorMessage.textContent = '';
+            if(phoneErrorMessage) phoneErrorMessage.textContent = '';
             currentAuthMethod = 'telegram';
             if (otpPopupInput) {
                 otpPopupInput.maxLength = 4;
@@ -1218,11 +1386,28 @@ async function initAuthPage() {
             // Removed premature determineUserRole call
             currentUserRole = 'user'; // Default to user until OTP request
             updateLoginModeUI();
+            checkFormValidity();
         });
     }
 
     // Initial UI update based on default state
     updateLoginModeUI();
-}
+});
 
-document.addEventListener('DOMContentLoaded', initAuthPage);
+// FIX: Expose updateHeaderAfterLogin to window for header refresh after login
+window.updateHeaderAfterLogin = function() {
+    console.debug('[Auth] updateHeaderAfterLogin called');
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        console.warn('[Auth] No access token found for header update');
+        return;
+    }
+
+    // Trigger header reload using loadUser from header.js
+    if (typeof window.loadUser === 'function') {
+        window.loadUser();
+    } else {
+        console.warn('[Auth] loadUser not found on window object');
+    }
+};

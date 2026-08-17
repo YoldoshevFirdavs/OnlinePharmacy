@@ -24,6 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(BASE_DIR))
 
+# Load .env file if it exists
+from dotenv import load_dotenv
+
+env_path = BASE_DIR / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # SECRET_KEY loading logic
@@ -37,7 +44,7 @@ if not SECRET_KEY:
         SECRET_KEY = "django-insecure-fallback-for-development-only"
     else:
         raise ImproperlyConfigured(
-            "SECRET_KEY environment variable must be set in production."
+            "The DJANGO_SECRET_KEY environment variable must be set in production."
         )
 
 # Strip whitespace/CRLF from each entry — Windows .env files often have \r artifacts
@@ -206,6 +213,8 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(
         days=int(os.getenv("JWT_SLIDING_TOKEN_REFRESH_TOKEN_LIFETIME_DAYS", 7))
     ),
+    # ADDED: Custom serializer for token obtain to include role in JWT claims
+    "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -222,7 +231,9 @@ CORS_ALLOW_ALL_ORIGINS = (
 CORS_ALLOW_CREDENTIALS = True
 
 PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "UZ")
-PHONENUMBER_DEFAULT_REGION_CODE = os.getenv("PHONENUMBER_DEFAULT_REGION_CODE", "998")
+PHONENUMBER_DEFAULT_REGION_CODE = os.getenv(
+    "PHONENUMBER_DEFAULT_REGION_CODE", "998"
+)  # Added this line
 
 AUTH_BOT_TOKEN = os.getenv("AUTH_BOT_TOKEN", "")
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
@@ -395,11 +406,4 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = (
     os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False").lower() == "true"
 )
 SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-}
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

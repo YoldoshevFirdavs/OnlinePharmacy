@@ -2,7 +2,7 @@ from django import forms
 
 from orders.models import Order
 from pharmacy.models import Category, Medicine
-from users.models import CustomUser, Deliverer
+from users.models import CustomUser, DeliveryDriver
 
 
 class CategoryForm(forms.ModelForm):
@@ -97,59 +97,17 @@ class UserForm(forms.ModelForm):
         return user
 
 
-class DriverForm(forms.ModelForm):
-    full_name = forms.CharField(
-        label="Ism",
-        max_length=255,
-        widget=forms.TextInput(attrs={"class": "form-input"}),
-    )
-
+class DeliveryDriverForm(forms.ModelForm):
     class Meta:
-        model = Deliverer
-        fields = ["phone_number", "vehicle_info", "status"]
-        labels = {
-            "phone_number": "Telefon",
-            "vehicle_info": "Transport vositasi",
-            "status": "Status",
-        }
+        model = DeliveryDriver
+        fields = ["user", "phone_number", "vehicle_info", "status", "avatar"]
         widgets = {
-            "phone_number": forms.TextInput(attrs={"class": "form-input"}),
-            "vehicle_info": forms.TextInput(attrs={"class": "form-input"}),
-            "status": forms.Select(attrs={"class": "form-input"}),
+            "user": forms.Select(attrs={"class": "form-control"}),
+            "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "vehicle_info": forms.TextInput(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["status"].choices = [
-            ("pending", "Kutilmoqda"),
-            ("active", "Faol"),
-            ("suspended", "To'xtatilgan"),
-        ]
-        if self.instance and self.instance.pk:
-            self.fields["full_name"].initial = self.instance.user.full_name
-        self.order_fields(["full_name", "phone_number", "vehicle_info", "status"])
-
-    def save(self, commit=True):
-        full_name = self.cleaned_data["full_name"]
-        phone_number = self.cleaned_data["phone_number"]
-        deliverer = super().save(commit=False)
-
-        if self.instance.pk:
-            user = deliverer.user
-            user.full_name = full_name
-            user.phone_number = phone_number
-            if commit:
-                user.save()
-                deliverer.save()
-        else:
-            user = CustomUser.objects.create_user(
-                phone_number=phone_number,
-                full_name=full_name,
-            )
-            deliverer.user = user
-            if commit:
-                deliverer.save()
-        return deliverer
 
 
 # Admin va Deliverer uchun Account Settings formasi

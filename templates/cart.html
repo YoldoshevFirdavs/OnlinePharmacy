@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Savatcha - Online Pharmacy</title>
-    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link class="site-header-css" rel="stylesheet" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/cart.css' %}">
     <link rel="stylesheet" href="{% static 'dashboard/css/loader.css' %}">
 </head>
@@ -28,16 +28,33 @@
 </div>
 
 <main class="cart-container">
-    <h1>Sizning savatchangiz</h1>
-    <div id="cart-items-container">
-        <!-- Cart items will be rendered here by cart.js -->
-    </div>
-    <div class="cart-summary">
-        <div class="summary-total">
-            <p>Jami:</p>
-            <p id="cart-total-price">0 so'm</p>
+    <h1 class="cart-title"><i class="fas fa-shopping-cart"></i> Sizning savatchangiz</h1>
+    <div class="cart-layout">
+        <!-- Left: Cart Items List -->
+        <div id="cart-items-container" class="cart-items-list">
+            <!-- Cart items will be rendered here by cart.js -->
         </div>
-        <button id="proceed-to-order" class="btn btn-primary">Buyurtma berishga o'tish</button>
+        
+        <!-- Right: Summary Card -->
+        <div class="cart-summary-card">
+            <h3>Buyurtma tafsilotlari</h3>
+            <div class="summary-row">
+                <span>Mahsulotlar soni:</span>
+                <span id="items-count-display">0 ta</span>
+            </div>
+            <div class="summary-row">
+                <span>Yetkazib berish:</span>
+                <span class="free-shipping">Bepul</span>
+            </div>
+            <hr class="summary-divider">
+            <div class="summary-row total-row">
+                <span>Jami:</span>
+                <span id="cart-total-price">0 so'm</span>
+            </div>
+            <button id="proceed-to-order" class="btn-checkout">
+                Rasmiylashtirishga o'tish <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
     </div>
 </main>
 

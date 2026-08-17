@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from orders.models import Order
 from pharmacy.models import Category, Medicine
-from users.models import CustomUser, Deliverer
+from users.models import CustomUser
 from users.serializers import UserSerializer
 
 
@@ -73,32 +73,54 @@ class DashboardProductSerializer(serializers.ModelSerializer):
 
 
 class DashboardOrderSerializer(serializers.ModelSerializer):
-    customer = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     items_count = serializers.SerializerMethodField()
-    driver = serializers.SerializerMethodField()
+    item_count = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
             "id",
-            "customer",
+            "user",
             "username",
             "total_price",
             "total",
             "status",
             "items_count",
-            "driver",
+            "item_count",
             "created_at",
         ]
 
-    def get_customer(self, obj):
-        user = obj.customer
-        return user.full_name or user.email or user.phone_number or str(user.pk)
+    def get_user(self, obj):
+        if obj.user:
+            request = self.context.get("request")
+            avatar_url = None
+            if obj.user.avatar and hasattr(obj.user.avatar, "url"):
+                avatar_url = (
+                    request.build_absolute_uri(obj.user.avatar.url)
+                    if request
+                    else obj.user.avatar.url
+                )
+
+            return {
+                "id": obj.user.id,
+                "email": obj.user.email,
+                "full_name": obj.user.full_name,
+                "avatar_url": avatar_url,
+            }
+        return None
 
     def get_username(self, obj):
-        return self.get_customer(obj)
+        if obj.user:
+            return (
+                obj.user.full_name
+                or obj.user.email
+                or obj.user.phone_number
+                or str(obj.user.pk)
+            )
+        return "Anonymous"
 
     def get_total(self, obj):
         return str(obj.total_price)
@@ -106,10 +128,8 @@ class DashboardOrderSerializer(serializers.ModelSerializer):
     def get_items_count(self, obj):
         return obj.order_items.count()
 
-    def get_driver(self, obj):
-        if not obj.driver:
-            return "Tayinlanmagan"
-        return obj.driver.full_name or obj.driver.email or obj.driver.phone_number
+    def get_item_count(self, obj):
+        return self.get_items_count(obj)
 
 
 class DashboardUserSerializer(serializers.ModelSerializer):
@@ -138,34 +158,3 @@ class DashboardUserSerializer(serializers.ModelSerializer):
 
     def get_edit_url(self, obj):
         return reverse("dashboard:user_edit", kwargs={"pk": obj.pk})
-
-
-class DelivererSerializer(serializers.ModelSerializer):
-    """Serializer for deliverer profile data"""
-
-    user = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Deliverer
-        fields = [
-            "id",
-            "user",
-            "phone_number",
-            "vehicle_info",
-            "status",
-            "rate_per_hour",
-            "created_at",
-        ]
-        read_only_fields = ["id", "created_at", "status"]
-
-    def get_user(self, obj):
-        """Get user details"""
-        return {
-            "id": obj.user.id,
-            "full_name": obj.user.full_name,
-            "email": obj.user.email,
-            "phone_number": obj.user.phone_number,
-            "avatar": (
-                obj.user.get_avatar_url if hasattr(obj.user, "get_avatar_url") else None
-            ),
-        }

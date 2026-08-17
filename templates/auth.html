@@ -6,7 +6,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
-{# Google Fonts - Moved to local static #}
 <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 <link href="{% static 'vendor/fonts/google-fonts.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'dashboard/css/loader.css' %}">
@@ -22,15 +21,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        padding-top: 100px;
+        padding-bottom: 40px;
     }
     .auth-container {
-        max-width: 550px; /* Increased width */
-        margin: 24px auto; /* Adjusted margin for flex layout */
+        max-width: 550px;
+        margin: 110px auto 40px;
         padding: 35px;
         background: #ffffff;
         border-radius: 12px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         font-family: Arial, sans-serif;
+        position: relative;
+        z-index: 1;
     }
     .auth-subtitle {
         text-align: center;
@@ -194,6 +197,10 @@
     .btn-primary:hover {
         background: #0069d9; 
     }
+    .btn-primary:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+    }
     .hidden-field {
         display: none;
     }
@@ -278,6 +285,18 @@
         font-weight: bold;
         display: none; /* Hidden by default */
     }
+    /* Login mode toggle button */
+    .login-mode-toggle {
+        text-align: center;
+        margin-top: 15px;
+    }
+    .btn-link {
+        background: none;
+        border: none;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+    }
 </style>
 <style>
     /* Footer layout fix */
@@ -308,7 +327,6 @@
             <h3 style="text-align: center; margin-bottom: 5px; color: #333;">Tizimga kirish</h3>
             <p class="auth-subtitle">Online Pharmacy — sog‘lom hayot uchun</p>
             
-            {# Error Banner #}
             <div id="auth-error-banner" style="display: none;"></div>
 
             <div class="social-auth-buttons">
@@ -323,7 +341,7 @@
             <form id="auth-form">
                 {% csrf_token %}
 
-                <div class="form-group" id="name-group"> {# Initially hidden #}
+                <div class="form-group" id="name-group">
                     <label for="full_name">Ism</label>
                     <input type="text" id="full_name" name="full_name" class="input-field" placeholder="Ismingizni kiriting" required>
                 </div>
@@ -331,6 +349,7 @@
                 <div class="form-group" id="email-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" class="input-field" placeholder="example@mail.com">
+                    <span id="email-validator" class="error-message"></span>
                 </div>
 
                 <div class="form-group hidden-field" id="phone-group">
@@ -345,11 +364,24 @@
                         </div>
                         <input type="text" id="phone" name="phone_number" class="input-field" placeholder="99 999 99 99" autocomplete="off">
                     </div>
-                    <div id="phone-error-message" class="error-message"></div>
+                    <span id="phone-error-message" class="error-message"></span>
                 </div>
                 
-                <button type="submit" id="get-code" class="btn-primary">Kod olish</button>
+                <!-- FIX: Added password field for admin login -->
+                <div class="form-group hidden-field" id="password-group">
+                    <label for="password">Parol</label>
+                    <input type="password" id="password" name="password" class="input-field" placeholder="Parolni kiriting">
+                </div>
+
+                <button type="button" id="get-code-btn" class="btn-primary" disabled>Kod olish</button>
+                <!-- FIX: Added separate button for password login -->
+                <button type="button" id="login-with-password-btn" class="btn-primary hidden-field">Kirish</button>
             </form>
+
+            <!-- FIX: Added toggle button for admin login mode -->
+            <div class="login-mode-toggle">
+                <button id="login-mode-toggle-btn" class="btn-link hidden-field">Parol bilan kirish</button>
+            </div>
         </div>
     </div>
 </main>

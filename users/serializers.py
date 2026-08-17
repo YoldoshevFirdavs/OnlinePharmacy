@@ -6,9 +6,40 @@ from phonenumbers import PhoneNumberFormat
 from PIL import Image
 from rest_framework import serializers
 
-from .models import CustomUser, Deliverer, Seller, SubscribedUser
+from .models import CustomUser, DeliveryDriver, Seller, SubscribedUser
 
 User = get_user_model()
+
+
+def determine_role(user):
+    """
+    Determine user role from server-side authoritative sources.
+
+    Args:
+        user: CustomUser instance
+
+    Returns:
+        str: One of 'admin', 'seller', or 'user'
+
+    Role priority:
+        1. admin: if is_staff or is_superuser
+        2. seller: if has Seller profile in database
+        3. user: default
+    """
+    if not user:
+        return "user"
+
+    # Check is_staff/is_superuser first (highest privilege)
+    if user.is_staff or user.is_superuser:
+        return "admin"
+
+    # Check if user has a seller profile (FIXED: check database existence, not hasattr)
+    # hasattr() only checks Python object attributes, not database OneToOne relationship
+    if Seller.objects.filter(user=user).exists():
+        return "seller"
+
+    # Default to user role
+    return "user"
 
 
 def validate_image_file(file):
@@ -21,6 +52,7 @@ def validate_image_file(file):
 
 
 class PhoneNumberField(serializers.CharField):
+
     def to_internal_value(self, data):
         data = str(data).strip()
         if not data:
@@ -30,10 +62,12 @@ class PhoneNumberField(serializers.CharField):
             data = f"+{settings.PHONENUMBER_DEFAULT_REGION_CODE}{data}"
 
         try:
+
             parsed_number = phonenumbers.parse(
                 data, settings.PHONENUMBER_DEFAULT_REGION
             )
             if not phonenumbers.is_valid_number(parsed_number):
+
                 parsed_number = phonenumbers.parse(data)
                 if not phonenumbers.is_valid_number(parsed_number):
                     raise serializers.ValidationError("Telefon raqami noto‘g‘ri.")
@@ -50,9 +84,7 @@ class PhoneNumberField(serializers.CharField):
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     phone_number = PhoneNumberField(required=False, allow_blank=True, allow_null=True)
-    roles = (
-        serializers.SerializerMethodField()
-    )  # Compute roles array from user properties
+    role = serializers.SerializerMethodField()
     avatar = serializers.ImageField(
         validators=[validate_image_file], required=False, allow_null=True
     )
@@ -68,11 +100,10 @@ class UserSerializer(serializers.ModelSerializer):
             "address",
             "avatar",
             "avatar_url",
-            "roles",
+            "role",
             "is_verified",
             "date_joined",
             "is_staff",
-            "role",
         ]
         read_only_fields = [
             "is_verified",
@@ -80,7 +111,6 @@ class UserSerializer(serializers.ModelSerializer):
             "telegram_id",
             "is_staff",
             "role",
-            "roles",
         ]
         extra_kwargs = {
             "email": {"required": False, "allow_blank": True, "allow_null": True},
@@ -89,30 +119,31 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def get_avatar_url(self, obj):
-        if hasattr(obj, "deliverer_profile") and obj.deliverer_profile:
-            return obj.deliverer_profile.get_avatar_url
         if hasattr(obj, "seller") and obj.seller:
             return obj.seller.get_avatar_url
         if obj.avatar:
             return obj.avatar.url
         return "/static/images/default_avatar.png"
 
-    def get_roles(self, obj):
-        """Compute roles array based on user properties."""
-        roles = []
+    def get_role(self, obj):
+        """Compute a single, primary role based on user properties."""
         if obj.is_staff or obj.is_superuser:
-            roles.append("admin")
-        if hasattr(obj, "deliverer_profile") and obj.deliverer_profile:
-            roles.append("deliverer")
-        if hasattr(obj, "seller") and obj.seller:
-            roles.append("seller")
-        if not roles:
-            roles.append("user")
-        return roles
-
-    def validate_phone_number(self, value):
-        if value is None:
+            return "admin"
+        # FIXED: Check Seller existence directly without hasattr()
+        if Seller.objects.filter(user=obj).exists():
+            return "seller"
+        return obj.role or "user"
+        if not value:
             return value
+        try:
+            parsed_number = phonenumbers.parse(
+                value, settings.PHONENUMBER_DEFAULT_REGION
+            )
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise serializers.ValidationError("Telefon raqami noto'g'ri formatda.")
+        except phonenumbers.phonenumberutil.NumberParseException:
+            raise serializers.ValidationError("Telefon raqami noto'g'ri formatda.")
+
         if self.instance and value:
             if (
                 CustomUser.objects.exclude(id=self.instance.id)
@@ -138,8 +169,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
-        phone = validated_data.get("phone_number")
-        email = validated_data.get("email")
+        validated_data["role"] = "user"
         user = CustomUser(**validated_data)
         if password:
             user.set_password(password)
@@ -159,10 +189,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
 
         if avatar:
-            if hasattr(instance, "deliverer_profile") and instance.deliverer_profile:
-                instance.deliverer_profile.avatar = avatar
-                instance.deliverer_profile.save()
-            elif hasattr(instance, "seller") and instance.seller:
+            if hasattr(instance, "seller") and instance.seller:
                 instance.seller.avatar = avatar
                 instance.seller.save()
             else:
@@ -191,13 +218,21 @@ class UserPublicSerializer(serializers.ModelSerializer):
     """Minimal user data for session checking."""
 
     avatar_url = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     def get_avatar_url(self, obj):
-        if hasattr(obj, "deliverer_profile") and obj.deliverer_profile:
-            return obj.deliverer_profile.get_avatar_url
         if hasattr(obj, "seller") and obj.seller:
             return obj.seller.get_avatar_url
         return obj.avatar.url if obj.avatar else "/static/images/default_avatar.png"
+
+    def get_role(self, obj):
+        """Compute a single, primary role based on user properties."""
+        if obj.is_staff or obj.is_superuser:
+            return "admin"
+        # FIXED: Check Seller existence directly without hasattr()
+        if Seller.objects.filter(user=obj).exists():
+            return "seller"
+        return obj.role or "user"
 
     class Meta:
         model = CustomUser
@@ -352,21 +387,17 @@ class AdminSetupSerializer(serializers.Serializer):
         return value
 
 
-class DelivererSerializer(serializers.ModelSerializer):
+class DeliveryDriverSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    avatar = serializers.ImageField(write_only=True, required=False, allow_null=True)
 
     class Meta:
-        model = Deliverer
+        model = DeliveryDriver
         fields = (
             "id",
             "user",
             "phone_number",
             "vehicle_info",
             "status",
-            "stripe_account_id",
-            "payout_method",
-            "rate_per_hour",
             "avatar",
         )
         read_only_fields = ("id",)
@@ -374,8 +405,8 @@ class DelivererSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop("user")
         user = User.objects.create_user(**user_data)
-        deliverer = Deliverer.objects.create(user=user, **validated_data)
-        return deliverer
+        driver = DeliveryDriver.objects.create(user=user, **validated_data)
+        return driver
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user", None)
@@ -513,3 +544,23 @@ class GmailOAuthSerializer(serializers.Serializer):
             "redirect_uri": self.validated_data.get("redirect_uri"),
             "grant_type": "authorization_code",
         }
+
+
+# CUSTOM JWT SERIALIZER
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Custom TokenObtainPairSerializer that includes user role in JWT claims.
+    Role is computed server-side via determine_role() for security.
+    """
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Add custom claims to token
+        token["role"] = determine_role(user)
+        token["email"] = user.email or ""
+        token["full_name"] = user.full_name or ""
+        return token

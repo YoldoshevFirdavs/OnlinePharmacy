@@ -2,10 +2,8 @@ from django.contrib import admin
 
 from .models import (
     CustomUser,
-    Deliverer,
+    DeliveryDriver,
     Operator,
-    PayrollStats,
-    SalaryRecord,
     Seller,
     SubscribedUser,
     TelegrambotUser,
@@ -14,8 +12,15 @@ from .models import (
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ["phone_number", "full_name", "is_verified", "is_staff", "role"]
-    search_fields = ["phone_number", "full_name"]
+    list_display = [
+        "id",
+        "get_display_name",
+        "email",
+        "role",
+        "is_active",
+        "date_joined",
+    ]
+    search_fields = ["full_name", "email", "phone_number"]
 
 
 @admin.register(Seller)
@@ -80,48 +85,14 @@ class SubscribedUserAdmin(admin.ModelAdmin):
     list_filter = ("is_verified",)
 
 
-@admin.register(Deliverer)
-class DelivererAdmin(admin.ModelAdmin):
+@admin.register(DeliveryDriver)
+class DeliveryDriverAdmin(admin.ModelAdmin):
     list_display = (
-        "user_email",
+        "user",
         "phone_number",
         "status",
-        "rate_per_hour",
         "created_at",
     )
     search_fields = ("user__email", "user__full_name", "phone_number")
     list_filter = ("status",)
     autocomplete_fields = ("user",)
-
-    def user_email(self, obj):
-        return obj.user.email
-
-    user_email.short_description = "User Email"
-    user_email.admin_order_field = "user__email"
-
-
-@admin.register(SalaryRecord)
-class SalaryRecordAdmin(admin.ModelAdmin):
-    list_display = (
-        "deliverer",
-        "period_start",
-        "period_end",
-        "gross_amount",
-        "net_amount",
-        "status",
-        "paid_at",
-    )
-    list_filter = ("status", "period_start", "period_end")
-    search_fields = (
-        "deliverer__user__email",
-        "deliverer__phone_number",
-        "stripe_payment_id",
-    )
-    date_hierarchy = "period_end"
-
-
-@admin.register(PayrollStats)
-class PayrollStatsAdmin(admin.ModelAdmin):
-    list_display = ("month", "year", "total_gross", "total_net", "total_payouts")
-    list_filter = ("year", "month")
-    search_fields = ("year",)

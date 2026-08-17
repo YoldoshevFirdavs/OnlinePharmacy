@@ -2,15 +2,17 @@ from datetime import timedelta
 
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from orders.models import Order
 from pharmacy.models import Category, Medicine
-from users.models import CustomUser, Deliverer
+from users.models import CustomUser, DeliveryDriver
+from users.serializers import DeliveryDriverSerializer
 
 from .permissions import IsDashboardAdmin
 from .serializers import (
@@ -18,7 +20,6 @@ from .serializers import (
     DashboardOrderSerializer,
     DashboardProductSerializer,
     DashboardUserSerializer,
-    DelivererSerializer,
 )
 
 VALID_ORDER_STATUSES = {choice[0] for choice in Order.STATUS_CHOICES}
@@ -85,7 +86,7 @@ class ProductListView(DashboardAPIView):
 class OrderListView(DashboardAPIView):
     def get(self, request):
         orders = (
-            Order.objects.select_related("customer")
+            Order.objects.select_related("user")
             .prefetch_related("order_items")
             .order_by("-created_at")
         )
@@ -98,7 +99,7 @@ class OrderListView(DashboardAPIView):
 class RecentOrderListView(DashboardAPIView):
     def get(self, request):
         orders = (
-            Order.objects.select_related("customer")
+            Order.objects.select_related("user")
             .prefetch_related("order_items")
             .order_by("-created_at")[:10]
         )
@@ -173,36 +174,41 @@ class CalendarEventsView(DashboardAPIView):
         return Response(events)
 
 
-class DriverApiView(APIView):
-    permission_classes = [IsDashboardAdmin]
-
+class DeliveryDriverViewSet(DashboardAPIView):
     def get(self, request, pk=None):
         if pk:
-            driver = generics.get_object_or_404(Deliverer, pk=pk)
-            serializer = DelivererSerializer(driver)
+            driver = get_object_or_404(DeliveryDriver, pk=pk)
+            serializer = DeliveryDriverSerializer(driver)
             return Response(serializer.data)
-        else:
-            drivers = Deliverer.objects.all()
-            serializer = DelivererSerializer(drivers, many=True)
-            return Response(serializer.data)
+        drivers = DeliveryDriver.objects.all()
+        serializer = DeliveryDriverSerializer(drivers, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        serializer = DelivererSerializer(data=request.data)
+        serializer = DeliveryDriverSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
-        driver = generics.get_object_or_404(Deliverer, pk=pk)
-        serializer = DelivererSerializer(driver, data=request.data)
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
+        serializer = DeliveryDriverSerializer(driver, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
+        serializer = DeliveryDriverSerializer(driver, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        driver = generics.get_object_or_404(Deliverer, pk=pk)
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
         driver.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -218,7 +224,7 @@ class DashboardStatsApiView(DashboardAPIView):
         pending_orders = Order.objects.filter(status="Pending").count()
         delivered_orders = Order.objects.filter(status="Delivered").count()
         total_users = CustomUser.objects.count()
-        total_deliverers = Deliverer.objects.count()
+        total_drivers = DeliveryDriver.objects.count()
         out_of_stock = Medicine.objects.filter(stock=0).count()
         total_staff = CustomUser.objects.filter(is_staff=True).count()
 
@@ -230,8 +236,60 @@ class DashboardStatsApiView(DashboardAPIView):
             "pending_orders": pending_orders,
             "delivered_orders": delivered_orders,
             "total_users": total_users,
-            "total_deliverers": total_deliverers,
+            "total_drivers": total_drivers,
             "out_of_stock": out_of_stock,
             "total_staff": total_staff,
         }
         return Response(data)
+
+
+class DriverApiView(DashboardAPIView):
+    """
+    Admin dashboard uchun driverlarni boshqarish API.
+    Full CRUD: list, create, retrieve, update, delete.
+    """
+
+    def get(self, request, pk=None):
+        if pk:
+            driver = get_object_or_404(DeliveryDriver, pk=pk)
+            serializer = DeliveryDriverSerializer(driver, context={"request": request})
+            return Response(serializer.data)
+        drivers = DeliveryDriver.objects.all().order_by("id")
+        serializer = DeliveryDriverSerializer(
+            drivers, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = DeliveryDriverSerializer(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
+        serializer = DeliveryDriverSerializer(
+            driver, data=request.data, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
+        serializer = DeliveryDriverSerializer(
+            driver, data=request.data, partial=True, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        driver = get_object_or_404(DeliveryDriver, pk=pk)
+        driver.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

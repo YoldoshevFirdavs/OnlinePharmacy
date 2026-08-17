@@ -1,35 +1,36 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Jadvalda hover effekti
-    const tableRows = document.querySelectorAll('.data-table tbody tr');
-
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', () => {
-            row.classList.add('drivers-table__row--hover');
-        });
-        row.addEventListener('mouseleave', () => {
-            row.classList.remove('drivers-table__row--hover');
+document.addEventListener('DOMContentLoaded', function () {
+    // Delete driver
+    document.querySelectorAll('.driver-delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const driverId = this.getAttribute('data-driver-id');
+            if (confirm('Are you sure you want to delete this driver?')) {
+                fetch(`/dashboard/api/delivery/${driverId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        }
+                    });
+            }
         });
     });
 
-    // Delete tugmasi bosilganda tasdiqlash modal chiqishi
-    const deleteForms = document.querySelectorAll('.delete-form');
-
-    deleteForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#6a00f4',
-                cancelButtonColor: '#e74c3c',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-            })
-        });
-    });
+            }
+        }
+        return cookieValue;
+    }
 });

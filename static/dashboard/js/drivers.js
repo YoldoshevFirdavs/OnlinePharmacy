@@ -1,135 +1,101 @@
-/**
- * OnlinePharmacy Dashboard — Drivers page module
- * Row hover, delete confirmation modal, edit navigation.
- */
-(function () {
-    'use strict';
+document.addEventListener('DOMContentLoaded', function () {
+    const driverModal = new bootstrap.Modal(document.getElementById('driverModal'));
+    const driverForm = document.getElementById('driverForm');
+    const driverIdField = document.getElementById('driverId');
+    const fullNameField = document.getElementById('fullName');
+    const phoneNumberField = document.getElementById('phoneNumber');
+    const vehicleInfoField = document.getElementById('vehicleInfo');
+    const saveDriverBtn = document.getElementById('saveDriverBtn');
 
-    var API_BASE = '/api/v1/dashboard/drivers/';
-
-    function getCSRFToken() {
-        if (window.Dashboard && window.Dashboard.getCSRFToken) {
-            return window.Dashboard.getCSRFToken();
-        }
-        var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
-        return match ? decodeURIComponent(match[1]) : '';
-    }
-
-    function getHoverColor() {
-        return getComputedStyle(document.documentElement)
-            .getPropertyValue('--table-row-hover-bg-color')
-            .trim();
-    }
-
-    function initRowHover() {
-        var hoverColor = getHoverColor();
-        document.querySelectorAll('.drivers-table tbody tr:not(.data-table__empty)').forEach(function (row) {
-            row.addEventListener('mouseenter', function () {
-                row.classList.add('drivers-table__row--hover');
-                if (hoverColor) {
-                    row.style.backgroundColor = hoverColor;
-                }
-            });
-            row.addEventListener('mouseleave', function () {
-                row.classList.remove('drivers-table__row--hover');
-                row.style.backgroundColor = '';
-            });
-        });
-    }
-
-    function confirmDelete(onConfirm) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'O\'chirishni tasdiqlang',
-                text: 'Haqiqatan ham bu haydovchini o\'chirmoqchimisiz?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-trash"></i> Ha, o\'chirish',
-                cancelButtonText: 'Bekor qilish',
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    onConfirm();
-                }
-            });
-            return;
-        }
-        if (window.confirm('Haqiqatan ham bu haydovchini o\'chirmoqchimisiz?')) {
-            onConfirm();
-        }
-    }
-
-    function deleteDriver(driverId, row) {
-        fetch(API_BASE + driverId + '/', {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-            },
-            credentials: 'same-origin',
-        })
-            .then(function (response) {
-                if (response.ok || response.status === 204) {
-                    row.remove();
-                    updateTableCount();
-                    showEmptyStateIfNeeded();
-                    return;
-                }
-                window.alert('Haydovchini o\'chirishda xatolik yuz berdi.');
-            })
-            .catch(function () {
-                window.alert('Haydovchini o\'chirishda xatolik yuz berdi.');
-            });
-    }
-
-    function showEmptyStateIfNeeded() {
-        var tbody = document.querySelector('.drivers-table tbody');
-        if (!tbody) {
-            return;
-        }
-        var rows = tbody.querySelectorAll('tr:not(.data-table__empty)');
-        if (rows.length) {
-            return;
-        }
-        tbody.innerHTML =
-            '<tr class="data-table__empty">' +
-            '<td colspan="5">' +
-            '<i class="fa-solid fa-inbox"></i>' +
-            '<span>Haydovchilar topilmadi</span>' +
-            '</td></tr>';
-    }
-
-    function bindDeleteButtons() {
-        document.querySelectorAll('.driver-delete-btn').forEach(function (button) {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                var driverId = button.dataset.driverId;
-                var row = button.closest('tr');
-                if (!driverId || !row) {
-                    return;
-                }
-                confirmDelete(function () {
-                    deleteDriver(driverId, row);
-                });
-            });
-        });
-    }
-
-    function updateTableCount() {
-        var countEl = document.getElementById('tableCount');
-        if (!countEl) {
-            return;
-        }
-        var rows = document.querySelectorAll('.drivers-table tbody tr:not(.data-table__empty)');
-        countEl.textContent = rows.length + ' ta haydovchi';
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        var table = document.getElementById('dataTable');
-        if (!table) {
-            return;
-        }
-        table.classList.add('drivers-table');
-        initRowHover();
-        bindDeleteButtons();
-        updateTableCount();
+    // Open modal for creating a new driver
+    document.getElementById('btnCreateDriver').addEventListener('click', function () {
+        driverForm.reset();
+        driverIdField.value = '';
+        driverModal.show();
     });
-})();
+
+    // Open modal for editing a driver
+    document.querySelectorAll('.driver-edit-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const driverId = this.getAttribute('data-driver-id');
+            fetch(`/dashboard/api/drivers/${driverId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    driverIdField.value = data.id;
+                    fullNameField.value = data.user.full_name;
+                    phoneNumberField.value = data.phone_number;
+                    vehicleInfoField.value = data.vehicle_info;
+                    driverModal.show();
+                });
+        });
+    });
+
+    // Save driver (create or update)
+    saveDriverBtn.addEventListener('click', function () {
+        const driverId = driverIdField.value;
+        const url = driverId ? `/dashboard/api/drivers/${driverId}/` : '/dashboard/api/drivers/';
+        const method = driverId ? 'PUT' : 'POST';
+
+        const formData = {
+            user: {
+                full_name: fullNameField.value,
+            },
+            phone_number: phoneNumberField.value,
+            vehicle_info: vehicleInfoField.value,
+        };
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                driverModal.hide();
+                location.reload();
+            } else {
+                // Handle errors
+                console.error(data);
+            }
+        });
+    });
+
+    // Delete driver
+    document.querySelectorAll('.driver-delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const driverId = this.getAttribute('data-driver-id');
+            if (confirm('Are you sure you want to delete this driver?')) {
+                fetch(`/dashboard/api/drivers/${driverId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});

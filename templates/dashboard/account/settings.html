@@ -58,7 +58,15 @@
                         {{ field.label }}
                         {% if field.field.required %}<span class="form-required">*</span>{% endif %}
                     </label>
-                    {{ field }}
+                    {% if field.html_name == 'email' %}
+                        <input type="email" name="{{ field.name }}" id="id_email" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ request.user.id }}">
+                        <div id="email-feedback" class="form-text"></div>
+                    {% elif field.html_name == 'phone_number' %}
+                        <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ request.user.id }}">
+                        <div id="phone-feedback" class="form-text"></div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
 
                     {% if field.help_text %}
                     <p class="form-hint">{{ field.help_text }}</p>
@@ -76,7 +84,7 @@
 
                 <div class="form-actions" id="formActions">
                     <button type="submit" class="btn btn--primary" id="btnSaveSettings">
-                        <i class="fa-solid fa-floppy-disk"></i> Saqlash
+                        <i class="fa-solid fa-floppy-disk"></i> Save
                     </button>
                 </div>
             </form>
@@ -128,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
         pwdInput.parentNode.insertBefore(reqBox, pwdInput.nextSibling);
 
-        var submitBtn = document.getElementById('btnSaveSettings');
+        var submitBtn = document.getElementById('btnSaveSettings'); // This button is for the settings form, not password form
 
         function update() {
             var val = pwdInput.value;
@@ -142,10 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 li.className = 'pwd-req ' + (pass ? 'pwd-req--pass' : 'pwd-req--fail');
                 li.querySelector('i').className = 'fa-solid ' + (pass ? 'fa-circle-check' : 'fa-circle-xmark');
             });
-            if (submitBtn) {
-                submitBtn.disabled = visible && !allPass;
-                submitBtn.classList.toggle('btn--disabled', visible && !allPass);
-            }
+            // This part needs to be handled by the account-validation.js for the password form
+            // if (submitBtn) {
+            //     submitBtn.disabled = visible && !allPass;
+            //     submitBtn.classList.toggle('btn--disabled', visible && !allPass);
+            // }
         }
 
         pwdInput.addEventListener('input', update);
@@ -156,4 +165,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script src="{% static 'dashboard/js/account-validation.js' %}" defer></script>
 {% endblock %}

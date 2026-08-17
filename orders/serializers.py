@@ -1,6 +1,7 @@
+from django.utils import timezone
 from rest_framework import serializers
 
-from orders.models import Cart, CartItem, Order, OrderItem
+from orders.models import Cart, CartItem, DeliveryOrder, Order, OrderItem
 from pharmacy.models.medicine import Medicine
 
 
@@ -20,14 +21,14 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             "id",
-            "customer",
+            "user",
             "order_items",
             "total_price",
             "status",
             "address",
             "created_at",
         ]
-        read_only_fields = ["customer", "total_price"]
+        read_only_fields = ["user", "total_price"]
 
     def get_total_price(self, obj):
         return sum(
@@ -95,6 +96,74 @@ class CartSummarySerializer(serializers.ModelSerializer):
         return sum(item.product.price * item.quantity for item in obj.items.all())
 
 
+class DeliveryOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryOrder
+        fields = "__all__"
+        read_only_fields = (
+            "order",
+            "driver",
+            "created_at",
+            "updated_at",
+            "driver_earnings",
+        )
+
+
+class DriverOrderSerializer(serializers.ModelSerializer):
+    customer_full_name = serializers.ReadOnlyField(source="customer.full_name")
+    customer_phone_number = serializers.ReadOnlyField(source="customer.phone_number")
+    order_items = OrderItemSerializer(many=True, read_only=True)
+    # driver = DriverSerializer(read_only=True)
+    delivery_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "customer_full_name",
+            "customer_phone_number",
+            "driver",
+            "total_price",
+            "status",
+            "address",
+            "created_at",
+            "assigned_at",
+            "accepted_at",
+            "picked_up_at",
+            "on_the_way_at",
+            "delivered_at",
+            "driver_notes",
+            "order_items",
+            "delivery_details",
+        ]
+        read_only_fields = [
+            "id",
+            "customer_full_name",
+            "customer_phone_number",
+            "driver",
+            "total_price",
+            "created_at",
+            "assigned_at",
+            "accepted_at",
+            "picked_up_at",
+            "on_the_way_at",
+            "delivered_at",
+            "order_items",
+            "delivery_details",
+        ]
+
+    def get_delivery_details(self, obj):
+        try:
+            if hasattr(obj, "delivery_details") and obj.delivery_details is not None:
+                return DeliveryOrderSerializer(obj.delivery_details).data
+            delivery = DeliveryOrder.objects.filter(order=obj).first()
+            if delivery:
+                return DeliveryOrderSerializer(delivery).data
+            return None
+        except DeliveryOrder.DoesNotExist:
+            return None
+
+
 class OrderListSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField()
     short_address = serializers.SerializerMethodField()
@@ -127,22 +196,72 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, read_only=True)
+    delivery_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
             "id",
-            "customer",
+            "user",
             "order_items",
             "total_price",
             "status",
             "address",
             "created_at",
+            "delivery_details",
         ]
         read_only_fields = [
             "id",
-            "customer",
+            "user",
             "order_items",
             "total_price",
             "created_at",
+            "delivery_details",
         ]
+
+    def get_delivery_details(self, obj):
+        delivery = DeliveryOrder.objects.filter(order=obj).first()
+        if delivery:
+            return DeliveryOrderSerializer(delivery).data
+        return None
+
+
+class OrderStatusUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=[
+            ("Accepted", "Accepted by Driver"),
+            ("Picked Up", "Picked Up by Driver"),
+            ("On The Way", "On The Way for Delivery"),
+            ("Arrived", "Arrived at User Location"),
+            ("Delivered", "Delivered"),
+        ]
+    )
+
+
+class ArrivalSerializer(serializers.Serializer):
+    arrived_at = serializers.DateTimeField(
+        required=True,
+        help_text="Timestamp when the driver arrived at the user's location.",
+    )
+    wait_seconds = serializers.IntegerField(
+        required=False,
+        default=0,
+        min_value=0,
+        help_text="Time in seconds the driver waited at the user's location.",
+    )
+
+    def validate_arrived_at(self, value):
+        if value > timezone.now():
+            raise serializers.ValidationError("Arrival time cannot be in the future.")
+        return value
+
+
+class LocationSerializer(serializers.Serializer):
+    lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
+    lng = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
+    timestamp = serializers.DateTimeField(required=False, default=timezone.now)
+
+    def validate_timestamp(self, value):
+        if value > timezone.now():
+            raise serializers.ValidationError("Timestamp cannot be in the future.")
+        return value

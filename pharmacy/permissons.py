@@ -1,33 +1,29 @@
 from rest_framework import permissions
 
+from users.models import Seller
+
 
 class IsVerifiedSeller(permissions.BasePermission):
     def has_permission(self, request, view):
-        if (
-            request.user
-            and request.user.is_authenticated
-            and request.user.role == "seller"
-        ):
+        # FIXED: Use Seller.objects.filter() instead of role field check
+        if request.user and request.user.is_authenticated:
             try:
-                seller_profile = request.user.seller
-                return seller_profile.is_verified
-            except AttributeError:
+                seller = Seller.objects.get(user=request.user)
+                return seller.is_verified
+            except Seller.DoesNotExist:
                 return False
         return False
 
     def has_object_permission(self, request, view, obj):
-        if (
-            request.user
-            and request.user.is_authenticated
-            and request.user.role == "seller"
-        ):
+        # FIXED: Use Seller.objects.filter() instead of role field check
+        if request.user and request.user.is_authenticated:
             try:
-                seller_profile = request.user.seller
+                seller = Seller.objects.get(user=request.user)
                 return (
-                    seller_profile.is_verified
+                    seller.is_verified
                     and hasattr(obj, "seller")
-                    and obj.seller == seller_profile
+                    and obj.seller == seller
                 )
-            except AttributeError:
+            except Seller.DoesNotExist:
                 return False
         return False

@@ -4,6 +4,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("orders", "0004_alter_order_driver_alter_orderdelivery_driver"),
         ("payments", "0002_alter_payout_driver"),

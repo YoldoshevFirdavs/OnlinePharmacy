@@ -1435,67 +1435,12 @@ footer, .site-footer {
             <h2>Ommabop Mahsulotlar</h2>
             <p>Eng ko'p buyurtma berilgan va foydalanuvchilar tafakkuri bilan tanlangan dorilar</p>
         </div>
-        <div class="products-grid">
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-pills"></i></div>
-                <div class="product-info">
-                    <h3>Paracetamol 500mg</h3>
-                    <p class="product-desc">Og'riq va isitma uchun zaruriy dori</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (240)</div>
-                    <div class="product-price">12,000 so'm</div>
-                    <a href="/shop/products/1/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-fist-raised"></i></div>
-                <div class="product-info">
-                    <h3>Vitamin C 1000mg</h3>
-                    <p class="product-desc">Immunitet mustahkamlash uchun</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (189)</div>
-                    <div class="product-price">25,000 so'm</div>
-                    <a href="/shop/products/2/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-fire"></i></div>
-                <div class="product-info">
-                    <h3>Ibuprofen 400mg</h3>
-                    <p class="product-desc">Yallig'lanishga qarshi dori</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (156)</div>
-                    <div class="product-price">18,000 so'm</div>
-                    <a href="/shop/products/3/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-leaf"></i></div>
-                <div class="product-info">
-                    <h3>Aspirin 500mg</h3>
-                    <p class="product-desc">Qon tushiruvchi dori</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (203)</div>
-                    <div class="product-price">9,000 so'm</div>
-                    <a href="/shop/products/4/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-syringe"></i></div>
-                <div class="product-info">
-                    <h3>Qandli Migli Dori</h3>
-                    <p class="product-desc">Qandli miglining darajasini boshqarish</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (178)</div>
-                    <div class="product-price">35,000 so'm</div>
-                    <a href="/shop/products/5/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-image"><i class="fas fa-brain"></i></div>
-                <div class="product-info">
-                    <h3>Stress Bartaraf Dori</h3>
-                    <p class="product-desc">Stressni kamaytiradigan preparit</p>
-                    <div class="product-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> (142)</div>
-                    <div class="product-price">22,000 so'm</div>
-                    <a href="/shop/products/6/" class="btn btn-primary btn-small">Batafsil va sotib olish</a>
-                </div>
-            </div>
+        <!-- Dinamik mahsulotlar uchun konteyner -->
+        <div id="popular-products-grid" class="products-grid">
+            <!-- Mahsulotlar bu yerga JS orqali yuklanadi -->
+        </div>
+        <div id="popular-products-loader" style="text-align: center; padding: 40px; display: none;">
+            <p>Mahsulotlar yuklanmoqda...</p>
         </div>
     </div>
 </section>
@@ -1657,12 +1602,13 @@ footer, .site-footer {
     </div>
 </section>
 
-<section class="about">
+<section class="about" id="about">
     <div class="container">
         <div class="about-content">
             <div class="about-text">
                 <h2>Biz Haqimizda</h2>
-                <p>{{ site_config.about_us_text }}</p>
+                <p>Bizning dorixonamiz O'zbekistondagi eng ishonchli onlayn platformalardan biri bo'lib, aholiga sifatli va hamyonbop dori-darmonlarni tezkorlik bilan yetkazib berishni o'z oldiga maqsad qilib qo'ygan. Biz mijozlar salomatligini birinchi o'ringa qo'yamiz va har bir buyurtmaga alohida e'tibor bilan yondashamiz.</p>
+                <p>Platformamizda faqat litsenziyalangan va sertifikatlangan mahsulotlar sotiladi. Professional farmatsevtlarimiz esa sizga 24/7 rejimida maslahat berishga tayyor. Bizning maqsadimiz – sog'liqni saqlashni hamma uchun oson va qulay qilish.</p>
                 <div class="about-stats">
                     <div class="stat-box">
                         <div class="stat-number">{{ site_config.clients_count }}+</div>
@@ -1695,7 +1641,8 @@ footer, .site-footer {
 </main>
 
 {% include "components/footer.html" %}
-<script src="{% static 'js/header.js' %}"></script>
+<script type="module" src="{% static 'js/header.js' %}"></script>
+<script type="module" src="{% static 'js/main.js' %}"></script>
 
 </body>
 </html>

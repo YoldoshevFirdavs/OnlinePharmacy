@@ -112,7 +112,7 @@ def mask(identifier: str) -> str:
     if "@" in identifier:
         parts = identifier.split("@")
         local = parts[0]
-        domain = parts[1] if len(parts) > 1 else ""
+        domain = parts[1]
         if len(local) > 1:
             masked_local = local[0] + "***"
         else:
@@ -214,8 +214,18 @@ class AdminLoginViewSet(viewsets.ViewSet):
         request.session.set_expiry(SESSION_TIMEOUT)
         otp_service.reset_failed_attempts(identifier)
 
+        # FIXED: Role is determined from server-side data, not hardcoded
+        from .serializers import determine_role
+
+        computed_role = determine_role(user)
+
         return Response(
-            {"success": True, "redirect": reverse("dashboard:dashboard-admin")},
+            {
+                "success": True,
+                "redirect": reverse("dashboard:dashboard-admin"),
+                "role": computed_role,  # Use determined role
+                "avatar_url": user.get_avatar_url,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -254,6 +264,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
         return self._login_user(request, user, identifier)
 
     def _handle_telegram_login(self, request, data, identifier):
+
         phone_number = data.get("phone_number")
         telegram_id = data.get("telegram_id")
 
@@ -320,6 +331,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 "session_id": session_id,
                 "message": "OTP yuborildi. Telegram orqali tasdiqlang.",
                 "expected_length": 6,
+                "avatar_url": user.get_avatar_url,
             },
             status=status.HTTP_200_OK,
         )
@@ -377,7 +389,11 @@ class AdminLoginViewSet(viewsets.ViewSet):
         logger.info("OTP request handled for identifier=%s", mask_pii(str(identifier)))
 
         return Response(
-            {"session_id": session_id, "message": "OTP yuborildi."},
+            {
+                "session_id": session_id,
+                "message": "OTP yuborildi.",
+                "avatar_url": user.get_avatar_url,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -443,7 +459,28 @@ class AdminLoginViewSet(viewsets.ViewSet):
             session_id
         )  # Delete session after successful login
 
-        return self._login_user(request, user, identifier)
+        login(request, user)
+
+        # FIXED: Use determine_role() helper instead of hardcoded logic
+        from .serializers import determine_role
+
+        computed_role = determine_role(user)
+
+        # Determine redirect based on role
+        redirect_url = "/account/"
+        if computed_role == "admin":
+            redirect_url = "/dashboard/admin/"
+        elif computed_role == "seller":
+            redirect_url = "/dashboard/seller/"
+
+        return Response(
+            {
+                "success": True,
+                "role": computed_role,  # Use determined role
+                "redirect": redirect_url,
+                "avatar_url": user.get_avatar_url,
+            }
+        )
 
     def _handle_request_verification(self, request, data, identifier):
         # This action seems redundant with request_otp and is based on the old model.
@@ -496,12 +533,20 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 )
 
             refresh = RefreshToken.for_user(user)
+
+            # FIXED: Determine role from server-side data, not hardcoded
+            from .serializers import determine_role
+
+            computed_role = determine_role(user)
+
             return Response(
                 {
                     "status": "verified",
                     "access": str(refresh.access_token),
                     "refresh": str(refresh),
                     "redirect": reverse("dashboard:dashboard-admin"),
+                    "role": computed_role,  # Use determined role
+                    "avatar_url": user.get_avatar_url,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -542,7 +587,8 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 )
                 return Response(
                     {
-                        "error": "Siz juda ko‘p urinishlar yubordingiz. Iltimos keyinroq qayta urinib ko‘ring.",
+                        "banned": True,
+                        "message": "Siz bloklandingiz. Ko‘p marta noto‘g‘ri urinishlar.",
                         "retry_after": remaining,
                     },
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -611,6 +657,11 @@ class AdminLoginViewSet(viewsets.ViewSet):
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
 
+        # FIXED: Determine role from server-side data, not hardcoded
+        from .serializers import determine_role
+
+        computed_role = determine_role(user)
+
         return Response(
             {
                 "ok": True,
@@ -620,8 +671,9 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 "user_id": user.id,
                 "email": user.email,
                 "full_name": user.full_name,
-                "role": "admin",
+                "role": computed_role,  # Use determined role
                 "is_verified": True,
+                "avatar_url": user.get_avatar_url,
             },
             status=status.HTTP_200_OK,
         )
@@ -648,12 +700,14 @@ class RegistrationView(APIView):
                 email=email, defaults={"phone_number": phone, "full_name": full_name}
             )
         else:
+
             return Response(
                 {"error": "Telefon raqami yoki email kiritilishi shart."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if not created:
+
             if full_name and user.full_name != full_name:
                 user.full_name = full_name
 
@@ -698,6 +752,7 @@ class RegistrationView(APIView):
                 "expected_length": otp_length,
                 "verification_link": verification_link,
                 "incognito": incognito,
+                "avatar_url": user.get_avatar_url,
             },
             status=status.HTTP_200_OK,
         )
@@ -741,11 +796,13 @@ class TelegramLoginView(APIView):
             user = CustomUser.objects.filter(phone_number=phone_number).first()
 
         if not user:
+
             user = CustomUser.objects.create(
                 phone_number=phone_number, telegram_id=telegram_id, full_name=name
             )
             logger.info("New user created via Telegram login")
         else:
+
             if not user.telegram_id and telegram_id:
                 user.telegram_id = telegram_id
             if name and user.full_name != name:
@@ -779,6 +836,7 @@ class TelegramLoginView(APIView):
             "deeplink": deeplink,
             "otp_sent": True,
             "incognito": incognito,
+            "avatar_url": user.get_avatar_url,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -893,6 +951,7 @@ class EmailLoginView(APIView):
                 "session_id": session.session_id,
                 "expected_length": otp_length,
                 "message": "OTP sent to email",
+                "avatar_url": user.get_avatar_url,
             },
             status=status.HTTP_200_OK,
         )
@@ -936,18 +995,19 @@ class VerifyOtpView(APIView):
                     # Generate JWT tokens
                     refresh = RefreshToken.for_user(user)
 
-                    # Determine role and redirect URL
-                    role = "user"
+                    # FIXED: Use determine_role() helper for consistency
+                    from .serializers import determine_role
+
+                    role = determine_role(user)
+
+                    # Determine redirect URL based on role
                     redirect_url = reverse(
                         "account"
                     )  # Default redirect for simple users
-                    if user.is_staff:
-                        role = "admin"
+                    if role == "admin":
                         redirect_url = reverse("dashboard:dashboard-admin")
-                    elif Seller.objects.filter(user=user).exists():
-                        role = "seller"
-                        # Add seller dashboard redirect if it exists
-                        # redirect_url = reverse('seller_dashboard')
+                    elif role == "seller":
+                        redirect_url = "/dashboard/seller/"
 
                     return Response(
                         {
@@ -958,8 +1018,9 @@ class VerifyOtpView(APIView):
                             "phone_number": user.phone_number,
                             "email": user.email,
                             "is_verified": True,
-                            "role": role,
+                            "role": role,  # Use determined role
                             "redirect_url": redirect_url,
+                            "avatar_url": user.get_avatar_url,  # Added avatar_url
                         }
                     )
                 except CustomUser.DoesNotExist:
@@ -1199,9 +1260,22 @@ class LogoutJWTView(APIView):
 
 
 class DetermineRoleView(APIView):
+    """
+    Determine user's role from server-side authoritative sources.
+
+    Frontend uses this to route user to correct login endpoint:
+    - admin → /api/v1/users/admin/login/
+    - seller → /api/v1/users/login/ (or specific seller endpoint)
+    - user → /api/v1/users/login/
+
+    Role is computed server-side using determine_role() helper.
+    """
+
     permission_classes = [AllowAny]
 
     def post(self, request):
+        from .serializers import determine_role
+
         serializer = RoleDetermineSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -1217,8 +1291,7 @@ class DetermineRoleView(APIView):
             user = CustomUser.objects.filter(email=email).first()
 
         if not user:
-            # If user is not found, create a new one. This is crucial for the new user registration flow
-            # as the frontend expects a role to continue the OTP process.
+            # If user is not found, create a new one for registration flow
             try:
                 with transaction.atomic():
                     create_params = {}
@@ -1238,9 +1311,15 @@ class DetermineRoleView(APIView):
                     user, created = CustomUser.objects.get_or_create(**create_params)
                     if created:
                         logger.info(f"New user created via determine_role: {user.id}")
-                        # For a new user, the role is always 'user'.
+                        # FIXED: Use determine_role() helper for consistency
                         return Response(
-                            {"role": "user"}, status=status.HTTP_201_CREATED
+                            {
+                                "role": determine_role(
+                                    user
+                                ),  # Server-side authoritative role
+                                "avatar_url": user.get_avatar_url,
+                            },
+                            status=status.HTTP_201_CREATED,
                         )
             except Exception as e:
                 logger.error(f"Error creating user in determine_role: {e}")
@@ -1249,13 +1328,11 @@ class DetermineRoleView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-        role = "user"
-        if user.is_staff:
-            role = "admin"
-        elif Seller.objects.filter(user=user).exists():
-            role = "seller"
-
-        return Response({"role": role}, status=status.HTTP_200_OK)
+        # FIXED: Use determine_role() helper instead of hardcoded logic
+        role = determine_role(user)
+        return Response(
+            {"role": role, "avatar_url": user.get_avatar_url}, status=status.HTTP_200_OK
+        )
 
 
 class AccountDashboardView(LoginRequiredMixin, TemplateView):
@@ -1376,8 +1453,18 @@ class TestAdminLoginView(APIView):
 
         login(request, user)
 
+        # FIXED: Determine role from server-side data, not hardcoded
+        from .serializers import determine_role
+
+        computed_role = determine_role(user)
+
         return Response(
-            {"ok": True, "next": reverse("dashboard:dashboard-admin")},
+            {
+                "ok": True,
+                "next": reverse("dashboard:dashboard-admin"),
+                "role": computed_role,  # Use determined role
+                "avatar_url": user.get_avatar_url,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -1418,6 +1505,7 @@ class AdminCheckView(TemplateView):
                     "refresh_token": refresh_token,
                     "username": user.full_name or user.email,
                     "user_role": "admin",
+                    "avatar_url": user.get_avatar_url,
                 }
                 return self.render_to_response(context)
 

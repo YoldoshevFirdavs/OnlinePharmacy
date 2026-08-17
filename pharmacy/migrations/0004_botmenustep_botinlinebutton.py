@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("pharmacy", "0003_remove_cartitem_cart_remove_cartitem_product_and_more"),
     ]

@@ -1,11 +1,16 @@
+from datetime import timedelta
+
+from django.db.models import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
+from rest_framework.response import Response
 
 from pharmacy.models.medicine import Category, Medicine
 from pharmacy.models.misc import FlashSale, MedicineImage, ProductViewHistory, Review
@@ -43,6 +48,41 @@ class MedicineViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [IsVerifiedSeller()]
         return [AllowAny()]
+
+    @action(detail=False, methods=["get"], permission_classes=[AllowAny])
+    def popular(self, request):
+        """
+        Returns a list of popular medicines based on view count in a given time range.
+        Accepts a 'range' query parameter (in days). Defaults to 7 days.
+        """
+        try:
+            range_days = int(request.query_params.get("range", 7))
+        except (ValueError, TypeError):
+            range_days = 7
+
+        if not 1 <= range_days <= 365:
+            return Response(
+                {"error": "Range must be between 1 and 365 days."}, status=400
+            )
+
+        since_date = timezone.now() - timedelta(days=range_days)
+
+        # Get top 10 most viewed product IDs
+        popular_medicine_ids = (
+            ProductViewHistory.objects.filter(viewed_at__gte=since_date)
+            .values("medicine")
+            .annotate(view_count=Count("medicine"))
+            .order_by("-view_count")
+            .values_list("medicine", flat=True)[:10]
+        )
+
+        if not popular_medicine_ids:
+            return Response([], status=200)
+
+        # Fetch the actual medicine objects
+        queryset = Medicine.available.filter(id__in=list(popular_medicine_ids))
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
