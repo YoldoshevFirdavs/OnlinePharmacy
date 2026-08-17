@@ -90,8 +90,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "security.middleware.BanMiddleware",  # NEW: Ban middleware (before auth)
-    "config.middleware.SafeErrorMiddleware",  # MOVED: from security.middleware
+    "security.middleware.BanMiddleware",  # Ban middleware (before auth)
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
