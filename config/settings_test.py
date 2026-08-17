@@ -1,11 +1,8 @@
 import os
-import sys
 from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
-
-from .settings import *
 
 load_dotenv()
 
@@ -17,7 +14,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-key-123")
 if not SECRET_KEY:
     SECRET_KEY = "test-secret-key-for-django-tests"
 
-DEBUG = False
+DEBUG = True  # Always True for tests
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -56,6 +53,7 @@ MIDDLEWARE = [
     "config.middleware.SecurityHeadersMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 APPEND_SLASH = False
 
 TEMPLATES = [
@@ -82,7 +80,7 @@ IS_DOCKER = os.path.exists("/.dockerenv")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": ":memory:",
+        "NAME": os.getenv("DB_NAME", "test_pharmacy_db"),
         "USER": os.getenv("DB_USER", "postgres"),
         "PASSWORD": os.getenv("DB_PASSWORD", "root"),
         "HOST": os.getenv("DB_HOST", "db" if IS_DOCKER else "localhost"),
@@ -98,7 +96,7 @@ REDIS_URL = (
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -201,13 +199,13 @@ SOCIAL_INSTAGRAM = "https://instagram.com/test"
 SOCIAL_FACEBOOK = "https://facebook.com/test"
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = os.path.join(BASE_DIR, "test_static")
+STATICFILES_DIRS = [BASE_DIR / "frontend" / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media_test"  # Use separate media root for tests
 
-EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"  # Use in-memory email backend for tests
 EMAIL_HOST = ""
 EMAIL_PORT = 587
 EMAIL_HOST_USER = ""
@@ -220,24 +218,3 @@ STRIPE_WEBHOOK_SECRET = "test_stripe_webhook_secret"
 
 # Content Security Policy (CSP) - Disabled for tests
 CONTENT_SECURITY_POLICY = {}
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": True,
-    "handlers": {},
-    "loggers": {},
-}
-
-PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.MD5PasswordHasher",
-]
-
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-}
-print("✅ TEST SETTINGS LOADED")

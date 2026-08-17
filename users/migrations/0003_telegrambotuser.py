@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("users", "0002_remove_customuser_cart_alter_customuser_auth_code"),
     ]

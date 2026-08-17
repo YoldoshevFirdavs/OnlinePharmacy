@@ -32,6 +32,7 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, email=None, phone_number=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault("role", "user")
         return self._create_user(
             email=email, phone_number=phone_number, password=password, **extra_fields
         )
@@ -41,6 +42,7 @@ class CustomUserManager(BaseUserManager):
     ):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("role", "admin")
         if not email:
             raise ValueError("Superuser must have an email")
         return self._create_user(
@@ -50,7 +52,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     USER_ROLE_CHOICES = [
-        ("customer", "Customer"),
+        ("user", "User"),
         ("admin", "Admin"),
         ("seller", "Seller"),
     ]
@@ -69,9 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    role = models.CharField(
-        max_length=10, choices=USER_ROLE_CHOICES, default="customer"
-    )
+    role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES, default="user")
 
     bad_comments_count = models.PositiveIntegerField(default=0)
     is_banned = models.BooleanField(default=False)
@@ -82,6 +82,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.full_name or self.email or self.phone_number}"
+
+    def get_display_name(self):
+        return self.full_name if self.full_name else self.email
 
     @property
     def get_avatar_url(self):
@@ -201,123 +204,23 @@ class SubscribedUser(models.Model):
         return f"{self.email} ({'Verified' if self.is_verified else 'Not verified'})"
 
 
-class Deliverer(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Pending Onboarding"),
-        ("active", "Active"),
-        ("suspended", "Suspended"),
-    ]
+class DeliveryDriver(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="deliverer_profile",
+        CustomUser, on_delete=models.CASCADE, related_name="delivery_profile"
     )
-    phone_number = models.CharField(max_length=32, unique=True)
-    avatar = models.ImageField(upload_to="deliverer_avatars/", blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     vehicle_info = models.CharField(max_length=255, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-    stripe_account_id = models.CharField(max_length=255, blank=True, null=True)
-    payout_method = models.CharField(max_length=50, blank=True, null=True)
-    rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    status = models.CharField(
+        max_length=50,
+        choices=[("active", "Active"), ("inactive", "Inactive")],
+        default="active",
+    )
+    avatar = models.ImageField(upload_to="drivers/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Deliverer: {self.user.full_name or self.user.email}"
-
-    @property
-    def get_avatar_url(self):
-        if self.avatar and hasattr(self.avatar, "url"):
-            return self.avatar.url
-        return "/static/images/default_avatar.png"
-
-    def clean_phone_number(self):
-        if self.phone_number:
-            try:
-                parsed_number = phonenumbers.parse(
-                    self.phone_number, settings.PHONENUMBER_DEFAULT_REGION
-                )
-                if phonenumbers.is_valid_number(parsed_number):
-                    self.phone_number = phonenumbers.format_number(
-                        parsed_number, PhoneNumberFormat.E164
-                    )
-                else:
-                    self.phone_number = None  # Invalidate if not a valid number
-            except phonenumbers.phonenumberutil.NumberParseException:
-                self.phone_number = None  # Invalidate if parsing fails
-
-    def save(self, *args, **kwargs):
-        self.clean_phone_number()
-        super().save(*args, **kwargs)
-
-
-DeliveryDriver = Deliverer
-
-
-class OnboardToken(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="onboard_tokens",
-    )
-    token_hash = models.CharField(max_length=128, default="", blank=True)
-    expires_at = models.DateTimeField()
-    used = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def check_token(self, token):
-        return (
-            (not self.used)
-            and self.expires_at > timezone.now()
-            and hashlib.sha256(token.encode()).hexdigest() == self.token_hash
-        )
-
-
-class SalaryRecord(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("paid", "Paid"),
-        ("failed", "Failed"),
-    ]
-    deliverer = models.ForeignKey(
-        "Deliverer", on_delete=models.CASCADE, related_name="salary_records"
-    )
-    period_start = models.DateField()
-    period_end = models.DateField()
-    hours_worked = models.DecimalField(max_digits=6, decimal_places=2)
-    rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
-    gross_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    taxes_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    net_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-    stripe_payment_id = models.CharField(max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    paid_at = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        unique_together = ("deliverer", "period_start", "period_end")
-        ordering = ["-period_end", "deliverer__user__full_name"]
-
-    def __str__(self):
-        return f"Salary for {self.deliverer.user.full_name} ({self.period_start} to {self.period_end})"
-
-
-class PayrollStats(models.Model):
-    month = models.PositiveSmallIntegerField()
-    year = models.PositiveSmallIntegerField()
-    total_gross = models.DecimalField(max_digits=12, decimal_places=2)
-    total_net = models.DecimalField(max_digits=12, decimal_places=2)
-    total_fees = models.DecimalField(max_digits=12, decimal_places=2)
-    total_payouts = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ("month", "year")
-        verbose_name_plural = "Payroll Stats"
-
-    def __str__(self):
-        return f"Payroll Stats for {self.month}/{self.year}"
+        return self.user.full_name or self.user.email
 
 
 class AdminLoginToken(models.Model):

@@ -580,6 +580,9 @@
         initPasswordToggle();
         initVendorPlugins();
         initDashboardPage();
+        if (window.AccountValidator && typeof window.AccountValidator.init === 'function') {
+            window.AccountValidator.init();
+        }
     });
 
     window.Dashboard = {

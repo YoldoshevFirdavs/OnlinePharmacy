@@ -1,26 +1,16 @@
 {% load static %}
+{% load i18n %}
+
 <!-- NOTE: Account dropdown for logged-in users -->
 <div id="account-dropdown-container" style="display: none;">
     <button id="account-dropdown-button" class="dropdown-toggle">
-        <img src="{% static 'images/default_avatar.png' %}" alt="User Avatar" class="avatar">
-        <span id="username-display">User</span>
+        <img id="header-user-avatar" src="{% static 'images/default_avatar.png' %}" alt="User Avatar" class="avatar">
+        <span id="header-username-display">User</span>
     </button>
     <ul id="account-dropdown-menu" class="dropdown-menu">
-        {% if user.is_authenticated %}
-            {% if user.is_staff %}
-                <!-- NOTE: Admin links -->
-                <li><a href="/dashboard/admin/"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a></li>
-            {% elif user.is_deliverer %}
-                <!-- NOTE: Deliverer has no extra links, only logout -->
-            {% else %}
-                <!-- NOTE: User links -->
-                <li><a href="/account/"><i class="fas fa-user-circle"></i> My Profile</a></li>
-                <li><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
-            {% endif %}
-            <!-- NOTE: Logout button -->
-            <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-        {% endif %}
+        <li><a id="account-link" href="/account/"><i class="fas fa-user-circle"></i> {% trans "Account" %}</a></li>
+        <li><a href="/user/orders"><i class="fas fa-box"></i> {% trans "My Orders" %}</a></li>
+        <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a></li>
     </ul>
 </div>
-{# NOTE: Removed redundant script block, logic moved to header.js #}
-{# NOTE: Removed "My Deliveries" button #}
+{# NOTE: Removed delivery-related buttons and links. #}

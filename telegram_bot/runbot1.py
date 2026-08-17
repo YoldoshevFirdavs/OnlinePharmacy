@@ -9,7 +9,9 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
-from telegram.error import TelegramError
+from telegram.error import (
+    TelegramError,
+)
 from telegram.ext import (
     CallbackContext,
     CommandHandler,

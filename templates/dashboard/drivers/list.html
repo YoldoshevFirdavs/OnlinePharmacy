@@ -13,10 +13,10 @@
         <p class="page-header__subtitle">Manage all drivers</p>
     </div>
     <div class="page-header__actions">
-        <a href="{% url 'dashboard:driver_create' %}" class="btn btn--primary" id="btnCreateDriver">
+        <button type="button" class="btn btn--primary" id="btnCreateDriver">
             <i class="fa-solid fa-plus"></i>
             Add New Driver
-        </a>
+        </button>
     </div>
 </div>
 {% endblock %}
@@ -44,9 +44,9 @@
         <td>{{ driver.vehicle_info|default:"—" }}</td>
         <td>
             <div class="table__actions">
-                <a href="{% url 'dashboard:driver_edit' driver.pk %}" class="btn btn--sm btn--ghost driver-edit-btn" title="Update">
+                <button type="button" class="btn btn--sm btn--ghost driver-edit-btn" data-driver-id="{{ driver.pk }}" title="Update">
                     <i class="fa-solid fa-pen"></i>
-                </a>
+                </button>
                 <button type="button"
                         class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
                         data-driver-id="{{ driver.pk }}"
@@ -65,6 +65,41 @@
         </td>
     </tr>
 {% endif %}
+{% endblock %}
+
+{% block extra_content %}
+<!-- Modal for creating/editing drivers -->
+<div class="modal fade" id="driverModal" tabindex="-1" aria-labelledby="driverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="driverModalLabel">Add/Edit Driver</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="driverForm">
+                    <input type="hidden" id="driverId" name="driver_id">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="fullName" name="full_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phoneNumber" name="phone_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="vehicleInfo" class="form-label">Vehicle Info</label>
+                        <input type="text" class="form-control" id="vehicleInfo" name="vehicle_info">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveDriverBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

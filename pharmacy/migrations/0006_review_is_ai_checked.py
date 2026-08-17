@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("pharmacy", "0005_rename_text_en_botmenustep_text_eng_and_more"),
     ]

@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("users", "0009_alter_customuser_avatar_alter_seller_avatar_and_more"),
     ]

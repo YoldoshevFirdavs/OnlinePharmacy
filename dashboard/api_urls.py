@@ -25,8 +25,7 @@ urlpatterns = [
         api_views.CalendarEventsView.as_view(),
         name="calendar_events",
     ),
-    path("drivers/", api_views.DriverApiView.as_view(), name="driver-list-create"),
-    path("drivers/<int:pk>/", api_views.DriverApiView.as_view(), name="driver-detail"),
+    path("drivers/", api_views.DriverApiView.as_view(), name="drivers_api"),
     path(
         "stats/", api_views.DashboardStatsApiView.as_view(), name="dashboard_stats_api"
     ),

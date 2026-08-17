@@ -12,7 +12,7 @@ __pycache__/
 venv/
 venvs*/
 \.venv
-.venvs310
+.venv310
 
 # Django
 media/
@@ -22,7 +22,7 @@ staticfiles/
 # IDEs
 .idea/
 .vscode/
-.kiro/
+
 
 *.log
 *.bak
@@ -32,4 +32,5 @@ staticfiles/
 *.zip
 *.tar
 *.gz
-
+# Kiro IDE
+.kiro/

@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block title %}{% if user %}Foydalanuvchini tahrirlash{% else %}Yangi foydalanuvchi{% endif %}{% endblock %}
-{% block back_url %}{% url 'dashboard:user_list' %}{% endblock %}
 
 {% block extra_js %}
 {{ block.super }}

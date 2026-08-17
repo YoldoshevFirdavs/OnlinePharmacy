@@ -1,5 +1,68 @@
-{% extends 'dashboard/form.html' %}
+{% extends 'dashboard/base.html' %}
+{% load static %}
 
-{% block form_title %}Edit Delivery Order{% endblock %}
-{% block form_icon %}fa-solid fa-truck-fast{% endblock %}
-{% block back_url %}{% url 'dashboard:delivery_list' %}{% endblock %}
+{% block title %}Buyurtma statusini yangilash{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-pen-to-square"></i> Buyurtma #{{ order.id }} — Statusni yangilash
+    </h1>
+    <a href="{% url 'dashboard:deliverer_order_list' %}" class="btn btn--outline" id="btnBack">
+        <i class="fa-solid fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card card--form" id="deliveryUpdateCard">
+    <div class="card__body">
+        <!-- Order Info -->
+        <div class="order-summary" id="orderSummary">
+            <div class="order-summary__item">
+                <span class="order-summary__label">Mijoz:</span>
+                <span class="order-summary__value">{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
+            </div>
+            <div class="order-summary__item">
+                <span class="order-summary__label">Manzil:</span>
+                <span class="order-summary__value">{{ order.address|default:"—" }}</span>
+            </div>
+            <div class="order-summary__item">
+                <span class="order-summary__label">Jami:</span>
+                <span class="order-summary__value"><strong>{{ order.total_price|default:"0" }} so'm</strong></span>
+            </div>
+            <div class="order-summary__item">
+                <span class="order-summary__label">Joriy status:</span>
+                <span class="order-summary__value">
+                    <span class="tag tag--info">{{ order.status }}</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Status Form -->
+        <form method="post" class="dashboard-form" id="deliveryUpdateForm" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="form-group{% if field.errors %} form-group--error{% endif %}" id="group_{{ field.html_name }}">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+
+                {% if field.errors %}
+                <ul class="form-error-list">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="form-actions" id="formActions">
+                <button type="submit" class="btn btn--primary" id="btnUpdateStatus">
+                    <i class="fa-solid fa-floppy-disk"></i> Yangilash
+                </button>
+                <a href="{% url 'dashboard:deliverer_order_list' %}" class="btn btn--ghost">Bekor qilish</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

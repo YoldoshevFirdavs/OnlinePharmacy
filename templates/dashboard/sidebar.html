@@ -50,11 +50,11 @@
                 </a>
             </li>
 
-            <!-- Haydovchilar (Drivers) -->
-            <li class="sidebar-item{% if 'driver' in request.resolver_match.url_name %} active{% endif %}">
-                <a href="{% url 'dashboard:driver_list' %}" class="sidebar-link">
+            <!-- Delivery -->
+            <li class="sidebar-item{% if 'delivery' in request.resolver_match.url_name %} active{% endif %}">
+                <a href="{% url 'dashboard:delivery_list' %}" class="sidebar-link">
                     <i class="fa-solid fa-truck"></i>
-                    <span>Haydovchilar</span>
+                    <span>Delivery</span>
                 </a>
             </li>
 

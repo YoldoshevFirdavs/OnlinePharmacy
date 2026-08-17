@@ -1,133 +1,213 @@
+ // ============================================
+// main.js - Main page dynamic logic
 // ============================================
-// main.js - Authentication & UI Logic
-// ============================================
+
+// FIX: Add a reload monitor to prevent loops.
+window.__reloadMonitor = {
+    count: 0,
+    lastReload: 0,
+    logAndCheck: function() {
+        const now = Date.now();
+        if (now - this.lastReload < 5000) { // 5-second threshold
+            this.count++;
+            console.warn(`[ReloadGuard] Rapid reload detected! Count: ${this.count}. Suppressing.`);
+            return false; // Suppress reload
+        }
+        this.lastReload = now;
+        this.count = 1;
+        console.log("[ReloadGuard] Reload permitted.");
+        return true;
+    }
+};
+
+// Override location.reload to use the guard
+const originalReload = window.location.reload;
+window.location.reload = function() {
+    if (window.__reloadMonitor.logAndCheck()) {
+        originalReload.apply(window.location, arguments);
+    }
+};
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    initAuth();
-    initBuyButtons();
-    initFooterLoader();
+    // Safely initialize all components
+    try {
+        initBuyButtons();
+    } catch (e) {
+        console.error("Error initializing buy buttons:", e);
+    }
+    
+    try {
+        initFaq(); // Ensure this is safe if .faq-container doesn't exist
+    } catch (e) {
+        console.error("Error initializing FAQ:", e);
+    }
+
+    try {
+        loadPopularProducts(30); // Load popular products for the last 30 days
+    } catch (e) {
+        console.error("Error loading popular products:", e);
+    }
 });
 
-// ============================================
-// AUTH & NAVBAR UPDATE
-// ============================================
+/**
+ * FEAT: Loads popular products from the API and renders them.
+ * @param {number} range - The number of days to look back for popular products.
+ */
+async function loadPopularProducts(range = 30) {
+    const container = document.getElementById('popular-products-grid');
+    const loader = document.getElementById('popular-products-loader');
 
-async function initAuth() {
-    // Tokenni olish (Electron API yoki localStorage orqali)
-    const token = (window.api && typeof window.api.isAuthenticated === 'function')
-        ? window.api.isAuthenticated()
-        : Boolean(localStorage.getItem('access_token'));
-
-    const navbarLoginItem = document.getElementById('navbar-login-item');
-    const navbarUserSection = document.getElementById('navbar-user-section');
-    const navbarAvatar = document.getElementById('navbar-avatar');
-    const navbarName = document.getElementById('navbar-name');
-
-    if (!token) {
-        navbarLoginItem.style.display = 'block';
-        navbarUserSection.style.display = 'none';
+    if (!container) {
+        console.warn('Popular products container not found.');
         return;
     }
 
     try {
-        // Markaziy API wrapper orqali foydalanuvchi ma'lumotlarini olish
-        const user = window.api ? await window.api.getProfile() : null;
+        if (loader) loader.style.display = 'block';
 
-        if (!user) {
-            localStorage.removeItem('access_token');
-            location.reload();
+        const response = await fetch(`/api/v1/pharmacy/products/popular/?range=${range}`);
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+        const products = await response.json();
+
+        if (loader) loader.style.display = 'none';
+
+        if (!products || products.length === 0) {
+            container.innerHTML = '<p>Hozircha ommabop mahsulotlar yo‘q.</p>';
             return;
         }
 
-        if (user && user.id) {
-            navbarLoginItem.style.display = 'none';
-            navbarUserSection.style.display = 'flex';
-            navbarName.textContent = user.full_name || 'Profil';
-            navbarAvatar.src = user.avatar || user.avatar_url || 'images/default_avatar.png';
-        }
-    } catch (e) {
-        console.error('Auth error:', e);
-        navbarLoginItem.style.display = 'block';
-        navbarUserSection.style.display = 'none';
+        // Clear loader and render products
+        container.innerHTML = '';
+        products.forEach(product => {
+            const productCard = `
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="${product.thumbnail || 'https://via.placeholder.com/280x200?text=No+Image'}" alt="${product.name}" style="width:100%; height:100%; object-fit: cover;">
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="product-desc">${product.short_description || 'Tavsif mavjud emas'}</p>
+                        <div class="product-price">${new Intl.NumberFormat('uz-UZ').format(product.price)} so'm</div>
+                        <button class="btn btn-primary btn-small btn-buy-mini" data-product-id="${product.id}">Savatga qo'shish</button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', productCard);
+        });
+
+    } catch (error) {
+        console.error('Failed to load popular products:', error);
+        if (loader) loader.style.display = 'none';
+        if (container) container.innerHTML = '<p>Mahsulotlarni yuklashda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko‘ring.</p>';
     }
 }
 
-// ============================================
-// BUY BUTTON HANDLERS
-// ============================================
 
+/**
+ * FIX: Strengthened initBuyButtons with event delegation and real AJAX call.
+ */
 function initBuyButtons() {
-    document.querySelectorAll('.btn-buy-mini').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
+    const productGrid = document.getElementById('popular-products-grid');
+    if (!productGrid) {
+        console.warn("Popular products grid not found for buy button delegation.");
+        return;
+    }
 
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                window.location.href = '/auth/';
-                return;
+    productGrid.addEventListener('click', async (e) => {
+        const button = e.target.closest('.btn-buy-mini'); // More specific target
+        if (!button) {
+            return;
+        }
+        
+        e.preventDefault();
+        
+        const card = button.closest('.product-card');
+
+        const productId = button.dataset.productId;
+        if (!productId) {
+            console.error("Product ID not found on button.");
+            return;
+        }
+
+        const token = localStorage.getItem('access_token');
+        if (!token && confirm('Savatga qo‘shish uchun tizimga kirishingiz kerak. Kirish sahifasiga o‘tasizmi?')) {
+            window.location.href = '/auth/';
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Qo‘shilmoqda...';
+
+        try {
+            const response = await fetch('/api/v1/orders/cart/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    medicine_id: productId,
+                    quantity: 1
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showFeedbackBanner(result.message || 'Mahsulot savatga qo‘shildi!', 'success');
+                button.textContent = 'Savatda';
+            } else {
+                const error = await response.json();
+                showFeedbackBanner(error.detail || 'Savatga qo‘shishda xatolik yuz berdi.', 'error');
+                button.disabled = false;
+                button.textContent = "Savatga qo'shish";
             }
-
-            const card = e.target.closest('.product-card');
-            const productName = card
-                ? card.querySelector('h3').textContent.trim()
-                : 'Mahsulot';
-
-            if (confirm(`${productName} savatga qo'shilsinmi?`)) {
-                alert('✅ Mahsulot savatga qo\'shildi!');
-                // Kelajakda: savatga qo'shish logikasi qo'shiladi
-            }
-        });
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            showFeedbackBanner('Tarmoq xatosi. Iltimos, qayta urinib ko‘ring.', 'error');
+            button.disabled = false;
+            button.textContent = "Savatga qo'shish";
+        }
     });
 }
 
-// ============================================
-// FOOTER LOADER
-// ============================================
+function initFaq() {
+    const faqContainer = document.querySelector('.faq-container');
+    if (!faqContainer) return;
 
-function initFooterLoader() {
-    const footerPlaceholder = document.getElementById('footer-placeholder');
-    if (!footerPlaceholder) return;
+    faqContainer.addEventListener('click', (e) => {
+        const question = e.target.closest('.faq-question');
+        if (question) {
+            const item = question.parentElement;
+            item.classList.toggle('active');
+        }
+    });
+}
 
-    fetch('/static/components/footer.html')
-        .then(response => {
-            if (!response.ok) throw new Error('Footer yuklanmadi');
-            return response.text();
-        })
-        .then(html => {
-            footerPlaceholder.innerHTML = html;
-        })
-        .catch(() => {
-            // Fallback footer (internet yo'q yoki xatolik bo'lsa)
-            footerPlaceholder.innerHTML = `
-                <footer>
-                    <div class="footer-content">
-                        <div class="footer-column">
-                            <h4>OnlinePharmacy</h4>
-                            <p>Sog'liq — eng katta boylik.</p>
-                        </div>
-                        <div class="footer-column">
-                            <h4>Havolalar</h4>
-                            <a href="/">Bosh sahifa</a>
-                            <a href="/shop/products/">Mahsulotlar</a>
-                            <a href="/about/">Biz haqimizda</a>
-                        </div>
-                        <div class="footer-column">
-                            <h4>Xizmatlar</h4>
-                            <a href="/contact/">Aloqa</a>
-                            <a href="/faq/">FAQ</a>
-                        </div>
-                        <div class="footer-column">
-                            <h4>Obuna</h4>
-                            <div class="footer-subscribe">
-                                <input type="email" placeholder="Email..." />
-                                <button onclick="alert('✅ Obuna qabul qilindi!')">OK</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer-bottom">
-                        © 2026 OnlinePharmacy. Barcha huquqlar himoyalangan.
-                    </div>
-                </footer>
-            `;
-        });
+// Helper functions for UI feedback
+function showFeedbackBanner(message, type = 'success') {
+    const banner = document.createElement('div');
+    banner.className = `feedback-banner ${type}`;
+    banner.textContent = message;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), type === 'error' ? 5000 : 3000);
+}
+
+// Inlined Helper to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }

@@ -5,6 +5,54 @@
    perfect-scrollbar, lightbox2, fullcalendar, font-awesome, wow.
    ========================================================================== */
 
+/* Table actions alignment for add buttons (ensure right aligned) */
+.table-wrapper { display: block; width: 100%; }
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.avatar-small {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.table-actions .btn-add,
+.table-actions .add-button,
+.table-actions .btn--add {
+  margin-left: 0;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .table-actions { justify-content: flex-end; }
+  .table-actions .btn-add,
+  .table-actions .add-button,
+  .table-actions .btn--add {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+}
+/* Keep theme variable compatibility */
+.table-actions .btn-add {
+  background: var(--primary, #007bff);
+  color: var(--btn-color, #fff);
+  border-radius: 6px;
+  padding: 8px 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+body.dark .table-actions .btn-add {
+  /* rely on theme variables for dark mode */
+  background: var(--primary, #007bff);
+  color: var(--btn-color, #fff);
+}
+
 /* ── Poppins @font-face ─────────────────────────────────────────────────── */
 
 /* poppins-100 - latin */
@@ -43,7 +91,7 @@
   src: url('../fonts/poppins/poppins-v5-latin-200.eot'); /* IE9 Compat Modes */
   src: local('Poppins ExtraLight'), local('Poppins-ExtraLight'),
        url('../fonts/poppins/poppins-v5-latin-200.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('../fonts/poppins/poppins-v5-latin-200.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/poppins/poppins-v5-latin-200italic.woff2') format('woff2'), /* Super Modern Browsers */
        url('../fonts/poppins/poppins-v5-latin-200.woff') format('woff'), /* Modern Browsers */
        url('../fonts/poppins/poppins-v5-latin-200.ttf') format('truetype'), /* Safari, Android, iOS */
        url('../fonts/poppins/poppins-v5-latin-200.svg#Poppins') format('svg'); /* Legacy iOS */
@@ -304,11 +352,6 @@
 
     /* Chart */
     --chart-height: 320px;
-
-    /* Data table (drivers & lists) */
-    --table-header-bg-color: var(--clr-bg);
-    --table-header-text-color: var(--clr-muted);
-    --table-row-hover-bg-color: color-mix(in srgb, var(--clr-primary) 4%, transparent);
 }
 
 /* ── Dark mode overrides ────────────────────────────────────────────────── */
@@ -610,8 +653,8 @@ a:hover {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
+    justify-content: space-between;
+    gap: var(--gap);
     margin-bottom: var(--gap-lg);
 }
 
@@ -860,22 +903,6 @@ a:hover {
 
 .data-table tbody tr:hover {
     background: color-mix(in srgb, var(--clr-primary) 4%, transparent);
-}
-
-/* Drivers table — colors controlled via CSS variables in :root */
-.drivers-table thead th {
-    background: var(--table-header-bg-color);
-    color: var(--table-header-text-color);
-    border-bottom: 2px solid var(--clr-border);
-}
-
-.drivers-table tbody tr {
-    transition: background var(--transition);
-}
-
-.drivers-table tbody tr:hover,
-.drivers-table tbody tr.drivers-table__row--hover {
-    background: var(--table-row-hover-bg-color);
 }
 
 .data-table__empty td {
@@ -2197,7 +2224,6 @@ a:hover {
 .form-group--checkbox {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Chapdan boshlash uchun */
     min-height: 44px;
     padding: 4px 0;
 }
@@ -2212,7 +2238,6 @@ a:hover {
     font-weight: 500;
     color: var(--clr-text);
     user-select: none;
-    margin-left: 8px; /* Yangi qo'shildi */
 }
 
 .form-label--checkbox input[type="checkbox"],
@@ -2324,6 +2349,12 @@ a:hover {
     align-items: center;
 }
 
+.form-group--checkbox {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
 .pwd-requirements {
     /* ... existing styles ... */
     transition: all 0.3s ease-in-out;
@@ -2333,46 +2364,4 @@ a:hover {
     height: 64px;
     padding-top: 0;
     padding-bottom: 0;
-}
-
-/* ── Account Preview ────────────────────────────────────────────────────── */
-
-.account-preview {
-    display: flex;
-    align-items: flex-start;
-    gap: 2rem;
-}
-
-.account-preview__avatar img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--clr-primary);
-}
-
-.account-preview__info {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    flex: 1;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--clr-border);
-}
-
-.info-item__label {
-    font-size: var(--font-size-sm);
-    color: var(--clr-muted);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-}
-
-.info-item__value {
-    font-size: var(--font-size-base);
-    font-weight: 600;
 }

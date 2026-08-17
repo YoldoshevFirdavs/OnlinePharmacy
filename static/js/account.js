@@ -161,10 +161,10 @@ function displayUserProfile(user) {
     if (phoneNumberInput) phoneNumberInput.value = user.phone_number || '';
 
     // Store user data in localStorage for header.js
-    localStorage.setItem('username', user.full_name || '');
-    localStorage.setItem('avatar_url', user.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR);
-    localStorage.setItem('user_email', user.email || '');
-    localStorage.setItem('user_role', user.role || 'user');
+    localStorage.setItem('username', user.full_name || ''); // OK
+    localStorage.setItem('avatar_url', user.avatar || ACCOUNT_CONFIG.DEFAULT_AVATAR); // OK
+    localStorage.setItem('user_email', user.email || ''); // OK
+    localStorage.setItem('user_role', user.role || 'user'); // OK
 }
 
 async function handleProfileUpdate(event) {
@@ -256,12 +256,7 @@ async function handleLogout() {
         alert(error.detail || _('logout_error'));
     } finally {
         // Clear all local storage related to auth
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('avatar_url');
-        localStorage.removeItem('user_role');
-        localStorage.removeItem('user_email');
+        localStorage.clear(); // More robust: clears all items
         localStorage.removeItem('currentSessionId');
         localStorage.removeItem('currentIdentifier');
         localStorage.removeItem('showOtpPopup');

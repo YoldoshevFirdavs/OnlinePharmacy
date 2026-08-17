@@ -1,97 +1,81 @@
-{% extends 'dashboard/base.html' %}
+{% extends 'dashboard/list.html' %}
 {% load static %}
 
-{% block title %}Delivery List{% endblock %}
+{% block title %}Delivery Drivers{% endblock %}
 
-{% block content %}
+{% block page_header %}
 <div class="page-header">
-    <h2 class="page-title">
-        <i class="fa-solid fa-truck-fast"></i> Delivery Orders
-    </h2>
-    <div class="page-actions">
-        <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i> Add New Delivery
-        </a>
+    <div>
+        <h1 class="page-header__title">
+            <i class="fa-solid fa-truck"></i>
+            Delivery Drivers
+        </h1>
+        <p class="page-header__subtitle">Manage all delivery drivers</p>
     </div>
-</div>
-
-<div class="card">
-    <div class="card__body">
-        <div class="table-responsive">
-            <table class="data-table drivers-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Driver</th>
-                        <th>Vehicle</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if deliveries %}
-                        {% for delivery in deliveries %}
-                        <tr data-delivery-id="{{ delivery.id }}">
-                            <td>{{ delivery.id }}</td>
-                            <td>
-                                {% if delivery.customer %}
-                                    {{ delivery.customer.full_name }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if delivery.driver %}
-                                    {{ delivery.driver.full_name }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>{{ delivery.get_vehicle_display }}</td>
-                            <td>
-                                {% if delivery.customer %}
-                                    {{ delivery.customer.phone_number }}
-                                {% else %}
-                                    N/A
-                                {% endif %}
-                            </td>
-                            <td>{{ delivery.address }}</td>
-                            <td>
-                                <span class="tag tag--{{ delivery.get_status_tag_class }}">
-                                    {{ delivery.get_status_display }}
-                                </span>
-                            </td>
-                            <td class="table-actions">
-                                <a href="{% url 'dashboard:delivery_update' delivery.id %}" class="btn btn--sm btn--ghost" title="Edit">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </a>
-                                <form action="{% url 'dashboard:delivery_delete' delivery.id %}" method="post" class="inline-form delete-form">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn--sm btn--ghost btn--danger" title="Delete">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="8" class="data-table__empty">
-                                <i class="fa-solid fa-box-open"></i>
-                                No delivery orders found.
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+    <div class="page-header__actions">
+        <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
+            <i class="fa-solid fa-plus"></i>
+            Add New Driver
+        </a>
     </div>
 </div>
 {% endblock %}
 
+{% block table_head %}
+<th>ID</th>
+<th>Driver</th>
+<th>Phone</th>
+<th>Vehicle</th>
+<th>Status</th>
+<th>Actions</th>
+{% endblock %}
+
+{% block table_body %}
+{% if drivers %}
+    {% for driver in drivers %}
+    <tr data-driver-id="{{ driver.pk }}">
+        <td>{{ driver.id }}</td>
+        <td>
+            <div class="table__cell table__cell--user">
+                    <img src="{{ driver.avatar.url|default:'/static/dashboard/img/default-avatar.png' }}" 
+                         alt="{{ driver.name }}" 
+                         class="avatar-small">
+                <span>{{ driver.user.get_display_name|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ driver.phone_number|default:"—" }}</td>
+        <td>{{ driver.vehicle_info|default:"—" }}</td>
+        <td>
+            <span class="tag {% if driver.status == 'active' %}tag--success{% else %}tag--danger{% endif %}">
+                {{ driver.get_status_display }}
+            </span>
+        </td>
+        <td>
+            <div class="table__actions">
+                <a href="{% url 'dashboard:delivery_edit' driver.pk %}" class="btn btn--sm btn--ghost" title="Update">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button type="button"
+                        class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
+                        data-driver-id="{{ driver.pk }}"
+                        title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="table__empty-row">
+        <td colspan="6">
+            <i class="fa-solid fa-inbox"></i>
+            <span>No drivers found</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}
+
 {% block extra_js %}
+{{ block.super }}
 <script src="{% static 'dashboard/js/delivery.js' %}"></script>
 {% endblock %}

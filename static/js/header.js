@@ -174,17 +174,19 @@ function updateHeaderUI(isLoggedIn, username, avatarUrl, email, userRoles) {
         if (authLinks) authLinks.style.display = 'none';
         if (accountDropdownContainer) accountDropdownContainer.style.display = 'block';
 
-        const headerUserAvatar = document.querySelector('#account-dropdown-button .avatar');
-        const headerUserName = document.getElementById('username-display');
 
         if (headerUserAvatar) headerUserAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
         if (headerUserName) headerUserName.textContent = username || '';
+
+        if (adminAvatar) adminAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
+        const adminUsername = document.querySelector('.topbar-username');
+        if (adminUsername) adminUsername.textContent = username || '';
 
         const adminLink = document.querySelector('.admin-link');
         const userLinks = document.querySelectorAll('.user-link');
 
         if (adminLink) adminLink.style.display = (userRoles.includes('admin')) ? 'list-item' : 'none';
-        
+
         userLinks.forEach(link => link.style.display = (userRoles.includes('user') || userRoles.length === 0) ? 'list-item' : 'none');
 
         const logoutButton = document.getElementById('logout-button');
@@ -219,13 +221,22 @@ async function initHeader() {
         const username = user.full_name || localStorage.getItem('username');
         const avatarUrl = user.avatar_url || HEADER_CONFIG.DEFAULT_AVATAR;
         const email = user.email || localStorage.getItem('user_email');
-        const userRoles = user.roles || [];
+        // FIX: Use 'role' (singular) from backend, not 'roles' (plural)
+        const userRole = user.role || user.roles || [];
+        // FIX: Directly use user object properties. Avoid localStorage fallback here.
+        const username = user.full_name || '';
+        const avatarUrl = user.avatar || HEADER_CONFIG.DEFAULT_AVATAR; // FIX: Use 'avatar' from backend, not 'avatar_url'
+        const email = user.email || '';
+        const userRole = user.role || 'user'; // FIX: Use 'role' (singular) and provide a default.
+        const userRoles = Array.isArray(userRole) ? userRole : [userRole];
 
         localStorage.setItem('username', username || '');
         localStorage.setItem('avatar_url', avatarUrl);
         localStorage.setItem('user_email', email || '');
-        if (user.roles) {
-            localStorage.setItem('user_roles', JSON.stringify(user.roles));
+        localStorage.setItem('avatar_url', avatarUrl); // Keep this for other scripts if they use it
+        localStorage.setItem('user_email', email || ''); // Keep this for other scripts
+        if (user.role) {
+            localStorage.setItem('user_role', user.role);
         }
 
         updateHeaderUI(true, username, avatarUrl, email, userRoles);

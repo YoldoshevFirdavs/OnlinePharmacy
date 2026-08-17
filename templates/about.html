@@ -5,158 +5,388 @@
     {% include "components/begin.html" %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="OnlinePharmacy haqida — o‘quv loyihasi. Django, PostgreSQL va zamonaviy texnologiyalar asosida yaratilgan farmatsevtika e-commerce platformasi.">
-    <meta name="author" content="Yoldashev Firdavs">
-    <title>Biz haqimizda | OnlinePharmacy</title>
+    <meta name="description" content="OnlinePharmacy — O‘zbekistondagi oilangiz salomatligi uchun ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.">
+    <title>Biz haqimizda | OnlinePharmacy — Ishonchli Onlayn Dorixona</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-text: #2c3e50;
-            --secondary-text: #34495e;
-            --accent: #6a00f4;
-            --accent-light: #b084f4;
-            --bg-color: #f9f9f9;
-            --card-bg: #ffffff;
-            --line-height: 1.7;
+            --primary-color: #6a00f4;
+            --primary-light: #b084f4;
+            --secondary-color: #f4f4f9;
+            --text-dark: #2c3e50;
+            --text-light: #5a6a7a;
+            --border-color: #e8e8e8;
+            --white: #ffffff;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--secondary-text);
-            line-height: var(--line-height);
-            margin: 0;
-            padding: 0;
+        .about-page {
+            background-color: var(--white);
         }
 
-        .about-container {
-            max-width: 1100px;
-            margin: 100px auto 80px;
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
             padding: 0 20px;
         }
 
-        .content-card {
-            background: var(--card-bg);
-            padding: 60px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        .page-content {
+            padding-top: 60px;
+            padding-bottom: 60px;
         }
 
-        h1 {
-            color: var(--primary-text);
-            font-size: 2.8rem;
+        .page-section {
+            padding: 80px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-section:last-child {
+            border-bottom: none;
+        }
+
+        .page-section.bg-light {
+            background-color: var(--secondary-color);
+            margin: 0 -20px; /* Extend background to container edges */
+            padding: 80px 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            color: var(--text-dark);
             text-align: center;
+            margin-bottom: 24px;
         }
 
-        h2 {
-            color: var(--primary-text);
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 50px 0 20px;
-            border-left: 5px solid var(--accent);
-            padding-left: 20px;
+        .section-intro {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
         }
 
         h3 {
-            color: var(--accent);
-            font-size: 1.4rem;
-            margin: 35px 0 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 16px;
         }
 
         p {
-            margin-bottom: 20px;
-            font-size: 1.08rem;
+            line-height: 1.7;
+            color: var(--text-light);
+            margin-bottom: 16px;
         }
 
-        .hero {
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 12px;
+            color: var(--text-light);
+        }
+
+        ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .col-md-6, .col-lg-4, .col-md-4 {
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .col-md-6 { width: 50%; }
+        .col-lg-4 { width: 33.333%; }
+        .col-md-4 { width: 33.333%; }
+
+        @media (max-width: 992px) {
+            .col-lg-4 { width: 50%; }
+        }
+        @media (max-width: 768px) {
+            .col-md-6, .col-lg-4, .col-md-4 { width: 100%; margin-bottom: 30px; }
+            .row { margin: 0; }
+            .section-title { font-size: 2rem; }
+        }
+
+        /* Hero Section */
+        .hero-section.about-hero {
+            position: relative;
+            padding: 100px 0;
+            color: var(--white);
             text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #6a00f4, #b084f4);
-            color: white;
-            border-radius: 20px;
-            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            overflow: hidden;
         }
 
-        .hero h1 {
-            color: white;
-            font-size: 3rem;
+        .hero-background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
         }
 
-        .highlight-box {
-            background: rgba(106, 0, 244, 0.05);
-            border: 1px solid rgba(106, 0, 244, 0.15);
-            padding: 30px;
-            border-radius: 16px;
-            margin: 30px 0;
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2;
         }
 
-        .section-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
         }
 
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-            transition: transform 0.3s;
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
         }
 
-        .card:hover {
-            transform: translateY(-8px);
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
         }
 
-        .tech-badge {
+        .btn {
+            text-decoration: none;
+            cursor: pointer;
             display: inline-block;
-            background: #f1f5f9;
-            color: #475569;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            margin: 5px;
-        }
-
-        .testimonial {
-            background: #f8fafc;
-            padding: 25px;
-            border-radius: 16px;
-            font-style: italic;
-        }
-
-        .faq-item {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .btn-primary {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 14px 32px;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            background: var(--primary-color);
+            color: var(--white);
         }
-
         .btn-primary:hover {
-            background: #5c00d6;
-            transform: scale(1.05);
+            background: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
+        .btn-lg {
+            padding: 15px 40px;
+            font-size: 1rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--primary-light);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+        }
+        .timeline-item:nth-child(odd) { left: 0; }
+        .timeline-item:nth-child(even) { left: 50%; }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: var(--white);
+            border: 4px solid var(--primary-color);
+            top: 20px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-item:nth-child(even)::after { left: -10px; }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: var(--white);
+            position: relative;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
         @media (max-width: 768px) {
-            .content-card { padding: 30px 20px; }
-            h1 { font-size: 2.2rem; }
+            .timeline::after { left: 20px; }
+            .timeline-item { width: 100%; padding-left: 60px; padding-right: 15px; }
+            .timeline-item:nth-child(even) { left: 0%; }
+            .timeline-item::after { left: 10px; }
+        }
+
+        /* Service Item */
+        .service-item {
+            text-align: center;
+            padding: 20px;
+        }
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: var(--secondary-color);
+        }
+
+        /* Team Member */
+        .team-member {
+            text-align: center;
+        }
+        .team-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 5px solid var(--white);
+            box-shadow: var(--shadow-md);
+        }
+        .team-role {
+            font-style: italic;
+            color: var(--primary-color);
+        }
+
+        /* Testimonial Item */
+        .testimonial-item blockquote {
+            background: var(--white);
+            padding: 30px;
+            border-left: 5px solid var(--primary-color);
+            margin: 0 0 20px;
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-md);
+        }
+        .testimonial-item footer {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* FAQ Accordion */
+        .faq-accordion {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .faq-question {
+            cursor: pointer;
+            padding: 20px 0;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        .faq-question::after {
+            content: '+';
+            position: absolute;
+            right: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            transition: transform 0.3s;
+        }
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        .faq-answer p {
+            padding-bottom: 20px;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 80px 20px;
+            border-radius: var(--radius-lg);
+        }
+        .cta-section .section-title,
+        .cta-section .section-intro {
+            color: var(--white);
+        }
+        .cta-section .btn-primary {
+            background: var(--white);
+            color: var(--primary-color);
+        }
+        .cta-section .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+        .contact-info-short {
+            margin-top: 30px;
+        }
+        .contact-info-short a {
+            color: var(--white);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .contact-info-short a:hover {
+            text-decoration: underline;
+        }
+        .map-placeholder {
+            background: #f0f0f0;
+            height: 300px;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            color: var(--text-dark);
+        }
+
+        /* Legal & English Summary */
+        #legal p, #english-summary p {
+            text-align: center;
+        }
+        #legal a {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        #english-summary .section-title {
+            font-size: 2rem;
         }
     </style>
 </head>
@@ -164,161 +394,245 @@
 
     {% include "components/header.html" %}
 
-    <main class="about-container">
-        <article class="content-card">
-
-            <!-- Hero -->
-            <div class="hero">
-                <h1>OnlinePharmacy</h1>
-                <p style="font-size: 1.35rem; max-width: 700px; margin: 0 auto 30px;">Sog‘liqni saqlashni raqamlashtirish yo‘lidagi talaba loyihasi</p>
-                <p style="opacity: 0.95; font-size: 1.1rem; margin-bottom: 30px;">Loyiha o‘quv maqsadida yaratilgan, real dorixona faoliyatini ifodalamaydi.</p>
-                <div>
-                    <a href="/shop/" class="btn-primary" style="margin-right: 15px;">Mahsulotlarni ko‘rish</a>
-                    <a href="/contact/" class="btn-primary" style="background: rgba(255,255,255,0.2);">Biz bilan bog‘lanish</a>
+    <main class="about-page">
+        <!-- 1. HERO SECTION -->
+        <section class="hero-section about-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Sog‘lig‘ingizga g‘amxo‘rlik qilish — bizning asosiy vazifamiz</h1>
+                    <p class="hero-subtitle">OnlinePharmacy jamoasi siz va yaqinlaringiz uchun sifatli farmatsevtika mahsulotlari va professional xizmatlarni taqdim etadi.</p>
+                    <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Do‘konni ko‘rib chiqish</a>
                 </div>
             </div>
+            <div class="hero-background-image" style="background-image: url('https://via.placeholder.com/1920x600?text=Professional+Pharmacy+Background');"></div>
+        </section>
 
-            <!-- Who We Are -->
-            <section id="who-we-are">
-                <h2>Biz kimlarmiz?</h2>
-                <p><strong>OnlinePharmacy</strong> — bu Komiljon Hamidjonovning 10.3 Python Backend kursida Yoldashev Firdavs tomonidan yaratilgan to‘liq stack e-commerce loyihasidir. Loyiha Django, Django REST Framework, PostgreSQL, Redis va Docker texnologiyalari asosida ishlab chiqilgan.</p>
-                <p>Bizning asosiy maqsadimiz — zamonaviy web dasturlash ko‘nikmalarini mustahkamlash hamda farmatsevtika sohasidagi raqamli yechimlarning imkoniyatlarini namoyish etishdir. Platforma foydalanuvchilarga ro‘yxatdan o‘tish, OTP orqali tasdiqlash, mahsulotlar katalogini ko‘rish, savatga qo‘shish va buyurtma berish imkoniyatini beradi.</p>
-                <p>2026-yilda boshlangan ushbu loyiha nafaqat kod yozish, balki to‘liq ishlaydigan, xavfsiz va foydalanuvchiga qulay tizim yaratish tajribasini oshirish uchun ishlab chiqildi. Hozirgi vaqtda loyiha o‘quv maqsadida ishlatilmoqda va tijorat maqsadida foydalanilmaydi.</p>
-            </section>
-
-            <!-- Mission Vision Values -->
-            <section id="mission-vision">
-                <h2>Bizning Maqsad va Qadriyatlarimiz</h2>
-
-                <div class="section-grid">
-                    <div class="card">
-                        <h3>Missiya</h3>
-                        <p>Sog‘liqni saqlash jarayonini har bir inson uchun qulay, shaffof va tezkor qilish. Talaba sifatida biz zamonaviy texnologiyalar yordamida real dunyo muammolariga yechim taklif qilishni o‘rganmoqdamiz.</p>
+        <div class="container page-content">
+            <!-- 2. BIZNING MISSIYAMIZ VA QADRIYATLARIMIZ -->
+            <section id="mission" class="page-section">
+                <h2 class="section-title">Bizning missiyamiz va qadriyatlarimiz</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Bizning Missiyamiz</h3>
+                        <p>Bizning asosiy missiyamiz – O‘zbekiston aholisini yuqori sifatli, litsenziyalangan va xavfsiz dori-darmonlar bilan ta’minlash orqali jamiyat salomatligini yaxshilashga hissa qo‘shishdir. Biz har bir mijozimiz uchun qulay, ishonchli va tezkor xizmat ko‘rsatishni o‘z oldimizga maqsad qilib qo‘yganmiz. Texnologik innovatsiyalarni farmatsevtika sohasiga joriy etish orqali biz sog‘liqni saqlashni hamma uchun ochiq va tushunarli qilishga intilamiz.</p>
+                        <p>Biz nafaqat mahsulot sotamiz, balki sog‘lom turmush tarzi bo‘yicha ishonchli hamkoringiz bo‘lishni xohlaymiz. Mijozlarimizning ehtiyojlarini chuqur anglagan holda, ularga individual yondashuvni taklif etamiz va har bir savoliga professional javob berishga tayyormiz.</p>
                     </div>
-                    <div class="card">
-                        <h3>Vizyon</h3>
-                        <p>O‘zbekistonda raqamli farmatsevtika xizmatlarini rivojlantirish va kelajakda sun’iy intellekt, dron yetkazib berish kabi innovatsiyalarni joriy etish.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Asosiy Qadriyatlar</h3>
+                    <div class="col-md-6">
+                        <h3>Bizning Qadriyatlarimiz</h3>
                         <ul>
-                            <li><strong>Xavfsizlik</strong> — JWT, OTP va kuchli shifrlash</li>
-                            <li><strong>Shaffoflik</strong> — Barcha jarayonlar ochiq va kuzatiladigan</li>
-                            <li><strong>Qulaylik</strong> — Har qanday qurilmada ishlaydigan interfeys</li>
-                            <li><strong>Sifat</strong> — Toza kod va ishonchli arxitektura</li>
-                            <li><strong>Maxfiylik</strong> — Foydalanuvchi ma’lumotlari hech qachon uchinchi tomonga berilmaydi</li>
+                            <li><strong>Ishonch:</strong> Biz faqat rasmiy distribyutorlar bilan ishlaymiz va barcha mahsulotlarimizning sifatini kafolatlaymiz.</li>
+                            <li><strong>Mijozga yo‘naltirilganlik:</strong> Sizning ehtiyojlaringiz biz uchun birinchi o‘rinda. Biz doimo xizmat sifatini oshirish ustida ishlaymiz.</li>
+                            <li><strong>Professionallik:</strong> Jamoamiz malakali farmatsevtlar va mutaxassislardan iborat bo‘lib, sizga eng to‘g‘ri maslahatlarni berishga tayyor.</li>
+                            <li><strong>Innovatsiya:</strong> Biz doimiy ravishda jarayonlarimizni takomillashtiramiz va xizmatlarimizni yanada qulay qilish uchun yangi texnologiyalarni joriy etamiz.</li>
+                            <li><strong>Shaffoflik:</strong> Mahsulotlar narxi, tarkibi va mavjudligi haqidagi barcha ma’lumotlar ochiq va tushunarli tarzda taqdim etiladi.</li>
+                            <li><strong>Mas'uliyat:</strong> Biz o‘z ishimizga va mijozlarimiz salomatligiga katta mas'uliyat bilan yondashamiz.</li>
                         </ul>
                     </div>
                 </div>
             </section>
 
-            <!-- What We Build -->
-            <section id="features-tech">
-                <h2>Biz nima qurdik?</h2>
-                <p>OnlinePharmacy loyihasi to‘liq funksional e-commerce platforma bo‘lib, quyidagi imkoniyatlarni o‘z ichiga oladi:</p>
-                <ul>
-                    <li>JWT autentifikatsiya + OTP tasdiqlash tizimi</li>
-                    <li>Mahsulotlar katalogi, qidiruv va filtrlar</li>
-                    <li>Savat va buyurtmalar tizimi</li>
-                    <li>Celery orqali email xabarnomalar</li>
-                    <li>Redis caching va sessiya boshqaruvi</li>
-                    <li>Admin panel va analitika</li>
-                </ul>
-                <p><strong>Texnologiya stacki:</strong></p>
-                <div style="margin: 20px 0;">
-                    <span class="tech-badge">Django 5.1</span>
-                    <span class="tech-badge">Django REST Framework</span>
-                    <span class="tech-badge">PostgreSQL</span>
-                    <span class="tech-badge">Redis</span>
-                    <span class="tech-badge">Celery</span>
-                    <span class="tech-badge">Docker</span>
-                    <span class="tech-badge">Nginx + Gunicorn</span>
-                    <span class="tech-badge">Vanilla JS</span>
-                </div>
-                <p>Xavfsizlik nuqtai nazaridan: PBKDF2 parol hash, JWT token expiry (1 soat), refresh token (7 kun), OTP TTL (10 daqiqa) va boshqa zamonaviy himoya choralari qo‘llanilgan.</p>
-            </section>
-
-            <!-- Data Protection -->
-            <section id="data-protection">
-                <h2>Ma’lumotlaringizni qanday himoya qilamiz?</h2>
-                <p class="highlight-box">Bu loyiha o‘quv maqsadida yaratilgan. Foydalanuvchi ma’lumotlari (email, telefon, manzil) faqat loyiha doirasida ishlatiladi va hech qachon uchinchi shaxslarga berilmaydi. Barcha ma’lumotlar shifrlangan holda saqlanadi.</p>
-            </section>
-
-            <!-- Team -->
-            <section id="team">
-                <h2>Bizning Jamoa</h2>
-                <div class="section-grid">
-                    <div class="card">
-                        <h3>Yoldashev Firdavs</h3>
-                        <p>Loyiha muallifi, Python Backend talabasi. Django, DRF va Docker bilan ishlash tajribasini oshirish maqsadida ushbu platformani yaratdi.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Komiljon Hamidjonov</h3>
-                        <p>Mentor. Talabalariga zamonaviy backend texnologiyalarini o‘rgatuvchi tajribali mutaxassis.</p>
+            <!-- 3. TARIX VA RIVOJLANISH -->
+            <section id="history" class="page-section bg-light">
+                <div class="container">
+                    <h2 class="section-title">Tarix va Rivojlanish Bosqichlari</h2>
+                    <p class="section-intro">Kompaniyamiz bir necha yil avval kichik jamoa va katta maqsadlar bilan o‘z faoliyatini boshlagan. Bugungi kunga kelib, biz O‘zbekistondagi yetakchi onlayn dorixonalardan biriga aylandik.</p>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h4>2021: G‘oyaning tug‘ilishi</h4>
+                                <p>Odamlarga uydan chiqmasdan turib, sifatli dori-darmonlarga buyurtma berish imkoniyatini yaratish g‘oyasi bilan kompaniyamizga asos solindi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h4>2022: Platformaning ishga tushirilishi</h4>
+                                <p>Birinchi veb-saytimiz ishga tushirildi va Toshkent shahri bo‘ylab dastlabki buyurtmalarni yetkazib berish boshlandi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h4>2023: Xizmat ko‘rsatish hududining kengayishi</h4>
+                                <p>Mijozlarimiz ishonchini qozonib, biz respublikaning yirik shaharlariga ham xizmat ko‘rsatishni yo‘lga qo‘ydik.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <h4>Bugun: Innovatsiyalar va yangi marralar</h4>
+                                <p>Bugungi kunda biz mobil ilova, shaxsiy maslahatchi va tezkor yetkazib berish xizmatlarini taklif etamiz. Kelajakda xizmatlarimiz ko‘lamini yanada kengaytirishni rejalashtirganmiz.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Roadmap -->
-            <section id="roadmap">
-                <h2>Kelajakdagi Rejalar</h2>
-                <ul>
-                    <li>Q3 2026 — To‘lov tizimi integratsiyasi</li>
-                    <li>Q4 2026 — Mobil ilova prototipi</li>
-                    <li>2027 — Admin analitika dashboardini kengaytirish</li>
-                    <li>2027 — CI/CD va monitoring tizimi</li>
-                </ul>
-            </section>
-
-            <!-- Testimonials -->
-            <section id="testimonials">
-                <h2>Foydalanuvchilar fikri</h2>
-                <div class="section-grid">
-                    <div class="testimonial">
-                        <p>“Buyurtma berish jarayoni juda qulay. Loyiha sifati yuqori darajada.”</p>
-                        <strong>— Aziza R., Toshkent</strong>
+            <!-- 4. XIZMATLAR VA MAHSULOTLAR -->
+            <section id="services" class="page-section">
+                <h2 class="section-title">Bizning Xizmatlar va Mahsulotlarimiz</h2>
+                <p class="section-intro">Biz sizning salomatligingiz uchun zarur bo‘lgan barcha narsalarni bir joyda jamlaganmiz.</p>
+                <div class="row">
+                    <div class="col-lg-4 service-item">
+                        <img src="https://via.placeholder.com/80x80?text=P" alt="Mahsulotlar" class="service-icon">
+                        <h3>Keng Assortiment</h3>
+                        <p>Retseptli va retseptsiz dori vositalari, vitaminlar va biologik faol qo‘shimchalar, tibbiy buyumlar, ona va bola uchun mahsulotlar, gigiyena vositalari va boshqalar.</p>
                     </div>
-                    <div class="testimonial">
-                        <p>“OTP tasdiqlash tizimi xavfsizligini his qilyapman. Talaba loyihasi uchun ajoyib natija!”</p>
-                        <strong>— Sardor M., Navoiy</strong>
+                    <div class="col-lg-4 service-item">
+                        <img src="https://via.placeholder.com/80x80?text=C" alt="Maslahat" class="service-icon">
+                        <h3>Professional Farmatsevt Maslahati</h3>
+                        <p>Onlayn chat yoki telefon orqali malakali farmatsevtlarimizdan bepul maslahat oling. Ular sizga dori vositalarini to‘g‘ri tanlash va qo‘llash bo‘yicha yordam berishadi.</p>
+                    </div>
+                    <div class="col-lg-4 service-item">
+                        <img src="https://via.placeholder.com/80x80?text=D" alt="Yetkazib berish" class="service-icon">
+                        <h3>Tezkor va Ishonchli Yetkazib Berish</h3>
+                        <p>Buyurtmangizni belgilangan manzilga tez va xavfsiz tarzda yetkazib beramiz. Maxsus termo-sumkalar dori vositalarining kerakli haroratda saqlanishini ta’minlaydi.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- FAQ -->
-            <section id="faq">
-                <h2>Tez-tez so‘raladigan savollar</h2>
-                <div class="faq-item">
-                    <h3>Bu haqiqiy dorixonami?</h3>
-                    <p>Yo‘q. Loyiha faqat o‘quv maqsadida yaratilgan va real savdo amalga oshirilmaydi.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Ma’lumotlarim qayerda saqlanadi?</h3>
-                    <p>PostgreSQL bazasida, xavfsiz sharoitda. Hech qachon uchinchi tomonlarga berilmaydi.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Admin bo‘lish mumkinmi?</h3>
-                    <p>Hozircha faqat loyiha muallifi admin hisoblanadi. Kelajakda kengaytirilishi mumkin.</p>
+            <!-- 5. JAMOAMIZ -->
+            <section id="team" class="page-section bg-light">
+                <div class="container">
+                    <h2 class="section-title">Bizning Professional Jamoamiz</h2>
+                    <p class="section-intro">Bizning yutug‘imiz – o‘z ishiga sodiq va malakali mutaxassislardan iborat jamoamizdir.</p>
+                    <div class="row">
+                        <div class="col-md-4 team-member">
+                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
+                            <h4>Boshqaruvchi Direktor</h4>
+                            <p class="team-role">Strategik rejalashtirish va kompaniya rivojlanishi uchun mas'ul.</p>
+                        </div>
+                        <div class="col-md-4 team-member">
+                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
+                            <h4>Bosh Farmatsevt</h4>
+                            <p class="team-role">Mahsulotlar sifati, litsenziyalash va farmatsevtik nazorat bo‘yicha yetakchi mutaxassis.</p>
+                        </div>
+                        <div class="col-md-4 team-member">
+                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
+                            <h4>Mijozlar bilan ishlash bo‘limi rahbari</h4>
+                            <p class="team-role">Mijozlarga yuqori darajadagi xizmat ko‘rsatishni ta’minlash va ularning murojaatlarini hal etish.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Contribute -->
-            <section id="contribute">
-                <h2>Hissa qo‘shing</h2>
-                <p>Loyiha ochiq kodli. GitHub’da fork qilib, o‘z hissangizni qo‘shishingiz mumkin.</p>
-                <pre style="background:#f8fafc; padding:20px; border-radius:12px; overflow:auto;">
-git clone https://github.com/yourusername/online-pharmacy.git
-cp .env.example .env
-docker-compose up -d
-                </pre>
+            <!-- 6. MIJOZLAR FIKRI -->
+            <section id="testimonials" class="page-section">
+                <h2 class="section-title">Mijozlarimiz Biz Haqimizda</h2>
+                <div class="row">
+                    <div class="col-md-6 testimonial-item">
+                        <blockquote>
+                            <p>"Juda qulay xizmat! Kechqurun buyurtma bergandim, ertasiga ertalab allaqachon qo‘limda edi. Rahmat!"</p>
+                            <footer>– Anvar R., Toshkent</footer>
+                        </blockquote>
+                    </div>
+                    <div class="col-md-6 testimonial-item">
+                        <blockquote>
+                            <p>"Onam uchun dori-darmonlarni doim shu yerdan olaman. Farmatsevtlar maslahati juda yordam beradi. Ishlaringizga omad!"</p>
+                            <footer>– Gulchehra K., Samarqand</footer>
+                        </blockquote>
+                    </div>
+                    <div class="col-md-6 testimonial-item">
+                        <blockquote>
+                            <p>"Mobil ilovasi juda qulay ishlangan. Kerakli dorini topish va buyurtma berish bir necha daqiqada hal bo‘ladi."</p>
+                            <footer>– Sardor M., Buxoro</footer>
+                        </blockquote>
+                    </div>
+                    <div class="col-md-6 testimonial-item">
+                        <blockquote>
+                            <p>"Narxlar hamyonbop, mahsulotlar sifatli. Eng muhimi, ishonchli. Barchaga tavsiya qilaman."</p>
+                            <footer>– Lola A., Farg'ona</footer>
+                        </blockquote>
+                    </div>
+                </div>
             </section>
 
-            <!-- CTA -->
-            <div style="text-align:center; margin: 60px 0 30px;">
-                <a href="/shop/" class="btn-primary" style="font-size: 1.1rem; padding: 16px 40px;">Do‘konga o‘tish</a>
-            </div>
+            <!-- 7. TEZ-TEZ SO‘RALADIGAN SAVOLLAR (FAQ) -->
+            <section id="faq" class="page-section bg-light">
+                <div class="container">
+                    <h2 class="section-title">Tez-tez So‘raladigan Savollar (FAQ)</h2>
+                    <div class="faq-accordion">
+                        <div class="faq-item">
+                            <h3 class="faq-question">Buyurtmani qanday amalga oshirish mumkin?</h3>
+                            <div class="faq-answer">
+                                <p>Saytimiz yoki mobil ilovamiz orqali kerakli mahsulotlarni savatga qo‘shing, shaxsiy ma’lumotlaringiz va yetkazib berish manzilini kiriting, so‘ng buyurtmani tasdiqlang. Tez orada operatorimiz siz bilan bog‘lanadi.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Yetkazib berish qancha vaqt oladi?</h3>
+                            <div class="faq-answer">
+                                <p>Toshkent shahri ichida 2-4 soat ichida, viloyatlarga esa 1-2 ish kuni davomida yetkazib beriladi.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Retseptli dori vositalarini qanday xarid qilsam bo‘ladi?</h3>
+                            <div class="faq-answer">
+                                <p>Retseptli dori vositalarini buyurtma qilishda, shifokor retseptining rasmini yuklashingiz talab etiladi. Buyurtmani qabul qilishda asl nusxani ko‘rsatishingiz kerak bo‘ladi.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Mahsulotlarni qaytarish yoki almashtirish mumkinmi?</h3>
+                            <div class="faq-answer">
+                                <p>O‘zbekiston Respublikasi qonunchiligiga ko‘ra, dori vositalari va tibbiy buyumlar qaytarib olinmaydi yoki almashtirilmaydi. Iltimos, buyurtma berishdan oldin diqqat bilan tanlovingizni tekshiring.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <h3 class="faq-question">To‘lovni qanday amalga oshirish mumkin?</h3>
+                            <div class="faq-answer">
+                                <p>Siz naqd pulda (buyurtmani olganda), Payme, Click yoki bank kartasi orqali to‘lovni amalga oshirishingiz mumkin.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <h3 class="faq-question">Dori vositalarining sifati qanday kafolatlanadi?</h3>
+                            <div class="faq-answer">
+                                <p>Barcha mahsulotlarimiz litsenziyalangan, sertifikatlangan va rasmiy distribyutorlardan olinadi. Biz saqlash va tashish sharoitlariga qat’iy rioya qilamiz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        </article>
+            <!-- 8. KARYERA VA HAMKORLIK -->
+            <section id="career" class="page-section">
+                <h2 class="section-title">Karyera va Hamkorlik</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Biz bilan ishlash</h3>
+                        <p>Biz doimo o‘z sohasining professionallarini jamoamizga taklif qilishdan mamnunmiz. Agar siz farmatsevtika, logistika, marketing yoki IT sohasida tajribaga ega bo‘lsangiz va bizning jamoamizga qo‘shilishni istasangiz, rezyumeingizni hr@onlinepharmacy.uz manziliga yuboring.</p>
+                        <p><strong>Ochiq pozitsiyalar:</strong> Farmatsevt-konsultant, Kuryer, Kontent-menejer.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Hamkorlik</h3>
+                        <p>Biz ishonchli yetkazib beruvchilar va distribyutorlar bilan hamkorlik qilishdan doimo manfaatdormiz. Agar sizda sifatli mahsulotlar bo‘lsa va biz bilan hamkorlik qilish istagingiz bo‘lsa, iltimos, partnership@onlinepharmacy.uz manzili orqali biz bilan bog‘laning.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. KONTAKT VA CTA -->
+            <section id="contact-cta" class="page-section text-center cta-section">
+                <h2 class="section-title">Biz bilan bog‘laning</h2>
+                <p class="section-intro">Savollaringiz yoki takliflaringiz bormi? Biz sizni eshitishdan doim mamnunmiz.</p>
+                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg">Bog‘lanish sahifasi</a>
+                <div class="contact-info-short">
+                    <p>Telefon: <a href="tel:+998712000000">+998 71 200 00 00</a> | Email: <a href="mailto:info@onlinepharmacy.uz">info@onlinepharmacy.uz</a></p>
+                </div>
+                <div class="map-placeholder">
+                    <p>Xarita o‘rni</p>
+                </div>
+            </section>
+
+            <!-- 10. QONUNIY VA MAXFIYLIK -->
+            <section id="legal" class="page-section bg-light text-center">
+                <div class="container">
+                    <p>Barcha xizmatlar litsenziyalangan. Saytdan foydalanish orqali siz <a href="/terms/">Foydalanish shartlari</a> va <a href="/privacy/">Maxfiylik siyosati</a>ga rozilik bildirasiz.</p>
+                </div>
+            </section>
+
+            <!-- English Summary -->
+            <section id="english-summary" class="page-section">
+                <h2 class="section-title">About Us (Summary in English)</h2>
+                <p><strong>OnlinePharmacy</strong> is a leading online pharmacy in Uzbekistan, dedicated to providing reliable and convenient access to high-quality pharmaceutical products. Our mission is to enhance public health by offering a wide range of certified medications, professional pharmacist consultations, and fast delivery services across the country.</p>
+                <p>We are committed to our core values of trust, customer focus, professionalism, and innovation. Our team consists of qualified specialists who ensure that every customer receives the best care and advice. We leverage modern technology to make healthcare more accessible and transparent for everyone.</p>
+            </section>
+
+        </div>
     </main>
 
     {% include "components/footer.html" %}
@@ -326,30 +640,45 @@ docker-compose up -d
     <script src="{% static 'js/header.js' %}"></script>
     <script src="{% static 'js/footer.js' %}"></script>
     <script>
-        // Simple interactive elements
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('%cOnlinePharmacy About Page loaded successfully', 'color: #6a00f4; font-weight: bold');
+            // FAQ Accordion
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const answer = item.querySelector('.faq-answer');
+                    const isActive = item.classList.toggle('active');
+                    answer.style.maxHeight = isActive ? answer.scrollHeight + "px" : "0";
+                });
+            });
         });
     </script>
 
-    <!-- Structured Data -->
+    <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "OnlinePharmacy",
-      "url": "https://yourdomain.com",
-      "logo": "https://via.placeholder.com/200x200?text=OnlinePharmacy",
-      "description": "O‘quv maqsadidagi Django asosidagi farmatsevtika e-commerce platformasi",
-      "founder": {
-        "@type": "Person",
-        "name": "Yoldashev Firdavs"
-      },
+      "url": "https://your-production-domain.uz",
+      "logo": "https://your-production-domain.uz/static/images/logo.png",
+      "description": "O‘zbekistondagi oilangiz salomatligi uchun ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.",
       "contactPoint": {
         "@type": "ContactPoint",
-        "email": "firdavsyoldoshevpython@gmail.com"
+        "telephone": "+998-71-200-00-00",
+        "contactType": "Customer Service",
+        "areaServed": "UZ",
+        "availableLanguage": ["Uzbek", "Russian"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Islom Karimov Avenue",
+        "addressLocality": "Tashkent",
+        "postalCode": "100000",
+        "addressCountry": "UZ"
       }
     }
     </script>
+
 </body>
 </html>

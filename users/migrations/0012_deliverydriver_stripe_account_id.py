@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("users", "0011_remove_deliverydriver_license_number_and_more"),
     ]

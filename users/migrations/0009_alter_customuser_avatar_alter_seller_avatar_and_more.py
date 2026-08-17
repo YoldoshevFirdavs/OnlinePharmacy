@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("users", "0008_customuser_email_and_nullable_phone"),
     ]

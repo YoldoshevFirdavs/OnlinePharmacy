@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("users", "0007_customuser_bad_comments_count_customuser_is_banned"),
     ]

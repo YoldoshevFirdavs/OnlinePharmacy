@@ -4,6 +4,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("billing", "0003_alter_payment_order_alter_payment_stripe_charge_id"),
         ("pharmacy", "0002_initial"),

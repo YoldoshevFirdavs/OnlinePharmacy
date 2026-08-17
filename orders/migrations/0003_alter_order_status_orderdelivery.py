@@ -5,6 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("orders", "0002_order_accepted_at_order_assigned_at_and_more"),
         ("users", "0011_remove_deliverydriver_license_number_and_more"),

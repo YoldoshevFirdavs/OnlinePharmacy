@@ -15,6 +15,7 @@ def create_default_site_configuration(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ("pharmacy", "0009_site_configuration_data"),
     ]
