@@ -69,10 +69,10 @@ class BanMiddleware:
         # Get identifiers
         ip = get_client_ip(request)
         fp = get_device_fingerprint(request)
-        user = request.user if request.user.is_authenticated else None
+        user = getattr(request, 'user', None)  # Safe access to user (may not exist yet)
         
         # Check if banned
-        ban = BanRecord.get_active_ban(ip=ip, fingerprint=fp, user=user)
+        ban = BanRecord.get_active_ban(ip=ip, fingerprint=fp, user=user if user and user.is_authenticated else None)
         
         if ban:
             # Log ban (debounced)
