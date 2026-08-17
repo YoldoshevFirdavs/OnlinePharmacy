@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "whitenoise",
     "django_extensions",
-    'django_seed',
+    # 'django_seed',
 ]
 
 MIDDLEWARE = [
