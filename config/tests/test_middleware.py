@@ -134,7 +134,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
         
         # Should redirect to not-allowed page
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/dashboard/not-allowed/', response.url)
+        self.assertIn('/security/not-allowed/', response.url)
         self.assertIn('next=/test-path', response.url)
     
     def test_expired_ban_automatic_cleanup(self):
@@ -178,7 +178,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
         
         # Should redirect due to IP block
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/dashboard/not-allowed/', response.url)
+        self.assertIn('/security/not-allowed/', response.url)
     
     @override_settings(FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT=2)
     def test_main_page_refresh_limit(self):

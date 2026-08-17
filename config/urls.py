@@ -11,6 +11,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from users.views import AccountView, AdminCheckView, AdminLoginViewSet, auth_view, SubscriptionVerifyPageView
+from dashboard.views import not_allowed as not_allowed_view
 
 
 class JWTSchemaGenerator(OpenAPISchemaGenerator):
@@ -62,6 +63,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("dashboard/login/", RedirectView.as_view(url="/auth/")),
     path("dashboard/logout/", custom_logout_view),
+    path("security/not-allowed/", not_allowed_view, name="not_allowed"),
     path("dashboard/", include("dashboard.urls", namespace="dashboard")),
     path(
         "accounts/login/", TemplateView.as_view(template_name="auth.html"), name="login"

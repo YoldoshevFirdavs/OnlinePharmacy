@@ -55,7 +55,7 @@ class BanMiddleware:
         '/health/',
         '/favicon.ico',
         '/robots.txt',
-        '/dashboard/not-allowed/',  # Don't block not-allowed page itself
+        '/security/not-allowed/',  # Don't block not-allowed page itself
     ]
     
     def __init__(self, get_response):

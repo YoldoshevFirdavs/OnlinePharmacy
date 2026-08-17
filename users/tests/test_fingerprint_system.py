@@ -211,7 +211,7 @@ class DeviceFingerprintMiddlewareTest(DeviceFingerprintTestCase):
         
         # Should be redirected to not-allowed page
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/dashboard/not-allowed/', response.url)
+        self.assertIn('/security/not-allowed/', response.url)
     
     def test_ip_blocking_after_rate_limit(self):
         """Test IP blocking after rate limit exceeded"""
@@ -331,7 +331,7 @@ class NotAllowedViewTest(DeviceFingerprintTestCase):
         
         # Access not-allowed page
         response = self.client.get(
-            '/dashboard/not-allowed/',
+            '/security/not-allowed/',
             HTTP_AUTHORIZATION_FINGERPRINT=self.test_fingerprint
         )
         
@@ -352,7 +352,7 @@ class NotAllowedViewTest(DeviceFingerprintTestCase):
         # Login and access not-allowed page
         self.client.login(email='test@example.com', password='testpass123')
         
-        response = self.client.get('/dashboard/not-allowed/')
+        response = self.client.get('/security/not-allowed/')
         
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'User ban test')

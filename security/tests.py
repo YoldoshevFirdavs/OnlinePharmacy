@@ -83,7 +83,7 @@ class BanMiddlewareTestCase(TestCase):
     
     def test_not_allowed_page_not_blocked(self):
         """Test that not-allowed page itself is not blocked"""
-        response = self.client.get('/dashboard/not-allowed/')
+        response = self.client.get('/security/not-allowed/')
         # Should not be 403 forbidden (middleware should skip it)
         self.assertNotEqual(response.status_code, 403)
     
