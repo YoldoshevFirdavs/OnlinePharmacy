@@ -1085,10 +1085,10 @@ def not_allowed(request):
                 "fp_is_permanent": fp_ban_info.get('is_permanent', False),
             })
         
-        return render(request, "dashboard/not_allowed.html", ctx)
+        return render(request, "security/not_allowed.html", ctx)
     except Exception as e:
         logger.error(f"Error in not_allowed: {str(e)}")
-        return render(request, "dashboard/not_allowed.html", {
+        return render(request, "security/not_allowed.html", {
             "path_attempted": request.path,
             "error": "Xatolik yuz berdi"
         })

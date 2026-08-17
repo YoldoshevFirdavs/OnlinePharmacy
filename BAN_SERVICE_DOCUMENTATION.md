@@ -103,7 +103,7 @@ Har request-da ban holatini tekshiruvchi middleware.
 
 #### Ishlashi:
 1. Authenticated user-ni tekshirish
-2. Agar banned bo'lsa → `/dashboard/not-allowed/?next=<path>` ga redirect
+2. Agar banned bo'lsa → `/security/not-allowed/?next=<path>` ga redirect
 3. Agar admin roli yo'q bo'lsa admin URL-ga kirsa → not_allowed-ga redirect (ban bermaydi)
 
 ---
@@ -201,7 +201,7 @@ banned_by = ForeignKey(...)  # Ban qo'ygan admin
    ↓
 6. Next request-da Middleware tekshiradi
    ↓
-7. Ban_check_middleware → /dashboard/not-allowed/ redirect
+7. Ban_check_middleware → /security/not-allowed/ redirect
 ```
 
 ### Ban Olib Tashlash Oqimi:
@@ -316,7 +316,7 @@ print(BanService.is_user_banned(user))  # False
 
 ```bash
 # Not_allowed sahifasini test qilish
-curl http://localhost/dashboard/not-allowed/?next=/test
+curl http://localhost/security/not-allowed/?next=/test
 
 # Ban status tekshirish
 curl http://localhost/api/users/1/ | grep banned_for
