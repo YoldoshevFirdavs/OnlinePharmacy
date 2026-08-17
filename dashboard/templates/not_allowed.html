@@ -25,7 +25,7 @@
       padding: 40px;
       border-radius: var(--border-radius-md); /* O'zgaruvchidan olindi */
       box-shadow: var(--shadow-md); /* O'zgaruvchidan olindi */
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
       transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Tema o'zgarishi uchun */
     }
@@ -37,25 +37,195 @@
     p {
       font-size: 16px;
       line-height: 1.5;
+      margin-bottom: 15px;
+    }
+    .ban-info {
+      background-color: var(--warning-background, #fff3cd);
+      border: 1px solid var(--warning-border, #ffeaa7);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .ban-info h3 {
+      color: var(--warning-color, #856404);
       margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .ban-detail {
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .ban-detail strong {
+      color: var(--text-color);
+    }
+    .fingerprint-info {
+      background-color: var(--info-background, #d1ecf1);
+      border: 1px solid var(--info-border, #bee5eb);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-size: 12px;
+      text-align: left;
+    }
+    .fingerprint-info code {
+      background-color: var(--code-background, #f8f9fa);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .unban-section {
+      margin-top: 25px;
+      padding: 20px;
+      background-color: var(--success-background, #d4edda);
+      border: 1px solid var(--success-border, #c3e6cb);
+      border-radius: 8px;
+    }
+    .btn {
+      background-color: var(--primary-color, #007bff);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-dark, #0056b3);
+    }
+    .btn-danger {
+      background-color: var(--danger-color, #dc3545);
+    }
+    .btn-danger:hover {
+      background-color: var(--danger-dark, #c82333);
     }
     .from-info {
       font-style: italic;
       color: var(--text-muted); /* O'zgaruvchidan olindi */
       margin-top: 20px;
+      font-size: 14px;
+    }
+    .loading {
+      display: none;
+      color: var(--text-muted);
+    }
+    .error-msg {
+      color: var(--danger-color);
+      background-color: var(--danger-background, #f8d7da);
+      border: 1px solid var(--danger-border, #f5c6cb);
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .success-msg {
+      color: var(--success-color, #155724);
+      background-color: var(--success-background, #d4edda);
+      border: 1px solid var(--success-border, #c3e6cb);
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body data-theme="light"> {# data-theme qo'shildi #}
   <main>
-    <h1>Siz bloklandingiz</h1>
-    <p>Hozir siz bu sahifaga kira olmaysiz. Sabab: ko‘p marta noto‘g‘ri urinishlar.</p>
-    <p class="from-info">Manba: <span id="fromSource">{{ request.GET.from|default:"noma'lum" }}</span></p>
+    <h1>Kirish taqiqlangan</h1>
+    
+    {% if ban_info %}
+      <!-- User-based ban info -->
+      <div class="ban-info">
+        <h3>Ban tafsilotlari</h3>
+        <div class="ban-detail"><strong>Sabab:</strong> {{ ban_info.ban_reason|default:"Ko'rsatilmagan" }}</div>
+        <div class="ban-detail"><strong>Ban turi:</strong> {{ ban_info.banned_for|default:"Umumiy" }}</div>
+        {% if ban_info.is_permanent %}
+          <div class="ban-detail"><strong>Muddat:</strong> <span style="color: var(--danger-color);">Doimiy ban</span></div>
+        {% elif ban_info.ban_until %}
+          <div class="ban-detail"><strong>Ban tugaydi:</strong> {{ ban_info.ban_until|date:"d.m.Y H:i" }}</div>
+        {% endif %}
+        {% if ban_info.banned_by %}
+          <div class="ban-detail"><strong>Ban qo'ygan:</strong> {{ ban_info.banned_by }}</div>
+        {% endif %}
+      </div>
+    {% elif fp_ban_info %}
+      <!-- Fingerprint-based ban info -->
+      <div class="ban-info">
+        <h3>Qurilma bani tafsilotlari</h3>
+        <div class="ban-detail"><strong>Sabab:</strong> {{ fp_ban_info.ban_reason|default:"Ko'rsatilmagan" }}</div>
+        <div class="ban-detail"><strong>Ban turi:</strong> {{ fp_ban_info.banned_for|default:"Umumiy" }}</div>
+        {% if fp_ban_info.is_permanent %}
+          <div class="ban-detail"><strong>Muddat:</strong> <span style="color: var(--danger-color);">Doimiy ban</span></div>
+        {% elif fp_ban_info.ban_expires_at %}
+          <div class="ban-detail"><strong>Ban tugaydi:</strong> <span id="ban-expires">{{ fp_ban_info.ban_expires_at }}</span></div>
+        {% endif %}
+        <div class="ban-detail"><strong>Ban qo'yilgan vaqt:</strong> <span id="ban-created">{{ fp_ban_info.ban_created_at }}</span></div>
+        {% if fp_ban_info.actor %}
+          <div class="ban-detail"><strong>Ban qo'ygan:</strong> {{ fp_ban_info.actor }}</div>
+        {% endif %}
+      </div>
+    {% else %}
+      <!-- General ban message -->
+      <p>Hozir siz bu sahifaga kira olmaysiz.</p>
+      {% if request.GET.reason %}
+        <div class="ban-info">
+          <h3>Sabab</h3>
+          <div class="ban-detail">{{ request.GET.reason }}</div>
+        </div>
+      {% endif %}
+    {% endif %}
+    
+    <!-- Device Fingerprint Information -->
+    <div class="fingerprint-info" id="fingerprintInfo" style="display: none;">
+      <strong>Qurilma ma'lumotlari:</strong><br>
+      <div class="ban-detail">Fingerprint ID: <code id="fingerprintId">Yuklanmoqda...</code></div>
+      <div class="ban-detail">IP Address: <code>{{ request.client_ip|default:"Noma'lum" }}</code></div>
+      <div class="ban-detail">User Agent: <code>{{ request.META.HTTP_USER_AGENT|truncatechars:50 }}</code></div>
+    </div>
+    
+    <!-- Admin Unban Section -->
+    {% if user.is_authenticated and user.is_staff %}
+      <div class="unban-section">
+        <h3>Admin amallar</h3>
+        <p>Siz admin sifatida ushbu banni bekor qilishingiz mumkin.</p>
+        
+        <div id="unban-messages"></div>
+        
+        {% if ban_info %}
+          <!-- User unban -->
+          <button class="btn" onclick="unbanUser({{ user.id }})">
+            Foydalanuvchi banini bekor qilish
+          </button>
+        {% endif %}
+        
+        <!-- Fingerprint unban -->
+        <button class="btn" onclick="unbanFingerprint()">
+          Qurilma banini bekor qilish
+        </button>
+        
+        <!-- Clear IP block -->
+        <button class="btn btn-danger" onclick="clearIpBlock()">
+          IP blokini tozalash
+        </button>
+        
+        <div class="loading" id="loading">Jarayon bajarilmoqda...</div>
+      </div>
+    {% endif %}
+    
+    <p class="from-info">
+      Sahifa: <span id="fromSource">{{ request.GET.next|default:request.path }}</span><br>
+      {% if request.GET.reason %}
+        Xatolik: {{ request.GET.reason }}
+      {% endif %}
+    </p>
   </main>
+  
+  <script src="{% static 'js/device-fingerprint.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // URL parameters handling
       const urlParams = new URLSearchParams(window.location.search);
-      const fromParam = urlParams.get('from');
+      const fromParam = urlParams.get('next') || urlParams.get('from');
       if (fromParam) {
         document.getElementById('fromSource').textContent = fromParam.replace(/_/g, ' ');
       }
@@ -66,7 +236,169 @@
       if (savedTheme === 'dark') {
           document.body.classList.add('dark');
       }
+      
+      // Load and display fingerprint information
+      loadFingerprintInfo();
+      
+      // Format ban timestamps
+      formatTimestamps();
     });
+    
+    async function loadFingerprintInfo() {
+      try {
+        // Wait for device fingerprint to be initialized
+        let fingerprint = 'Yuklanmadi';
+        if (window.deviceFP) {
+          fingerprint = await window.deviceFP.getCurrentFingerprint();
+        }
+        
+        document.getElementById('fingerprintId').textContent = fingerprint ? fingerprint.substring(0, 16) + '...' : 'Xato';
+        document.getElementById('fingerprintInfo').style.display = 'block';
+      } catch (error) {
+        console.error('Fingerprint info loading error:', error);
+        document.getElementById('fingerprintId').textContent = 'Xato: ' + error.message;
+        document.getElementById('fingerprintInfo').style.display = 'block';
+      }
+    }
+    
+    function formatTimestamps() {
+      const banExpires = document.getElementById('ban-expires');
+      const banCreated = document.getElementById('ban-created');
+      
+      if (banExpires) {
+        try {
+          const date = new Date(banExpires.textContent);
+          banExpires.textContent = date.toLocaleString('uz-UZ');
+        } catch (e) {
+          // Keep original text if parsing fails
+        }
+      }
+      
+      if (banCreated) {
+        try {
+          const date = new Date(banCreated.textContent);
+          banCreated.textContent = date.toLocaleString('uz-UZ');
+        } catch (e) {
+          // Keep original text if parsing fails
+        }
+      }
+    }
+    
+    // Admin functions
+    async function unbanUser(userId) {
+      if (!userId) return;
+      
+      showLoading(true);
+      try {
+        const response = await fetch(`/api/admin/unban-user/${userId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showMessage('Foydalanuvchi bani muvaffaqiyatli bekor qilindi!', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          showMessage('Xatolik: ' + (result.error || 'Noma\'lum xatolik'), 'error');
+        }
+      } catch (error) {
+        showMessage('Tarmoq xatoligi: ' + error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+    
+    async function unbanFingerprint() {
+      showLoading(true);
+      try {
+        const fingerprint = await window.deviceFP.getCurrentFingerprint();
+        if (!fingerprint) {
+          showMessage('Qurilma fingerprinti topilmadi', 'error');
+          return;
+        }
+        
+        const response = await fetch('/api/admin/unban-fingerprint/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ fingerprint: fingerprint })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showMessage('Qurilma bani muvaffaqiyatli bekor qilindi!', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          showMessage('Xatolik: ' + (result.error || 'Noma\'lum xatolik'), 'error');
+        }
+      } catch (error) {
+        showMessage('Xatolik: ' + error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+    
+    async function clearIpBlock() {
+      showLoading(true);
+      try {
+        const response = await fetch('/api/admin/clear-ip-block/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showMessage('IP bloki muvaffaqiyatli tozalandi!', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          showMessage('Xatolik: ' + (result.error || 'Noma\'lum xatolik'), 'error');
+        }
+      } catch (error) {
+        showMessage('Xatolik: ' + error.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+    
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+    
+    function showMessage(message, type) {
+      const messagesDiv = document.getElementById('unban-messages');
+      const className = type === 'error' ? 'error-msg' : 'success-msg';
+      messagesDiv.innerHTML = `<div class="${className}">${message}</div>`;
+    }
+    
+    function getCSRFToken() {
+      const name = 'csrftoken';
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+          return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+      }
+      return '';
+    }
   </script>
 </body>
 </html>

@@ -15,7 +15,7 @@
     <div class="page-actions">
         <a href="{% url 'dashboard:user_create' %}" class="btn btn--primary">
             <i class="fa-solid fa-plus"></i>
-            Foydalanuvchi qo'shish
+            Qo'shish
         </a>
     </div>
 </div>
@@ -68,6 +68,12 @@
                 <a href="{% url 'dashboard:user_edit' u.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
                 </a>
+                <button type="button" 
+                        class="btn btn--sm btn--ghost btn--danger user-delete-btn"
+                        data-user-id="{{ u.pk }}"
+                        title="O'chirish">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>
         </td>
     </tr>

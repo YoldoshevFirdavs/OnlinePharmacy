@@ -1,0 +1,218 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Ban Olib Tashlash So'rovlari</h2>
+        <p class="text-muted">Adminlar tomonidan yuborilgan barcha ban olib tashlash so'rovlari</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Jami So'rovlar</h5>
+                    <p class="card-text display-4" id="totalRequests">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Kutilmoqda</h5>
+                    <p class="card-text display-4 text-warning" id="pendingRequests">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Qabul Qilingan</h5>
+                    <p class="card-text display-4 text-success" id="approvedRequests">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4" id="requestTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">Barcha so'rovlar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="pending-tab" data-toggle="tab" href="#pending" role="tab">Kutilmoqda</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="approved-tab" data-toggle="tab" href="#approved" role="tab">Qabul Qilingan</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="rejected-tab" data-toggle="tab" href="#rejected" role="tab">Rad etilgan</a>
+        </li>
+    </ul>
+
+    <!-- Request List -->
+    <div class="tab-content" id="requestTabsContent">
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="requestsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Target</th>
+                                    <th>So'rovchi</th>
+                                    <th>Sabab</th>
+                                    <th>Holat</th>
+                                    <th>Vaqt</th>
+                                    <th>Harakatlar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requestsTableBody">
+                                <!-- Requests will be loaded here -->
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">So'rovlar yuklanmoqda...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/device-fingerprint.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadUnbanRequests();
+    loadStats();
+});
+
+async function loadUnbanRequests() {
+    try {
+        const response = await fetch('/dashboard/api/admin/ban-stats/');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Load requests from audit logs or pending cache
+            loadRequestsFromCache();
+        } else {
+            showError('Xatolik: ' + (data.error || 'So\'rovlar yuklanmadi'));
+        }
+    } catch (error) {
+        console.error('Error loading unban requests:', error);
+        showError('Tarmoq xatoligi: ' + error.message);
+    }
+}
+
+async function loadRequestsFromCache() {
+    try {
+        // In production, you would use Redis SCAN to get all pending requests
+        // For now, show a placeholder
+        const tbody = document.getElementById('requestsTableBody');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <p>Admin tomonidan yuborilgan barcha unban so'rovlari quyida ko'rsatiladi.</p>
+                    <p class="text-muted">Joriy vaqtda kutilmoqda: 0</p>
+                </td>
+            </tr>
+        `;
+    } catch (error) {
+        console.error('Error loading requests from cache:', error);
+    }
+}
+
+async function loadStats() {
+    try {
+        const response = await fetch('/dashboard/api/admin/ban-stats/');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('totalRequests').textContent = 
+                data.stats?.user_bans?.total || 0;
+            document.getElementById('approvedRequests').textContent = 
+                data.stats?.user_bans?.temporary || 0;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+function approveUnbanRequest(requestId) {
+    if (!confirm(`Bu so'rovni tasdiqlaysizmi?`)) return;
+    
+    fetch('/dashboard/api/admin/approve-unban-request/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ request_id: requestId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('So\'rov tasdiqlandi');
+            loadUnbanRequests();
+        } else {
+            showError(data.error || 'Xatolik yuz berdi');
+        }
+    })
+    .catch(error => {
+        console.error('Error approving unban request:', error);
+        showError('Tarmoq xatoligi');
+    });
+}
+
+function rejectUnbanRequest(requestId) {
+    const reason = prompt('Rad etish sababini kiriting:');
+    if (!reason) return;
+    
+    fetch('/dashboard/api/admin/reject-unban-request/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ request_id: requestId, reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('So\'rov rad etildi');
+            loadUnbanRequests();
+        } else {
+            showError(data.error || 'Xatolik yuz berdi');
+        }
+    })
+    .catch(error => {
+        console.error('Error rejecting unban request:', error);
+        showError('Tarmoq xatoligi');
+    });
+}
+
+function showError(message) {
+    alert('Xato: ' + message);
+}
+
+function showSuccess(message) {
+    alert('Muvaffaqiyat: ' + message);
+}
+
+function getCSRFToken() {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+    }
+    return '';
+}
+</script>
+{% endblock %}

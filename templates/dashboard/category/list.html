@@ -15,7 +15,7 @@
     <div class="page-actions">
         <a href="{% url 'dashboard:category_create' %}" class="btn btn--primary">
             <i class="fa-solid fa-plus"></i>
-            Kategoriya qo'shish
+            Qo'shish
         </a>
     </div>
 </div>
@@ -52,13 +52,12 @@
                 <a href="{% url 'dashboard:category_edit' category.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
                 </a>
-                <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" class="inline-form"
-                      onsubmit="return confirm('Ushbu kategoriyani o\'chirmoqchimisiz?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn--sm btn--ghost btn--danger" title="O'chirish">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </form>
+                <button type="button"
+                        class="btn btn--sm btn--ghost btn--danger category-delete-btn"
+                        data-category-id="{{ category.pk }}"
+                        title="O'chirish">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>
         </td>
     </tr>

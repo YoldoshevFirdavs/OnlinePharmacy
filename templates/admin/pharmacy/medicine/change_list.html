@@ -1,0 +1,88 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .infinite-scroll-loader {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+    .infinite-scroll-loader.loading {
+        color: #6a00f4;
+    }
+</style>
+{% endblock %}
+
+{% block object-tools %}
+{{ block.super }}
+<script>
+(function() {
+    let page = 1;
+    let loading = false;
+    let allLoaded = false;
+    const container = document.querySelector('.results');
+    
+    if (!container) return;
+    
+    const loadMore = function() {
+        if (loading || allLoaded) return;
+        loading = true;
+        
+        const loader = document.createElement('div');
+        loader.className = 'infinite-scroll-loader loading';
+        loader.textContent = 'Yuklanmoqda...';
+        container.appendChild(loader);
+        
+        page += 1;
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('p', page - 1);
+        
+        fetch(url.toString(), { headers: {'X-Requested-With': 'XMLHttpRequest'} })
+            .then(function(r) {
+                if (!r.ok) {
+                    loader.textContent = 'Xatolik yuz berdi';
+                    loading = false;
+                    return;
+                }
+                return r.text();
+            })
+            .then(function(html) {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                const newRows = tmp.querySelectorAll('.results tbody tr');
+                
+                loader.remove();
+                
+                if (newRows.length === 0) {
+                    allLoaded = true;
+                    const endMarker = document.createElement('div');
+                    endMarker.className = 'infinite-scroll-loader';
+                    endMarker.textContent = 'Barcha ma`lumotlar yuklandi';
+                    container.appendChild(endMarker);
+                    window.removeEventListener('scroll', onScroll);
+                } else {
+                    const tbody = container.querySelector('tbody');
+                    newRows.forEach(function(r) {
+                        tbody.appendChild(r);
+                    });
+                    loading = false;
+                }
+            })
+            .catch(function() {
+                loader.textContent = 'Xatolik yuz berdi';
+                loading = false;
+            });
+    };
+    
+    const onScroll = function() {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+            loadMore();
+        }
+    };
+    
+    window.addEventListener('scroll', onScroll);
+})();
+</script>
+{% endblock %}

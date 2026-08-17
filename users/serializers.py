@@ -86,6 +86,11 @@ class UserSerializer(serializers.ModelSerializer):
             "is_verified",
             "date_joined",
             "is_staff",
+            "is_banned",
+            "banned_for",
+            "ban_reason",
+            "ban_until",
+            "is_permanent_ban",
         ]
         read_only_fields = [
             "is_verified",
@@ -280,6 +285,7 @@ class TelegramLoginSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
     name = serializers.CharField(max_length=255, required=False, allow_blank=True)
     telegram_id = serializers.CharField(required=False, allow_blank=True)
+    role = serializers.CharField(required=False, allow_blank=True, default="user")  # Added role field
 
     def validate(self, data):
         phone_number = data.get("phone_number")
@@ -288,6 +294,13 @@ class TelegramLoginSerializer(serializers.Serializer):
         if not phone_number and not telegram_id:
             raise serializers.ValidationError(
                 "Telegram orqali kirish uchun telefon raqami yoki Telegram ID kerak."
+            )
+        
+        # Validate role
+        role = data.get("role", "user")
+        if role not in ["user", "admin", "seller"]:
+            raise serializers.ValidationError(
+                {"role": "Noto'g'ri role. 'user', 'admin', yoki 'seller' bo'lishi kerak."}
             )
 
         return data

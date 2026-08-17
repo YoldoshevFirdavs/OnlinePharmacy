@@ -29,6 +29,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import users.otp_service as otp_service
 from pharmacy.permissons import IsVerifiedSeller
 from security.locks import is_locked, record_failed_attempt, reset_lockout
+from dashboard.forms import AccountSettingsForm
 
 from .models import CustomUser, Seller, SubscribedUser
 
@@ -48,7 +49,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 from django.utils import timezone
 from django.views.generic import TemplateView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -780,6 +781,7 @@ class TelegramLoginView(APIView):
         phone_number = serializer.validated_data.get("phone_number")
         telegram_id = serializer.validated_data.get("telegram_id")
         name = serializer.validated_data.get("name", "")
+        role = serializer.validated_data.get("role", "user")  # Get requested role
 
         identifier = phone_number or telegram_id
 
@@ -806,21 +808,27 @@ class TelegramLoginView(APIView):
             user = CustomUser.objects.filter(phone_number=phone_number).first()
 
         if not user:
-
+            # Create new user with role
             user = CustomUser.objects.create(
-                phone_number=phone_number, telegram_id=telegram_id, full_name=name
+                phone_number=phone_number, 
+                telegram_id=telegram_id, 
+                full_name=name,
+                role=role  # Set role
             )
-            logger.info("New user created via Telegram login")
+            logger.info(f"New user created via Telegram login with role={role}")
         else:
-
+            # Update existing user
             if not user.telegram_id and telegram_id:
                 user.telegram_id = telegram_id
             if name and user.full_name != name:
                 user.full_name = name
             if not user.phone_number and phone_number:
                 user.phone_number = phone_number
+            # Update role if different and user is not already admin
+            if role != user.role and user.role != 'admin':
+                user.role = role
             user.save()
-            logger.info("Existing user updated via Telegram login")
+            logger.info(f"Existing user updated via Telegram login, role={role}")
 
         session = create_otp_session(purpose="telegram")
         otp_length = TELEGRAM_OTP_LENGTH
@@ -833,12 +841,15 @@ class TelegramLoginView(APIView):
         bot_username = os.getenv("AUTH_BOT_USERNAME", "authversabot").lstrip("@")
         deeplink = f"https.t.me/{bot_username}?start={session.session_id}"
 
-        logger.info("Telegram login initiated for user_id=%s", user.id)
+        logger.info(f"Telegram login initiated for user_id={user.id}, role={user.role}")
 
         decr_ip_score(
             ip_address, delta=getattr(settings, "AUTH_IP_SCORE_DECAY_SUCCESS", 5)
         )
 
+        # Role-based response
+        is_admin = user.role == 'admin'
+        
         response_data = {
             "message": "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring.",
             "session_id": session.session_id,
@@ -847,7 +858,16 @@ class TelegramLoginView(APIView):
             "otp_sent": True,
             "incognito": incognito,
             "avatar_url": user.get_avatar_url,
+            "role": user.role,
+            "is_admin": is_admin,
+            "bot_message": "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring.",
         }
+        
+        # Role-specific messaging (FIX for runbot1.oy)
+        if is_admin:
+            response_data["bot_message"] = "Admin login: Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring."
+        else:
+            response_data["bot_message"] = "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring."
 
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -1498,17 +1518,30 @@ def auth_view(request):
     return render(request, "auth.html")
 
 
-class AccountView(TemplateView):
+class AccountView(FormView):
     template_name = "account.html"
-    permission_classes = [IsAuthenticated]
+    form_class = AccountSettingsForm
+    success_url = '/account/'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self):
+        return self.request.user
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_object()
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        # Add user data to context
         context['user'] = user
-        context['user_role'] = user.role if user.role else 'user'  # Add role for conditional rendering
+        context['user_role'] = user.role if user.role else 'user'
         
         # Add orders if available
         try:
@@ -1518,6 +1551,37 @@ class AccountView(TemplateView):
             context['orders'] = []
         
         return context
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        
+        # Handle password change
+        old_password = form.cleaned_data.get('old_password')
+        new_password1 = form.cleaned_data.get('new_password1')
+        new_password2 = form.cleaned_data.get('new_password2')
+        
+        if new_password1:
+            if not old_password or not user.check_password(old_password):
+                form.add_error('old_password', 'Eski parol noto\'g\'ri')
+                return self.form_invalid(form)
+            
+            if new_password1 != new_password2:
+                form.add_error('new_password2', 'Yangi parollar mos kelmadi')
+                return self.form_invalid(form)
+            
+            user.set_password(new_password1)
+        
+        user.save()
+        
+        from django.contrib import messages
+        messages.success(self.request, 'Profil ma\'lumotlari muvaffaqiyatli saqlandi!')
+        
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        from django.contrib import messages
+        messages.error(self.request, 'Forma xatolar bilan to\'ldirilgan')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class AdminCheckView(TemplateView):

@@ -2365,3 +2365,70 @@ a:hover {
     padding-top: 0;
     padding-bottom: 0;
 }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   DELIVERY TABLE - Compact Styles & Small Avatars
+   ════════════════════════════════════════════════════════════════════════= */
+
+/* Delivery table compact rows */
+.delivery-table tbody tr {
+    height: auto;
+}
+
+.delivery-table tbody td {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+
+.delivery-table thead th {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+/* Delivery driver avatar - small 48x48 */
+.delivery-avatar,
+.delivery-avatar img,
+.table-image.delivery-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.delivery-avatar img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+/* Compact table actions for delivery */
+.delivery-table .table-actions {
+    gap: 4px;
+}
+
+.delivery-table .btn--sm {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+/* Driver info cell styling */
+.driver-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.driver-phone {
+    font-size: 0.85rem;
+    color: var(--clr-muted);
+}
+
+.driver-vehicle {
+    font-size: 0.85rem;
+    color: var(--clr-muted);
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

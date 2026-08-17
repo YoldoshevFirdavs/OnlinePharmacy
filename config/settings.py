@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "whitenoise",
     "django_extensions",
+    'django_seed',
 ]
 
 MIDDLEWARE = [
@@ -94,6 +95,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.DeviceFingerprintMiddleware",
+    "config.middleware.BanCheckMiddleware",
+    "config.middleware.CustomErrorMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -175,7 +179,7 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "20/min", "user": "60/min"},
+    "DEFAULT_THROTTLE_RATES": {"anon": "20/min", "user": "300/min"},
 }
 
 SIMPLE_JWT = {
@@ -407,6 +411,44 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = (
 )
 SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# ============================================
+# DEVICE FINGERPRINT SECURITY SETTINGS
+# ============================================
+
+# Device fingerprint rate limiting (requests per second per fingerprint)
+FINGERPRINT_RATE_THRESHOLD = int(os.getenv("FINGERPRINT_RATE_THRESHOLD", "10"))
+
+# Temporary ban duration for rate limiting violations (minutes)
+FINGERPRINT_TEMP_BAN_DURATION = int(os.getenv("FINGERPRINT_TEMP_BAN_DURATION", "60"))
+
+# IP block duration after rate limiting (seconds)
+FINGERPRINT_IP_BLOCK_DURATION = int(os.getenv("FINGERPRINT_IP_BLOCK_DURATION", "3600"))
+
+# Main page refresh limit per fingerprint per hour
+FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT = int(os.getenv("FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT", "20"))
+
+# Fingerprint ban cache TTL (seconds) - how long to keep ban info in cache
+# For permanent bans, this is ignored
+FINGERPRINT_BAN_CACHE_TTL = int(os.getenv("FINGERPRINT_BAN_CACHE_TTL", "86400"))  # 24 hours
+
+# Fingerprint to user mapping TTL (seconds)
+FINGERPRINT_USER_MAPPING_TTL = int(os.getenv("FINGERPRINT_USER_MAPPING_TTL", "86400"))  # 24 hours
+
+# Auto cleanup settings
+FINGERPRINT_AUTO_CLEANUP_ENABLED = os.getenv("FINGERPRINT_AUTO_CLEANUP_ENABLED", "True").lower() == "true"
+FINGERPRINT_CLEANUP_BATCH_SIZE = int(os.getenv("FINGERPRINT_CLEANUP_BATCH_SIZE", "100"))
+
+# Security settings
+FINGERPRINT_REQUIRE_HTTPS_COOKIE = os.getenv("FINGERPRINT_REQUIRE_HTTPS_COOKIE", "True").lower() == "true"
+FINGERPRINT_COOKIE_SAMESITE = os.getenv("FINGERPRINT_COOKIE_SAMESITE", "Lax")  # Strict, Lax, None
+FINGERPRINT_HEADER_NAME = os.getenv("FINGERPRINT_HEADER_NAME", "Authorization-Fingerprint")
+
+# Logging settings
+FINGERPRINT_LOG_LEVEL = os.getenv("FINGERPRINT_LOG_LEVEL", "WARNING")
+FINGERPRINT_LOG_BLOCKED_REQUESTS = os.getenv("FINGERPRINT_LOG_BLOCKED_REQUESTS", "True").lower() == "true"
+FINGERPRINT_LOG_RATE_LIMITS = os.getenv("FINGERPRINT_LOG_RATE_LIMITS", "True").lower() == "true"
 
 
 # ============================================

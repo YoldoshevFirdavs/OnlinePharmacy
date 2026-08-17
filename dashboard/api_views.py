@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import timedelta
 
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
