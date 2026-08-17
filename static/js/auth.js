@@ -11,7 +11,7 @@ const AUTH_CONFIG = {
         user_email_login:     '/api/v1/users/login/email/',      // EmailLoginView
         user_telegram_login:  '/api/v1/users/login/telegram/',   // TelegramLoginView
         user_verify_otp:      '/api/v1/users/login/verify-otp/', // VerifyOtpView
-        admin_verify_otp:     '/api/v1/users/admin/login/verify-otp/', // AdminLoginViewSet - verify_otp action (new endpoint)
+        admin_verify_otp:     '/api/v1/users/admin/verify-otp/', // AdminLoginViewSet - verify_otp action (new endpoint)
         determine_role:       '/api/v1/users/determine_role/',   // DetermineRoleView
         logout:               '/api/v1/users/logout/',           // LogoutView
         logout_jwt:           '/api/v1/users/logout/jwt/'        // LogoutJWTView
@@ -110,7 +110,7 @@ const AUTH_CONFIG = {
             phone_number_not_found: "Telefon raqami topilmadi yoki noto'g'ri.",
             gmail_login_error: "Gmail orqali ro'yxatdan o'tishda muammo bor.",
             telegram_login_error: "Telegram orqali ro'yxatdan o'tishda muammo bor.",
-            error_requesting_otp: "OTP so'rashda xato yuz berdi.",
+            error_requesting_otp: "Error requesting OTP.",
             no_such_number: "Bunday raqam topilmadi.",
             name_required: "Ismni kiriting.",
             password_required: "Parol majburiy.",
@@ -608,11 +608,11 @@ async function handleOtpVerification() {
         const action = currentAuthMethod === 'gmail' ? 'gmail' : 'telegram';
 
         if (currentUserRole === 'admin') {
-            endpoint = AUTH_CONFIG.AUTH_ENDPOINTS.admin_login;
+            endpoint = AUTH_CONFIG.AUTH_ENDPOINTS.admin_verify_otp; // Use the new dedicated endpoint
             payload = {
-                action: 'verify_otp',
+                action: 'verify_otp', // FIXED: Added action field for admin verify_otp
                 session_id: currentSessionId,
-                otp: otpInputVal,
+                code: otpInputVal, // Changed from 'otp' to 'code' for consistency with VerifyOTPSerializer
                 fingerprint: await getFingerprint(),
             };
             if (currentIdentifier.includes('@')) {
@@ -1163,12 +1163,11 @@ function showSuccessAnimationAndRedirect(redirectUrl) {
     if (loader) {
         loader.classList.add('show');
     }
-    const safeUrl = _safeRedirectUrl(redirectUrl);
-    console.debug(`[Auth] Safe redirect URL resolved to: ${safeUrl}`);
-
+    // The actual redirect happens inside debounceRedirect after its timer.
+    // This function just sets up the visual feedback.
     setTimeout(() => {
         // No reload, just navigate
-        window.location.href = safeUrl;
+        window.location.href = redirectUrl;
     }, 1500);
 }
 
@@ -1368,7 +1367,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Telegram button binding
     if (telegramLoginBtn) {
         telegramLoginBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -1409,5 +1407,48 @@ window.updateHeaderAfterLogin = function() {
         window.loadUser();
     } else {
         console.warn('[Auth] loadUser not found on window object');
+    }
+};
+
+// FIX: Add loadUser function for header.js compatibility
+window.loadUser = async function() {
+    console.debug('[Auth] loadUser called');
+    
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        console.warn('[Auth] No access token for loadUser');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/v1/users/me/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+            
+            // Get full_name, username, or email - NOT role!
+            const username = user.full_name || user.username || user.email || localStorage.getItem('username');
+            
+            // Update localStorage
+            localStorage.setItem('username', username || '');
+            localStorage.setItem('avatar_url', user.avatar_url || '');
+            if (user.role) localStorage.setItem('user_role', user.role);
+
+            // Update header UI
+            if (typeof window.updateHeaderUI === 'function') {
+                const userRole = user.role || localStorage.getItem('user_role');
+                const shouldShowDropdown = userRole === 'admin' || userRole === 'seller' || userRole === 'user';
+                window.updateHeaderUI(true, username, user.avatar_url || user.avatar, user.email || '', userRole, shouldShowDropdown);
+            }
+        }
+    } catch (err) {
+        console.error('[Auth] loadUser error:', err);
     }
 };

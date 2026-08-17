@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% load static %}
+    {% include 'components/begin.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Tasdiqlash | OnlinePharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <style>
+        :root {
+            --primary: #6a00f4;
+            --primary-dark: #5000d4;
+            --primary-light: #b084f4;
+            --success: #34c759;
+            --danger: #ef4444;
+            --gray-900: #1a1a1a;
+            --gray-700: #3e3e4e;
+            --gray-600: #666666;
+            --gray-200: #f5f5f7;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(106,0,244,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--gray-200) 0%, var(--white) 100%);
+            color: var(--gray-900);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* VERIFICATION CONTAINER */
+        .verification-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 60px 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--white);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .verification-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .verification-subtitle {
+            font-size: 1rem;
+            color: var(--gray-600);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* LOADER */
+        .loader-wrapper {
+            margin: 40px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* STATUS STATES */
+        .status {
+            display: none;
+            margin: 40px 0;
+        }
+
+        .status.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .status-success .status-icon {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+
+        .status-error .status-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .status-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status-success .status-title {
+            color: var(--success);
+        }
+
+        .status-error .status-title {
+            color: var(--danger);
+        }
+
+        .status-message {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        /* BUTTONS */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-900);
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e5e7;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* INFO MESSAGE */
+        .info-message {
+            background: rgba(52, 199, 89, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            color: var(--gray-900);
+        }
+
+        .info-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .verification-container {
+                padding: 40px 24px;
+            }
+
+            .logo-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+
+            .verification-title {
+                font-size: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'components/header.html' %}
+
+    <main>
+        <div class="verification-container">
+            <!-- INITIAL LOADING STATE -->
+            <div id="loading-state">
+                <div class="logo-icon">
+                    <i class="fas fa-envelope-open"></i>
+                </div>
+                <h1 class="verification-title">Email Tasdiqlash</h1>
+                <p class="verification-subtitle">Iltimos, kutib turingiz. Email tasdiqlanmoqda...</p>
+                <div class="loader-wrapper">
+                    <div class="spinner"></div>
+                </div>
+                <p style="color: var(--gray-600); font-size: 0.9rem;">Bu sahifani yopmaslik arqonda.</p>
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="success-state" class="status status-success">
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="status-title">Muvaffaqiyat!</h2>
+                <p class="status-message">Sizning email manzilingiz muvaffaqiyatli tasdiqlandi. Kuzalari uchun rahmat!</p>
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    Siz hozir bizning yangilanmalar va maxsus takliflarini qabul qilishni boshlaydi.
+                </div>
+                <div class="button-group">
+                    <a href="/" class="btn btn-primary">Bosh Sahifaga</a>
+                    <a href="/shop/" class="btn btn-secondary">Do'konga O'tish</a>
+                </div>
+            </div>
+
+            <!-- ERROR STATE -->
+            <div id="error-state" class="status status-error">
+                <div class="status-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h2 class="status-title">Xatolik Yuz Berdi</h2>
+                <p class="status-message" id="error-message">
+                    Email tasdiqlashda xatolik yuz berdi. Token noto'g'ri yoki muddati o'tgan bo'lishi mumkin.
+                </p>
+                <div class="info-message error">
+                    <i class="fas fa-warning"></i>
+                    Agar muammo davom etsa, iltimos biz bilan bog'laning.
+                </div>
+                <div class="button-group">
+                    <a href="/" class="btn btn-primary">Bosh Sahifaga</a>
+                    <a href="mailto:info@onlinepharmacy.uz" class="btn btn-secondary">Qo'llab-Quvvatlash</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = '{{ token }}';
+            const loadingState = document.getElementById('loading-state');
+            const successState = document.getElementById('success-state');
+            const errorState = document.getElementById('error-state');
+            const errorMessage = document.getElementById('error-message');
+
+            if (!token) {
+                showError('Token topilmadi.');
+                return;
+            }
+
+            // Verify email via API
+            verifyEmail(token);
+        });
+
+        function verifyEmail(token) {
+            // Simulate API call or make actual API request
+            fetch('/api/v1/users/subscribe/verify/' + token + '/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.detail || 'Email tasdiqlashda xatolik yuz berdi.');
+                    });
+                }
+            })
+            .then(data => {
+                showSuccess();
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+                showError(error.message);
+            });
+        }
+
+        function showSuccess() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').classList.add('show');
+        }
+
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-state').classList.add('show');
+        }
+    </script>
+
+</body>
+</html>

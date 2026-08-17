@@ -6,13 +6,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from orders.models import Order
 from pharmacy.models import Category, Medicine
 from users.models import CustomUser, DeliveryDriver
-from users.serializers import DeliveryDriverSerializer
+from users.serializers import DeliveryDriverSerializer, UserBanSerializer, BanUserSerializer, UnbanUserSerializer
 
 from .permissions import IsDashboardAdmin
 from .serializers import (
@@ -293,3 +294,83 @@ class DriverApiView(DashboardAPIView):
         driver = get_object_or_404(DeliveryDriver, pk=pk)
         driver.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ============================================
+# BAN MANAGEMENT ENDPOINTS
+# ============================================
+
+from users.serializers import UserBanSerializer, BanUserSerializer, UnbanUserSerializer
+
+
+class BannedUsersListView(APIView):
+    """Bannalangan foydalanuvchilar ro'yxati."""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Vaqtli va permanent banlar jadvalini olish."""
+        from django.utils import timezone
+        
+        # Hozirda bannalangan foydalanuvchilar
+        banned_users = CustomUser.objects.filter(
+            banned_for__isnull=False
+        ).select_related('banned_by').order_by('-ban_until', '-date_joined')
+        
+        serializer = UserBanSerializer(banned_users, many=True)
+        
+        return Response({
+            'count': banned_users.count(),
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class BanUserView(APIView):
+    """Foydalanuvchini ban qilish."""
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request):
+        """Ban berish."""
+        serializer = BanUserSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                'success': True,
+                'message': f'{user.full_name or user.email} bannalandi.',
+                'user': UserBanSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnbanUserView(APIView):
+    """Ban olib tashlash."""
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request):
+        """Ban olib tashlash."""
+        serializer = UnbanUserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                'success': True,
+                'message': f'{user.full_name or user.email} unbanned qilindi.',
+                'user': UserBanSerializer(user).data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserBanDetailView(APIView):
+    """Alohida foydalanuvchining ban status-ini olish."""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request, user_id):
+        """Foydalanuvchining ban ma'lumotlari."""
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'Foydalanuvchi topilmadi.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = UserBanSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

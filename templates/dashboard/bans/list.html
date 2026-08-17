@@ -1,0 +1,356 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Banlar{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-ban"></i>
+            Banlar
+        </h1>
+        <p class="page-subtitle">Bannalangan foydalanuvchilarni boshqarish</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_head %}
+<th>ID</th>
+<th>Foydalanuvchi</th>
+<th>Email</th>
+<th>Telefon</th>
+<th>Rol</th>
+<th>Ban sababi</th>
+<th>Ban turi</th>
+<th>Berilgan vaqt</th>
+<th>Qolgan vaqt</th>
+<th>Ban bergan</th>
+<th>Amallar</th>
+{% endblock %}
+
+{% block table_body %}
+{% if banned_users %}
+    {% for user in banned_users %}
+    <tr class="ban-row {% if user.is_permanent_ban %}ban-row--permanent{% else %}ban-row--temporary{% endif %}" data-user-id="{{ user.id }}" data-ban-until="{{ user.ban_until|date:'U' }}">
+        <td>{{ user.id }}</td>
+        <td>
+            <div class="user-cell">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>{{ user.full_name|default:user.email|default:"—" }}</span>
+            </div>
+        </td>
+        <td>{{ user.email|default:"—" }}</td>
+        <td>{{ user.phone_number|default:"—" }}</td>
+        <td>
+            <span class="tag {% if user.role == 'admin' %}tag--primary{% elif user.role == 'seller' %}tag--warning{% else %}tag--info{% endif %}">
+                {{ user.get_role_display|default:user.role }}
+            </span>
+        </td>
+        <td>
+            <span class="ban-reason" title="{{ user.ban_reason }}">
+                {{ user.ban_reason|truncatewords:3|default:"—" }}
+            </span>
+        </td>
+        <td>
+            {% if user.is_permanent_ban %}
+                <span class="tag tag--error">
+                    <i class="fa-solid fa-infinity"></i>
+                    Doimiy ban
+                </span>
+            {% elif user.ban_until %}
+                <span class="tag tag--warning">
+                    <i class="fa-solid fa-hourglass-end"></i>
+                    Vaqtli ban
+                </span>
+            {% else %}
+                <span class="tag tag--info">—</span>
+            {% endif %}
+        </td>
+        <td class="ban-date">
+            <span class="date-formatted">
+                {{ user.ban_until|date:"d.m.Y H:i" }}
+            </span>
+        </td>
+        <td>
+            {% if user.is_permanent_ban %}
+                <span class="timer permanent-label">∞ Doimiy</span>
+            {% elif user.ban_until %}
+                <span class="timer" data-until="{{ user.ban_until|date:'U' }}">
+                    <i class="fa-solid fa-hourglass-end"></i>
+                    <span class="timer-text">Hisoblanmoqda...</span>
+                </span>
+            {% else %}
+                <span class="timer">—</span>
+            {% endif %}
+        </td>
+        <td>
+            <span class="banned-by">
+                {% if user.banned_by %}
+                    {{ user.banned_by.full_name|default:user.banned_by.email }}
+                {% else %}
+                    Tizim
+                {% endif %}
+            </span>
+        </td>
+        <td>
+            <div class="table-actions">
+                <button class="btn btn--sm btn--ghost unban-btn" data-user-id="{{ user.id }}" title="Ban olib tashlash">
+                    <i class="fa-solid fa-check-circle"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr class="data-table__empty">
+        <td colspan="11">
+            <i class="fa-solid fa-inbox"></i>
+            <span>Bannalangan foydalanuvchilar topilmadi</span>
+        </td>
+    </tr>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.ban-row {
+    transition: all 0.3s ease;
+}
+
+.ban-row--permanent {
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.ban-row--permanent:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.ban-row--temporary {
+    background-color: rgba(245, 158, 11, 0.05);
+}
+
+.ban-row--temporary:hover {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.ban-reason {
+    display: inline-block;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.875rem;
+}
+
+.timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #ef4444;
+    font-family: 'Monaco', 'Courier New', monospace;
+    min-width: 100px;
+}
+
+.timer-text {
+    white-space: nowrap;
+}
+
+.permanent-label {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.banned-by {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.unban-btn {
+    color: #10b981;
+}
+
+.unban-btn:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.unban-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    animation: slideInUp 0.3s ease;
+}
+
+.toast--success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.toast--error {
+    background-color: #fee2e2;
+    color: #7f1d1d;
+    border: 1px solid #fecaca;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time timer update
+    function updateTimers() {
+        const timers = document.querySelectorAll('.timer[data-until]');
+        timers.forEach(timer => {
+            const until = parseInt(timer.dataset.until) * 1000;
+            const now = Date.now();
+            const diff = until - now;
+
+            if (diff <= 0) {
+                timer.innerHTML = '<i class="fa-solid fa-check-circle"></i><span class="timer-text">Ban tugadi</span>';
+                timer.classList.add('expired');
+            } else {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timeStr = '';
+                if (days > 0) {
+                    timeStr = `${days}k ${hours}s`;
+                } else if (hours > 0) {
+                    timeStr = `${hours}s ${minutes}m`;
+                } else if (minutes > 0) {
+                    timeStr = `${minutes}m ${seconds}s`;
+                } else {
+                    timeStr = `${seconds}s`;
+                }
+
+                timer.querySelector('.timer-text').textContent = timeStr;
+            }
+        });
+    }
+
+    // Update timers every second
+    updateTimers();
+    setInterval(updateTimers, 1000);
+
+    // Unban button handler
+    document.querySelectorAll('.unban-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const userId = this.dataset.userId;
+            const row = document.querySelector(`[data-user-id="${userId}"]`);
+            
+            if (!confirm('Bu foydalanuvchini banning-dan olib tashlashga ishonchingiz komilmi?')) {
+                return;
+            }
+
+            this.classList.add('unban-loading');
+            this.disabled = true;
+
+            try {
+                const response = await fetch('/api/v1/dashboard/bans/unban/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ user_id: parseInt(userId) })
+                });
+
+                if (response.ok) {
+                    showToast('Ban muvaffaqiyatli olib tashlandi', 'success');
+                    row.style.animation = 'slideOutDown 0.3s ease';
+                    setTimeout(() => {
+                        row.remove();
+                        // Check if table is empty
+                        const tbody = document.querySelector('table tbody');
+                        if (tbody.children.length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Xatolik yuz berdi', 'error');
+                    this.classList.remove('unban-loading');
+                    this.disabled = false;
+                }
+            } catch (error) {
+                showToast('Serverga ulanishda xatolik', 'error');
+                this.classList.remove('unban-loading');
+                this.disabled = false;
+            }
+        });
+    });
+
+    // Toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOutDown 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

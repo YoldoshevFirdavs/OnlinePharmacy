@@ -407,3 +407,17 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = (
 )
 SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# ============================================
+# ADMIN LOGIN SECURITY SETTINGS
+# ============================================
+
+# Admin login maximum failed attempts before ban
+ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "7"))
+
+# Admin ban duration in seconds (1 hour = 3600)
+ADMIN_BAN_SECONDS = int(os.getenv("ADMIN_BAN_SECONDS", "3600"))
+
+# Admin session timeout in seconds (10 minutes = 600)
+ADMIN_SESSION_TIMEOUT = int(os.getenv("ADMIN_SESSION_TIMEOUT", "600"))

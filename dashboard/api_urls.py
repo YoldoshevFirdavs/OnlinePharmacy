@@ -29,4 +29,9 @@ urlpatterns = [
     path(
         "stats/", api_views.DashboardStatsApiView.as_view(), name="dashboard_stats_api"
     ),
+    # Ban Management APIs
+    path("bans/", api_views.BannedUsersListView.as_view(), name="banned_users_list"),
+    path("bans/ban/", api_views.BanUserView.as_view(), name="ban_user"),
+    path("bans/unban/", api_views.UnbanUserView.as_view(), name="unban_user"),
+    path("bans/user/<int:user_id>/", api_views.UserBanDetailView.as_view(), name="user_ban_detail"),
 ]

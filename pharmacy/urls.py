@@ -8,8 +8,10 @@ from .views.product import (
     MedicineViewSet,
     ProductViewHistoryViewSet,
     ReviewViewSet,
+    product_list
 )
 
+app_name = 'pharmacy'
 router = DefaultRouter()
 router.register(r"products", MedicineViewSet)
 router.register(r"reviews", ReviewViewSet)
@@ -18,6 +20,7 @@ router.register(r"flash-sales", FlashSaleViewSet)
 router.register(r"images", MedicineImageViewSet)
 
 urlpatterns = [
+    path("products/", product_list, name="product_list"),
     path(
         "categories/",
         CategoryViewSet.as_view({"get": "list", "post": "create"}),

@@ -39,7 +39,7 @@ except ImportError:
     # Fallback if dashboard app not available
     def is_admin(user):
         try:
-            return user.is_authenticated and user.is_staff
+            return user.is_authenticated and getattr(user, 'role', None) == 'admin'
         except Exception:
             return False
 
@@ -48,6 +48,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.generic import TemplateView
 from django.utils import timezone
 from django.views.generic import TemplateView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -281,6 +282,14 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 pass
 
         if user == None:
+            # Ban user in database - vaqtli ban 1 soat uchun
+            try:
+                admin_user = CustomUser.objects.filter(is_staff=True).first()
+                ban_user = CustomUser.objects.filter(email=identifier).first() or CustomUser.objects.filter(phone_number=identifier).first()
+                if ban_user and ban_user != admin_user:
+                    ban_user.ban_user("admin_login", duration_seconds=3600, reason="Admin topilmadi", banned_by=admin_user)
+            except:
+                pass
             otp_service.record_failed_attempt(identifier)
             return Response(
                 {"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND
@@ -479,7 +488,8 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 "role": computed_role,  # Use determined role
                 "redirect": redirect_url,
                 "avatar_url": user.get_avatar_url,
-            }
+            },
+            status=status.HTTP_200_OK,
         )
 
     def _handle_request_verification(self, request, data, identifier):
@@ -847,7 +857,12 @@ class EmailLoginView(APIView):
 
     @swagger_auto_schema(request_body=RegisterSerializer)
     def post(self, request):
-        email = request.data.get("email")
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data.get("email")
+        full_name = serializer.validated_data.get("full_name", "")
+
         if not email:
             return Response(
                 {"email": "This field is required."}, status=status.HTTP_400_BAD_REQUEST
@@ -883,6 +898,10 @@ class EmailLoginView(APIView):
         try:
             with transaction.atomic():
                 user, created = CustomUser.objects.get_or_create(email=email)
+                # Update full_name if provided and user was just created or full_name is empty
+                if full_name and (created or not user.full_name):
+                    user.full_name = full_name
+                    user.save()
         except Exception as e:
             logger.error("User get_or_create error")
             return Response(
@@ -1075,7 +1094,9 @@ class MeView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        logger.debug(f"MeView - User: {user.id}, email: {user.email}, full_name: {user.full_name}, role: {user.role}")
+        return user
 
 
 class UserProfileViewSet(generics.RetrieveUpdateAPIView):
@@ -1148,7 +1169,7 @@ class SubscribedUserViewSet(viewsets.ModelViewSet):
 
         if not subscriber.is_verified:
             token = dumps(subscriber.email)
-            verify_url = f"{self.request.build_absolute_uri('/api/v1/users/subscribe/verify/')}{token}/"
+            verify_url = f"{self.request.build_absolute_uri('/subscribe/')}{token}/"
             try:
                 tasks.send_subscription_verification_email.delay(
                     subscriber.email, verify_url
@@ -1327,6 +1348,10 @@ class DetermineRoleView(APIView):
                     {"detail": "Could not create user profile."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
+        
+        # Debugging: Log user's staff/superuser status
+        if settings.DEBUG and user:
+            logger.debug(f"DetermineRoleView: User {user.email} (ID: {user.id}) - is_staff: {user.is_staff}, is_superuser: {user.is_superuser}")
 
         # FIXED: Use determine_role() helper instead of hardcoded logic
         role = determine_role(user)
@@ -1477,6 +1502,23 @@ class AccountView(TemplateView):
     template_name = "account.html"
     permission_classes = [IsAuthenticated]
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Add user data to context
+        context['user'] = user
+        context['user_role'] = user.role if user.role else 'user'  # Add role for conditional rendering
+        
+        # Add orders if available
+        try:
+            from orders.models import Order
+            context['orders'] = Order.objects.filter(user=user).order_by('-date')[:10]
+        except Exception:
+            context['orders'] = []
+        
+        return context
+
 
 class AdminCheckView(TemplateView):
     template_name = "admin_check_deeplink.html"
@@ -1513,3 +1555,19 @@ class AdminCheckView(TemplateView):
                 pass
 
         return redirect("auth")
+
+
+
+# ============================================
+# SUBSCRIPTION VERIFICATION PAGE
+# ============================================
+
+class SubscriptionVerifyPageView(TemplateView):
+    """Subscription verification page - standalone template view."""
+    template_name = 'subscribe.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        token = self.kwargs.get('token')
+        context['token'] = token
+        return context

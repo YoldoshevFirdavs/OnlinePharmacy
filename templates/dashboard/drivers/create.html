@@ -3,6 +3,10 @@
 
 {% block title %}Yangi haydovchi qo'shish{% endblock %}
 
+{% block form_title %}Yangi haydovchi qo'shish{% endblock %}
+{% block form_icon %}fa-solid fa-plus{% endblock %}
+{% block back_url %}{% url 'dashboard:drivers_list' %}{% endblock %}
+
 {% block extra_js %}
 {{ block.super }}
 <script>

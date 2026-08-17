@@ -1,33 +1,10 @@
- // ============================================
+// ============================================
 // main.js - Main page dynamic logic
 // ============================================
 
-// FIX: Add a reload monitor to prevent loops.
-window.__reloadMonitor = {
-    count: 0,
-    lastReload: 0,
-    logAndCheck: function() {
-        const now = Date.now();
-        if (now - this.lastReload < 5000) { // 5-second threshold
-            this.count++;
-            console.warn(`[ReloadGuard] Rapid reload detected! Count: ${this.count}. Suppressing.`);
-            return false; // Suppress reload
-        }
-        this.lastReload = now;
-        this.count = 1;
-        console.log("[ReloadGuard] Reload permitted.");
-        return true;
-    }
-};
-
-// Override location.reload to use the guard
-const originalReload = window.location.reload;
-window.location.reload = function() {
-    if (window.__reloadMonitor.logAndCheck()) {
-        originalReload.apply(window.location, arguments);
-    }
-};
-
+// FIX: Removed the problematic reload monitor that caused TypeError.
+// If a reload monitor is strictly needed, it should be implemented differently
+// to avoid assigning to a read-only property of window.location.
 
 document.addEventListener('DOMContentLoaded', () => {
     // Safely initialize all components

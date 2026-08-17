@@ -222,12 +222,12 @@
                         const _ADMIN_ALLOWED = ['/dashboard/admin/', '/dashboard/'];
                         window.location.href = _ADMIN_ALLOWED.includes(data.next) ? data.next : '/dashboard/admin/';
                     } else {
-                        const errorDetail = data.detail || (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(' ') : "Admin ma'lumotlarini tekshirishda xato yuz berdi.");
+                        const errorDetail = data.detail || (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(' ') : "Admin ma'lumotlarini tekshirishda xatolik yuz berdi.");
                         showAdminError(errorDetail);
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    showAdminError("Server bilan bog'lanishda kutilmagan xato yuz berdi.");
+                    showAdminError("Server bilan bog'lanishda kutilmagan xatolik yuz berdi.");
                 }
             });
         }

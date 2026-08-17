@@ -58,13 +58,14 @@ function sendRequest(url, method, data = null) {
 const HEADER_CONFIG = {
     AUTH_PAGE_URL: '/auth/',
     ADMIN_DASHBOARD_URL: '/dashboard/admin/',
+    DELIVERER_DASHBOARD_URL: '/dashboard/delivery/',
     USER_ACCOUNT_URL: '/account/',
     LOGOUT_URL: '/api/v1/users/logout/',
     PROFILE_URL: '/api/v1/users/me/',
     DEFAULT_AVATAR: '/static/images/default_avatar.png',
     I18N: {
-        en: { login: 'Login', logout: 'Logout', account: 'Account', my_deliveries: 'My deliveries' },
-        uz: { login: 'Kirish', logout: 'Chiqish', account: 'Kabinet', my_deliveries: 'Mening yetkazmalarim' },
+        en: { login: 'Login', logout: 'Logout', account: 'Account' },
+        uz: { login: 'Kirish', logout: 'Chiqish', account: 'Kabinet' },
     },
     DEFAULT_LANG: 'uz',
 };
@@ -147,54 +148,69 @@ async function fetchUserProfile() {
 }
 
 function setupDropdownToggle() {
-    const accountDropdownButton = document.getElementById('account-dropdown-button'); // NOTE: Use specific ID for button
-    const accountDropdownMenu = document.getElementById('account-dropdown-menu'); // NOTE: Use specific ID for menu
+    const accountDropdownButton = document.getElementById('account-dropdown-button');
+    const accountDropdownMenu = document.getElementById('account-dropdown-menu');
 
-    if (accountDropdownButton && accountDropdownMenu) {
-        accountDropdownButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            accountDropdownMenu.classList.toggle('show');
-            accountDropdownButton.classList.toggle('active'); // NOTE: Add active class for styling
-        });
+    if (!accountDropdownButton || !accountDropdownMenu) return;
 
-        document.addEventListener('click', (e) => {
-            if (!accountDropdownButton.contains(e.target) && !accountDropdownMenu.contains(e.target)) {
-                accountDropdownMenu.classList.remove('show');
-                accountDropdownButton.classList.remove('active');
-            }
-        });
-    }
+    accountDropdownButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = accountDropdownMenu.classList.contains('show');
+        if (isOpen) {
+            accountDropdownMenu.classList.remove('show');
+            accountDropdownButton.classList.remove('active');
+        } else {
+            accountDropdownMenu.classList.add('show');
+            accountDropdownButton.classList.add('active');
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!accountDropdownButton.contains(e.target) && !accountDropdownMenu.contains(e.target)) {
+            accountDropdownMenu.classList.remove('show');
+            accountDropdownButton.classList.remove('active');
+        }
+    });
 }
 
-function updateHeaderUI(isLoggedIn, username, avatarUrl, email, userRoles) {
+function updateHeaderUI(isLoggedIn, username, avatarUrl, email, userRole, shouldShowDropdown = true) {
     const authLinks = document.getElementById('auth-links');
     const accountDropdownContainer = document.getElementById('account-dropdown-container');
+    const accountDropdownButton = document.getElementById('account-dropdown-button');
+    const headerUserAvatar = document.getElementById('header-user-avatar');
+    const headerUserName = document.getElementById('header-username-display');
 
     if (isLoggedIn) {
         if (authLinks) authLinks.style.display = 'none';
-        if (accountDropdownContainer) accountDropdownContainer.style.display = 'block';
+        
+        if (shouldShowDropdown) {
+            // Show dropdown container for admin, seller, user
+            if (accountDropdownContainer) accountDropdownContainer.style.display = 'block';
+            if (headerUserAvatar) headerUserAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
+            if (headerUserName) headerUserName.textContent = username || '';
+            
+            // Update dropdown links based on user role
+            const adminLink = document.querySelector('.admin-link');
+            const delivererLink = document.querySelector('.deliverer-link');
+            const userLinks = document.querySelectorAll('.user-link');
 
+            if (adminLink) adminLink.style.display = (userRole === 'admin') ? 'list-item' : 'none';
+            if (delivererLink) delivererLink.style.display = (userRole === 'deliverer') ? 'list-item' : 'none';
+            userLinks.forEach(link => link.style.display = (userRole === 'user' || !userRole) ? 'list-item' : 'none');
 
-        if (headerUserAvatar) headerUserAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
-        if (headerUserName) headerUserName.textContent = username || '';
-
-        if (adminAvatar) adminAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
-        const adminUsername = document.querySelector('.topbar-username');
-        if (adminUsername) adminUsername.textContent = username || '';
-
-        const adminLink = document.querySelector('.admin-link');
-        const userLinks = document.querySelectorAll('.user-link');
-
-        if (adminLink) adminLink.style.display = (userRoles.includes('admin')) ? 'list-item' : 'none';
-
-        userLinks.forEach(link => link.style.display = (userRoles.includes('user') || userRoles.length === 0) ? 'list-item' : 'none');
-
-        const logoutButton = document.getElementById('logout-button');
-        if (logoutButton) {
-            logoutButton.removeEventListener('click', handleHeaderLogout);
-            logoutButton.addEventListener('click', handleHeaderLogout);
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.removeEventListener('click', handleHeaderLogout);
+                logoutButton.addEventListener('click', handleHeaderLogout);
+            }
+            setupDropdownToggle();
+        } else {
+            // Deliverer: hide dropdown, show only avatar and name
+            if (accountDropdownContainer) accountDropdownContainer.style.display = 'none';
+            if (headerUserAvatar) headerUserAvatar.src = avatarUrl || HEADER_CONFIG.DEFAULT_AVATAR;
+            if (headerUserName) headerUserName.textContent = username || '';
         }
-        setupDropdownToggle();
     } else {
         if (authLinks) authLinks.style.display = 'block';
         if (accountDropdownContainer) accountDropdownContainer.style.display = 'none';
@@ -210,7 +226,7 @@ async function handleHeaderLogout(e) {
     } catch (err) {
         console.warn('[Header] Logout xato:', err);
     } finally {
-        clearAuthStorage();
+        clearAuthStorage(); // NOTE: Call clearAuthStorage for full logout process
     }
 }
 
@@ -218,30 +234,26 @@ async function initHeader() {
     const user = await fetchUserProfile();
 
     if (user) {
-        const username = user.full_name || localStorage.getItem('username');
-        const avatarUrl = user.avatar_url || HEADER_CONFIG.DEFAULT_AVATAR;
+        // Get full_name, username, or email - NOT role!
+        const username = user.full_name || user.username || user.email || localStorage.getItem('username');
+        const avatarUrl = user.avatar || user.avatar_url || HEADER_CONFIG.DEFAULT_AVATAR;
         const email = user.email || localStorage.getItem('user_email');
-        // FIX: Use 'role' (singular) from backend, not 'roles' (plural)
-        const userRole = user.role || user.roles || [];
-        // FIX: Directly use user object properties. Avoid localStorage fallback here.
-        const username = user.full_name || '';
-        const avatarUrl = user.avatar || HEADER_CONFIG.DEFAULT_AVATAR; // FIX: Use 'avatar' from backend, not 'avatar_url'
-        const email = user.email || '';
-        const userRole = user.role || 'user'; // FIX: Use 'role' (singular) and provide a default.
-        const userRoles = Array.isArray(userRole) ? userRole : [userRole];
+        const userRole = user.role || localStorage.getItem('user_role');
 
         localStorage.setItem('username', username || '');
         localStorage.setItem('avatar_url', avatarUrl);
         localStorage.setItem('user_email', email || '');
-        localStorage.setItem('avatar_url', avatarUrl); // Keep this for other scripts if they use it
-        localStorage.setItem('user_email', email || ''); // Keep this for other scripts
         if (user.role) {
             localStorage.setItem('user_role', user.role);
         }
 
-        updateHeaderUI(true, username, avatarUrl, email, userRoles);
+        // Show dropdown only if role is admin, seller, or user
+        // Deliverer users (no role or role !== 'admin' && role !== 'seller' && role !== 'user') get avatar+name only
+        const shouldShowDropdown = userRole === 'admin' || userRole === 'seller' || userRole === 'user';
+        
+        updateHeaderUI(true, username, avatarUrl, email, userRole, shouldShowDropdown);
     } else {
-        updateHeaderUI(false, null, null, null, []);
+        updateHeaderUI(false);
     }
 }
 

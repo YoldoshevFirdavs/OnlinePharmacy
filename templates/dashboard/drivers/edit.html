@@ -1,4 +1,16 @@
 {% extends 'dashboard/form.html' %}
 {% load static %}
 
-{% block title %}Edit Driver{% endblock %}
+{% block title %}Haydovchini tahrirlash{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var submitBtn = document.getElementById('btnSubmit');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fa-solid fa-save"></i> Saqlash';
+    }
+});
+</script>
+{% endblock %}

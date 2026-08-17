@@ -8,8 +8,13 @@
         <span id="header-username-display">User</span>
     </button>
     <ul id="account-dropdown-menu" class="dropdown-menu">
-        <li><a id="account-link" href="/account/"><i class="fas fa-user-circle"></i> {% trans "Account" %}</a></li>
-        <li><a href="/user/orders"><i class="fas fa-box"></i> {% trans "My Orders" %}</a></li>
+        {% if user.role == 'admin' %}
+            <li><a id="account-link" href="/dashboard/account/"><i class="fas fa-user-cog"></i> {% trans "Account" %}</a></li>
+        {% elif user.role == 'seller' %}
+            <li><a id="account-link" href="/dashboard/seller/account-settings/"><i class="fas fa-user-cog"></i> {% trans "Account" %}</a></li>
+        {% else %}
+            <li><a id="account-link" href="/account/"><i class="fas fa-user-circle"></i> {% trans "Account" %}</a></li>
+        {% endif %}
         <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a></li>
     </ul>
 </div>

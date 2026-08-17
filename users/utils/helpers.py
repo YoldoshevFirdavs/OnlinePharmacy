@@ -75,3 +75,14 @@ def delete_otp(session_id):
 
     # Use the identifier format from otp_service.store_otp
     cache.delete(f"otp_code:{session_id}")
+
+
+def determine_role(user):
+    """
+    Foydalanuvchining rolini aniqlaydi.
+    Agar user.role maydoni mavjud bo'lsa, uning qiymatini qaytaradi.
+    Aks holda, None qaytaradi (masalan, Deliverer uchun).
+    """
+    if hasattr(user, 'role') and user.role:
+        return user.role
+    return None

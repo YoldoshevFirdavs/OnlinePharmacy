@@ -74,7 +74,37 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES, default="user")
 
     bad_comments_count = models.PositiveIntegerField(default=0)
-    is_banned = models.BooleanField(default=False)
+    is_banned = models.BooleanField(default=False)  # Telegram login page uchun permanent ban
+    
+    # banned_for - Boshqa barcha page'lar uchun vaqtli/permanent ban
+    banned_for = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Qaysi page uchun ban qo'yilgan (masalan: 'admin_login', 'dashboard', etc.)"
+    )
+    ban_reason = models.CharField(
+        max_length=500, 
+        blank=True, 
+        null=True,
+        help_text="Ban berilgan sababi"
+    )
+    ban_until = models.DateTimeField(
+        blank=True, 
+        null=True,
+        help_text="Vaqtli ban bo'lsa, bu vaqtgacha ban davom etadi. Null bo'lsa, permanent ban."
+    )
+    is_permanent_ban = models.BooleanField(
+        default=False,
+        help_text="Permanent ban bo'lsa True. Faqat boshqa adminlar ochishi mumkin."
+    )
+    banned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users_banned_by_me"
+    )
 
     objects = CustomUserManager()
     USERNAME_FIELD = "email"
@@ -110,6 +140,70 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         self.clean_phone_number()
         super().save(*args, **kwargs)
+    
+    def is_active_ban(self, page: str = None) -> bool:
+        """
+        Foydalanuvchi hozir bannalangan yoki yo'qligini tekshirish.
+        
+        Args:
+            page (str): Qaysi page uchun ban tekshirish (masalan 'admin_login')
+                        Null bo'lsa, umumiy ban holatini qaytaradi
+        
+        Returns:
+            bool: Agarda ban qo'yilgan bo'lsa True
+        """
+        if page and self.banned_for != page:
+            return False
+        
+        # Agar permanent ban bo'lsa
+        if self.is_permanent_ban and self.banned_for:
+            return True
+        
+        # Vaqtli ban bo'lsa, vaqtni tekshirish
+        if self.ban_until:
+            if timezone.now() < self.ban_until:
+                return True
+            else:
+                # Ban vaqti tugagan, avtomatik ochish
+                self.banned_for = None
+                self.ban_until = None
+                self.is_permanent_ban = False
+                self.save(update_fields=['banned_for', 'ban_until', 'is_permanent_ban'])
+                return False
+        
+        return False
+    
+    def ban_user(self, page: str, duration_seconds: int = None, reason: str = None, banned_by = None, is_permanent: bool = False):
+        """
+        Foydalanuvchini ban qilish.
+        
+        Args:
+            page (str): Qaysi page uchun ban (masalan 'admin_login')
+            duration_seconds (int): Vaqtli ban bo'lsa, necha sekundga ban (default None = permanent)
+            reason (str): Ban sababi
+            banned_by: Ban qo'ygan admin user
+            is_permanent (bool): Permanent ban bo'lsa True
+        """
+        self.banned_for = page
+        self.ban_reason = reason
+        self.banned_by = banned_by
+        self.is_permanent_ban = is_permanent
+        
+        if is_permanent:
+            self.ban_until = None
+        elif duration_seconds:
+            self.ban_until = timezone.now() + timezone.timedelta(seconds=duration_seconds)
+        
+        self.save()
+    
+    def unban_user(self):
+        """Ban olib tashlash."""
+        self.banned_for = None
+        self.ban_until = None
+        self.ban_reason = None
+        self.is_permanent_ban = False
+        self.banned_by = None
+        self.save()
 
 
 class Seller(models.Model):
