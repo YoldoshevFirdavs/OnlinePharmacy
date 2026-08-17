@@ -90,13 +90,13 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "security.middleware.BanMiddleware",  # Ban middleware (before auth)
+    "security.middleware.BanMiddleware",  # NEW: Ban middleware with 403 direct response
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "config.middleware.DeviceFingerprintMiddleware",
-    "config.middleware.BanCheckMiddleware",
+    # "config.middleware.DeviceFingerprintMiddleware",  # DISABLED: Replaced by BanMiddleware
+    # "config.middleware.BanCheckMiddleware",  # DISABLED: Replaced by BanMiddleware
     "config.middleware.CustomErrorMiddleware",
 ]
 

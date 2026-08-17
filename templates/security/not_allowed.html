@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirishga Ruxsat Berilmagan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status.temporary {
+            background-color: #FFF3CD;
+            color: #856404;
+        }
+        
+        .status.permanent {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .reason {
+            background-color: #F5F5F5;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+            border-radius: 6px;
+        }
+        
+        .reason-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .reason-text {
+            color: #666;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #FAFAFA;
+            border-radius: 6px;
+        }
+        
+        .detail-item {
+            text-align: left;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5568d3;
+        }
+        
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+        
+        .support {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #EEE;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .support-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .support-contact {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .support-link {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .support-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        .timer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .code {
+            font-family: "Courier New", monospace;
+            font-size: 11px;
+            color: #999;
+            word-break: break-all;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .icon {
+                font-size: 60px;
+            }
+            
+            .details {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚫</div>
+        
+        <h1>Kirishga Ruxsat Berilmagan</h1>
+        
+        <div class="status {% if ban.ban_type == 'temporary' %}temporary{% else %}permanent{% endif %}">
+            {% if ban.ban_type == 'temporary' %}
+                ⏱️ Vaqtli Blok
+            {% else %}
+                🔒 Doimiy Blok
+            {% endif %}
+        </div>
+        
+        <!-- Reason -->
+        <div class="reason">
+            <div class="reason-title">📋 Blok Sababi</div>
+            <div class="reason-text">{{ ban.reason }}</div>
+        </div>
+        
+        <!-- Details -->
+        <div class="details">
+            <div class="detail-item">
+                <div class="detail-label">Blok Vaqti</div>
+                <div class="detail-value">{{ ban.created_at|date:"d.m.Y H:i:s" }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Blok Turi</div>
+                <div class="detail-value">
+                    {% if ban.ban_type == 'temporary' %}
+                        Vaqtli ({{ ban.attempts }} xato)
+                    {% else %}
+                        Doimiy
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if ban.expires_at %}
+            <div class="detail-item">
+                <div class="detail-label">Tugash Vaqti</div>
+                <div class="detail-value">{{ ban.expires_at|date:"d.m.Y H:i:s" }}</div>
+            </div>
+            {% endif %}
+            
+            <div class="detail-item">
+                <div class="detail-label">Manba</div>
+                <div class="detail-value">{{ ban.get_created_by_display }}</div>
+            </div>
+            
+            {% if ban.source %}
+            <div class="detail-item">
+                <div class="detail-label">URL</div>
+                <div class="detail-value">{{ ban.source }}</div>
+            </div>
+            {% endif %}
+            
+            {% if ip %}
+            <div class="detail-item">
+                <div class="detail-label">IP Manzil</div>
+                <div class="detail-value">{{ ip }}</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Timer for temporary ban -->
+        {% if ban.ban_type == 'temporary' and ban.expires_at %}
+        <div class="timer">
+            <strong>Blok hali</strong> <span id="countdown"></span> <strong>vaqt qoldi</strong>
+        </div>
+        {% endif %}
+        
+        <!-- Actions -->
+        <div class="actions">
+            {% if ban.ban_type == 'temporary' %}
+            <a href="javascript:location.reload()" class="btn btn-primary">🔄 Qayta Urinib Ko'rish</a>
+            {% endif %}
+            <a href="/" class="btn btn-secondary">🏠 Bosh Sahifa</a>
+        </div>
+        
+        <!-- Support -->
+        <div class="support">
+            <div class="support-title">📞 Yordam Kerakmi?</div>
+            <div class="support-contact">
+                {% if support_email %}
+                <a href="mailto:{{ support_email }}" class="support-link">📧 {{ support_email }}</a>
+                {% endif %}
+                {% if support_phone %}
+                <a href="tel:{{ support_phone }}" class="support-link">☎️ {{ support_phone }}</a>
+                {% endif %}
+            </div>
+            <div style="margin-top: 15px; font-size: 11px; color: #CCC;">
+                <span class="code">{{ ban.fingerprint|default:"" }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Countdown timer for temporary ban
+        {% if ban.ban_type == 'temporary' and ban.expires_at %}
+        (function() {
+            const expiresAt = new Date('{{ ban.expires_at|date:"Y-m-d\TH:i:s.000000Z" }}').getTime();
+            
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const diff = expiresAt - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('countdown').textContent = '0 daqiqa';
+                    return;
+                }
+                
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('countdown').textContent = `${minutes} daqiqa ${seconds} soniya`;
+                
+                setTimeout(updateCountdown, 1000);
+            }
+            
+            updateCountdown();
+        })();
+        {% endif %}
+    </script>
+</body>
+</html>
