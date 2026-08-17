@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict hvOxKypVCFA95MRv7IsD0c1AB8mtikyL6CzjWpU686zwcSFsOXrxPw861d8eEzz
+\restrict 9IQygKJ13KLszVrggZH44HHDkV4SvTwL9e4YCC7aMQTOgJ7R4Ht381c8aUPpnO6
 
 -- Dumped from database version 15.19 (Debian 15.19-1.pgdg13+2)
 -- Dumped by pg_dump version 15.19 (Debian 15.19-1.pgdg13+2)
@@ -2400,6 +2400,7 @@ COPY public.pharmacy_medicine (id, name, slug, average_rating, reviews_count, pr
 668	Statement Price	list-campaign-son	1.45	320	526.48	151	t	Partner tax out far different direction specific cause put agency mouth radio pattern.	Write everyone gun grow recent perform act peace range evening very food culture at TV.	Along way onto them government environment decade meeting.	Statement red environmental interesting may various central five also.	Look part remember serious black same learn determine.	t		2026-08-17 18:13:30.646111+00	22	\N
 669	Green However	certainly-tax-seem	3.37	356	960.80	145	t	Bad fill even goal notice particular society lawyer.	Nature ask gun figure operation couple girl tree ahead describe.	Behavior college continue heart best collection although clear similar true.	We stuff focus open imagine national school.	Fall perform throw statement more brother soldier.	f		2026-08-17 18:13:30.646129+00	22	\N
 670	Oil Pass	positive-occur-size	4.65	307	219.80	281	t	Clearly treatment paper deep together almost training notice fire part seek southern product.	Maintain know race artist floor significant admit past walk.	Nearly side onto production throughout key artist certain thought.	Itself decide suggest movement approach live news.	Remember million finish happy.	f		2026-08-17 18:13:30.646147+00	22	\N
+671	Ukol	ukol	0.00	0	100000.00	2324	t	fadfsdfgdfsgd	sdfgdsgdfgsdfgdsf	fdsgdsfsgfgs	dfgsgdsfgfd		f		2026-08-17 19:08:49.21379+00	21	\N
 \.
 
 
@@ -2540,6 +2541,7 @@ COPY public.security_auditlog (id, action, description, ip_address, "timestamp",
 90	created	Category 'Weiss PLC' was created.	\N	2026-08-17 18:13:30.414426+00	\N
 91	created	Category 'Smith-Hughes' was created.	\N	2026-08-17 18:13:30.448386+00	\N
 92	created	Category 'Sullivan-Palmer' was created.	\N	2026-08-17 18:13:30.478562+00	\N
+93	created	Medicine 'Ukol' was created.	172.18.0.7	2026-08-17 19:08:49.743268+00	2
 \.
 
 
@@ -2606,7 +2608,7 @@ COPY public.users_adminlogintoken (id, created_at, expires_at, used, user_id, to
 COPY public.users_customuser (id, password, last_login, is_superuser, phone_number, telegram_id, auth_code, is_verified, full_name, address, avatar, date_joined, is_active, is_staff, bad_comments_count, is_banned, email, role, ban_reason, ban_until, banned_by_id, banned_for, is_permanent_ban) FROM stdin;
 1		2026-08-17 14:38:12.692599+00	f	\N	\N	\N	f	Yo'ldashev Firdavs		users_profile_avatars/macos-27-golden-4480x3088-26625.png	2026-08-17 08:23:56.358044+00	t	f	0	f	firdavsyoldoshevpython@gmail.com	user	\N	\N	\N	\N	f
 3	pbkdf2_sha256$870000$tAcYNCRLyoihbXIUPtjS7M$cAWSWfuAQg9J2qhmpQT8UWGqcScTlc0znR6qXLydGpU=	2026-08-17 14:32:26.214922+00	t	\N	\N	\N	f				2026-08-17 14:31:24.015709+00	t	t	0	f	yoldoshevfdev@gmail.com	admin	\N	\N	\N	\N	f
-2		2026-08-17 18:28:38.569796+00	t	+998977705558	\N	\N	t	Yo'ldashev Firdavs	Navoiy viloyati	users_profile_avatars/f1.png	2026-08-17 08:29:09.654638+00	t	t	0	f	yoldoshev.firdavs67@gmail.com	admin	\N	\N	\N	\N	f
+2		2026-08-17 19:26:24.154329+00	t	+998977705558	\N	\N	t	Yo'ldashev Firdavs	Navoiy viloyati	users_profile_avatars/f1.png	2026-08-17 08:29:09.654638+00	t	t	0	f	yoldoshev.firdavs67@gmail.com	admin	\N	\N	\N	\N	f
 \.
 
 
@@ -2798,7 +2800,7 @@ SELECT pg_catalog.setval('public.pharmacy_flashsale_id_seq', 1, false);
 -- Name: pharmacy_medicine_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pharmacy_admin
 --
 
-SELECT pg_catalog.setval('public.pharmacy_medicine_id_seq', 670, true);
+SELECT pg_catalog.setval('public.pharmacy_medicine_id_seq', 671, true);
 
 
 --
@@ -2840,7 +2842,7 @@ SELECT pg_catalog.setval('public.pharmacy_stocklog_id_seq', 1, false);
 -- Name: security_auditlog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pharmacy_admin
 --
 
-SELECT pg_catalog.setval('public.security_auditlog_id_seq', 92, true);
+SELECT pg_catalog.setval('public.security_auditlog_id_seq', 93, true);
 
 
 --
@@ -4220,5 +4222,5 @@ ALTER TABLE ONLY public.users_telegrambotuser
 -- PostgreSQL database dump complete
 --
 
-\unrestrict hvOxKypVCFA95MRv7IsD0c1AB8mtikyL6CzjWpU686zwcSFsOXrxPw861d8eEzz
+\unrestrict 9IQygKJ13KLszVrggZH44HHDkV4SvTwL9e4YCC7aMQTOgJ7R4Ht381c8aUPpnO6
 
