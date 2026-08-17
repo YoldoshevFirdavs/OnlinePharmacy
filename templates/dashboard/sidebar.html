@@ -76,9 +76,17 @@
                 </a>
             </li>
 
+            <!-- Banlar -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'ban_list' %} active{% endif %}">
+                <a href="{% url 'dashboard:ban_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>Banlar</span>
+                </a>
+            </li>
+
             <!-- Account -->
-            <li class="sidebar-item{% if request.resolver_match.url_name == 'account_settings' %} active{% endif %}">
-                <a href="{% url 'dashboard:account_settings' %}" class="sidebar-link">
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'account_dashboard' %} active{% endif %}">
+                <a href="{% url 'dashboard:account_dashboard' %}" class="sidebar-link">
                     <i class="fa-solid fa-user-gear"></i>
                     <span>Account</span>
                 </a>

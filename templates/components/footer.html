@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/";
           } else {
             const err = await response.json();
-            alert("Xato: " + (err.detail || err.email || "Nimadir xato ketdi"));
+            alert("Xatolik: " + (err.detail || err.email || "Nimadir xatolik yuz berdi"));
           }
       }
     } catch (err) {

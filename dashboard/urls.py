@@ -28,6 +28,7 @@ from .views import (
     user_create,
     user_edit,
     user_list,
+    ban_list,  # Added ban list view
 )
 
 app_name = "dashboard"
@@ -54,6 +55,7 @@ urlpatterns = [
     path("users/<int:pk>/edit/", user_edit, name="user_edit"),
     path("orders/", order_list, name="order_list"),
     path("audit-log/", audit_log_list, name="audit_log_list"),
+    path("bans/", ban_list, name="ban_list"),  # Added ban list URL
     path("customize/", dashboard_customize, name="dashboard_customize"),
     path("delivery/", delivery_list, name="delivery_list"),
     path("delivery/create/", delivery_create, name="delivery_create"),

@@ -51,13 +51,13 @@ urlpatterns = [
     path("subscribers/", SubscriberCreateView.as_view(), name="subscribers-list"),
     path(
         "admin/login/",
-        AdminLoginViewSet.as_view({"post": "create", "get": "verify"}),
+        AdminLoginViewSet.as_view({"post": "create"}),
         name="admin_login",
     ),
     path(
-        "admin/login/verify-otp/",
+        "admin/verify-otp/",
         AdminLoginViewSet.as_view({"post": "verify_otp"}),
-        name="admin_login_verify_otp",
+        name="verify_otp",
     ),
     path("payments/stripe-config/", StripeConfigView.as_view(), name="stripe_config"),
     path("logout/", LogoutView.as_view(), name="logout"),

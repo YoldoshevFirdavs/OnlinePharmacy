@@ -149,7 +149,7 @@ def login_required_decorator(function=None, redirect_field_name="next", login_ur
 
 def is_admin(user):
     try:
-        return user.is_authenticated and user.is_staff
+        return user.is_authenticated and getattr(user, 'role', None) == 'admin'
     except Exception as e:
         logger.error(f"Error checking admin status: {str(e)}")
         return False
@@ -159,8 +159,7 @@ def is_seller(user):
     try:
         return (
             user.is_authenticated
-            and hasattr(user, "seller")
-            and user.seller is not None
+            and getattr(user, 'role', None) == 'seller'
         )
     except Exception as e:
         logger.error(f"Error checking seller status: {str(e)}")
@@ -1106,3 +1105,28 @@ def is_deliverer(user):
         return hasattr(user, "deliverer") and user.deliverer is not None
     except Exception:
         return False
+
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET"])
+def ban_list(request):
+    """Bannalangan foydalanuvchilar ro'yxati."""
+    try:
+        from django.utils import timezone
+        
+        # Vaqtli va permanent banlar
+        banned_users = CustomUser.objects.filter(
+            banned_for__isnull=False
+        ).select_related('banned_by').order_by('-ban_until', '-date_joined')
+        
+        ctx = {
+            "banned_users": banned_users,
+            "now": timezone.now(),
+        }
+        return render(request, "dashboard/bans/list.html", ctx)
+    except Exception as query_error:
+        logger.error(f"Database query error in ban_list: {str(query_error)}")
+        messages.error(request, "Banlar ro'yxatini yuklashda xatolik yuz berdi.")
+        return render(request, "dashboard/bans/list.html", {"banned_users": []})

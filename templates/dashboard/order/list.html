@@ -36,19 +36,38 @@
                 <span>{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
             </div>
         </td>
-        <td>{{ order.items.count|default:"0" }}</td>
+        <td>{{ order.order_items.count|default:"0" }}</td>
         <td><strong>{{ order.total_price|default:"0" }} so'm</strong></td>
         <td>
             <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Pending' %}warning{% elif order.status == 'Cancelled' %}error{% else %}info{% endif %}">
                 {{ order.status|default:"—" }}
             </span>
         </td>
-        <td>{{ order.driver|default:"Tayinlanmagan" }}</td>
+        <td>
+            {% if order.deliveryorder.driver %}
+                {{ order.deliveryorder.driver.user.full_name|default:"—" }}
+            {% else %}
+                <span style="color: #999;">Tayinlanmagan</span>
+            {% endif %}
+        </td>
         <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
         <td>
             <div class="table-actions">
-                <button class="btn btn--sm btn--ghost" title="Ko'rish">
+                <button class="btn btn--sm btn--ghost order-view-btn" 
+                        type="button" 
+                        data-order-id="{{ order.id }}"
+                        title="Ko'rish">
                     <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn btn--sm btn--ghost" 
+                        type="button"
+                        title="Tahrirlash">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn--sm btn--ghost btn--danger" 
+                        type="button"
+                        title="O'chirish">
+                    <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
         </td>
@@ -62,4 +81,296 @@
         </td>
     </tr>
 {% endif %}
+{% endblock %}
+
+{% block extra_content %}
+<!-- Order Detail Modal -->
+<div id="orderDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px;">
+    <div style="background: white; border-radius: 16px; max-width: 700px; margin: 60px auto; max-height: 80vh; overflow-y: auto; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="margin: 0; color: #2c3e50; font-size: 24px;">Buyurtma ma'lumotlari</h2>
+            <button type="button" id="closeOrderModal" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #999;">&times;</button>
+        </div>
+        
+        <div id="orderDetailContent" style="min-height: 300px;">
+            <div style="text-align: center; padding: 40px;">
+                <i class="fa-solid fa-spinner" style="font-size: 32px; color: #6a00f4; animation: spin 1s linear infinite;"></i>
+                <p style="margin-top: 16px; color: #999;">Yuklanmoqda...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.order-modal-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e5ea;
+}
+
+.order-modal-section:last-child {
+    border-bottom: none;
+}
+
+.order-modal-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6a00f4;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.order-modal-value {
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.order-modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.order-modal-row.full {
+    grid-template-columns: 1fr;
+}
+
+.order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+}
+
+.order-items-table th {
+    background: #f5f5f7;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #e5e5ea;
+}
+
+.order-items-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e5ea;
+    color: #34495e;
+}
+
+.order-items-table tr:last-child td {
+    border-bottom: none;
+}
+
+.order-status-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.order-status-tag.delivered {
+    background: #d4edda;
+    color: #155724;
+}
+
+.order-status-tag.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.order-status-tag.processing {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.order-status-tag.canceled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.driver-info-box {
+    background: #f9f9f9;
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #6a00f4;
+}
+
+.driver-info-box.empty {
+    background: #f5f5f7;
+    border-left-color: #ccc;
+    color: #999;
+    font-style: italic;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('orderDetailModal');
+    const closeBtn = document.getElementById('closeOrderModal');
+    const viewBtns = document.querySelectorAll('.order-view-btn');
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const orderId = this.dataset.orderId;
+            modal.style.display = 'flex';
+            
+            try {
+                const response = await fetch(`/api/v1/orders/${orderId}/`);
+                const data = await response.json();
+                
+                let html = '';
+                
+                // Order header
+                html += `
+                    <div class="order-modal-section">
+                        <div class="order-modal-row">
+                            <div>
+                                <div class="order-modal-label">Buyurtma raqami</div>
+                                <div class="order-modal-value">#${data.id}</div>
+                            </div>
+                            <div>
+                                <div class="order-modal-label">Status</div>
+                                <div class="order-modal-value">
+                                    <span class="order-status-tag ${data.status.toLowerCase()}">
+                                        ${data.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-modal-row">
+                            <div>
+                                <div class="order-modal-label">Mijoz ismi</div>
+                                <div class="order-modal-value">${data.user?.full_name || data.user?.phone_number || '—'}</div>
+                            </div>
+                            <div>
+                                <div class="order-modal-label">Buyurtma sanasi</div>
+                                <div class="order-modal-value">${new Date(data.created_at).toLocaleDateString('uz-UZ')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Address
+                if (data.address) {
+                    html += `
+                        <div class="order-modal-section">
+                            <div class="order-modal-label">Yetkazib berish manzili</div>
+                            <div class="order-modal-value" style="line-height: 1.6;">${data.address}</div>
+                        </div>
+                    `;
+                }
+                
+                // Order items
+                if (data.order_items && data.order_items.length > 0) {
+                    html += `
+                        <div class="order-modal-section">
+                            <div class="order-modal-label">Mahsulotlar</div>
+                            <table class="order-items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mahsulot nomi</th>
+                                        <th style="text-align: right;">Miqdori</th>
+                                        <th style="text-align: right;">Narx</th>
+                                        <th style="text-align: right;">Jami</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    data.order_items.forEach(item => {
+                        const total = (item.quantity * item.price_at_order).toFixed(2);
+                        html += `
+                            <tr>
+                                <td>${item.product?.name || 'Noma\'lum mahsulot'}</td>
+                                <td style="text-align: right;">${item.quantity} ta</td>
+                                <td style="text-align: right;">${Number(item.price_at_order).toLocaleString('uz-UZ')} so'm</td>
+                                <td style="text-align: right; font-weight: 600;">${Number(total).toLocaleString('uz-UZ')} so'm</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                // Total price
+                html += `
+                    <div class="order-modal-section" style="border: 2px solid #e5e5ea; padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 16px; font-weight: 600; color: #2c3e50;">Jami summasi:</span>
+                        <span style="font-size: 24px; font-weight: 700; color: #6a00f4;">${Number(data.total_price).toLocaleString('uz-UZ')} so'm</span>
+                    </div>
+                `;
+                
+                // Driver info
+                html += `
+                    <div class="order-modal-section">
+                        <div class="order-modal-label">Yetkazib beruvchi ma'lumotlari</div>
+                `;
+                
+                if (data.delivery_driver) {
+                    html += `
+                        <div class="driver-info-box">
+                            <div style="margin-bottom: 12px;">
+                                <strong>${data.delivery_driver.user?.full_name || '—'}</strong>
+                            </div>
+                            <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                                <i class="fa-solid fa-phone" style="color: #6a00f4; margin-right: 8px;"></i>
+                                ${data.delivery_driver.phone_number || '—'}
+                            </div>
+                            <div style="font-size: 14px; color: #666;">
+                                <i class="fa-solid fa-car" style="color: #6a00f4; margin-right: 8px;"></i>
+                                ${data.delivery_driver.vehicle_info || 'Mashinasi noma\'lum'}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="driver-info-box empty">
+                            <i class="fa-solid fa-inbox" style="margin-right: 8px;"></i>
+                            Hali yetkazib beruvchi tayinlanmagan
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+                
+                document.getElementById('orderDetailContent').innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('orderDetailContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #d32f2f;">
+                        <i class="fa-solid fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 16px; display: block;"></i>
+                        <p>Ma'lumot yuklashda xatolik yuz berdi. Qayta urinib ko'ring.</p>
+                    </div>
+                `;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

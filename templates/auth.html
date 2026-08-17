@@ -1,412 +1,629 @@
 {% load static %}
-{% include 'components/begin.html' %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% include 'components/begin.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirish | OnlinePharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <style>
+        :root {
+            --primary: #6a00f4;
+            --primary-dark: #5000d4;
+            --primary-light: #b084f4;
+            --success: #34c759;
+            --gray-900: #1a1a1a;
+            --gray-800: #2d2d3d;
+            --gray-700: #3e3e4e;
+            --gray-600: #666666;
+            --gray-500: #999999;
+            --gray-300: #e5e5ea;
+            --gray-200: #f5f5f7;
+            --gray-100: #fafafa;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(106,0,244,0.15);
+        }
 
-{% include 'components/header.html' %}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
-<link href="{% static 'vendor/fonts/google-fonts.css' %}" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'dashboard/css/loader.css' %}">
-<style>
-    body.auth-page {
-        background-color: #f0f2f5;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-    .auth-page main.content {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-top: 100px;
-        padding-bottom: 40px;
-    }
-    .auth-container {
-        max-width: 550px;
-        margin: 110px auto 40px;
-        padding: 35px;
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        font-family: Arial, sans-serif;
-        position: relative;
-        z-index: 1;
-    }
-    .auth-subtitle {
-        text-align: center;
-        color: #666;
-        margin-top: -15px;
-        margin-bottom: 30px;
-        font-size: 15px;
-    }
-    .social-auth-buttons {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-    .btn-social {
-        flex: 1;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #eef0f2;
-        background: #ffffff;
-        color: #333;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .btn-social:hover {
-        background: #f8f9fa;
-        border-color: #dcdcdc;
-    }
-    .btn-social.active {
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-    }
-    .btn-google { color: #ea4335; font-size: 20px; }
-    .btn-telegram { color: #229ED9; font-size: 20px; }
-    
-    .divider {
-        display: flex;
-        align-items: center;
-        text-align: center;
-        margin: 20px 0;
-        color: #999;
-        font-size: 14px;
-    }
-    .divider::before, .divider::after {
-        content: "";
-        flex: 1;
-        border-bottom: 1px solid #eef0f2;
-    }
-    .divider:not(:empty)::before { margin-right: .5em; }
-    .divider:not(:empty)::after { margin-left: .5em; }
+        html, body {
+            height: 100%;
+        }
 
-    .form-group {
-        margin-bottom: 25px;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #555;
-        font-weight: 500;
-        font-size: 14px;
-    }
-    .phone-input-group {
-        display: flex;
-        gap: 12px;
-        position: relative;
-    }
-    
-    .country-selector-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 160px; /* Adjusted width for prefix input */
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background: #ffffff;
-        cursor: pointer;
-        user-select: none;
-        transition: border-color 0.2s;
-        padding: 8px 12px;
-    }
-    .country-selector-wrapper:focus-within {
-        border-color: #007bff;
-    }
-    .country-prefix-input {
-        width: 100%;
-        border: none;
-        outline: none;
-        font-size: 16px;
-        font-weight: bold;
-        text-align: center;
-        padding: 0;
-        margin: 0;
-    }
-    .country-dropdown {
-        position: absolute;
-        top: 100%; /* Position below the selector */
-        left: 0;
-        width: 160px; /* Adjusted width for dropdown */
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        z-index: 100;
-        max-height: 200px;
-        overflow-y: auto;
-        display: none; /* Hidden by default */
-    }
-    .country-dropdown.show {
-        display: block;
-    }
-    .country-item {
-        padding: 10px 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .country-item:hover {
-        background: #f8f9fa;
-    }
-    .country-item img.flag-icon {
-        width: 24px;
-        height: 24px;
-        vertical-align: middle;
-        border-radius: 3px;
-    }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--white) 100%);
+            color: var(--gray-900);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-    .input-field {
-        width: 100%;
-        padding: 14px 16px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background: #ffffff;
-        font-size: 16px;
-        outline: none;
-        transition: border-color 0.2s;
-        box-sizing: border-box;
-    }
-    .input-field:focus {
-        border-color: #007bff;
-    }
-    
-    .btn-primary {
-        width: 100%;
-        padding: 15px;
-        background: #007bff;
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-        margin-top: 15px;
-    }
-    .btn-primary:hover {
-        background: #0069d9; 
-    }
-    .btn-primary:disabled {
-        background: #cccccc;
-        cursor: not-allowed;
-    }
-    .hidden-field {
-        display: none;
-    }
-    .error-message {
-        color: #dc3545;
-        font-size: 13px;
-        margin-top: 5px;
-    }
-    /* Styles for OTP popup */
-    .otp-popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-    .otp-popup-content {
-        background: #fff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        text-align: center;
-        position: relative;
-        max-width: 400px;
-        width: 90%;
-    }
-    .otp-popup-close {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        color: #aaa;
-    }
-    .otp-popup-close:hover {
-        color: #333;
-    }
-    .otp-popup-title {
-        margin-top: 0;
-        color: #333;
-    }
-    .otp-input-field {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 18px;
-        text-align: center;
-        letter-spacing: 5px;
-    }
-    .otp-timer-container {
-        margin-bottom: 15px;
-    }
-    .otp-resend-btn {
-        background: none;
-        border: none;
-        color: #007bff;
-        cursor: pointer;
-        font-size: 14px;
-        margin-top: 5px;
-    }
-    .otp-resend-btn:disabled {
-        color: #ccc;
-        cursor: not-allowed;
-    }
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
 
-    /* Error Banner Styles */
-    #auth-error-banner {
-        background-color: #f8d7da; /* Light red background */
-        color: #721c24; /* Dark red text */
-        border: 1px solid #f5c6cb;
-        border-radius: 5px;
-        padding: 10px 15px;
-        margin-bottom: 20px;
-        text-align: center;
-        font-weight: bold;
-        display: none; /* Hidden by default */
-    }
-    /* Login mode toggle button */
-    .login-mode-toggle {
-        text-align: center;
-        margin-top: 15px;
-    }
-    .btn-link {
-        background: none;
-        border: none;
-        color: #007bff;
-        cursor: pointer;
-        text-decoration: underline;
-    }
-</style>
-<style>
-    /* Footer layout fix */
-    footer, .site-footer {
-        margin-top: auto;
-    }
-</style>
-{% endblock %}
+        /* AUTH CONTAINER */
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 48px 40px;
+        }
 
-{% block content %}
-<div class="tetris-loader-root" id="loader">
-  <div class="tetris-loader">
-    <span class="tetris-block">L</span>
-    <span class="tetris-block">O</span>
-    <span class="tetris-block">A</span>
-    <span class="tetris-block">D</span>
-    <span class="tetris-block">I</span>
-    <span class="tetris-block">N</span>
-    <span class="tetris-block">G</span>
-  </div>
-  <div class="tetris-loader-text">Loading</div>
-</div>
-<link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-<main>
-    <div class="auth-container">
-        <div id="login-section">
-            <h3 style="text-align: center; margin-bottom: 5px; color: #333;">Tizimga kirish</h3>
-            <p class="auth-subtitle">Online Pharmacy — sog‘lom hayot uchun</p>
-            
-            <div id="auth-error-banner" style="display: none;"></div>
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-lg);
+        }
 
-            <div class="social-auth-buttons">
-                <a href="#" class="btn-social active" id="gmail-login">
-                    <i class="fa-brands fa-google btn-google"></i> Gmail
-                </a>
-                <a href="#" class="btn-social" id="telegram-login">
-                    <i class="fa-brands fa-telegram btn-telegram"></i> Telegram
-                </a>
+        .auth-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* FORM TABS */
+        .form-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--gray-300);
+        }
+
+        .form-tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            font-weight: 600;
+            color: var(--gray-600);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .form-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .form-tab:hover:not(.active) {
+            color: var(--gray-900);
+        }
+
+        /* FORM SECTIONS */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* FORM GROUP */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 0.95rem;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--white);
+            color: var(--gray-900);
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106,0,244,0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-500);
+        }
+
+        /* PHONE INPUT GROUP */
+        .phone-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .country-code {
+            width: 110px;
+            flex-shrink: 0;
+        }
+
+        .phone-number {
+            flex: 1;
+        }
+
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-900);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        /* SOCIAL AUTH */
+        .social-auth {
+            margin-bottom: 30px;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-social {
+            padding: 12px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: 10px;
+            background: var(--white);
+            color: var(--gray-900);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-social:hover {
+            border-color: var(--primary);
+            background: rgba(106,0,244,0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-social i {
+            font-size: 1.3rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--gray-300);
+        }
+
+        /* HELPER TEXT */
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .helper-text i {
+            font-size: 0.8rem;
+        }
+
+        /* ERROR STATE */
+        .form-input.error,
+        .form-select.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* LOADING */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gray-300);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* FOOTER LINK */
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--gray-300);
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 32px 24px;
+                border-radius: 12px;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+
+            .auth-logo {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+
+            .social-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .phone-group {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .country-code {
+                width: 100%;
+            }
+
+            .country-code .form-select {
+                border-radius: 10px 10px 0 0;
+                margin-bottom: 0;
+            }
+
+            .phone-number .form-input {
+                border-radius: 0 0 10px 10px;
+                border-top: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'components/header.html' %}
+
+    <main>
+        <div class="auth-container">
+            <!-- HEADER -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h1 class="auth-title">Kirish</h1>
+                <p class="auth-subtitle">OnlinePharmacy-ga kirish uchun telefon raqamingizni kiriting</p>
             </div>
 
-            <form id="auth-form">
-                {% csrf_token %}
+            <!-- FORM TABS -->
+            <div class="form-tabs">
+                <button class="form-tab active" data-tab="telegram">
+                    <i class="fab fa-telegram" style="margin-right: 6px;"></i>
+                    Telegram
+                </button>
+                <button class="form-tab" data-tab="credentials">
+                    <i class="fas fa-key" style="margin-right: 6px;"></i>
+                    Email/Parol
+                </button>
+            </div>
 
-                <div class="form-group" id="name-group">
-                    <label for="full_name">Ism</label>
-                    <input type="text" id="full_name" name="full_name" class="input-field" placeholder="Ismingizni kiriting" required>
-                </div>
-
-                <div class="form-group" id="email-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" class="input-field" placeholder="example@mail.com">
-                    <span id="email-validator" class="error-message"></span>
-                </div>
-
-                <div class="form-group hidden-field" id="phone-group">
-                    <label for="phone">Telefon raqam</label>
-                    <div class="phone-input-group">
-                        <div id="country-selector" class="country-selector-wrapper" tabindex="0">
-                            <img src="{% static 'flags/1x1/uz.svg' %}" alt="Uzbekistan Flag" class="flag-icon" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; border-radius: 3px;">
-                            <input type="text" id="country-prefix-input" class="country-prefix-input" value="+998" maxlength="5">
-                        </div>
-                        <div id="country-dropdown" class="country-dropdown">
-                            <div id="country-list"></div>
-                        </div>
-                        <input type="text" id="phone" name="phone_number" class="input-field" placeholder="99 999 99 99" autocomplete="off">
+            <!-- TELEGRAM LOGIN FORM -->
+            <form id="telegramForm" class="form-section active">
+                <div class="social-auth">
+                    <div class="social-buttons">
+                        <button type="button" class="btn-social" id="telegramOAuth">
+                            <i class="fab fa-telegram"></i>
+                            Telegram
+                        </button>
+                        <button type="button" class="btn-social" id="googleOAuth">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
                     </div>
-                    <span id="phone-error-message" class="error-message"></span>
-                </div>
-                
-                <!-- FIX: Added password field for admin login -->
-                <div class="form-group hidden-field" id="password-group">
-                    <label for="password">Parol</label>
-                    <input type="password" id="password" name="password" class="input-field" placeholder="Parolni kiriting">
+                    <div class="divider">yoki</div>
                 </div>
 
-                <button type="button" id="get-code-btn" class="btn-primary" disabled>Kod olish</button>
-                <!-- FIX: Added separate button for password login -->
-                <button type="button" id="login-with-password-btn" class="btn-primary hidden-field">Kirish</button>
+                <div class="form-group">
+                    <label>Telefon Raqami</label>
+                    <div class="phone-group">
+                        <select class="form-select country-code" id="countryCode">
+                            <option value="+998">🇺🇿 +998</option>
+                            <option value="+7">🇷🇺 +7</option>
+                            <option value="+1">🇺🇸 +1</option>
+                        </select>
+                        <input 
+                            type="tel" 
+                            class="form-input phone-number" 
+                            id="phoneNumber" 
+                            placeholder="90 123 45 67"
+                            autocomplete="tel"
+                        >
+                    </div>
+                    <div class="helper-text">
+                        <i class="fas fa-info-circle"></i>
+                        <span>9 ta raqam kiriting</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    OTP Yuborish
+                </button>
             </form>
 
-            <!-- FIX: Added toggle button for admin login mode -->
-            <div class="login-mode-toggle">
-                <button id="login-mode-toggle-btn" class="btn-link hidden-field">Parol bilan kirish</button>
+            <!-- CREDENTIALS LOGIN FORM -->
+            <form id="credentialsForm" class="form-section">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input 
+                        type="email" 
+                        class="form-input" 
+                        id="email" 
+                        placeholder="example@mail.com"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Parol</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="password" 
+                        placeholder="Parolingizni kiriting"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Kirish
+                </button>
+            </form>
+
+            <!-- FOOTER -->
+            <div class="auth-footer">
+                Akkauntingiz yo'qmi? 
+                <a href="/account/">Ro'yxatdan o'tish</a>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-{# OTP Popup structure #}
-<div class="otp-popup-overlay" id="otp-popup" style="display: none;">
-    <div class="otp-popup-content">
-        <span class="otp-popup-close" id="otp-popup-close-btn">&times;</span>
-        <h2 class="otp-popup-title">OTP kiriting</h2>
-        <p id="otp-message" style="margin: 10px 0; font-size: 14px; color: #555;"></p>
-        <input type="text" id="otp-popup-input" class="form-control otp-input-field" placeholder="XXXXXX" maxlength="6">
-        <div class="otp-timer-container" style="margin: 10px 0;">
-            <span id="otp-timer-display" style="font-weight: bold;"></span>
-            <button id="otp-popup-resend-btn" class="btn btn-link otp-resend-btn" disabled>OTPni qayta yuborish</button>
-        </div>
-        <button id="otp-popup-verify-btn" class="btn btn-primary mt-3" style="width: 100%; padding: 10px; background: #007bff; border: none; border-radius: 5px; color: white;">Tasdiqlash</button>
-    </div>
-</div>
+    {% include 'components/footer.html' %}
 
-{% include 'components/footer.html' %}
-{% endblock %}
+    <script>
+        // Form Tab Switching
+        document.querySelectorAll('.form-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                // Remove active from all tabs and sections
+                document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+                
+                // Add active to clicked tab and corresponding section
+                this.classList.add('active');
+                document.getElementById(tabName + 'Form').classList.add('active');
+            });
+        });
 
-{% block extra_js %}
-<script type="module" src="{% static 'js/auth.js' %}"></script>
-<script type="module" src="{% static 'js/footer.js' %}"></script>
-<script type="module" src="{% static 'js/header.js' %}"></script>
+        // Telegram Form Handler
+        document.getElementById('telegramForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const countryCode = document.getElementById('countryCode').value;
+            const fullPhone = countryCode + phoneNumber;
 
-{% endblock %}
+            if (!phoneNumber || phoneNumber.length < 9) {
+                alert('Iltimos, to\'g\'ri telefon raqamini kiriting');
+                return;
+            }
+
+            // Send to API
+            try {
+                const response = await fetch('/api/v1/admin/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'request_otp',
+                        phone_number: fullPhone
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('OTP yuborildi: ' + data.message);
+                } else {
+                    const error = await response.json();
+                    alert('Xatolik: ' + (error.error || error.message || 'Noma\'lum xatolik'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Serverga ulanishda xatolik');
+            }
+        });
+
+        // Credentials Form Handler
+        document.getElementById('credentialsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Iltimos, email va parolni kiriting');
+                return;
+            }
+
+            // Send to API
+            try {
+                const response = await fetch('/api/v1/admin/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'credentials',
+                        email: email,
+                        password: password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    window.location.href = data.redirect || '/account/';
+                } else {
+                    const error = await response.json();
+                    alert('Xatolik: ' + (error.error || error.message || 'Email yoki parol noto\'g\'ri'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Serverga ulanishda xatolik');
+            }
+        });
+
+        // Get CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+
+</body>
+</html>

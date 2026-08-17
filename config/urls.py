@@ -10,7 +10,7 @@ from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
-from users.views import AccountView, AdminCheckView, AdminLoginViewSet, auth_view
+from users.views import AccountView, AdminCheckView, AdminLoginViewSet, auth_view, SubscriptionVerifyPageView
 
 
 class JWTSchemaGenerator(OpenAPISchemaGenerator):
@@ -58,6 +58,7 @@ urlpatterns = [
     path("auth/", auth_view, name="auth"),
     path("account/", AccountView.as_view(), name="account"),
     path("check/admin/", AdminCheckView.as_view(), name="admin_check"),
+    path("subscribe/<str:token>/", SubscriptionVerifyPageView.as_view(), name="subscribe_verify"),
     path("admin/", admin.site.urls),
     path("dashboard/login/", RedirectView.as_view(url="/auth/")),
     path("dashboard/logout/", custom_logout_view),
@@ -71,7 +72,7 @@ urlpatterns = [
         AdminLoginViewSet.as_view({"post": "create"}),
         name="admin_login_alias",
     ),
-    path("api/v1/pharmacy/", include("pharmacy.urls")),
+    path("api/v1/pharmacy/", include("pharmacy.urls", namespace='pharmacy')),
     path("api/v1/orders/", include("orders.urls")),
     path("api/v1/payments/", include("payments.urls")),
     path("api/v1/dashboard/", include("dashboard.api_urls", namespace="dashboard_api")),

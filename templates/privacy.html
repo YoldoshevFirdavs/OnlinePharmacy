@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
+            --primary-color: #6a00f4;
             --primary-text: #2c3e50;
             --secondary-text: #34495e;
             --bg-color: #f9f9f9;
@@ -27,6 +28,13 @@
             line-height: var(--line-height);
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
         }
 
         .legal-container {
@@ -56,7 +64,7 @@
             font-weight: 600;
             margin-top: 40px;
             margin-bottom: 20px;
-            border-left: 4px solid #6a00f4;
+            border-left: 4px solid var(--primary-color);
             padding-left: 15px;
         }
 
@@ -98,6 +106,9 @@
 
         @media (max-width: 768px) {
             .content-card { padding: 30px; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            p { font-size: 1rem; }
         }
     </style>
 </head>

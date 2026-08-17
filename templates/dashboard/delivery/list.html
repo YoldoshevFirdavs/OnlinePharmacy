@@ -1,21 +1,21 @@
 {% extends 'dashboard/list.html' %}
 {% load static %}
 
-{% block title %}Delivery Drivers{% endblock %}
+{% block title %}Yetkazib beruvchilar{% endblock %}
 
 {% block page_header %}
 <div class="page-header">
     <div>
         <h1 class="page-header__title">
             <i class="fa-solid fa-truck"></i>
-            Delivery Drivers
+            Yetkazib beruvchilar
         </h1>
-        <p class="page-header__subtitle">Manage all delivery drivers</p>
+        <p class="page-header__subtitle">Barcha yetkazib beruvchilarni boshqarish</p>
     </div>
     <div class="page-header__actions">
         <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
             <i class="fa-solid fa-plus"></i>
-            Add New Driver
+            Yangi yetkazib beruvchi qo'shish
         </a>
     </div>
 </div>
@@ -23,11 +23,11 @@
 
 {% block table_head %}
 <th>ID</th>
-<th>Driver</th>
-<th>Phone</th>
-<th>Vehicle</th>
+<th>Haydovchi</th>
+<th>Telefon</th>
+<th>Mashina</th>
 <th>Status</th>
-<th>Actions</th>
+<th>Amallar</th>
 {% endblock %}
 
 {% block table_body %}
@@ -52,13 +52,13 @@
         </td>
         <td>
             <div class="table__actions">
-                <a href="{% url 'dashboard:delivery_edit' driver.pk %}" class="btn btn--sm btn--ghost" title="Update">
+                <a href="{% url 'dashboard:delivery_edit' driver.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
                 </a>
                 <button type="button"
                         class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
                         data-driver-id="{{ driver.pk }}"
-                        title="Delete">
+                        title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -66,10 +66,10 @@
     </tr>
     {% endfor %}
 {% else %}
-    <tr class="table__empty-row">
-        <td colspan="6">
-            <i class="fa-solid fa-inbox"></i>
-            <span>No drivers found</span>
+    <tr class="table__empty-row" style="height: 300px;">
+        <td colspan="6" style="text-align: center; vertical-align: middle;">
+            <i class="fa-solid fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 16px; display: block;"></i>
+            <span style="color: #999; font-size: 16px;">Yetkazib beruvchilar topilmadi</span>
         </td>
     </tr>
 {% endif %}

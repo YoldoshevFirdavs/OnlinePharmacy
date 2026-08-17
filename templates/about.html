@@ -5,651 +5,961 @@
     {% include "components/begin.html" %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="OnlinePharmacy — O‘zbekistondagi oilangiz salomatligi uchun ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.">
-    <title>Biz haqimizda | OnlinePharmacy — Ishonchli Onlayn Dorixona</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="OnlinePharmacy — O'zbekistondagi ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.">
+    <title>Biz haqimizda | OnlinePharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <style>
         :root {
-            --primary-color: #6a00f4;
+            --primary: #6a00f4;
+            --primary-dark: #5000d4;
             --primary-light: #b084f4;
-            --secondary-color: #f4f4f9;
-            --text-dark: #2c3e50;
-            --text-light: #5a6a7a;
-            --border-color: #e8e8e8;
+            --secondary: #f4f4f9;
+            --success: #34c759;
+            --warning: #ff9500;
+            --dark: #0f1120;
+            --gray-900: #1a1a1a;
+            --gray-800: #2d2d3d;
+            --gray-700: #3e3e4e;
+            --gray-600: #666666;
+            --gray-500: #999999;
+            --gray-300: #e5e5ea;
+            --gray-200: #f5f5f7;
+            --gray-100: #fafafa;
             --white: #ffffff;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
-            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(106,0,244,0.15);
         }
 
-        .about-page {
-            background-color: var(--white);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--white);
+            color: var(--gray-900);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
         }
 
         .container {
-            max-width: 1140px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        .page-content {
-            padding-top: 60px;
-            padding-bottom: 60px;
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            padding: 120px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            text-align: center;
+            overflow: hidden;
         }
 
-        .page-section {
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* SECTION STYLES */
+        .section {
             padding: 80px 0;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--gray-200);
         }
 
-        .page-section:last-child {
+        .section:last-child {
             border-bottom: none;
         }
 
-        .page-section.bg-light {
-            background-color: var(--secondary-color);
-            margin: 0 -20px; /* Extend background to container edges */
-            padding: 80px 20px;
+        .section.bg-light {
+            background: var(--gray-100);
         }
 
         .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 20px;
             text-align: center;
-            margin-bottom: 24px;
         }
 
-        .section-intro {
+        .section-subtitle {
             font-size: 1.1rem;
-            color: var(--text-light);
+            color: var(--gray-600);
             text-align: center;
             max-width: 700px;
             margin: 0 auto 60px;
+            line-height: 1.8;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 24px;
         }
 
         h3 {
             font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
+            font-weight: 700;
+            color: var(--gray-900);
             margin-bottom: 16px;
         }
 
         p {
-            line-height: 1.7;
-            color: var(--text-light);
+            color: var(--gray-600);
+            line-height: 1.8;
             margin-bottom: 16px;
         }
 
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        ul li {
-            position: relative;
-            padding-left: 25px;
-            margin-bottom: 12px;
-            color: var(--text-light);
-        }
-
-        ul li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
+        /* GRID */
         .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin: 0;
         }
 
-        .col-md-6, .col-lg-4, .col-md-4 {
-            padding: 0 15px;
-            box-sizing: border-box;
+        .row.row-2 {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         }
 
-        .col-md-6 { width: 50%; }
-        .col-lg-4 { width: 33.333%; }
-        .col-md-4 { width: 33.333%; }
-
-        @media (max-width: 992px) {
-            .col-lg-4 { width: 50%; }
+        .row.row-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
+
         @media (max-width: 768px) {
-            .col-md-6, .col-lg-4, .col-md-4 { width: 100%; margin-bottom: 30px; }
-            .row { margin: 0; }
-            .section-title { font-size: 2rem; }
+            .row, .row-2, .row-3 {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
         }
 
-        /* Hero Section */
-        .hero-section.about-hero {
-            position: relative;
-            padding: 100px 0;
-            color: var(--white);
-            text-align: center;
+        /* VALUES LIST */
+        .values-list {
+            list-style: none;
+        }
+
+        .values-list li {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 500px;
-            overflow: hidden;
-        }
-
-        .hero-background-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            z-index: 1;
-        }
-
-        .hero-section::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 3;
-            max-width: 800px;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.2;
+            gap: 16px;
             margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
         }
 
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
+        .values-list li:last-child {
+            border-bottom: none;
         }
 
-        .btn {
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .values-list strong {
+            color: var(--primary);
+            min-width: 80px;
+            display: block;
+            font-weight: 700;
         }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-        .btn-primary:hover {
-            background: var(--primary-light);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-lg {
-            padding: 15px 40px;
-            font-size: 1rem;
-        }
-
-        /* Timeline */
+        /* TIMELINE */
         .timeline {
             position: relative;
-            max-width: 800px;
-            margin: 0 auto;
+            padding: 0;
         }
+
         .timeline::after {
             content: '';
             position: absolute;
             width: 4px;
-            background-color: var(--primary-light);
+            background: var(--primary-light);
             top: 0;
             bottom: 0;
             left: 50%;
-            margin-left: -2px;
+            transform: translateX(-50%);
         }
+
         .timeline-item {
-            padding: 10px 40px;
-            position: relative;
+            margin-bottom: 50px;
             width: 50%;
+            position: relative;
         }
-        .timeline-item:nth-child(odd) { left: 0; }
-        .timeline-item:nth-child(even) { left: 50%; }
-        .timeline-item::after {
+
+        .timeline-item:nth-child(odd) {
+            margin-left: 0;
+            padding-right: 60px;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) {
+            margin-left: 50%;
+            padding-left: 60px;
+            text-align: left;
+        }
+
+        .timeline-item::before {
             content: '';
             position: absolute;
             width: 20px;
             height: 20px;
-            right: -10px;
-            background-color: var(--white);
-            border: 4px solid var(--primary-color);
-            top: 20px;
+            background: var(--white);
+            border: 4px solid var(--primary);
             border-radius: 50%;
-            z-index: 1;
-        }
-        .timeline-item:nth-child(even)::after { left: -10px; }
-        .timeline-content {
-            padding: 20px 30px;
-            background-color: var(--white);
-            position: relative;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-        }
-        @media (max-width: 768px) {
-            .timeline::after { left: 20px; }
-            .timeline-item { width: 100%; padding-left: 60px; padding-right: 15px; }
-            .timeline-item:nth-child(even) { left: 0%; }
-            .timeline-item::after { left: 10px; }
+            top: 0;
         }
 
-        /* Service Item */
-        .service-item {
-            text-align: center;
-            padding: 20px;
+        .timeline-item:nth-child(odd)::before {
+            right: -42px;
         }
+
+        .timeline-item:nth-child(even)::before {
+            left: -42px;
+        }
+
+        .timeline-content {
+            background: var(--white);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .timeline-content h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::after {
+                left: 20px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 60px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+                margin-left: 0 !important;
+            }
+
+            .timeline-item::before {
+                left: -42px !important;
+                right: auto !important;
+            }
+        }
+
+        /* SERVICE CARDS */
+        .service-card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 2px solid var(--gray-200);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
         .service-icon {
             width: 80px;
             height: 80px;
-            border-radius: 50%;
             margin: 0 auto 20px;
-            background: var(--secondary-color);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2rem;
         }
 
-        /* Team Member */
+        .service-card h3 {
+            margin-bottom: 16px;
+        }
+
+        /* TEAM */
         .team-member {
             text-align: center;
         }
+
         .team-photo {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             margin: 0 auto 20px;
-            border: 5px solid var(--white);
-            box-shadow: var(--shadow-md);
-        }
-        .team-role {
-            font-style: italic;
-            color: var(--primary-color);
-        }
-
-        /* Testimonial Item */
-        .testimonial-item blockquote {
-            background: var(--white);
-            padding: 30px;
-            border-left: 5px solid var(--primary-color);
-            margin: 0 0 20px;
-            box-shadow: var(--shadow-sm);
-            border-radius: var(--radius-md);
-        }
-        .testimonial-item footer {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        /* FAQ Accordion */
-        .faq-accordion {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .faq-item {
-            border-bottom: 1px solid var(--border-color);
-        }
-        .faq-question {
-            cursor: pointer;
-            padding: 20px 0;
-            font-size: 1.2rem;
-            position: relative;
-        }
-        .faq-question::after {
-            content: '+';
-            position: absolute;
-            right: 0;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            transition: transform 0.3s;
-        }
-        .faq-item.active .faq-question::after {
-            transform: rotate(45deg);
-        }
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out;
-        }
-        .faq-answer p {
-            padding-bottom: 20px;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 80px 20px;
-            border-radius: var(--radius-lg);
-        }
-        .cta-section .section-title,
-        .cta-section .section-intro {
-            color: var(--white);
-        }
-        .cta-section .btn-primary {
-            background: var(--white);
-            color: var(--primary-color);
-        }
-        .cta-section .btn-primary:hover {
-            background: var(--secondary-color);
-        }
-        .contact-info-short {
-            margin-top: 30px;
-        }
-        .contact-info-short a {
-            color: var(--white);
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        .contact-info-short a:hover {
-            text-decoration: underline;
-        }
-        .map-placeholder {
-            background: #f0f0f0;
-            height: 300px;
-            margin-top: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: var(--radius-md);
-            color: var(--text-dark);
+            color: var(--white);
+            font-size: 3rem;
+            box-shadow: var(--shadow-lg);
         }
 
-        /* Legal & English Summary */
-        #legal p, #english-summary p {
-            text-align: center;
+        .team-member h4 {
+            margin-bottom: 8px;
         }
-        #legal a {
-            color: var(--primary-color);
+
+        .team-role {
+            color: var(--primary);
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        /* TESTIMONIALS */
+        .testimonial {
+            background: var(--gray-100);
+            padding: 30px;
+            border-radius: var(--radius);
+            border-left: 5px solid var(--primary);
+            position: relative;
+        }
+
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.2;
+        }
+
+        .testimonial p {
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+            color: var(--gray-800);
+        }
+
+        .testimonial-author {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .testimonial-location {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            background: var(--gray-100);
+            cursor: pointer;
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            color: var(--gray-900);
         }
-        #english-summary .section-title {
-            font-size: 2rem;
+
+        .faq-question:hover {
+            background: var(--gray-200);
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 20px;
+        }
+
+        .faq-answer p {
+            margin: 0;
+        }
+
+        /* CTA SECTION */
+        .cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin: 80px 0;
+        }
+
+        .cta h2 {
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            color: rgba(255,255,255,0.9);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            font-size: 1.1rem;
+        }
+
+        /* STATS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .stat-box {
+            padding: 40px 20px;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* CONTACTS */
+        .contact-info {
+            background: var(--gray-100);
+            padding: 40px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            margin: 20px 0;
+        }
+
+        .contact-label {
+            color: var(--gray-600);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .contact-value {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        .contact-value:hover {
+            text-decoration: underline;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 80px 0;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            .service-card {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
-<body data-page="about">
+<body>
 
     {% include "components/header.html" %}
 
-    <main class="about-page">
-        <!-- 1. HERO SECTION -->
-        <section class="hero-section about-hero">
+    <main>
+        <!-- HERO SECTION -->
+        <section class="hero">
             <div class="container">
-                <div class="hero-content">
-                    <h1 class="hero-title">Sog‘lig‘ingizga g‘amxo‘rlik qilish — bizning asosiy vazifamiz</h1>
-                    <p class="hero-subtitle">OnlinePharmacy jamoasi siz va yaqinlaringiz uchun sifatli farmatsevtika mahsulotlari va professional xizmatlarni taqdim etadi.</p>
-                    <a href="{% url 'shop' %}" class="btn btn-primary btn-lg">Do‘konni ko‘rib chiqish</a>
-                </div>
+                <h1>Biz haqimizda</h1>
+                <p>OnlinePharmacy — O'zbekistondagi ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.</p>
+                <a href="{% url 'shop' %}" class="btn btn-primary">Do'konga o'tish</a>
             </div>
-            <div class="hero-background-image" style="background-image: url('https://via.placeholder.com/1920x600?text=Professional+Pharmacy+Background');"></div>
         </section>
 
-        <div class="container page-content">
-            <!-- 2. BIZNING MISSIYAMIZ VA QADRIYATLARIMIZ -->
-            <section id="mission" class="page-section">
-                <h2 class="section-title">Bizning missiyamiz va qadriyatlarimiz</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3>Bizning Missiyamiz</h3>
-                        <p>Bizning asosiy missiyamiz – O‘zbekiston aholisini yuqori sifatli, litsenziyalangan va xavfsiz dori-darmonlar bilan ta’minlash orqali jamiyat salomatligini yaxshilashga hissa qo‘shishdir. Biz har bir mijozimiz uchun qulay, ishonchli va tezkor xizmat ko‘rsatishni o‘z oldimizga maqsad qilib qo‘yganmiz. Texnologik innovatsiyalarni farmatsevtika sohasiga joriy etish orqali biz sog‘liqni saqlashni hamma uchun ochiq va tushunarli qilishga intilamiz.</p>
-                        <p>Biz nafaqat mahsulot sotamiz, balki sog‘lom turmush tarzi bo‘yicha ishonchli hamkoringiz bo‘lishni xohlaymiz. Mijozlarimizning ehtiyojlarini chuqur anglagan holda, ularga individual yondashuvni taklif etamiz va har bir savoliga professional javob berishga tayyormiz.</p>
+        <!-- MISSION & VALUES -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Bizning Missiyamiz</h2>
+                <p class="section-subtitle">O'zbekiston aholisining salomatligini yaxshilash va har bir oilaga sifatli, xavfsiz dori-darmonlarni qulay tarzda yetkazib berish</p>
+
+                <div class="row row-2">
+                    <div>
+                        <h3>Missiyamiz</h3>
+                        <p>Biz har bir mijozimiz uchun sog'lashtirilgan, ishonchli va professional xizmati taqdim etishga sodiq. Bizning maqsadimiz — texnologiya va farmatsevtika sohasidagi bilimlarni birlashtirib, salomatlikni hamma uchun ochiq va tushunarli qilish.</p>
+                        <p>OnlinePharmacy nafaqat dori sotuvchi emas, balki sizning sog'lom turmush tarzi bo'yicha ishonchli hamkoringiz.</p>
                     </div>
-                    <div class="col-md-6">
+                    <div>
                         <h3>Bizning Qadriyatlarimiz</h3>
-                        <ul>
-                            <li><strong>Ishonch:</strong> Biz faqat rasmiy distribyutorlar bilan ishlaymiz va barcha mahsulotlarimizning sifatini kafolatlaymiz.</li>
-                            <li><strong>Mijozga yo‘naltirilganlik:</strong> Sizning ehtiyojlaringiz biz uchun birinchi o‘rinda. Biz doimo xizmat sifatini oshirish ustida ishlaymiz.</li>
-                            <li><strong>Professionallik:</strong> Jamoamiz malakali farmatsevtlar va mutaxassislardan iborat bo‘lib, sizga eng to‘g‘ri maslahatlarni berishga tayyor.</li>
-                            <li><strong>Innovatsiya:</strong> Biz doimiy ravishda jarayonlarimizni takomillashtiramiz va xizmatlarimizni yanada qulay qilish uchun yangi texnologiyalarni joriy etamiz.</li>
-                            <li><strong>Shaffoflik:</strong> Mahsulotlar narxi, tarkibi va mavjudligi haqidagi barcha ma’lumotlar ochiq va tushunarli tarzda taqdim etiladi.</li>
-                            <li><strong>Mas'uliyat:</strong> Biz o‘z ishimizga va mijozlarimiz salomatligiga katta mas'uliyat bilan yondashamiz.</li>
+                        <ul class="values-list">
+                            <li>
+                                <strong>Ishonch</strong>
+                                <span>Faqat rasmiy distribyutorlardan sertifikatlangan mahsulotlar</span>
+                            </li>
+                            <li>
+                                <strong>Xizmat</strong>
+                                <span>Mijozning ehtiyojlari biz uchun birinchi o'rinda</span>
+                            </li>
+                            <li>
+                                <strong>Professionallik</strong>
+                                <span>Malakali farmatsevtlar va mutaxassislardan iborat jamoamiz</span>
+                            </li>
+                            <li>
+                                <strong>Innovatsiya</strong>
+                                <span>Doimo jarayonlarimizni takomillashtiramiz</span>
+                            </li>
+                            <li>
+                                <strong>Shaffoflik</strong>
+                                <span>Barcha ma'lumotlar ochiq va tushunarli tarzda</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 3. TARIX VA RIVOJLANISH -->
-            <section id="history" class="page-section bg-light">
-                <div class="container">
-                    <h2 class="section-title">Tarix va Rivojlanish Bosqichlari</h2>
-                    <p class="section-intro">Kompaniyamiz bir necha yil avval kichik jamoa va katta maqsadlar bilan o‘z faoliyatini boshlagan. Bugungi kunga kelib, biz O‘zbekistondagi yetakchi onlayn dorixonalardan biriga aylandik.</p>
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <h4>2021: G‘oyaning tug‘ilishi</h4>
-                                <p>Odamlarga uydan chiqmasdan turib, sifatli dori-darmonlarga buyurtma berish imkoniyatini yaratish g‘oyasi bilan kompaniyamizga asos solindi.</p>
-                            </div>
+        <!-- HISTORY -->
+        <section class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Bizning Tarix</h2>
+                <p class="section-subtitle">Kompaniyamizning rivojlanish bosqichlari va muvaffaqiyatlari</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>2021: Asos Solish</h4>
+                            <p>OnlinePharmacy kompaniyasi kichik jamoasi va katta maqsadlari bilan o'z faoliyatiga asos soldi. Bizning g'oyamiz — odamlarga uydan chiqmasdan sifatli dori-darmonlarga buyurtma berish imkoniyatini berish.</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <h4>2022: Platformaning ishga tushirilishi</h4>
-                                <p>Birinchi veb-saytimiz ishga tushirildi va Toshkent shahri bo‘ylab dastlabki buyurtmalarni yetkazib berish boshlandi.</p>
-                            </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>2022: Platformaning Ishga Tushirilishi</h4>
+                            <p>Birinchi veb-saytimiz ishga tushirildi. Toshkent shahri bo'ylab dastlabki buyurtmalarni yetkazib berish boshlandi. Mihozlarimizning ishonchi va talabasi bizi yanada takomillashtirishga ilhom berdi.</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <h4>2023: Xizmat ko‘rsatish hududining kengayishi</h4>
-                                <p>Mijozlarimiz ishonchini qozonib, biz respublikaning yirik shaharlariga ham xizmat ko‘rsatishni yo‘lga qo‘ydik.</p>
-                            </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>2023: Xizmat Hududining Kengayishi</h4>
+                            <p>Mijozlarimizning ehtiyojlarini tulab, xizmatlarimizni O'zbekiston viloyatlariga kengaytrdik. Respublikaning yirik shaharlarida xizmat ko'rsatishni boshladdik.</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-content">
-                                <h4>Bugun: Innovatsiyalar va yangi marralar</h4>
-                                <p>Bugungi kunda biz mobil ilova, shaxsiy maslahatchi va tezkor yetkazib berish xizmatlarini taklif etamiz. Kelajakda xizmatlarimiz ko‘lamini yanada kengaytirishni rejalashtirganmiz.</p>
-                            </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h4>2024-2025: Modernizatsiya</h4>
+                            <p>Mobil ilova ishga tushirildi. Shaxsiy farmatsevt maslahatchi, tezkor yetkazib berish, va 24/7 qo'llab-quvvatlash xizmati ishga tushdi. Kelajakda yanada ko'p innovatsiyalar kutilmoqda.</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 4. XIZMATLAR VA MAHSULOTLAR -->
-            <section id="services" class="page-section">
-                <h2 class="section-title">Bizning Xizmatlar va Mahsulotlarimiz</h2>
-                <p class="section-intro">Biz sizning salomatligingiz uchun zarur bo‘lgan barcha narsalarni bir joyda jamlaganmiz.</p>
-                <div class="row">
-                    <div class="col-lg-4 service-item">
-                        <img src="https://via.placeholder.com/80x80?text=P" alt="Mahsulotlar" class="service-icon">
+        <!-- SERVICES -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Bizning Xizmatlarimiz</h2>
+                <p class="section-subtitle">Sog'ligingiz uchun zarur bo'lgan barcha narsalar bir joyda</p>
+
+                <div class="row row-3">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-capsules"></i>
+                        </div>
                         <h3>Keng Assortiment</h3>
-                        <p>Retseptli va retseptsiz dori vositalari, vitaminlar va biologik faol qo‘shimchalar, tibbiy buyumlar, ona va bola uchun mahsulotlar, gigiyena vositalari va boshqalar.</p>
+                        <p>Retseptli va retseptsiz dori vositalari, vitaminlar, biologik faol qo'shimchalar, tibbiy buyumlar, ona va bola uchun mahsulotlar.</p>
                     </div>
-                    <div class="col-lg-4 service-item">
-                        <img src="https://via.placeholder.com/80x80?text=C" alt="Maslahat" class="service-icon">
-                        <h3>Professional Farmatsevt Maslahati</h3>
-                        <p>Onlayn chat yoki telefon orqali malakali farmatsevtlarimizdan bepul maslahat oling. Ular sizga dori vositalarini to‘g‘ri tanlash va qo‘llash bo‘yicha yordam berishadi.</p>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>Professional Maslahat</h3>
+                        <p>Onlayn chat yoki telefon orqali malakali farmatsevtlarimizdan bepul maslahat oling. 24/7 qo'llab-quvvatlash xizmati mavjud.</p>
                     </div>
-                    <div class="col-lg-4 service-item">
-                        <img src="https://via.placeholder.com/80x80?text=D" alt="Yetkazib berish" class="service-icon">
-                        <h3>Tezkor va Ishonchli Yetkazib Berish</h3>
-                        <p>Buyurtmangizni belgilangan manzilga tez va xavfsiz tarzda yetkazib beramiz. Maxsus termo-sumkalar dori vositalarining kerakli haroratda saqlanishini ta’minlaydi.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. JAMOAMIZ -->
-            <section id="team" class="page-section bg-light">
-                <div class="container">
-                    <h2 class="section-title">Bizning Professional Jamoamiz</h2>
-                    <p class="section-intro">Bizning yutug‘imiz – o‘z ishiga sodiq va malakali mutaxassislardan iborat jamoamizdir.</p>
-                    <div class="row">
-                        <div class="col-md-4 team-member">
-                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
-                            <h4>Boshqaruvchi Direktor</h4>
-                            <p class="team-role">Strategik rejalashtirish va kompaniya rivojlanishi uchun mas'ul.</p>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-truck"></i>
                         </div>
-                        <div class="col-md-4 team-member">
-                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
-                            <h4>Bosh Farmatsevt</h4>
-                            <p class="team-role">Mahsulotlar sifati, litsenziyalash va farmatsevtik nazorat bo‘yicha yetakchi mutaxassis.</p>
-                        </div>
-                        <div class="col-md-4 team-member">
-                            <img src="https://via.placeholder.com/150x150?text=Avatar" alt="Jamoa a'zosi" class="team-photo">
-                            <h4>Mijozlar bilan ishlash bo‘limi rahbari</h4>
-                            <p class="team-role">Mijozlarga yuqori darajadagi xizmat ko‘rsatishni ta’minlash va ularning murojaatlarini hal etish.</p>
-                        </div>
+                        <h3>Tezkor Yetkazib Berish</h3>
+                        <p>Toshkent shahri ichida 2-4 soat, viloyatlarga 1-2 ish kuni davomida. Xavfsiz va ishonchli yetkazib berish garantirlangan.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 6. MIJOZLAR FIKRI -->
-            <section id="testimonials" class="page-section">
-                <h2 class="section-title">Mijozlarimiz Biz Haqimizda</h2>
-                <div class="row">
-                    <div class="col-md-6 testimonial-item">
-                        <blockquote>
-                            <p>"Juda qulay xizmat! Kechqurun buyurtma bergandim, ertasiga ertalab allaqachon qo‘limda edi. Rahmat!"</p>
-                            <footer>– Anvar R., Toshkent</footer>
-                        </blockquote>
+        <!-- TEAM -->
+        <section class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Bizning Professional Jamoamiz</h2>
+                <p class="section-subtitle">O'z ishiga sodiq va tajribali mutaxassislardan iborat</p>
+
+                <div class="row row-3">
+                    <div class="team-member">
+                        <div class="team-photo">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h4>Direktor</h4>
+                        <p class="team-role">Strategik rejalashtirish va rivojlanish</p>
+                        <p>Kompaniyaning biznes-strategiyasi va rivojlanishini yo'lga qo'yuvchi maqsadli rahbar.</p>
                     </div>
-                    <div class="col-md-6 testimonial-item">
-                        <blockquote>
-                            <p>"Onam uchun dori-darmonlarni doim shu yerdan olaman. Farmatsevtlar maslahati juda yordam beradi. Ishlaringizga omad!"</p>
-                            <footer>– Gulchehra K., Samarqand</footer>
-                        </blockquote>
+                    <div class="team-member">
+                        <div class="team-photo">
+                            <i class="fas fa-user-nurse"></i>
+                        </div>
+                        <h4>Bosh Farmatsevt</h4>
+                        <p class="team-role">Sifat va litsenziya boshqarish</p>
+                        <p>Barcha mahsulotlarning sifat kontroli, farmatsevtik nazorat va litsenziyalashni ta'minlovchi.</p>
                     </div>
-                    <div class="col-md-6 testimonial-item">
-                        <blockquote>
-                            <p>"Mobil ilovasi juda qulay ishlangan. Kerakli dorini topish va buyurtma berish bir necha daqiqada hal bo‘ladi."</p>
-                            <footer>– Sardor M., Buxoro</footer>
-                        </blockquote>
-                    </div>
-                    <div class="col-md-6 testimonial-item">
-                        <blockquote>
-                            <p>"Narxlar hamyonbop, mahsulotlar sifatli. Eng muhimi, ishonchli. Barchaga tavsiya qilaman."</p>
-                            <footer>– Lola A., Farg'ona</footer>
-                        </blockquote>
+                    <div class="team-member">
+                        <div class="team-photo">
+                            <i class="fas fa-headphones"></i>
+                        </div>
+                        <h4>Mijozlar Hizmatlar Bo'limi Rahbari</h4>
+                        <p class="team-role">Mijozlar qo'llab-quvvatlashi</p>
+                        <p>Mijozlarimizning murojaatlarini hal etish va yuqori darajadagi xizmatni ta'minlovchi.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 7. TEZ-TEZ SO‘RALADIGAN SAVOLLAR (FAQ) -->
-            <section id="faq" class="page-section bg-light">
-                <div class="container">
-                    <h2 class="section-title">Tez-tez So‘raladigan Savollar (FAQ)</h2>
-                    <div class="faq-accordion">
-                        <div class="faq-item">
-                            <h3 class="faq-question">Buyurtmani qanday amalga oshirish mumkin?</h3>
-                            <div class="faq-answer">
-                                <p>Saytimiz yoki mobil ilovamiz orqali kerakli mahsulotlarni savatga qo‘shing, shaxsiy ma’lumotlaringiz va yetkazib berish manzilini kiriting, so‘ng buyurtmani tasdiqlang. Tez orada operatorimiz siz bilan bog‘lanadi.</p>
-                            </div>
+        <!-- TESTIMONIALS -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Mijozlarimiz Nima Deyadi</h2>
+
+                <div class="row row-2">
+                    <div class="testimonial">
+                        <p>"Juda qulay xizmat! Kechqurun buyurtma bergandim, ertasiga ertalab allaqachon qo'limda edi. Hammasi sifatli va tez!"</p>
+                        <div class="testimonial-author">Anvar R.</div>
+                        <div class="testimonial-location">Toshkent</div>
+                    </div>
+                    <div class="testimonial">
+                        <p>"Farmatsevtlar maslahati juda yordam beradi. Har safar dori tanlashda savollari ko'rsatsa, ular professionalni maslahat berishadi."</p>
+                        <div class="testimonial-author">Gulchehra K.</div>
+                        <div class="testimonial-location">Samarqand</div>
+                    </div>
+                    <div class="testimonial">
+                        <p>"Mobil ilovasi judal qulay ishlagan. Kerakli dorini topish va buyurtma berish bir necha daqiqada hal bo'ladi."</p>
+                        <div class="testimonial-author">Sardor M.</div>
+                        <div class="testimonial-location">Buxoro</div>
+                    </div>
+                    <div class="testimonial">
+                        <p>"Narxlar hamyonbop, mahsulotlar sifatli. Eng muhimi, ishonchli. Oilam va do'stlarimga tavsiya qildim."</p>
+                        <div class="testimonial-author">Lola A.</div>
+                        <div class="testimonial-location">Farg'ona</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="section bg-light">
+            <div class="container">
+                <h2 class="section-title">Tez-Tez So'raladigan Savollar</h2>
+
+                <div style="max-width: 700px; margin: 0 auto;">
+                    <div class="faq-item active">
+                        <div class="faq-question">
+                            <span>Buyurtmani qanday qilish mumkin?</span>
+                            <div class="faq-icon">▼</div>
                         </div>
-                        <div class="faq-item">
-                            <h3 class="faq-question">Yetkazib berish qancha vaqt oladi?</h3>
-                            <div class="faq-answer">
-                                <p>Toshkent shahri ichida 2-4 soat ichida, viloyatlarga esa 1-2 ish kuni davomida yetkazib beriladi.</p>
-                            </div>
+                        <div class="faq-answer">
+                            <p>Saytimiz yoki mobil ilovamiz orqali kerakli mahsulotlarni tanlab, savatga qo'shing. Shaxsiy ma'lumotlaringiz va yetkazib berish manzilini kiriting, so'ng buyurtmani tasdiqlang. Tez orada operatorimiz siz bilan bog'lanadi.</p>
                         </div>
-                        <div class="faq-item">
-                            <h3 class="faq-question">Retseptli dori vositalarini qanday xarid qilsam bo‘ladi?</h3>
-                            <div class="faq-answer">
-                                <p>Retseptli dori vositalarini buyurtma qilishda, shifokor retseptining rasmini yuklashingiz talab etiladi. Buyurtmani qabul qilishda asl nusxani ko‘rsatishingiz kerak bo‘ladi.</p>
-                            </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Yetkazib berish qancha vaqt oladi?</span>
+                            <div class="faq-icon">▼</div>
                         </div>
-                        <div class="faq-item">
-                            <h3 class="faq-question">Mahsulotlarni qaytarish yoki almashtirish mumkinmi?</h3>
-                            <div class="faq-answer">
-                                <p>O‘zbekiston Respublikasi qonunchiligiga ko‘ra, dori vositalari va tibbiy buyumlar qaytarib olinmaydi yoki almashtirilmaydi. Iltimos, buyurtma berishdan oldin diqqat bilan tanlovingizni tekshiring.</p>
-                            </div>
+                        <div class="faq-answer">
+                            <p>Toshkent shahri ichida 2-4 soat ichida, viloyatlarga esa 1-2 ish kuni davomida yetkazib beriladi. Maxsus termo-sumkalar dori vositalarining kerakli haroratda saqlanishini ta'minlaydi.</p>
                         </div>
-                        <div class="faq-item">
-                            <h3 class="faq-question">To‘lovni qanday amalga oshirish mumkin?</h3>
-                            <div class="faq-answer">
-                                <p>Siz naqd pulda (buyurtmani olganda), Payme, Click yoki bank kartasi orqali to‘lovni amalga oshirishingiz mumkin.</p>
-                            </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Retseptli dori vositalarini qanday xarid qilsam bo'ladi?</span>
+                            <div class="faq-icon">▼</div>
                         </div>
-                        <div class="faq-item">
-                            <h3 class="faq-question">Dori vositalarining sifati qanday kafolatlanadi?</h3>
-                            <div class="faq-answer">
-                                <p>Barcha mahsulotlarimiz litsenziyalangan, sertifikatlangan va rasmiy distribyutorlardan olinadi. Biz saqlash va tashish sharoitlariga qat’iy rioya qilamiz.</p>
-                            </div>
+                        <div class="faq-answer">
+                            <p>Retseptli dori vositalarini buyurtma qilishda, shifokor retseptining rasmini yuklashingiz talab etiladi. Buyurtmani qabul qilishda asl nusxani ko'rsatishingiz kerak bo'ladi. Retseptsiz dori vositalari qisman yetkazib berilishi mumkin.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>To'lovni qanday amalga oshirish mumkin?</span>
+                            <div class="faq-icon">▼</div>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Siz naqd pulda (buyurtmani olganda), Payme, Click, Apelsin yoki bank kartasi orqali to'lovni amalga oshirishingiz mumkin. Biz eng xavfsiz to'lov sistemalarini qo'llaymiz.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Dori vositalarining sifati qanday kafolatlanadi?</span>
+                            <div class="faq-icon">▼</div>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Barcha mahsulotlarimiz litsenziyalangan, sertifikatlangan va rasmiy distribyutorlardan olinadi. Biz saqlash va tashish sharoitlariga qat'iy rioya qilamiz. Har bir mahsulot va qadisa tekshiriladi.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Agar mahsulot nomuxlasi bo'lsa?</span>
+                            <div class="faq-icon">▼</div>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Agar mahsulot nomuxlasa yoki shikastlanib kelsa, darhol biz bilan bog'laning. Biz o'zgartiş yoki qaytarish bilan to'liq javobgarlik o'zimizga olganmiz. To'lovingiz to'liq qaytariladi yoki boshqa mahsulot taklif qilinadi.</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 8. KARYERA VA HAMKORLIK -->
-            <section id="career" class="page-section">
+        <!-- STATS -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Bizning Erishlari</h2>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">50,000+</div>
+                        <div class="stat-label">Baxtli Mijoz</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">100,000+</div>
+                        <div class="stat-label">Buyurtma Amalga Oshirildi</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">5,000+</div>
+                        <div class="stat-label">Mahsulot Assortimenti</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Qo'llab-Quvvatlash</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CAREER & PARTNERSHIP -->
+        <section class="section bg-light">
+            <div class="container">
                 <h2 class="section-title">Karyera va Hamkorlik</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3>Biz bilan ishlash</h3>
-                        <p>Biz doimo o‘z sohasining professionallarini jamoamizga taklif qilishdan mamnunmiz. Agar siz farmatsevtika, logistika, marketing yoki IT sohasida tajribaga ega bo‘lsangiz va bizning jamoamizga qo‘shilishni istasangiz, rezyumeingizni hr@onlinepharmacy.uz manziliga yuboring.</p>
-                        <p><strong>Ochiq pozitsiyalar:</strong> Farmatsevt-konsultant, Kuryer, Kontent-menejer.</p>
+
+                <div class="row row-2">
+                    <div>
+                        <h3><i class="fas fa-briefcase" style="color: var(--primary); margin-right: 10px;"></i>Biz bilan Ishlash</h3>
+                        <p>Biz doimo o'z sohasining professionallarini jamoamizga taklif qilishdan mamnunmiz. Agar siz:</p>
+                        <ul class="values-list">
+                            <li>
+                                <strong>Farmatsevtika</strong>
+                                <span>sohasida tajriba bo'lsa</span>
+                            </li>
+                            <li>
+                                <strong>Logistika</strong>
+                                <span>va yetkazib berish haqida bilsangiz</span>
+                            </li>
+                            <li>
+                                <strong>IT/Dasturlash</strong>
+                                <span>muammoni hal qilishga moyil bo'lsangiz</span>
+                            </li>
+                        </ul>
+                        <p>Rezyumeingizni <strong>hr@onlinepharmacy.uz</strong> manziliga yuboring.</p>
                     </div>
-                    <div class="col-md-6">
-                        <h3>Hamkorlik</h3>
-                        <p>Biz ishonchli yetkazib beruvchilar va distribyutorlar bilan hamkorlik qilishdan doimo manfaatdormiz. Agar sizda sifatli mahsulotlar bo‘lsa va biz bilan hamkorlik qilish istagingiz bo‘lsa, iltimos, partnership@onlinepharmacy.uz manzili orqali biz bilan bog‘laning.</p>
+                    <div>
+                        <h3><i class="fas fa-handshake" style="color: var(--primary); margin-right: 10px;"></i>Hamkorlik</h3>
+                        <p>Biz sifatli yetkazib beruvchilar va distribyutorlar bilan hamkorlik qilishdan doimo manfaatdormiz.</p>
+                        <p><strong>Agar sizda:</strong></p>
+                        <ul class="values-list">
+                            <li>
+                                <strong>Dori-darmon</strong>
+                                <span>yoki farmatsevtika mahsulotlari bo'lsa</span>
+                            </li>
+                            <li>
+                                <strong>Logistika xizmati</strong>
+                                <span>taklif qilishingiz mumkin bo'lsa</span>
+                            </li>
+                            <li>
+                                <strong>Fikri/Loyihasi</strong>
+                                <span>bo'lsa va hamkorlik istagingiz bo'lsa</span>
+                            </li>
+                        </ul>
+                        <p>Iltimos, biz bilan bog'laning: <strong>partnership@onlinepharmacy.uz</strong></p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- 9. KONTAKT VA CTA -->
-            <section id="contact-cta" class="page-section text-center cta-section">
-                <h2 class="section-title">Biz bilan bog‘laning</h2>
-                <p class="section-intro">Savollaringiz yoki takliflaringiz bormi? Biz sizni eshitishdan doim mamnunmiz.</p>
-                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg">Bog‘lanish sahifasi</a>
-                <div class="contact-info-short">
-                    <p>Telefon: <a href="tel:+998712000000">+998 71 200 00 00</a> | Email: <a href="mailto:info@onlinepharmacy.uz">info@onlinepharmacy.uz</a></p>
+        <!-- CTA -->
+        <section class="cta">
+            <div class="container">
+                <h2>Biz bilan bog'laning</h2>
+                <p>Savollaringiz yoki takliflaringiz bormi? Biz sizni eshitishdan doim mamnunmiz.</p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="contact-label">Telefon:</span>
+                        <a href="tel:+998712000000" class="contact-value">+998 71 200 00 00</a>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Email:</span>
+                        <a href="mailto:info@onlinepharmacy.uz" class="contact-value">info@onlinepharmacy.uz</a>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Manzil:</span>
+                        <span class="contact-value">Toshkent, O'zbekiston</span>
+                    </div>
                 </div>
-                <div class="map-placeholder">
-                    <p>Xarita o‘rni</p>
-                </div>
-            </section>
-
-            <!-- 10. QONUNIY VA MAXFIYLIK -->
-            <section id="legal" class="page-section bg-light text-center">
-                <div class="container">
-                    <p>Barcha xizmatlar litsenziyalangan. Saytdan foydalanish orqali siz <a href="/terms/">Foydalanish shartlari</a> va <a href="/privacy/">Maxfiylik siyosati</a>ga rozilik bildirasiz.</p>
-                </div>
-            </section>
-
-            <!-- English Summary -->
-            <section id="english-summary" class="page-section">
-                <h2 class="section-title">About Us (Summary in English)</h2>
-                <p><strong>OnlinePharmacy</strong> is a leading online pharmacy in Uzbekistan, dedicated to providing reliable and convenient access to high-quality pharmaceutical products. Our mission is to enhance public health by offering a wide range of certified medications, professional pharmacist consultations, and fast delivery services across the country.</p>
-                <p>We are committed to our core values of trust, customer focus, professionalism, and innovation. Our team consists of qualified specialists who ensure that every customer receives the best care and advice. We leverage modern technology to make healthcare more accessible and transparent for everyone.</p>
-            </section>
-
-        </div>
+                <a href="{% url 'contact' %}" class="btn btn-primary" style="margin-top: 30px;">Bog'lanish Sahifasiga O'tish</a>
+            </div>
+        </section>
     </main>
 
     {% include "components/footer.html" %}
 
     <script src="{% static 'js/header.js' %}"></script>
-    <script src="{% static 'js/footer.js' %}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // FAQ Accordion
-            const faqItems = document.querySelectorAll('.faq-item');
-            faqItems.forEach(item => {
-                const question = item.querySelector('.faq-question');
-                question.addEventListener('click', () => {
-                    const answer = item.querySelector('.faq-answer');
-                    const isActive = item.classList.toggle('active');
-                    answer.style.maxHeight = isActive ? answer.scrollHeight + "px" : "0";
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const faqItem = this.parentElement;
+                const isActive = faqItem.classList.contains('active');
+                
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
                 });
+                
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
     </script>
@@ -660,22 +970,15 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "OnlinePharmacy",
-      "url": "https://your-production-domain.uz",
-      "logo": "https://your-production-domain.uz/static/images/logo.png",
-      "description": "O‘zbekistondagi oilangiz salomatligi uchun ishonchli onlayn dorixona. Sifatli dori-darmonlar, professional maslahatlar va tezkor yetkazib berish xizmati.",
+      "url": "https://your-domain.uz",
+      "logo": "https://your-domain.uz/static/images/logo.png",
+      "description": "O'zbekistondagi ishonchli onlayn dorixona",
       "contactPoint": {
         "@type": "ContactPoint",
         "telephone": "+998-71-200-00-00",
         "contactType": "Customer Service",
         "areaServed": "UZ",
-        "availableLanguage": ["Uzbek", "Russian"]
-      },
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "123 Islom Karimov Avenue",
-        "addressLocality": "Tashkent",
-        "postalCode": "100000",
-        "addressCountry": "UZ"
+        "availableLanguage": ["uz"]
       }
     }
     </script>

@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.db.models import Count
+from django.shortcuts import render
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
@@ -69,11 +70,11 @@ class MedicineViewSet(viewsets.ModelViewSet):
 
         # Get top 10 most viewed product IDs
         popular_medicine_ids = (
-            ProductViewHistory.objects.filter(viewed_at__gte=since_date)
-            .values("medicine")
-            .annotate(view_count=Count("medicine"))
+            ProductViewHistory.objects.filter(timestamp__gte=since_date)
+            .values("product")
+            .annotate(view_count=Count("product"))
             .order_by("-view_count")
-            .values_list("medicine", flat=True)[:10]
+            .values_list("product", flat=True)[:10]
         )
 
         if not popular_medicine_ids:
@@ -129,3 +130,8 @@ class ProductViewHistoryViewSet(viewsets.ModelViewSet):
 class MedicineImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = MedicineImage.objects.all()
     serializer_class = MedicineImageSerializer
+
+
+def product_list(request):
+    products = Medicine.objects.all()
+    return render(request, "pharmacy/product_list.html", {"products": products})

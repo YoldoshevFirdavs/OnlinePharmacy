@@ -1,32 +1,32 @@
 {% extends 'dashboard/list.html' %}
 {% load static %}
 
-{% block title %}Drivers{% endblock %}
+{% block title %}Haydovchilar{% endblock %}
 
 {% block page_header %}
 <div class="page-header">
     <div>
         <h1 class="page-header__title">
             <i class="fa-solid fa-truck"></i>
-            Drivers
+            Haydovchilar
         </h1>
-        <p class="page-header__subtitle">Manage all drivers</p>
+        <p class="page-header__subtitle">Barcha haydovchilarni boshqarish</p>
     </div>
     <div class="page-header__actions">
-        <button type="button" class="btn btn--primary" id="btnCreateDriver">
+        <a href="{% url 'dashboard:drivers_create' %}" class="btn btn--primary" id="btnCreateDriver">
             <i class="fa-solid fa-plus"></i>
-            Add New Driver
-        </button>
+            Yangi haydovchi qo'shish
+        </a>
     </div>
 </div>
 {% endblock %}
 
 {% block table_head %}
 <th>ID</th>
-<th>Name</th>
-<th>Phone</th>
-<th>Vehicle</th>
-<th>Actions</th>
+<th>Ismi</th>
+<th>Telefon</th>
+<th>Mashina</th>
+<th>Amallar</th>
 {% endblock %}
 
 {% block table_body %}
@@ -44,13 +44,13 @@
         <td>{{ driver.vehicle_info|default:"—" }}</td>
         <td>
             <div class="table__actions">
-                <button type="button" class="btn btn--sm btn--ghost driver-edit-btn" data-driver-id="{{ driver.pk }}" title="Update">
+                <a href="{% url 'dashboard:drivers_edit' driver.pk %}" class="btn btn--sm btn--ghost driver-edit-btn" data-driver-id="{{ driver.pk }}" title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
-                </button>
+                </a>
                 <button type="button"
                         class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
                         data-driver-id="{{ driver.pk }}"
-                        title="Delete">
+                        title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -61,7 +61,7 @@
     <tr class="table__empty-row">
         <td colspan="5">
             <i class="fa-solid fa-inbox"></i>
-            <span>No drivers found</span>
+            <span>Haydovchilar topilmadi</span>
         </td>
     </tr>
 {% endif %}
