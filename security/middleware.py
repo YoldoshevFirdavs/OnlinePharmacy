@@ -1,72 +1,157 @@
-import re
-
+import logging
+from datetime import timedelta
 from django.conf import settings
-from django.http import JsonResponse
-from django.utils.deprecation import MiddlewareMixin
-from rest_framework.exceptions import APIException
+from django.core.cache import cache
+from django.http import HttpResponseForbidden
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.views.decorators.cache import never_cache
+
+from .models import BanRecord
+
+logger = logging.getLogger(__name__)
 
 
-class SafeErrorMiddleware(MiddlewareMixin):
+def get_client_ip(request):
+    """Get real client IP address from request, considering proxy headers"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR', '')
+    return ip
+
+
+def get_device_fingerprint(request):
+    """Extract device fingerprint from cookie or header"""
+    fp = request.COOKIES.get('device_fp')
+    if not fp:
+        fp = request.META.get('HTTP_X_DEVICE_FINGERPRINT')
+    return fp
+
+
+class BanMiddleware:
+    """
+    Ban va rate-limit middleware - redirect loop yo'q
+    
+    Features:
+    - IP/fingerprint/user based bans
+    - Temporary/permanent ban types
+    - No redirect loop (403 direct return)
+    - Debounced logging (1 log per 60s per IP)
+    - Auto-expire temporary bans
+    """
+    
+    # Configuration
+    RATE_THRESHOLD = 20  # requests in RATE_WINDOW
+    RATE_WINDOW = 10  # seconds
+    TEMP_BAN_THRESHOLD = 100  # requests
+    TEMP_BAN_WINDOW = 60  # seconds
+    
+    # Paths to exclude from ban checking
+    EXCLUDED_PATHS = [
+        '/static/',
+        '/media/',
+        '/health/',
+        '/favicon.ico',
+        '/robots.txt',
+        '/dashboard/not-allowed/',  # Don't block not-allowed page itself
+    ]
+    
     def __init__(self, get_response):
         self.get_response = get_response
-
+    
     def __call__(self, request):
+        # Skip excluded paths
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+        
+        # Get identifiers
+        ip = get_client_ip(request)
+        fp = get_device_fingerprint(request)
+        user = request.user if request.user.is_authenticated else None
+        
+        # Check if banned
+        ban = BanRecord.get_active_ban(ip=ip, fingerprint=fp, user=user)
+        
+        if ban:
+            # Log ban (debounced)
+            self._log_ban_attempt(ip, ban)
+            
+            # Return 403 with not-allowed HTML (no redirect loop)
+            return self._render_not_allowed(request, ban)
+        
+        # Check rate limit and create temporary ban if needed
+        if self._check_and_update_rate_limit(ip, fp):
+            # Create temporary ban
+            ban = BanRecord.objects.create(
+                ip=ip,
+                fingerprint=fp,
+                user=user,
+                reason=f'Rate limit exceeded: {self.TEMP_BAN_THRESHOLD}+ requests in {self.TEMP_BAN_WINDOW}s',
+                ban_type='temporary',
+                created_by='system',
+                attempts=self.TEMP_BAN_THRESHOLD,
+                source=request.path,
+                expires_at=timezone.now() + timedelta(minutes=5),
+                meta={'request_path': request.path, 'user_agent': request.META.get('HTTP_USER_AGENT')}
+            )
+            
+            logger.warning(f"[BAN] Temporary ban created for IP {ip}: {ban.reason}")
+            
+            return self._render_not_allowed(request, ban)
+        
+        # Normal request
         response = self.get_response(request)
-        # This part handles responses that are already generated (e.g., by DRF views)
-        # and have a status code >= 400.
-        if response.status_code >= 400 and not settings.DEBUG:
-            # We only want to generalize the message if it's not already a generic one
-            # or if it's a 404/500 that might expose internal details.
-            # For simplicity, we'll apply the generic message to all 4xx/5xx in production
-            # unless a more specific exception handler has already provided a safe message.
-            # This might override some DRF default messages, but aligns with the strict requirement.
-            return JsonResponse(
-                {"error": "Login failed, please try again."},
-                status=response.status_code,
-            )
         return response
-
-    def process_exception(self, request, exception):
-        # This part handles exceptions raised during request processing.
-        if isinstance(exception, APIException):
-            # DRF exceptions are already well-structured.
-            # In production, we can generalize their messages if needed,
-            # but DRF's default exception handler usually does a good job.
-            # For now, we'll let DRF handle its own exceptions in debug mode,
-            # and apply the generic message in production.
-            if not settings.DEBUG:
-                return JsonResponse(
-                    {"error": "Login failed, please try again."},
-                    status=exception.status_code,
-                )
-            return None  # Let DRF's default exception handler process APIException in DEBUG mode
-
-        if not settings.DEBUG:
-            # Catch all other unexpected exceptions (e.g., 500 errors)
-            # and replace them with a generic safe message in production.
-            return JsonResponse(
-                {"error": "Login failed, please try again."}, status=500
-            )
-        # In debug mode, re-raise the exception to see the traceback
-        return None
-
-
-class SecurityHeadersMiddleware(MiddlewareMixin):
-    """Add common security headers to every response.
-    Includes HSTS, X-Content-Type-Options, X-Frame-Options, X-XSS-Protection.
-    CSP is handled by Django's 'csp' app.
-    """
-
-    def process_response(self, request, response):
-        # Strict-Transport-Security (only on HTTPS)
-        if request.is_secure():
-            response["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains"
-            )
-        # X-Content-Type-Options
-        response["X-Content-Type-Options"] = "nosniff"
-        # X-Frame-Options
-        response["X-Frame-Options"] = "DENY"
-        # X-XSS-Protection
-        response["X-XSS-Protection"] = "1; mode=block"
-        return response
+    
+    def _check_and_update_rate_limit(self, ip, fp):
+        """Check rate limit using cache counters"""
+        if not ip and not fp:
+            return False
+        
+        # Use IP as primary identifier
+        identifier = ip if ip else fp
+        cache_key = f"rate_limit:{identifier}"
+        
+        try:
+            current_count = cache.get(cache_key, 0)
+            current_count += 1
+            
+            # Set with RATE_WINDOW TTL (first increment)
+            if current_count == 1:
+                cache.set(cache_key, current_count, timeout=self.RATE_WINDOW)
+            else:
+                # Ensure TTL stays (use timeout to refresh)
+                cache.set(cache_key, current_count, timeout=self.RATE_WINDOW)
+            
+            # Ban if threshold exceeded
+            return current_count > self.TEMP_BAN_THRESHOLD
+            
+        except Exception as e:
+            logger.error(f"[BAN] Rate limit check error for {identifier}: {str(e)}")
+            return False
+    
+    def _log_ban_attempt(self, ip, ban):
+        """Log ban attempt (debounced - once per 60s per IP)"""
+        log_key = f"ban_log:{ip}"
+        
+        if cache.get(log_key):
+            return  # Already logged recently
+        
+        # Set debounce flag
+        cache.set(log_key, True, timeout=60)
+        
+        logger.warning(f"[BAN] IP {ip} blocked - Type: {ban.get_ban_type_display()}, Reason: {ban.reason}, Created: {ban.created_by}")
+    
+    def _render_not_allowed(self, request, ban):
+        """Render not-allowed page directly (no redirect loop)"""
+        context = {
+            'ban': ban,
+            'ip': get_client_ip(request),
+            'support_email': getattr(settings, 'SUPPORT_EMAIL', 'support@pharmacy.local'),
+            'support_phone': getattr(settings, 'SUPPORT_PHONE', '+998 (71) 200-00-00'),
+        }
+        
+        html = render_to_string('security/not_allowed.html', context, request=request)
+        return HttpResponseForbidden(html, content_type='text/html; charset=utf-8')
