@@ -572,34 +572,18 @@ def category_edit(request, pk):
 @require_http_methods(["POST"])
 def category_delete(request, pk):
     try:
-        try:
-            category = get_object_or_404(Category, pk=pk)
-
-            try:
-                with transaction.atomic():
-                    category_name = category.name
-                    category.delete()
-                    messages.success(
-                        request,
-                        f"'{category_name}' kategoriya muvaffaqiyatli o'chirildi.",
-                    )
-                    return redirect("dashboard:category_list")
-            except Exception as delete_error:
-                logger.error(f"Error deleting category: {str(delete_error)}")
-                messages.error(
-                    request, "Kategoriyani o'chirishda xatolik yuz berdi."
-                )
-                return redirect("dashboard:category_list")
-
-        except Exception as query_error:
-            logger.error(f"Database query error in category_delete: {str(query_error)}")
-            messages.error(request, "Kategoriyani yuklashda xatolik yuz berdi.")
+        category = get_object_or_404(Category, pk=pk)
+        with transaction.atomic():
+            category_name = category.name
+            category.delete()
+            messages.success(
+                request,
+                f"'{category_name}' kategoriya muvaffaqiyatli o'chirildi.",
+            )
             return redirect("dashboard:category_list")
-
     except Exception as e:
-        logger.error(f"Unexpected error in category_delete: {str(e)}")
-        messages.error(request, "Noma'lum xatolik yuz berdi.")
-        return redirect("dashboard:category_list")
+        logger.error(f"Error deleting category: {str(e)}")
+        messages.error(request, "Kategoriyani o'chirishda xatolik yuz berdi.")
         return redirect("dashboard:category_list")
 
 
@@ -930,8 +914,46 @@ def user_edit(request, pk):
 def order_list(request):
     try:
         try:
-            orders = Order.objects.all().order_by("-created_at")
-            ctx = {"orders": orders}
+            from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+            
+            # Get params
+            page = request.GET.get('page', 1)
+            page_size = request.GET.get('page_size', 25)
+            search = request.GET.get('search', '')
+            status = request.GET.get('status', '')
+            
+            # Base query
+            orders = Order.objects.select_related('customer').all()
+            
+            # Filter by status
+            if status:
+                orders = orders.filter(status=status)
+            
+            # Search
+            if search:
+                from django.db.models import Q
+                orders = orders.filter(
+                    Q(id__icontains=search) |
+                    Q(customer__email__icontains=search) |
+                    Q(customer__full_name__icontains=search)
+                )
+            
+            # Pagination
+            paginator = Paginator(orders, page_size)
+            try:
+                orders_page = paginator.page(page)
+            except PageNotAnInteger:
+                orders_page = paginator.page(1)
+            except EmptyPage:
+                orders_page = paginator.page(paginator.num_pages)
+            
+            ctx = {
+                "orders": orders_page,
+                "search": search,
+                "status": status,
+                "total_orders": paginator.count,
+                "num_pages": paginator.num_pages,
+            }
             return render(request, "dashboard/order/list.html", ctx)
         except Exception as query_error:
             logger.error(f"Database query error in order_list: {str(query_error)}")
@@ -1238,7 +1260,12 @@ def ban_create(request):
                 logger.error(f"Error saving ban: {str(save_error)}")
                 messages.error(request, "Banni saqlashda xatolik yuz berdi.")
         else:
-            return render(request, "dashboard/bans/form.html", {})
+            from custom_auth.models import CustomUser
+            all_users = CustomUser.objects.all().order_by('email')
+            return render(request, "dashboard/bans/form.html", {
+                "all_users": all_users,
+                "expires_days": 7
+            })
     except Exception as e:
         logger.error(f"Error in ban_create: {str(e)}")
         messages.error(request, "Noma'lum xatolik.")
@@ -1276,7 +1303,9 @@ def ban_edit(request, pk):
                 logger.error(f"Error updating ban: {str(save_error)}")
                 messages.error(request, "Banni yangilashda xatolik.")
         else:
-            ctx = {"ban": ban}
+            from custom_auth.models import CustomUser
+            all_users = CustomUser.objects.all().order_by('email')
+            ctx = {"ban": ban, "all_users": all_users}
             return render(request, "dashboard/bans/form.html", ctx)
     except Exception as e:
         logger.error(f"Error in ban_edit: {str(e)}")
@@ -1294,7 +1323,8 @@ def ban_toggle_status(request, pk):
         ban = get_object_or_404(BanRecord, pk=pk)
         ban.is_active = not ban.is_active
         ban.save()
-        messages.success(request, f"Ban statusi {'Faol' if ban.is_active else \"O'chirilgan\"} qilindi.")
+        status_text = "Faol" if ban.is_active else "O'chirilgan"
+        messages.success(request, f"Ban statusi {status_text} qilindi.")
     except Exception as e:
         logger.error(f"Error toggling ban status: {str(e)}")
         messages.error(request, "Statusni almashtirishda xatolik.")
@@ -1318,6 +1348,25 @@ def ban_delete(request, pk):
         messages.error(request, "Banni o'chirishda xatolik.")
     
     return redirect("dashboard:ban_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET"])
+def ban_view(request, pk):
+    """Ban ma'lumotlarini ko'rish."""
+    try:
+        from security.models import BanRecord
+        from django.utils import timezone
+        ban = get_object_or_404(BanRecord, pk=pk)
+        return render(request, "dashboard/bans/view.html", {
+            "ban": ban,
+            "now": timezone.now()
+        })
+    except Exception as e:
+        logger.error(f"Error viewing ban: {str(e)}")
+        messages.error(request, "Ban ma'lumotlarini yuklashda xatolik.")
+        return redirect("dashboard:ban_list")
 
 
 # ═══════ ORDER CRUD VIEWS ═══════

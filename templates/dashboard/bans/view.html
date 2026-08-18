@@ -1,0 +1,292 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Ban Ma'lumotlari{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-ban"></i>
+        Ban Ma'lumotlari
+    </h1>
+    <a href="{% url 'dashboard:ban_list' %}" class="btn btn--outline">
+        <i class="fa-solid fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card" id="banDetailCard">
+    <div class="card__body">
+        {% if ban %}
+        <div class="ban-details">
+            <!-- Ban ID -->
+            <div class="detail-group">
+                <label class="detail-label">Ban ID</label>
+                <div class="detail-value">#{{ ban.id }}</div>
+            </div>
+
+            <!-- Ban Type -->
+            <div class="detail-group">
+                <label class="detail-label">Ban Turi</label>
+                <div class="detail-value">
+                    <span class="tag
+                        {% if ban.ban_type == 'permanent' %}tag--danger
+                        {% else %}tag--warning
+                        {% endif %}">
+                        {% if ban.ban_type == 'permanent' %}
+                            Doimiy
+                        {% else %}
+                            Vaqtli
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="detail-group">
+                <label class="detail-label">Sabab</label>
+                <div class="detail-value">{{ ban.reason|default:"—" }}</div>
+            </div>
+
+            <!-- IP Address -->
+            <div class="detail-group">
+                <label class="detail-label">IP Address</label>
+                <div class="detail-value">
+                    <code>{{ ban.ip|default:"—" }}</code>
+                </div>
+            </div>
+
+            <!-- Fingerprint -->
+            <div class="detail-group">
+                <label class="detail-label">Device Fingerprint</label>
+                <div class="detail-value">
+                    <code>{{ ban.fingerprint|default:"—" }}</code>
+                </div>
+            </div>
+
+            <!-- User -->
+            <div class="detail-group">
+                <label class="detail-label">Foydalanuvchi</label>
+                <div class="detail-value">
+                    {% if ban.user %}
+                        <div class="user-cell">
+                            <i class="fa-solid fa-circle-user"></i>
+                            <span>{{ ban.user.email }} ({{ ban.user.get_full_name|default:ban.user.email }})</span>
+                        </div>
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="detail-group">
+                <label class="detail-label">Status</label>
+                <div class="detail-value">
+                    <span class="tag
+                        {% if ban.is_active %}tag--success
+                        {% else %}tag--secondary
+                        {% endif %}">
+                        {% if ban.is_active %}
+                            Faol
+                        {% else %}
+                            O'chirilgan
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Created At -->
+            <div class="detail-group">
+                <label class="detail-label">Yaratilgan sana</label>
+                <div class="detail-value">{{ ban.created_at|date:"d.m.Y H:i:s" }}</div>
+            </div>
+
+            <!-- Expires At -->
+            {% if ban.expires_at %}
+            <div class="detail-group">
+                <label class="detail-label">Tugash vaqti</label>
+                <div class="detail-value">
+                    {% if ban.ban_type == 'permanent' %}
+                        <span class="text-muted">Doimiy</span>
+                    {% elif ban.expires_at > now %}
+                        <span class="text-danger">{{ ban.expires_at|date:"d.m.Y H:i:s" }}</span>
+                    {% else %}
+                        <span class="text-muted" style="text-decoration: line-through;">{{ ban.expires_at|date:"d.m.Y H:i:s" }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Attempts -->
+            <div class="detail-group">
+                <label class="detail-label">Urinishlar soni</label>
+                <div class="detail-value">{{ ban.attempts }}</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="ban-actions">
+            <a href="{% url 'dashboard:ban_edit' ban.id %}" class="btn btn--primary">
+                <i class="fa-solid fa-pen"></i> Tahrirlash
+            </a>
+            <button type="button" 
+                    class="btn btn--danger ban-toggle-btn"
+                    data-ban-id="{{ ban.id }}"
+                    data-is-active="{{ ban.is_active }}">
+                <i class="fa-solid {% if ban.is_active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+                {% if ban.is_active %}O'chirish{% else %}Faol qilish{% endif %}
+            </button>
+            <button type="button" 
+                    class="btn btn--ghost ban-delete-btn"
+                    data-ban-id="{{ ban.id }}">
+                <i class="fa-solid fa-trash"></i> O'chirish
+            </button>
+        </div>
+        {% else %}
+        <div class="card__empty">
+            <i class="fa-solid fa-ban" style="font-size: 64px; color: #ccc; margin-bottom: 16px;"></i>
+            <p>Ban topilmadi</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.querySelector('.ban-toggle-btn');
+    const deleteBtn = document.querySelector('.ban-delete-btn');
+
+    // Toggle ban status
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            if (!confirm('Ban statusini almashtirmoqchimisiz?')) return;
+            
+            const banId = this.dataset.banId;
+            fetch(`/dashboard/bans/${banId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Xatolik yuz berdi');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Xatolik yuz berdi');
+            });
+        });
+    }
+
+    // Delete ban
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (!confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi? Bu amal qayta qaytarib bo\'lmaydi!')) return;
+            
+            const banId = this.dataset.banId;
+            fetch(`/dashboard/bans/${banId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard/bans/';
+                } else {
+                    alert('Xatolik yuz berdi');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Xatolik yuz berdi');
+            });
+        });
+    }
+
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
+<style>
+.ban-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.detail-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6a00f4;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 500;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e5e5ea;
+}
+
+.detail-value code {
+    background: #f5f5f7;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #e74c3c;
+}
+
+.ban-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 24px;
+    border-top: 1px solid #e5e5ea;
+}
+
+.ban-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card__empty {
+    text-align: center;
+    padding: 64px 24px;
+    color: #999;
+}
+</style>
+{% endblock %}

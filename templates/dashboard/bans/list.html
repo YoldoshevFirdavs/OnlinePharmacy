@@ -102,6 +102,12 @@
         </td>
         <td>
             <div class="table-actions">
+                <button type="button" 
+                        class="btn btn--sm btn--ghost btn--primary ban-view-btn"
+                        data-ban-id="{{ ban.id }}"
+                        title="Ko'rish">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <a href="{% url 'dashboard:ban_edit' ban.id %}" 
                    class="btn btn--sm btn--ghost" 
                    title="Tahrirlash">
@@ -115,8 +121,8 @@
                     </button>
                 </form>
                 <button type="button" 
-                        class="btn btn--sm btn--ghost btn--danger"
-                        onclick="deleteBan({{ ban.id }})"
+                        class="btn btn--sm btn--ghost btn--danger ban-delete-btn"
+                        data-ban-id="{{ ban.id }}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -134,6 +140,7 @@
 {% endif %}
 {% endblock %}
 
+{% block extra_js %}
 <script>
 function deleteBan(banId) {
     if (confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi? Bu amal qayta qaytarib bo\'lmaydi!')) {
@@ -172,5 +179,4 @@ function getCookie(name) {
     return cookieValue;
 }
 </script>
-
 {% endblock %}
