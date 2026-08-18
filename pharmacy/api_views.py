@@ -10,8 +10,8 @@ from pharmacy.serializers.misc import MedicineListSerializer
 
 
 class MedicinePagination(PageNumberPagination):
-    """Default pagination with 50 items per page"""
-    page_size = 50
+    """Default pagination with 24 items per page for shop"""
+    page_size = 24
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -36,12 +36,28 @@ class MedicineListView(ListAPIView):
     ordering = ['-reviews_count', '-average_rating', '-updated_at']
     
     def get_queryset(self):
-        queryset = Medicine.objects.all().order_by('-reviews_count', '-average_rating', '-updated_at')
+        queryset = Medicine.objects.all().select_related('category').order_by('-reviews_count', '-average_rating', '-updated_at')
         
         # Category filter
         category_id = self.request.query_params.get('category')
         if category_id:
             queryset = queryset.filter(category_id=category_id)
+        
+        # Price range filters
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        
+        if min_price:
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except (ValueError, TypeError):
+                pass
+        
+        if max_price:
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except (ValueError, TypeError):
+                pass
         
         # Active filter
         is_active = self.request.query_params.get('is_active')

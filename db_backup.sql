@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict d3DW9NsDyIWzSXYVH0hNXBSbAOtD8bc6zIrOoPpC90Czx8NcfY6EOdcgcsbu1jL
+\restrict R7VCNyzCKMynA5WD272a01dog6w7RKicCfO9EKGwc5y8tKK1OcdjRgylNj6h5yE
 
 -- Dumped from database version 15.19 (Debian 15.19-1.pgdg13+2)
 -- Dumped by pg_dump version 15.19 (Debian 15.19-1.pgdg13+2)
@@ -2645,7 +2645,8 @@ COPY public.security_auditlog (id, action, description, ip_address, "timestamp",
 --
 
 COPY public.security_banrecord (id, ip, fingerprint, reason, ban_type, created_at, expires_at, created_by, attempts, source, meta, is_active, user_id) FROM stdin;
-1	2.2.2.2	\N	Rate limit exceeded: 100+ requests in 60s	temporary	2026-08-17 20:11:09.54109+00	2026-08-17 20:16:09.540089+00	system	100	/	{"user_agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9168", "request_path": "/"}	t	\N
+1	2.2.2.2	\N	Rate limit exceeded: 100+ requests in 60s	temporary	2026-08-17 20:11:09.54109+00	2026-08-17 20:16:09.540089+00	system	100	/	{"user_agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.9168", "request_path": "/"}	f	\N
+2	9.9.9.9	\N	manual permanent test	permanent	2026-08-17 20:17:11.595458+00	\N	dev	0	manual	{}	f	\N
 \.
 
 
@@ -2712,7 +2713,7 @@ COPY public.users_adminlogintoken (id, created_at, expires_at, used, user_id, to
 COPY public.users_customuser (id, password, last_login, is_superuser, phone_number, telegram_id, auth_code, is_verified, full_name, address, avatar, date_joined, is_active, is_staff, bad_comments_count, is_banned, email, role, ban_reason, ban_until, banned_by_id, banned_for, is_permanent_ban) FROM stdin;
 1		2026-08-17 14:38:12.692599+00	f	\N	\N	\N	f	Yo'ldashev Firdavs		users_profile_avatars/macos-27-golden-4480x3088-26625.png	2026-08-17 08:23:56.358044+00	t	f	0	f	firdavsyoldoshevpython@gmail.com	user	\N	\N	\N	\N	f
 3	pbkdf2_sha256$870000$tAcYNCRLyoihbXIUPtjS7M$cAWSWfuAQg9J2qhmpQT8UWGqcScTlc0znR6qXLydGpU=	2026-08-17 14:32:26.214922+00	t	\N	\N	\N	f				2026-08-17 14:31:24.015709+00	t	t	0	f	yoldoshevfdev@gmail.com	admin	\N	\N	\N	\N	f
-2		2026-08-17 20:07:43.699211+00	t	+998977705558	\N	\N	t	Yo'ldashev Firdavs	Navoiy viloyati	users_profile_avatars/f1.png	2026-08-17 08:29:09.654638+00	t	t	0	f	yoldoshev.firdavs67@gmail.com	admin	\N	\N	\N	\N	f
+2		2026-08-18 00:55:26.642894+00	t	+998977705558	\N	\N	t	Yo'ldashev Firdavs	Navoiy viloyati	users_profile_avatars/f1.png	2026-08-17 08:29:09.654638+00	t	t	0	f	yoldoshev.firdavs67@gmail.com	admin	\N	\N	\N	\N	f
 \.
 
 
@@ -2960,7 +2961,7 @@ SELECT pg_catalog.setval('public.security_auditlog_id_seq', 93, true);
 -- Name: security_banrecord_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pharmacy_admin
 --
 
-SELECT pg_catalog.setval('public.security_banrecord_id_seq', 1, true);
+SELECT pg_catalog.setval('public.security_banrecord_id_seq', 2, true);
 
 
 --
@@ -4504,5 +4505,5 @@ ALTER TABLE ONLY public.users_telegrambotuser
 -- PostgreSQL database dump complete
 --
 
-\unrestrict d3DW9NsDyIWzSXYVH0hNXBSbAOtD8bc6zIrOoPpC90Czx8NcfY6EOdcgcsbu1jL
+\unrestrict R7VCNyzCKMynA5WD272a01dog6w7RKicCfO9EKGwc5y8tKK1OcdjRgylNj6h5yE
 
