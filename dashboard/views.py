@@ -1154,26 +1154,43 @@ def is_deliverer(user):
 
 @login_required_decorator(login_url="dashboard:login_page")
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
 @require_http_methods(["GET"])
 def ban_list(request):
-    """Bannalangan foydalanuvchilar ro'yxati."""
+    """Ban records ro'yxati - BanRecord model uchun."""
     try:
         from django.utils import timezone
+        from security.models import BanRecord
         
-        # Vaqtli va permanent banlar
-        banned_users = CustomUser.objects.filter(
-            banned_for__isnull=False
-        ).select_related('banned_by').order_by('-ban_until', '-date_joined')
+        # Barcha ban records
+        bans = BanRecord.objects.select_related('user').order_by('-created_at')
+        
+        # Stats
+        total_bans = bans.count()
+        active_bans = bans.filter(is_active=True).count()
+        permanent_bans = bans.filter(ban_type='permanent').count()
+        temporary_bans = bans.filter(ban_type='temporary').count()
         
         ctx = {
-            "banned_users": banned_users,
+            "bans": bans,
+            "total_bans": total_bans,
+            "active_bans": active_bans,
+            "permanent_bans": permanent_bans,
+            "temporary_bans": temporary_bans,
             "now": timezone.now(),
         }
         return render(request, "dashboard/bans/list.html", ctx)
     except Exception as query_error:
         logger.error(f"Database query error in ban_list: {str(query_error)}")
         messages.error(request, "Banlar ro'yxatini yuklashda xatolik yuz berdi.")
-        return render(request, "dashboard/bans/list.html", {"banned_users": []})
+        return render(request, "dashboard/bans/list.html", {
+            "bans": [],
+            "total_bans": 0,
+            "active_bans": 0,
+            "permanent_bans": 0,
+            "temporary_bans": 0,
+        })
 
 
 

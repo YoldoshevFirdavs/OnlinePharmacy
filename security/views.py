@@ -128,3 +128,34 @@ class AdminBanStatsView(SecurityAPIView):
             'ip_blocks': stats['ip_blocks'],
             'unban_requests': stats['unban_requests'],
         })
+
+
+class UnbanRecordView(SecurityAPIView):
+    """Unban a BanRecord by marking it inactive."""
+    
+    def post(self, request, pk):
+        """Mark ban record as inactive (unban)."""
+        from .models import BanRecord
+        
+        try:
+            ban = BanRecord.objects.get(id=pk)
+        except BanRecord.DoesNotExist:
+            return Response(
+                {'success': False, 'message': 'Ban record not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Mark as inactive (unban)
+        ban.is_active = False
+        ban.save()
+        
+        return Response({
+            'success': True,
+            'message': f'Ban record {pk} has been marked as inactive',
+            'ban': {
+                'id': ban.id,
+                'ip': ban.ip,
+                'fingerprint': ban.fingerprint,
+                'is_active': ban.is_active,
+            }
+        })
