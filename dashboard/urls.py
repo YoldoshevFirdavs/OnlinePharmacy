@@ -61,6 +61,7 @@ from .views_admin import (
     user_history_view,
     order_detail_view,
     order_detail_admin_view,
+    admin_order_view,
 )
 
 app_name = "dashboard"
@@ -131,4 +132,5 @@ urlpatterns = [
     path("admin/analytics/", admin_analytics_dashboard, name="admin_analytics"),
     path("admin/user/<int:user_id>/history/", user_history_view, name="user_history"),
     path("admin/user/<int:user_id>/order/<int:order_id>/", order_detail_admin_view, name="admin_order_detail"),
+    path("admin/orders/<int:order_id>/view/", admin_order_view, name="admin_order_view"),
 ]

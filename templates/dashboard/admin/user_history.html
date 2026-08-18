@@ -164,16 +164,21 @@ function renderHistory(items) {
         
         // Details from meta
         let details = '-';
+        let orderViewUrl = '';
         if (item.meta) {
             try {
                 const meta = typeof item.meta === 'string' ? JSON.parse(item.meta) : item.meta;
                 if (meta.quantity) details = `Miqdori: ${meta.quantity}`;
                 if (meta.rating) details = `Bahosi: ${meta.rating}★`;
-                if (meta.order_id) details = `Buyurtma #${meta.order_id}`;
+                if (meta.order_id) {
+                    details = `Buyurtma #${meta.order_id}`;
+                    orderViewUrl = `/dashboard/admin/orders/${meta.order_id}/view/`;
+                }
             } catch (e) {}
         }
         
-        row.innerHTML = `
+        // Build row HTML
+        let rowHtml = `
             <td><strong>#${item.id}</strong></td>
             <td><span title="${new Date(item.timestamp).toLocaleString()}">${new Date(item.timestamp).toLocaleDateString('uz-UZ')} ${new Date(item.timestamp).toLocaleTimeString('uz-UZ')}</span></td>
             <td><span class="tag ${actionClass}">${actionText}</span></td>
@@ -181,6 +186,13 @@ function renderHistory(items) {
             <td>${details}</td>
             <td><code>${item.ip_address}</code></td>
         `;
+        
+        // Add view button if order_id exists
+        if (orderViewUrl) {
+            rowHtml += `<td><a href="${orderViewUrl}" class="btn btn--sm btn--primary" style="padding: 6px 12px;">Ko'rish</a></td>`;
+        }
+        
+        row.innerHTML = rowHtml;
         
         tbody.appendChild(row);
     });
