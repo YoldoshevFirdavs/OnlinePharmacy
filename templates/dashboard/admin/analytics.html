@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            background: var(--light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .dashboard-container {
+            padding: 2rem;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        
+        .refresh-info {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .metric-card.success { border-left-color: var(--success); }
+        .metric-card.warning { border-left-color: var(--warning); }
+        .metric-card.danger { border-left-color: var(--danger); }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+        
+        .metric-change {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
+        .change-positive {
+            color: var(--success);
+        }
+        
+        .change-negative {
+            color: var(--danger);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .last-updated {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .metrics-grid,
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>{{ page_title }}</h1>
+                <p class="refresh-info">Auto-refreshes every 60 seconds</p>
+            </div>
+            <div>
+                <a href="{% url 'dashboard:dashboard-admin' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+        
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <!-- Orders -->
+            <div class="metric-card">
+                <div class="metric-label">Total Orders</div>
+                <p class="metric-value" id="total-orders">-</p>
+                <div class="metric-change"><span id="orders-7d"></span> last 7 days</div>
+            </div>
+            
+            <div class="metric-card success">
+                <div class="metric-label">Pending Orders</div>
+                <p class="metric-value" id="pending-orders">-</p>
+            </div>
+            
+            <div class="metric-card warning">
+                <div class="metric-label">Delivered Orders</div>
+                <p class="metric-value" id="delivered-orders">-</p>
+            </div>
+            
+            <!-- Revenue -->
+            <div class="metric-card success">
+                <div class="metric-label">Total Revenue</div>
+                <p class="metric-value" id="total-revenue">-</p>
+                <div class="metric-change"><span id="revenue-7d"></span> last 7 days</div>
+            </div>
+            
+            <!-- Products -->
+            <div class="metric-card">
+                <div class="metric-label">Total Products</div>
+                <p class="metric-value" id="total-products">-</p>
+            </div>
+            
+            <div class="metric-card danger">
+                <div class="metric-label">Out of Stock</div>
+                <p class="metric-value" id="out-of-stock">-</p>
+            </div>
+            
+            <!-- Users -->
+            <div class="metric-card">
+                <div class="metric-label">Total Users</div>
+                <p class="metric-value" id="total-users">-</p>
+            </div>
+            
+            <!-- Comments -->
+            <div class="metric-card">
+                <div class="metric-label">Total Comments</div>
+                <p class="metric-value" id="total-comments">-</p>
+            </div>
+            
+            <div class="metric-card danger">
+                <div class="metric-label">Unapproved</div>
+                <p class="metric-value" id="unapproved-comments">-</p>
+            </div>
+        </div>
+        
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <!-- Daily Orders Chart -->
+            <div class="chart-card">
+                <div class="chart-title">Orders (Last 30 Days)</div>
+                <div class="chart-container">
+                    <canvas id="daily-orders-chart"></canvas>
+                </div>
+                <div class="last-updated" id="orders-chart-updated"></div>
+            </div>
+            
+            <!-- Daily Revenue Chart -->
+            <div class="chart-card">
+                <div class="chart-title">Revenue (Last 30 Days)</div>
+                <div class="chart-container">
+                    <canvas id="daily-revenue-chart"></canvas>
+                </div>
+                <div class="last-updated" id="revenue-chart-updated"></div>
+            </div>
+            
+            <!-- Order Status Distribution -->
+            <div class="chart-card">
+                <div class="chart-title">Order Status Distribution</div>
+                <div class="chart-container">
+                    <canvas id="order-status-chart"></canvas>
+                </div>
+                <div class="last-updated" id="status-chart-updated"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Chart instances
+        let dailyOrdersChart = null;
+        let dailyRevenueChart = null;
+        let orderStatusChart = null;
+        
+        // Auto-refresh interval (1 minute)
+        const REFRESH_INTERVAL = {{ refresh_interval }};
+        
+        // Initialize
+        loadAnalytics();
+        setInterval(loadAnalytics, REFRESH_INTERVAL);
+        
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/dashboard/api/admin/analytics/');
+                if (!response.ok) throw new Error('API error');
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const data = result.data;
+                    updateMetrics(data);
+                    updateCharts(data);
+                    updateTimestamp();
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+        
+        function updateMetrics(data) {
+            // Orders
+            document.getElementById('total-orders').textContent = data.orders.total.toLocaleString();
+            document.getElementById('orders-7d').textContent = `+${data.orders.last_7_days} orders`;
+            document.getElementById('pending-orders').textContent = data.orders.pending;
+            document.getElementById('delivered-orders').textContent = data.orders.delivered;
+            
+            // Revenue
+            document.getElementById('total-revenue').textContent = '$' + data.revenue.total.toFixed(2);
+            document.getElementById('revenue-7d').textContent = '$' + data.revenue.last_7_days.toFixed(2);
+            
+            // Products
+            document.getElementById('total-products').textContent = data.products.total;
+            document.getElementById('out-of-stock').textContent = data.products.out_of_stock;
+            
+            // Users
+            document.getElementById('total-users').textContent = data.users.total;
+            
+            // Comments
+            document.getElementById('total-comments').textContent = data.comments.total;
+            document.getElementById('unapproved-comments').textContent = data.comments.unapproved;
+        }
+        
+        function updateCharts(data) {
+            // Daily orders (line chart)
+            const ordersLabels = data.charts.daily_orders.map(d => d.date).reverse();
+            const ordersValues = data.charts.daily_orders.map(d => d.orders).reverse();
+            
+            if (dailyOrdersChart) {
+                dailyOrdersChart.data.labels = ordersLabels;
+                dailyOrdersChart.data.datasets[0].data = ordersValues;
+                dailyOrdersChart.update();
+            } else {
+                const ctx = document.getElementById('daily-orders-chart').getContext('2d');
+                dailyOrdersChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ordersLabels,
+                        datasets: [{
+                            label: 'Orders',
+                            data: ordersValues,
+                            borderColor: '#0066cc',
+                            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+            
+            // Daily revenue (bar chart)
+            const revenueLabels = data.charts.daily_revenue.map(d => d.date).reverse();
+            const revenueValues = data.charts.daily_revenue.map(d => d.revenue).reverse();
+            
+            if (dailyRevenueChart) {
+                dailyRevenueChart.data.labels = revenueLabels;
+                dailyRevenueChart.data.datasets[0].data = revenueValues;
+                dailyRevenueChart.update();
+            } else {
+                const ctx = document.getElementById('daily-revenue-chart').getContext('2d');
+                dailyRevenueChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: revenueLabels,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: revenueValues,
+                            backgroundColor: '#28a745',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+            
+            // Order status pie chart
+            const statusLabels = data.charts.order_status.map(s => s.status);
+            const statusValues = data.charts.order_status.map(s => s.count);
+            
+            if (orderStatusChart) {
+                orderStatusChart.data.labels = statusLabels;
+                orderStatusChart.data.datasets[0].data = statusValues;
+                orderStatusChart.update();
+            } else {
+                const ctx = document.getElementById('order-status-chart').getContext('2d');
+                orderStatusChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusValues,
+                            backgroundColor: [
+                                '#0066cc',
+                                '#28a745',
+                                '#ffc107',
+                                '#dc3545',
+                                '#6c757d'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        }
+        
+        function updateTimestamp() {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('orders-chart-updated').textContent = `Updated: ${now}`;
+            document.getElementById('revenue-chart-updated').textContent = `Updated: ${now}`;
+            document.getElementById('status-chart-updated').textContent = `Updated: ${now}`;
+        }
+    </script>
+</body>
+</html>

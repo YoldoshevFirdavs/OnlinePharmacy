@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .page-container {
+            padding: 2rem;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .user-info {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .user-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .user-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .user-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .meta-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .meta-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .meta-value {
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-top: 0.25rem;
+        }
+        
+        .history-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table th {
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .action-badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .action-view { background: #d1ecf1; color: #0c5460; }
+        .action-add { background: #d4edda; color: #155724; }
+        .action-edit { background: #fff3cd; color: #856404; }
+        .action-delete { background: #f8d7da; color: #721c24; }
+        
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+            padding: 2rem 0 0;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        .empty-state button {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .empty-state button:hover {
+            background-color: #0052a3;
+        }
+        
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1rem;
+            }
+            
+            .user-meta {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>{{ page_title }}</h1>
+            <p class="text-muted">Immutable audit log of all user actions</p>
+            <a href="/dashboard/admin/" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+            <a href="{% url 'dashboard:dashboard-admin' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+        
+        <!-- User Info Card -->
+        <div class="user-card">
+            <h2>User Information</h2>
+            <div class="user-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Full Name</div>
+                    <div class="meta-value" id="user-name">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Email</div>
+                    <div class="meta-value" id="user-email">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Total Actions</div>
+                    <div class="meta-value" id="total-actions">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Table -->
+        <div class="user-card">
+            <h2>Activity History</h2>
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading history...</p>
+            </div>
+            
+            <div id="history-content" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>Product/Resource</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- Loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav id="pagination-nav" aria-label="History pagination" style="display: none;">
+                    <ul class="pagination">
+                        <li class="page-item" id="prev-btn" style="display: none;">
+                            <a class="page-link" href="#" onclick="loadPage(currentPage - 1); return false;">← Previous</a>
+                        </li>
+                        <li class="page-item" id="page-info">
+                            <span class="page-link">Page 1 of 1</span>
+                        </li>
+                        <li class="page-item" id="next-btn" style="display: none;">
+                            <a class="page-link" href="#" onclick="loadPage(currentPage + 1); return false;">Next →</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div id="empty-state" style="display: none;" class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No history found for this user</p>
+                <button onclick="loadPage(1)" id="retry-btn">Retry Loading</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const userId = {{ user_id }};
+        const pageSize = 50;
+        let currentPage = 1;
+        let totalPages = 1;
+        
+        // Initialize
+        loadPage(1);
+        
+        async function loadPage(page = 1) {
+            const loadingEl = document.getElementById('loading');
+            const historyContentEl = document.getElementById('history-content');
+            const emptyStateEl = document.getElementById('empty-state');
+            
+            loadingEl.style.display = 'block';
+            historyContentEl.style.display = 'none';
+            emptyStateEl.style.display = 'none';
+            
+            try {
+                const response = await fetch(`/dashboard/api/admin/user/${userId}/history/?page=${page}&page_size=${pageSize}`);
+                if (!response.ok) throw new Error('API error');
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const data = result.data;
+                    currentPage = page;
+                    totalPages = Math.ceil(data.count / data.page_size);
+                    
+                    // Update user info
+                    document.getElementById('user-name').textContent = result.user.name || '-';
+                    document.getElementById('user-email').textContent = result.user.email || '-';
+                    document.getElementById('total-actions').textContent = data.count;
+                    
+                    if (data.results.length > 0) {
+                        renderHistory(data.results);
+                        updatePagination();
+                        historyContentEl.style.display = 'block';
+                    } else {
+                        emptyStateEl.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+                loadingEl.innerHTML = '<p class="text-danger">Error loading history. <button onclick="loadPage(1)">Retry</button></p>';
+            }
+        }
+        
+        function renderHistory(items) {
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '';
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Action badge
+                let actionClass = 'action-view';
+                let showViewButton = false;
+                if (item.action.includes('create')) actionClass = 'action-add';
+                else if (item.action.includes('edit')) actionClass = 'action-edit';
+                else if (item.action.includes('delete')) actionClass = 'action-delete';
+                else if (item.action === 'order_create') {
+                    showViewButton = true;
+                }
+                
+                // Details from meta
+                let details = '';
+                if (item.meta) {
+                    try {
+                        const meta = typeof item.meta === 'string' ? JSON.parse(item.meta) : item.meta;
+                        if (meta.quantity) details = `Qty: ${meta.quantity}`;
+                        if (meta.rating) details = `Rating: ${meta.rating}★`;
+                    } catch (e) {}
+                }
+                
+                row.innerHTML = `
+                    <td>${new Date(item.timestamp).toLocaleString()}</td>
+                    <td><span class="action-badge ${actionClass}">${item.action}</span></td>
+                    <td>${item.product ? `<strong>${item.product}</strong>` : (item.seller ? item.seller : '-')}</td>
+                    <td>${details || '-'}</td>
+                    <td><code>${item.ip_address}</code></td>
+                    <td>${showViewButton ? `<a href="/dashboard/admin/user/${userId}/order/${meta.order_id || ''}/" class="btn btn-sm btn-outline-primary">Kurish</a>` : ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function updatePagination() {
+            const pageInfo = document.getElementById('page-info');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const paginationNav = document.getElementById('pagination-nav');
+            
+            pageInfo.innerHTML = `<span class="page-link">Page ${currentPage} of ${totalPages}</span>`;
+            
+            if (totalPages > 1) {
+                paginationNav.style.display = 'block';
+                prevBtn.style.display = currentPage > 1 ? 'block' : 'none';
+                nextBtn.style.display = currentPage < totalPages ? 'block' : 'none';
+            } else {
+                paginationNav.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

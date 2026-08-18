@@ -1193,6 +1193,132 @@ def ban_list(request):
         })
 
 
+# ═══════ BAN CRUD VIEWS ═══════
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def ban_create(request):
+    """Ban yaratish."""
+    try:
+        if request.method == "POST":
+            try:
+                from security.models import BanRecord
+                from django.utils import timezone
+                
+                ban_type = request.POST.get('ban_type', 'temporary')
+                reason = request.POST.get('reason', '')
+                ip = request.POST.get('ip', '').strip()
+                fingerprint = request.POST.get('fingerprint', '').strip()
+                user_id = request.POST.get('user', '')
+                expires_days = request.POST.get('expires_days', '')
+                
+                # Validate input
+                if not ip and not fingerprint and not user_id:
+                    messages.error(request, "IP, fingerprint yoki user kerak")
+                    return render(request, "dashboard/bans/form.html", {"form": request.POST})
+                
+                # Create ban
+                ban = BanRecord.objects.create(
+                    ban_type=ban_type,
+                    reason=reason,
+                    ip=ip if ip else None,
+                    fingerprint=fingerprint if fingerprint else None,
+                    user_id=user_id if user_id else None,
+                )
+                
+                if ban_type == 'temporary' and expires_days:
+                    from datetime import timedelta
+                    ban.expires_at = timezone.now() + timedelta(days=int(expires_days))
+                    ban.save()
+                
+                messages.success(request, "Ban muvaffaqiyatli yaratildi.")
+                return redirect("dashboard:ban_list")
+            except Exception as save_error:
+                logger.error(f"Error saving ban: {str(save_error)}")
+                messages.error(request, "Banni saqlashda xatolik yuz berdi.")
+        else:
+            return render(request, "dashboard/bans/form.html", {})
+    except Exception as e:
+        logger.error(f"Error in ban_create: {str(e)}")
+        messages.error(request, "Noma'lum xatolik.")
+        return redirect("dashboard:ban_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def ban_edit(request, pk):
+    """Ban tahrirlash."""
+    try:
+        from security.models import BanRecord
+        ban = get_object_or_404(BanRecord, pk=pk)
+        
+        if request.method == "POST":
+            try:
+                ban.ban_type = request.POST.get('ban_type', ban.ban_type)
+                ban.reason = request.POST.get('reason', ban.reason)
+                ban.ip = request.POST.get('ip', ban.ip or '')
+                ban.fingerprint = request.POST.get('fingerprint', ban.fingerprint or '')
+                
+                expires_days = request.POST.get('expires_days', '')
+                if ban.ban_type == 'temporary' and expires_days:
+                    from datetime import timedelta
+                    from django.utils import timezone
+                    ban.expires_at = timezone.now() + timedelta(days=int(expires_days))
+                else:
+                    ban.expires_at = None
+                
+                ban.save()
+                messages.success(request, "Ban muvaffaqiyatli yangilandi.")
+                return redirect("dashboard:ban_list")
+            except Exception as save_error:
+                logger.error(f"Error updating ban: {str(save_error)}")
+                messages.error(request, "Banni yangilashda xatolik.")
+        else:
+            ctx = {"ban": ban}
+            return render(request, "dashboard/bans/form.html", ctx)
+    except Exception as e:
+        logger.error(f"Error in ban_edit: {str(e)}")
+        messages.error(request, "Noma'lum xatolik.")
+        return redirect("dashboard:ban_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["POST"])
+def ban_toggle_status(request, pk):
+    """Ban statusini almashtirish (Faol/O'chirilgan)."""
+    try:
+        from security.models import BanRecord
+        ban = get_object_or_404(BanRecord, pk=pk)
+        ban.is_active = not ban.is_active
+        ban.save()
+        messages.success(request, f"Ban statusi {'Faol' if ban.is_active else \"O'chirilgan\"} qilindi.")
+    except Exception as e:
+        logger.error(f"Error toggling ban status: {str(e)}")
+        messages.error(request, "Statusni almashtirishda xatolik.")
+    
+    return redirect("dashboard:ban_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["POST"])
+def ban_delete(request, pk):
+    """Ban o'chirish."""
+    try:
+        from security.models import BanRecord
+        ban = get_object_or_404(BanRecord, pk=pk)
+        ban_name = str(ban)
+        ban.delete()
+        messages.success(request, f"'{ban_name}' ban muvaffaqiyatli o'chirildi.")
+    except Exception as e:
+        logger.error(f"Error deleting ban: {str(e)}")
+        messages.error(request, "Banni o'chirishda xatolik.")
+    
+    return redirect("dashboard:ban_list")
+
 
 # ═══════ ORDER CRUD VIEWS ═══════
 

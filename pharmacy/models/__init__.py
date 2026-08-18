@@ -9,3 +9,7 @@ from .misc import (
     Review,
     StockLog,
 )
+from .history import CustomerUserHistory
+from .comments import ProductComment, CommentLike, CommentAnalysis
+
+

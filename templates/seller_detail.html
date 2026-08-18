@@ -1,0 +1,367 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ seller.shop_name }} - Online Pharmacy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        main { min-height: calc(100vh - 200px); }
+
+        .seller-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .seller-hero {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .seller-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid white;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .seller-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .seller-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .seller-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .seller-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #4caf50;
+            color: #333;
+        }
+
+        /* ABOUT SECTION */
+        .about-box {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .about-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #555;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* PRODUCTS GRID */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+        }
+
+        .product-image-wrap {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            background: #f5f5f5;
+        }
+
+        .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #4caf50;
+            margin-top: auto;
+        }
+
+        /* INFO SECTION */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-icon {
+            font-size: 24px;
+            color: #4caf50;
+            flex-shrink: 0;
+        }
+
+        .info-content h3 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .info-content p {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* EMPTY STATE */
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .seller-header {
+                padding: 40px 20px;
+            }
+
+            .seller-header h1 {
+                font-size: 24px;
+            }
+
+            .seller-stats {
+                gap: 20px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <main>
+        <!-- SELLER HEADER -->
+        <div class="seller-header">
+            <div class="seller-hero">
+                <div class="seller-avatar-large">
+                    <img src="{{ seller.avatar.url|default:'/static/images/default_avatar.png' }}" alt="{{ seller.shop_name }}">
+                </div>
+                <h1>{{ seller.shop_name }}</h1>
+                <div class="seller-badge">
+                    {% if seller.is_verified %}
+                        <i class="fas fa-check-circle"></i> Tasdiqlangan sotuvchi
+                    {% endif %}
+                </div>
+                <div class="seller-stats">
+                    <div class="stat">
+                        <div class="stat-value">⭐ {{ seller.rating }}</div>
+                        <div class="stat-label">Reyting</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{ seller.sells_count }}</div>
+                        <div class="stat-label">Sotish</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{ reviews_count }}</div>
+                        <div class="stat-label">Fikrlar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- ABOUT SECTION -->
+            {% if seller.description %}
+                <div class="section">
+                    <div class="section-title">📖 Sotuvchi haqida</div>
+                    <div class="about-box">
+                        <div class="about-text">{{ seller.description }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- INFO SECTION -->
+            <div class="section">
+                <div class="info-grid">
+                    {% if seller.address %}
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div class="info-content">
+                                <h3>Joylashuvi</h3>
+                                <p>{{ seller.address }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-store"></i></div>
+                        <div class="info-content">
+                            <h3>Mahsulotlar</h3>
+                            <p>{{ products.count }} ta aktiv</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-star"></i></div>
+                        <div class="info-content">
+                            <h3>Avg Reyting</h3>
+                            <p>{{ seller.rating }}/5.0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCTS SECTION -->
+            <div class="section">
+                <div class="section-title">🏪 Mahsulotlar</div>
+                {% if products %}
+                    <div class="products-grid">
+                        {% for product in products %}
+                            <div class="product-card" onclick="window.location.href='/products/{{ product.id }}/'">
+                                <div class="product-image-wrap">
+                                    <img src="{{ product.main_image.url|default:'/static/images/default_avatar.png' }}" 
+                                         class="product-image" loading="lazy" alt="{{ product.name }}">
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-name">{{ product.name }}</h3>
+                                    <div class="product-price">{{ product.price|floatformat:0 }} so'm</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <div class="empty-icon">📦</div>
+                        <div>Hozircha mahsulotlar yo'q</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>

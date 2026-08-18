@@ -65,6 +65,9 @@
         <td>{{ u.date_joined|date:"d.m.Y" }}</td>
         <td>
             <div class="table-actions">
+                <a href="{% url 'dashboard:user_history' u.pk %}" class="btn btn--sm btn--ghost" title="Foydalanuvchi tarixi (Google History kabi)">
+                    <i class="fa-solid fa-history"></i>
+                </a>
                 <a href="{% url 'dashboard:user_edit' u.pk %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
                     <i class="fa-solid fa-pen"></i>
                 </a>

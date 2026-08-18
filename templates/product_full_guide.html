@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - To'liq Qo'llanma</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .guide-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .guide-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .guide-header-image {
+            width: 100px;
+            height: 100px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .guide-header-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .guide-header-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .guide-header-info p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #4caf50;
+            color: #333;
+        }
+
+        .section-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #555;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .empty-section {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* WARNING SECTIONS */
+        .warning-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .warning-section .section-title {
+            border-bottom-color: #ffc107;
+            color: #856404;
+        }
+
+        .side-effects-section {
+            background: #ffebee;
+            border-left: 4px solid #ff5252;
+        }
+
+        .side-effects-section .section-title {
+            border-bottom-color: #ff5252;
+            color: #c62828;
+        }
+
+        .contraindications-section {
+            background: #ffe0e0;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .contraindications-section .section-title {
+            border-bottom-color: #d32f2f;
+            color: #b71c1c;
+        }
+
+        @media (max-width: 768px) {
+            .guide-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .guide-header-info h1 {
+                font-size: 20px;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <div class="guide-container">
+        <!-- BACK BUTTON -->
+        <a href="/products/{{ product.id }}/" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Orqaga
+        </a>
+
+        <!-- HEADER -->
+        <div class="guide-header">
+            <div class="guide-header-image">
+                <img src="{{ product.main_image.url|default:'/static/images/default_avatar.png' }}" alt="{{ product.name }}">
+            </div>
+            <div class="guide-header-info">
+                <h1>{{ product.name }}</h1>
+                <p>{{ product.category.name }}</p>
+                <p style="margin-top: 8px; font-size: 12px; color: #999;">
+                    {% if product.seller %}
+                        Sotuvchi: {{ product.seller.shop_name }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- INSTRUCTION SECTION -->
+        {% if product.instruction %}
+            <div class="section">
+                <div class="section-title">📋 Qo'llanma va foydalanish</div>
+                <div class="section-content">{{ product.instruction }}</div>
+            </div>
+        {% endif %}
+
+        <!-- STORAGE CONDITIONS -->
+        {% if product.storage_conditions %}
+            <div class="section">
+                <div class="section-title">🧊 Saqlash shartlari</div>
+                <div class="section-content">{{ product.storage_conditions }}</div>
+            </div>
+        {% endif %}
+
+        <!-- SIDE EFFECTS WARNING -->
+        {% if product.side_effects %}
+            <div class="section side-effects-section">
+                <div class="section-title">⚠️ Yon ta'sirlar</div>
+                <div class="section-content">{{ product.side_effects }}</div>
+            </div>
+        {% else %}
+            <div class="section side-effects-section">
+                <div class="section-title">⚠️ Yon ta'sirlar</div>
+                <div class="section-content empty-section">Ma'lumot kiritilmagan</div>
+            </div>
+        {% endif %}
+
+        <!-- CONTRAINDICATIONS -->
+        {% if product.contraindications %}
+            <div class="section contraindications-section">
+                <div class="section-title">🔴 Qarama-qarshi ko'rsatmalar</div>
+                <div class="section-content">{{ product.contraindications }}</div>
+            </div>
+        {% else %}
+            <div class="section contraindications-section">
+                <div class="section-title">🔴 Qarama-qarshi ko'rsatmalar</div>
+                <div class="section-content empty-section">Ma'lumot kiritilmagan</div>
+            </div>
+        {% endif %}
+
+        <!-- PRESCRIPTION BADGE -->
+        {% if product.is_prescription_required %}
+            <div class="section" style="background: #e3f2fd; border-left: 4px solid #2196F3;">
+                <div class="section-title" style="border-bottom-color: #2196F3; color: #1565c0;">
+                    📝 Retsept talab qiladi
+                </div>
+                <div class="section-content">
+                    Ushbu dori sotib olish uchun shifokor retsepti talab qiladi. Iltimos, tib xodimi bilan maslahat qiling.
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- BACK TO PRODUCT -->
+        <a href="/products/{{ product.id }}/" class="btn-back" style="margin-top: 20px;">
+            <i class="fas fa-arrow-left"></i> Mahsulotga qaytish
+        </a>
+    </div>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>
