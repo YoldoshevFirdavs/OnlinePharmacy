@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    {% load static %}
+    {% include 'components/begin.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do'kon - Online Pharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flag-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard/css/loader.css' %}">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        #shop-main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shop-container {
+            flex: 1;
+            display: flex;
+        }
+
+        .shop-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'components/header.html' %}
+
+    <div class="tetris-loader-root" id="loader">
+        <div class="tetris-loader">
+            <span class="tetris-block">L</span>
+            <span class="tetris-block">O</span>
+            <span class="tetris-block">A</span>
+            <span class="tetris-block">D</span>
+            <span class="tetris-block">I</span>
+            <span class="tetris-block">N</span>
+            <span class="tetris-block">G</span>
+        </div>
+        <div class="tetris-loader-text">Loading</div>
+    </div>
+
+    <!-- MAIN SHOP VIEW -->
+    <div id="shop-main-view">
+        <div class="shop-container">
+            <!-- SIDEBAR - CATEGORIES -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-layer-group"></i> Kategoriyalar</h3>
+                </div>
+                <div class="categories-list" id="categoryList">
+                    <label class="category-item active" data-value="all">
+                        <input type="radio" name="category" value="all" checked>
+                        <span>Barchasi</span>
+                    </label>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="shop-main">
+                <!-- SEARCH & FILTER -->
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Dori yoki mahsulot nomini qidirish..."
+                            autocomplete="off">
+                        <div class="search-suggestions" id="search-suggestions" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <select id="sortSelect">
+                        <option value="newest">Eng yangilari</option>
+                        <option value="price_asc">Narx bo'yicha (o'suvchi)</option>
+                        <option value="price_desc">Narx bo'yicha (kamayuvchi)</option>
+                    </select>
+                    <input type="number" id="minPrice" placeholder="Min narx">
+                    <input type="number" id="maxPrice" placeholder="Max narx">
+                    <button class="btn btn-primary" id="applyFilter">
+                        <i class="fas fa-filter"></i> Filtrni qo'llash
+                    </button>
+                </div>
+
+                <!-- END OF PRODUCTS GRID -->
+            </main>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAIL VIEW (SPA) -->
+    <div id="product-detail-view" style="display: none;">
+        <div class="detail-container">
+            <button class="btn btn-secondary back-btn" id="back-to-shop">
+                <i class="fas fa-arrow-left"></i> Ortga qaytish
+            </button>
+            <div class="product-detail-layout" id="pageProductDetail">
+                <!-- Details injected by JS -->
+            </div>
+            <h4 class="similar-products-title">
+                <i class="fas fa-cubes"></i> O'xshash mahsulotlar
+            </h4>
+            <div class="products-grid" id="similarProductsGrid">
+                <!-- Similar products -->
+            </div>
+        </div>
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    <script src="{% static 'js/api.js' %}"></script>
+    <script src="{% static 'js/shop.js' %}"></script>
+    <script src="{% static 'js/header.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const loader = document.getElementById('loader');
+            const links = document.querySelectorAll('a');
+
+            links.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        e.preventDefault();
+                        loader.classList.add('show');
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 1000);
+                    }
+                });
+            });
+
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    loader.classList.remove('show');
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
