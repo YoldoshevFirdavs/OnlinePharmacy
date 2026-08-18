@@ -922,20 +922,20 @@ def order_list(request):
             search = request.GET.get('search', '')
             status = request.GET.get('status', '')
             
-            # Base query
-            orders = Order.objects.select_related('customer').all()
+            # Base query - use 'user' not 'customer' (model uses user field)
+            orders = Order.objects.select_related('user').order_by('-created_at')
             
             # Filter by status
             if status:
                 orders = orders.filter(status=status)
             
-            # Search
+            # Search - use 'user' not 'customer'
             if search:
                 from django.db.models import Q
                 orders = orders.filter(
                     Q(id__icontains=search) |
-                    Q(customer__email__icontains=search) |
-                    Q(customer__full_name__icontains=search)
+                    Q(user__email__icontains=search) |
+                    Q(user__full_name__icontains=search)
                 )
             
             # Pagination
