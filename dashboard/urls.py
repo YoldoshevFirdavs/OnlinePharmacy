@@ -14,6 +14,11 @@ from .api_admin import (
     UserHistoryAPIView,
     UserOrderDetailAPIView,
 )
+from .api_admin_orders import (
+    AdminOrderCreateAPIView,
+    AdminOrderUpdateAPIView,
+    AdminOrderListAPIView,
+)
 from .views import seller_dashboard  # Added seller_dashboard
 from .views import (
     account_settings,
@@ -47,6 +52,7 @@ from .views import (
     ban_list,
     ban_create,
     ban_edit,
+    ban_view,
     ban_toggle_status,
     ban_delete,  # Added ban CRUD views
 )
@@ -89,6 +95,7 @@ urlpatterns = [
     path("bans/", ban_list, name="ban_list"),
     path("bans/create/", ban_create, name="ban_create"),
     path("bans/<int:pk>/edit/", ban_edit, name="ban_edit"),
+    path("bans/<int:pk>/view/", ban_view, name="ban_view"),
     path("bans/<int:pk>/toggle/", ban_toggle_status, name="ban_toggle_status"),
     path("bans/<int:pk>/delete/", ban_delete, name="ban_delete"),
     path("customize/", dashboard_customize, name="dashboard_customize"),
@@ -114,6 +121,11 @@ urlpatterns = [
     path("api/admin/analytics/", AdminAnalyticsAPIView.as_view(), name="api_admin_analytics"),
     path("api/admin/user/<int:user_id>/history/", UserHistoryAPIView.as_view(), name="api_user_history"),
     path("api/admin/user/<int:user_id>/order/<int:order_id>/", UserOrderDetailAPIView.as_view(), name="api_order_detail"),
+    
+    # Admin Order API
+    path("api/admin/orders/", AdminOrderListAPIView.as_view(), name="api_admin_orders"),
+    path("api/admin/orders/create/", AdminOrderCreateAPIView.as_view(), name="api_admin_orders_create"),
+    path("api/admin/orders/<int:pk>/", AdminOrderUpdateAPIView.as_view(), name="api_admin_orders_update"),
     
     # Admin Dashboard HTML pages (Task #10)
     path("admin/analytics/", admin_analytics_dashboard, name="admin_analytics"),

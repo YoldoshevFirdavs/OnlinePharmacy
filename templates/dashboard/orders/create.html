@@ -1,0 +1,432 @@
+{% extends 'dashboard/list.html' %}
+{% load static %}
+
+{% block title %}Create Order - Admin Dashboard{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-shopping-cart"></i>
+            Create New Order
+        </h1>
+        <p class="page-subtitle">Buyurtma ma'lumotlarini to'ldiring</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:order_list' %}" class="btn btn--secondary">
+            <i class="fa-solid fa-arrow-left"></i>
+            Orqaga
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Order Meta Section -->
+    <div class="order-meta-section">
+        <h3 class="section-title">Buyurtma Ma'lumotlari</h3>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="customer">Mijoz</label>
+                <select id="customer" name="customer" class="form-control" required>
+                    <option value="">-- Mijozni tanlang --</option>
+                    {% for user in all_users %}
+                        <option value="{{ user.id }}">{{ user.email }} ({{ user.full_name|default:user.phone_number }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="Pending">Pending (Kutilmoqda)</option>
+                    <option value="Processing">Processing (Jarayonda)</option>
+                    <option value="Shipped">Shipped (Yuborildi)</option>
+                    <option value="Delivered">Delivered (Yetkazildi)</option>
+                    <option value="Cancelled">Cancelled (Bekor qilindi)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Yetkazish Manzili</label>
+                <textarea id="address" name="address" class="form-control" rows="3" placeholder="Mijoz manzilini kiriting..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Eslatmalar</label>
+                <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumot..."></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Add Section -->
+    <div class="product-add-section">
+        <h3 class="section-title">Mahsulot Qo'shish</h3>
+        
+        <div class="product-form-row">
+            <div class="form-group" style="flex: 0 0 120px;">
+                <label for="product_id">Product ID</label>
+                <input type="number" id="product_id" name="product_id" class="form-control" placeholder="Masalan: 123" required>
+            </div>
+            
+            <div class="form-group" style="flex: 0 0 100px;">
+                <label for="quantity">Soni</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" min="1" value="1" required>
+            </div>
+            
+            <div class="form-group" style="flex: 1;">
+                <label>&nbsp;</label>
+                <button type="button" id="add_product_btn" class="btn btn--primary" style="width: 100%;">
+                    <i class="fa-solid fa-plus"></i>
+                    Qo'shish
+                </button>
+            </div>
+        </div>
+        
+        <div class="product-info" id="product_info" style="display: none; margin-top: 0.5rem; padding: 0.75rem; background: #f8f9fa; border-radius: 4px;">
+            <i class="fa-solid fa-info-circle"></i>
+            <span id="product_info_text"></span>
+        </div>
+    </div>
+    
+    <!-- Order Items Table -->
+    <div class="order-items-section">
+        <h3 class="section-title">Buyurtma Mahsulotlari</h3>
+        
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Nom</th>
+                        <th>Narxi</th>
+                        <th>Soni</th>
+                        <th>Line Total</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody id="order_items_table">
+                    <!-- Items will be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Order Summary -->
+    <div class="order-summary-section">
+        <h3 class="section-title">Buyurtma Yig'indisi</h3>
+        
+        <div class="summary-card">
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span id="summary_subtotal">0.00 so'm</span>
+            </div>
+            <div class="summary-row">
+                <span>Pajak (10%):</span>
+                <span id="summary_tax">0.00 so'm</span>
+            </div>
+            <div class="summary-row" style="font-weight: bold; font-size: 1.2rem; border-top: 2px solid #0066cc; padding-top: 1rem; margin-top: 1rem;">
+                <span>Jami:</span>
+                <span id="summary_total">0.00 so'm</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Save Button -->
+    <div class="form-actions" style="margin-top: 2rem;">
+        <button type="button" id="save_order_btn" class="btn btn--primary" style="font-size: 1.2rem; padding: 1rem 2rem;">
+            <i class="fa-solid fa-save"></i>
+            Buyurtmani Saqlash
+        </button>
+    </div>
+</div>
+
+<script>
+// Order items storage
+let orderItems = [];
+
+// Calculate totals
+function calculateTotals() {
+    let subtotal = 0;
+    orderItems.forEach(item => {
+        subtotal += item.quantity * item.price;
+    });
+    
+    const tax = subtotal * 0.1; // 10% tax
+    const total = subtotal + tax;
+    
+    document.getElementById('summary_subtotal').textContent = subtotal.toFixed(2) + ' so\'m';
+    document.getElementById('summary_tax').textContent = tax.toFixed(2) + ' so\'m';
+    document.getElementById('summary_total').textContent = total.toFixed(2) + ' so\'m';
+}
+
+// Render items table
+function renderItems() {
+    const tbody = document.getElementById('order_items_table');
+    tbody.innerHTML = '';
+    
+    if (orderItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Mahsulotlar qo\'shilmagan</td></tr>';
+        return;
+    }
+    
+    orderItems.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const lineTotal = item.quantity * item.price;
+        
+        row.innerHTML = `
+            <td>${item.id}</td>
+            <td>
+                <a href="/products/${item.id}/" target="_blank" title="${item.name}">
+                    ${item.name}
+                </a>
+            </td>
+            <td>${item.price.toFixed(2)} so'm</td>
+            <td>
+                <input type="number" class="form-control" min="1" value="${item.quantity}" 
+                       onchange="updateQuantity(${index}, this.value)">
+            </td>
+            <td>${lineTotal.toFixed(2)} so'm</td>
+            <td>
+                <button type="button" class="btn btn--sm btn--ghost btn--danger" onclick="removeItem(${index})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    calculateTotals();
+}
+
+// Update quantity
+function updateQuantity(index, newQuantity) {
+    const qty = parseInt(newQuantity);
+    if (qty < 1) return;
+    orderItems[index].quantity = qty;
+    renderItems();
+}
+
+// Remove item
+function removeItem(index) {
+    if (confirm('Bu mahsulotni o\'chirmoqchimisiz?')) {
+        orderItems.splice(index, 1);
+        renderItems();
+    }
+}
+
+// Add product
+async function addProduct() {
+    const productId = document.getElementById('product_id').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    if (!productId || !quantity || quantity < 1) {
+        alert('Product ID va soni to\'g\'ri kiritilishi kerak');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/pharmacy/products/${productId}/`);
+        if (!response.ok) throw new Error('Product topilmadi');
+        
+        const product = await response.json();
+        
+        // Check stock
+        if (quantity > product.stock) {
+            alert(`Xatolik: Faqat ${product.stock} ta mahsulot qoldi!`);
+            return;
+        }
+        
+        // Add to items
+        orderItems.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            stock: product.stock,
+            quantity: quantity,
+            sku: product.sku || '',
+        });
+        
+        // Clear form
+        document.getElementById('product_id').value = '';
+        document.getElementById('quantity').value = '1';
+        
+        // Show success
+        const infoDiv = document.getElementById('product_info');
+        const infoText = document.getElementById('product_info_text');
+        infoDiv.style.display = 'block';
+        infoText.innerHTML = `<strong>${product.name}</strong> qo'shildi - ${quantity} ta`;
+        
+        renderItems();
+    } catch (error) {
+        console.error('Error:', error);
+        const infoDiv = document.getElementById('product_info');
+        const infoText = document.getElementById('product_info_text');
+        infoDiv.style.display = 'block';
+        infoText.innerHTML = '<span style="color: #dc3545;">Xatolik: Mahsulot topilmadi yoki API xatosi</span>';
+    }
+}
+
+// Save order
+async function saveOrder() {
+    if (orderItems.length === 0) {
+        alert('Hech qanday mahsulot qo\'shilmagan!');
+        return;
+    }
+    
+    const customerId = document.getElementById('customer').value;
+    const status = document.getElementById('status').value;
+    const address = document.getElementById('address').value;
+    const notes = document.getElementById('notes').value;
+    
+    if (!customerId) {
+        alert('Mijozni tanlang!');
+        return;
+    }
+    
+    // Prepare payload
+    const payload = {
+        customer_id: customerId,
+        status: status,
+        address: address,
+        notes: notes,
+        items: orderItems.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price,
+        })),
+    };
+    
+    if (confirm('Buyurtmani saqlashni xohlaymisanmi?')) {
+        try {
+            const response = await fetch('/dashboard/api/admin/orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify(payload),
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('Buyurtma muvaffaqiyatli yaratildi! ID: ' + result.order_id);
+                window.location.href = '/dashboard/orders/';
+            } else {
+                const error = await response.json();
+                alert('Xatolik: ' + (error.message || 'Noma\'lum xatolik'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Server xatosi');
+        }
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Event listeners
+document.getElementById('add_product_btn').addEventListener('click', addProduct);
+document.getElementById('save_order_btn').addEventListener('click', saveOrder);
+
+// Add product with Enter
+document.getElementById('product_id').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        addProduct();
+    }
+});
+
+// Initialize
+calculateTotals();
+</script>
+
+<style>
+    .order-meta-section, .product-add-section, .order-items-section, .order-summary-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #0066cc;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #1a1a1a;
+    }
+    
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .product-form-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .summary-card {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .product-form-row {
+            flex-direction: column;
+        }
+    }
+</style>
+
+{% endblock %}

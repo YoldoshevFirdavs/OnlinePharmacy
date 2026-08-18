@@ -121,10 +121,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Ban view
+    document.querySelectorAll('.ban-view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const banId = this.dataset.banId;
+            window.location.href = `/dashboard/bans/${banId}/view/`;
+        });
+    });
+    
+    // Ban delete
+    document.querySelectorAll('.ban-delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi? Bu amal qayta qaytarib bo\'lmaydi!')) return;
+            deleteItem(this, 'ban', {% url 'dashboard:ban_delete' 0 %}.replace('0', this.dataset.banId));
+        });
+    });
+    
     // Universal delete handler
     function deleteItem(btn, type, url) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        const row = btn.closest('tr');
+        
+        // Remove row instantly with quick fade
+        if (row) {
+            row.style.transition = 'opacity 0.15s ease';
+            row.style.opacity = '0';
+            setTimeout(() => row.remove(), 150);
+        }
         
         fetch(url, {
             method: 'POST',
@@ -134,26 +156,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            if (response.ok) {
-                // Remove row from table
-                const row = btn.closest('tr');
+            if (!response.ok) {
+                // Restore row if delete failed
                 if (row) {
-                    row.style.transition = 'opacity 0.3s ease';
-                    row.style.opacity = '0';
-                    setTimeout(() => row.remove(), 300);
+                    row.style.opacity = '1';
                 }
-                showNotification(`${type} muvaffaqiyatli o'chirildi.`, 'success');
-            } else {
                 showNotification(`${type} o'chirishda xatolik yuz berdi.`, 'error');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
             }
         })
         .catch(error => {
             console.error('Delete error:', error);
+            // Restore row if delete failed
+            if (row) {
+                row.style.opacity = '1';
+            }
             showNotification(`Xatolik: ${error.message}`, 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
         });
     }
     

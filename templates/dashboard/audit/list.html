@@ -21,6 +21,7 @@
 <th>Tavsif</th>
 <th>IP manzil</th>
 <th>Sana</th>
+<th>Amallar</th>
 {% endblock %}
 
 {% block table_body %}
@@ -40,11 +41,21 @@
         <td>{{ log.description|default:"—" }}</td>
         <td><code>{{ log.ip_address|default:"—" }}</code></td>
         <td>{{ log.timestamp|date:"d.m.Y H:i" }}</td>
+        <td>
+            <div class="table-actions">
+                <button type="button"
+                        class="btn btn--sm btn--ghost btn--danger auditlog-delete-btn"
+                        data-auditlog-id="{{ log.id }}"
+                        title="O'chirish">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </td>
     </tr>
     {% endfor %}
 {% else %}
     <tr class="data-table__empty">
-        <td colspan="6">
+        <td colspan="7">
             <i class="fa-solid fa-inbox"></i>
             <span>Faoliyat tarixi bo'sh</span>
         </td>
