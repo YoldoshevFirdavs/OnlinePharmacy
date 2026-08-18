@@ -1,344 +1,169 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }} - Admin Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: #f8f9fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-        
-        .page-container {
-            padding: 2rem;
-        }
-        
-        .page-header {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .page-header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .card-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .card-section h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .info-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .info-label {
-            font-size: 0.85rem;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-value {
-            font-size: 1rem;
-            color: #1a1a1a;
-            margin-top: 0.35rem;
-        }
-        
-        .info-value.large {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-        
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-processing { background: #d1ecf1; color: #0c5460; }
-        .status-delivered { background: #d4edda; color: #155724; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
-        
-        .table {
-            margin: 0;
-        }
-        
-        .table thead {
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-        }
-        
-        .table th {
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 1rem;
-            vertical-align: middle;
-        }
-        
-        .table td {
-            padding: 1rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .item-name {
-            font-weight: 600;
-            color: #0066cc;
-        }
-        
-        .price {
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            font-size: 1rem;
-        }
-        
-        .summary-row.total {
-            font-weight: 700;
-            font-size: 1.25rem;
-            border-top: 2px solid #dee2e6;
-            padding-top: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 2rem;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 2rem;
-            height: 2rem;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #0066cc;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="page-container">
-        <!-- Header -->
-        <div class="page-header">
-            <h1>{{ page_title }}</h1>
-            <p class="text-muted">Order details and line items</p>
-            <a href="{% url 'dashboard:dashboard-admin' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
-        </div>
-        
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
-            <p>Loading order details...</p>
-        </div>
-        
-        <div id="content" style="display: none;">
-            <div class="grid-2">
-                <!-- Order Info -->
-                <div class="card-section">
-                    <h2>Order Information</h2>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Order ID</div>
-                        <div class="info-value large" id="order-id">-</div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Status</div>
-                        <div id="order-status"></div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Created Date</div>
-                        <div class="info-value" id="order-created">-</div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Last Updated</div>
-                        <div class="info-value" id="order-updated">-</div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Total Amount</div>
-                        <div class="info-value large" id="order-total">-</div>
-                    </div>
-                </div>
-                
-                <!-- Customer Info -->
-                <div class="card-section">
-                    <h2>Customer Information</h2>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Full Name</div>
-                        <div class="info-value" id="customer-name">-</div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Email</div>
-                        <div class="info-value" id="customer-email">-</div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-label">Phone</div>
-                        <div class="info-value" id="customer-phone">-</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Order Items -->
-            <div class="card-section" style="margin-bottom: 2rem;">
-                <h2>Order Items</h2>
-                
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th class="text-end">Quantity</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-tbody">
-                            <!-- Loaded dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Order Summary -->
-                <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 4px; max-width: 400px; margin-left: auto;">
-                    <div class="summary-row">
-                        <span>Subtotal:</span>
-                        <span id="summary-subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total:</span>
-                        <span id="summary-total">$0.00</span>
-                    </div>
-                </div>
-            </div>
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Buyurtma #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-receipt"></i>
+        Buyurtma #{{ order.id }}
+    </h1>
+    <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline">
+        <i class="fa-solid fa-arrow-left"></i> Buyurtmalar ro'yxatiga qaytish
+    </a>
+</div>
+
+{% if order %}
+<!-- Order Status Badge -->
+<div class="card" id="orderStatusCard">
+    <div class="card__body" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Pending' %}warning{% elif order.status == 'Cancelled' %}error{% else %}info{% endif %}">
+                {{ order.status }}
+            </span>
+            <span class="text-muted" style="margin-left: 16px;" title="{{ order.created_at|date:'Y-m-d H:i:s' }}">
+                <i class="fa-solid fa-clock"></i> {{ order.created_at|date:"d.m.Y H:i" }}
+            </span>
         </div>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const userId = {{ user_id }};
-        const orderId = {{ order_id }};
+</div>
+
+<!-- Customer Information -->
+<div class="card" id="customerCard">
+    <div class="card__header">
+        <h3 class="card__title">Mijoz ma'lumotlari</h3>
+    </div>
+    <div class="card__body">
+        <div class="user-cell" style="margin-bottom: 16px;">
+            <i class="fa-solid fa-circle-user" style="color: #6a00f4;"></i>
+            <div style="margin-left: 12px;">
+                <strong>{{ order.customer.full_name|default:order.customer.email }}</strong>
+                <br>
+                <a href="{% url 'dashboard:dashboard-admin' %}" style="color: #6a00f4; text-decoration: none; font-size: 14px;">
+                    {{ order.customer.email }}
+                </a>
+                <br>
+                <span class="text-muted" style="font-size: 14px;">
+                    <i class="fa-solid fa-phone"></i> {{ order.customer.phone_number|default:"—" }}
+                </span>
+            </div>
+        </div>
         
-        // Initialize
-        loadOrderDetail();
+        {% if order.address %}
+        <div>
+            <strong class="text-muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Yetkazib berish manzili</strong>
+            <p style="margin: 8px 0 0 0; line-height: 1.6; color: #2c3e50;">
+                {{ order.address }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Driver Information -->
+<div class="card" id="driverCard">
+    <div class="card__header">
+        <h3 class="card__title">Yetkazib beruvchi ma'lumotlari</h3>
+    </div>
+    <div class="card__body">
+        {% if order.deliveryorder.driver %}
+        <div class="user-cell">
+            <i class="fa-solid fa-user-tag" style="color: #6a00f4;"></i>
+            <div style="margin-left: 12px;">
+                <strong>{{ order.deliveryorder.driver.user.full_name|default:"—" }}</strong>
+                <br>
+                <a href="tel:{{ order.deliveryorder.driver.phone_number }}" style="color: #6a00f4; text-decoration: none; font-size: 14px;">
+                    <i class="fa-solid fa-phone"></i> {{ order.deliveryorder.driver.phone_number|default:"—" }}
+                </a>
+            </div>
+        </div>
+        {% if order.deliveryorder.driver.vehicle_info %}
+        <div style="margin-top: 12px;">
+            <span class="text-muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-car"></i> {{ order.deliveryorder.driver.vehicle_info }}
+            </span>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert--warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Hali yetkazib beruvchi tayinlanmagan</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Order Items -->
+<div class="card" id="itemsCard">
+    <div class="card__header">
+        <h3 class="card__title">Buyurtma mahsulotlari</h3>
+    </div>
+    <div class="card__body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mahsulot nomi</th>
+                        <th style="text-align: right;">Narx (so'm)</th>
+                        <th style="text-align: right;">Miqdori</th>
+                        <th style="text-align: right;">Jami (so'm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>
+                            {% if item.product %}
+                            <strong>{{ item.product.name }}</strong>
+                            {% else %}
+                            <span class="text-muted">Mahsulot o'chirilgan</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">{{ item.price|floatformat:2 }}</td>
+                        <td style="text-align: right;">{{ item.quantity }}</td>
+                        <td style="text-align: right; font-weight: 600; color: #6a00f4;">{{ item.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         
-        async function loadOrderDetail() {
-            try {
-                const response = await fetch(`/dashboard/api/admin/user/${userId}/order/${orderId}/`);
-                if (!response.ok) throw new Error('API error');
-                
-                const result = await response.json();
-                if (result.status === 'success') {
-                    const order = result.order;
-                    
-                    // Order info
-                    document.getElementById('order-id').textContent = `#${order.id}`;
-                    document.getElementById('order-created').textContent = new Date(order.created_at).toLocaleString();
-                    document.getElementById('order-updated').textContent = new Date(order.updated_at).toLocaleString();
-                    document.getElementById('order-total').textContent = `$${order.total_price.toFixed(2)}`;
-                    
-                    // Status badge
-                    const statusBadge = document.getElementById('order-status');
-                    const statusClass = `status-${order.status.toLowerCase()}`;
-                    statusBadge.innerHTML = `<span class="status-badge ${statusClass}">${order.status}</span>`;
-                    
-                    // Customer info
-                    const customer = order.customer;
-                    document.getElementById('customer-name').textContent = customer.name || '-';
-                    document.getElementById('customer-email').textContent = customer.email || '-';
-                    document.getElementById('customer-phone').textContent = customer.phone || '-';
-                    
-                    // Items
-                    renderItems(order.items, order.total_price);
-                    
-                    // Show content
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('content').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error loading order:', error);
-                document.getElementById('loading').innerHTML = '<p class="text-danger">Error loading order details</p>';
-            }
-        }
+        <!-- Summary -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e5ea;">
+            <div>
+                <span class="text-muted">Jami mahsulotlar:</span>
+                <strong style="margin-left: 8px;">{{ order.items.count }}</strong>
+            </div>
+            <div>
+                <span class="text-muted">Jami miqdor:</span>
+                <strong style="margin-left: 8px;">{{ order.total_quantity }}</strong>
+            </div>
+        </div>
         
-        function renderItems(items, total) {
-            const tbody = document.getElementById('items-tbody');
-            tbody.innerHTML = '';
-            
-            let subtotal = 0;
-            items.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="item-name">${item.product_name}</span></td>
-                    <td class="text-end">${item.quantity}</td>
-                    <td class="text-end"><span class="price">$${item.price.toFixed(2)}</span></td>
-                    <td class="text-end"><span class="price">$${item.subtotal.toFixed(2)}</span></td>
-                `;
-                tbody.appendChild(row);
-                subtotal += item.subtotal;
-            });
-            
-            document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
-        }
-    </script>
-</body>
-</html>
+        <!-- Total -->
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e5ea;">
+            <span class="text-muted" style="font-size: 18px; font-weight: 600; margin-right: 16px;">Jami summa:</span>
+            <strong style="font-size: 24px; color: #6a00f4;">{{ order.total_price|floatformat:2 }} so'm</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Back button -->
+<div style="text-align: center; margin-top: 32px;">
+    <a href="{% url 'dashboard:order_list' %}" class="btn btn--primary">
+        <i class="fa-solid fa-arrow-left"></i> Buyurtmalar ro'yxatiga qaytish
+    </a>
+</div>
+{% else %}
+<div class="card">
+    <div class="card__body" style="text-align: center; padding: 64px 24px;">
+        <i class="fa-solid fa-receipt" style="font-size: 64px; color: #ccc; margin-bottom: 16px;"></i>
+        <p>Bu buyurtma topilmadi</p>
+        <a href="{% url 'dashboard:order_list' %}" class="btn btn--primary" style="margin-top: 16px;">
+            Buyurtmalar ro'yxatiga qaytish
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

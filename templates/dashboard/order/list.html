@@ -59,7 +59,7 @@
         <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
         <td>
             <div class="table-actions">
-                <a href="{% url 'dashboard:order_view' order.id %}" 
+                <a href="{% url 'dashboard:admin_order_view' order.id %}" 
                    class="btn btn--sm btn--ghost" 
                    title="Ko'rish">
                     <i class="fa-solid fa-eye"></i>

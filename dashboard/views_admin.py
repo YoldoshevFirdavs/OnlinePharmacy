@@ -98,3 +98,45 @@ def order_detail_view(request, user_id, order_id):
         'order_id': order_id,
     }
     return render(request, 'dashboard/admin/order_detail.html', context)
+@login_required(login_url='dashboard:login_page')
+@user_passes_test(is_admin, redirect_field_name=None)
+def order_detail_view(request, user_id, order_id):
+    """
+    Order detail page for admin
+    Shows full order info, line items, customer details, status
+    """
+    try:
+        user = get_object_or_404(CustomUser, id=user_id)
+        order = get_object_or_404(Order, id=order_id, customer=user)
+    except:
+        return HttpResponseForbidden("Order not found")
+    
+    context = {
+        'page_title': f'Order #{order.id}',
+        'target_user': user,
+        'order': order,
+        'user_id': user_id,
+        'order_id': order_id,
+    }
+    return render(request, 'dashboard/admin/order_detail.html', context)
+
+
+@login_required(login_url='dashboard:login_page')
+@user_passes_test(is_admin, redirect_field_name=None)
+def admin_order_view(request, order_id):
+    """
+    Admin order detail page - standalone page (not modal)
+    URL: /dashboard/admin/orders/<order_id>/view/
+    Shows full order info with base.html and theme.css
+    """
+    try:
+        from orders.models import Order
+        order = get_object_or_404(Order.objects.select_related('customer', 'deliveryorder__driver__user').prefetch_related('items__product'), id=order_id)
+    except:
+        return HttpResponseForbidden("Order not found")
+    
+    context = {
+        'page_title': f'Buyurtma #{order.id}',
+        'order': order,
+    }
+    return render(request, 'dashboard/admin/order_detail.html', context)
