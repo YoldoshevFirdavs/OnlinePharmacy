@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do'kon - Online Pharmacy</title>
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        main { min-height: 70vh; padding: 20px; }
+
+        /* Search-first layout */
+        .shop-header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Filter panel - hidden by default */
+        #filter-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        #filter-panel.show {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* Results grid */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        #result-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        #products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            min-height: 400px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .product-image-wrap {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 12px;
+        }
+
+        .product-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 8px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-price {
+            font-size: 16px;
+            color: #4caf50;
+            font-weight: 700;
+        }
+
+        /* Infinite scroll sentinel */
+        #scroll-sentinel {
+            height: 100px;
+            background: transparent;
+        }
+
+        /* Load more button */
+        #load-more-btn {
+            display: none;
+            margin: 20px auto;
+            padding: 12px 32px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #load-more-btn:hover {
+            background: #45a049;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        /* Accessibility */
+        @media (max-width: 768px) {
+            #products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                padding: 12px;
+            }
+
+            #filter-panel.show {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <div class="loader" id="loader">
+        <p>Yuklanmoqda...</p>
+    </div>
+
+    <!-- MAIN SHOP VIEW -->
+    <main id="shop-main-view">
+        <!-- Search Header -->
+        <div class="shop-header">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Dori yoki mahsulot nomini qidirish..."
+                    aria-label="Search products"
+                    autocomplete="off"
+                >
+                <button id="toggle-filters" style="padding: 12px 16px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                    🔽 Filterlar
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Panel (Hidden by default) -->
+        <div id="filter-panel">
+            <div class="filter-group">
+                <label for="category-filter">Kategoriya</label>
+                <select id="category-filter" aria-label="Filter by category">
+                    <option value="">Hamma</option>
+                    <option value="1">Vitaminlar</option>
+                    <option value="2">Antibiotiklar</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="min-price">Eng kam narx</label>
+                <input type="number" id="min-price" min="0" placeholder="0" aria-label="Minimum price">
+            </div>
+
+            <div class="filter-group">
+                <label for="max-price">Eng ko'p narx</label>
+                <input type="number" id="max-price" min="0" placeholder="999999" aria-label="Maximum price">
+            </div>
+
+            <div class="filter-group">
+                <label for="ordering">Saralash</label>
+                <select id="ordering" aria-label="Sort by">
+                    <option value="-reviews_count">Eng ko'p review</option>
+                    <option value="-average_rating">Eng yaxshi reyting</option>
+                    <option value="-updated_at">Eng yangi</option>
+                    <option value="price">Eng arzon</option>
+                    <option value="-price">Eng qimmat</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Header -->
+        <div class="results-header">
+            <span id="result-count">Natija soni: 0</span>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="products-grid"></div>
+
+        <!-- Infinite Scroll Sentinel -->
+        <div id="scroll-sentinel"></div>
+
+        <!-- Load More Button -->
+        <button id="load-more-btn">Yana mahsulotlar yuklash</button>
+    </main>
+
+    {% include 'components/footer.html' %}
+
+    <script src="{% static 'js/shop-new.js' %}"></script>
+</body>
+</html>
