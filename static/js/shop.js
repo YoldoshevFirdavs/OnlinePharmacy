@@ -50,6 +50,9 @@ async function initShop() {
     setupEventListeners();
     restoreFilterState();
     
+    // Load products on page init (infinite scroll without search)
+    await loadProducts();
+    
     // Search input focus = show filter panel
     elements.searchInput()?.addEventListener('focus', () => {
         elements.filterPanel()?.classList.add('show');
