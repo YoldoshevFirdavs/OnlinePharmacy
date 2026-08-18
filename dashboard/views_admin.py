@@ -63,7 +63,7 @@ def order_detail_admin_view(request, user_id, order_id):
     """
     try:
         user = get_object_or_404(CustomUser, id=user_id)
-        order = get_object_or_404(Order, id=order_id, customer=user)
+        order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
     
@@ -86,7 +86,7 @@ def order_detail_view(request, user_id, order_id):
     """
     try:
         user = get_object_or_404(CustomUser, id=user_id)
-        order = get_object_or_404(Order, id=order_id, customer=user)
+        order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
     
@@ -107,7 +107,7 @@ def order_detail_view(request, user_id, order_id):
     """
     try:
         user = get_object_or_404(CustomUser, id=user_id)
-        order = get_object_or_404(Order, id=order_id, customer=user)
+        order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
     
@@ -131,7 +131,7 @@ def admin_order_view(request, order_id):
     """
     try:
         from orders.models import Order
-        order = get_object_or_404(Order.objects.select_related('customer', 'deliveryorder__driver__user').prefetch_related('items__product'), id=order_id)
+        order = get_object_or_404(Order.objects.select_related('user', 'deliveryorder__driver__user').prefetch_related('items__product'), id=order_id)
     except:
         return HttpResponseForbidden("Order not found")
     
