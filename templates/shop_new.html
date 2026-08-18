@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Do'kon - Online Pharmacy</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
@@ -18,9 +17,14 @@
             color: #333;
         }
 
-        main { min-height: calc(100vh - 200px); }
+        /* ==================== SHOP LAYOUT ==================== */
+        .shop-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100vh;
+        }
 
-        /* ============ SHOP HEADER - STICKY ============ */
+        /* SEARCH HEADER - STICKY */
         .shop-header {
             background: white;
             border-bottom: 2px solid #e0e0e0;
@@ -32,7 +36,7 @@
         }
 
         .search-container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             position: relative;
         }
@@ -40,6 +44,7 @@
         .search-box {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .search-box input {
@@ -47,8 +52,8 @@
             padding: 14px 16px;
             border: 2px solid #ddd;
             border-radius: 6px;
-            font-size: 15px;
-            transition: all 0.3s;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
 
         .search-box input:focus {
@@ -57,7 +62,7 @@
             box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
         }
 
-        .btn-reference {
+        .btn-filters {
             padding: 14px 20px;
             background: #f5f5f5;
             border: 2px solid #ddd;
@@ -65,23 +70,21 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
-            font-size: 14px;
         }
 
-        .btn-reference:hover {
+        .btn-filters:hover {
             background: #efefef;
         }
 
-        /* ============ SUGGESTIONS DROPDOWN ============ */
+        /* SUGGESTIONS DROPDOWN */
         .suggestions-dropdown {
             position: absolute;
-            top: 52px;
+            top: 50px;
             left: 0;
             right: 0;
             background: white;
             border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 6px 6px;
+            border-radius: 6px;
             max-height: 350px;
             overflow-y: auto;
             display: none;
@@ -95,7 +98,7 @@
 
         .suggestion-item {
             padding: 12px 16px;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -106,8 +109,8 @@
 
         .suggestion-name {
             font-weight: 500;
-            font-size: 14px;
             color: #333;
+            font-size: 14px;
         }
 
         .suggestion-meta {
@@ -116,19 +119,18 @@
             margin-top: 4px;
         }
 
-        /* ============ MAIN CONTENT LAYOUT ============ */
-        .shop-container {
+        /* MAIN CONTENT AREA */
+        .shop-main {
             display: grid;
             grid-template-columns: 0 1fr;
-            max-width: 1400px;
-            margin: 0 auto;
+            gap: 0;
         }
 
-        .shop-container.filters-visible {
-            grid-template-columns: 260px 1fr;
+        .shop-main.filters-open {
+            grid-template-columns: 280px 1fr;
         }
 
-        /* ============ FILTER PANEL - LEFT SIDEBAR ============ */
+        /* FILTER PANEL - LEFT SIDE */
         .filter-panel {
             background: white;
             padding: 20px;
@@ -141,52 +143,45 @@
             visibility: hidden;
         }
 
-        .shop-container.filters-visible .filter-panel {
-            width: 260px;
+        .shop-main.filters-open .filter-panel {
+            width: 280px;
             opacity: 1;
             visibility: visible;
         }
 
-        .filter-section {
+        .filter-group {
             margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
         }
 
-        .filter-section:last-child {
-            border-bottom: none;
+        .filter-group:last-child {
             margin-bottom: 0;
-            padding-bottom: 0;
         }
 
         .filter-label {
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
+            color: #555;
             text-transform: uppercase;
-            color: #666;
             margin-bottom: 10px;
             display: block;
         }
 
-        .filter-section select,
-        .filter-section input {
+        .filter-group select,
+        .filter-group input {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 13px;
             font-family: inherit;
-            background: white;
         }
 
-        .filter-section select:focus,
-        .filter-section input:focus {
-            outline: none;
-            border-color: #4caf50;
-            box-shadow: 0 0 4px rgba(76, 175, 80, 0.2);
+        .filter-group input[type="range"] {
+            width: 100%;
+            padding: 0;
         }
 
-        /* ============ RESULTS AREA ============ */
+        /* RESULTS AREA */
         .results-area {
             flex: 1;
         }
@@ -215,19 +210,19 @@
             cursor: pointer;
         }
 
-        /* ============ PRODUCTS GRID ============ */
+        /* PRODUCTS GRID */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 16px;
             padding: 20px;
             background: #f8f9fa;
-            min-height: 400px;
+            min-height: 300px;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1024px) {
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
         }
 
@@ -237,26 +232,9 @@
                 gap: 12px;
                 padding: 12px;
             }
-
-            .shop-container.filters-visible {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-panel {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                right: 0;
-                width: 100% !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-                border-right: none;
-                border-bottom: 1px solid #e0e0e0;
-                z-index: 999;
-            }
         }
 
-        /* ============ PRODUCT CARD ============ */
+        /* PRODUCT CARD */
         .product-card {
             background: white;
             border: 1px solid #e0e0e0;
@@ -274,7 +252,6 @@
             border-color: #4caf50;
         }
 
-        /* Product Image - Responsive Square */
         .product-image-wrap {
             width: 100%;
             padding-top: 100%;
@@ -312,11 +289,20 @@
             color: #333;
         }
 
+        .product-seller {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .product-rating {
             display: flex;
             align-items: center;
             gap: 4px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 12px;
         }
 
@@ -328,15 +314,6 @@
             color: #999;
         }
 
-        .product-seller {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .product-price {
             font-size: 15px;
             font-weight: 700;
@@ -344,7 +321,7 @@
             margin-top: auto;
         }
 
-        /* ============ EMPTY STATE ============ */
+        /* EMPTY STATE */
         .empty-state {
             grid-column: 1 / -1;
             padding: 60px 20px;
@@ -352,25 +329,50 @@
             color: #999;
         }
 
-        .empty-icon {
+        .empty-state-icon {
             font-size: 48px;
             margin-bottom: 16px;
             opacity: 0.5;
         }
 
-        .empty-text {
-            font-size: 15px;
+        .empty-state-text {
+            font-size: 16px;
             color: #999;
         }
 
-        /* ============ LOADER ============ */
+        /* LOAD MORE / PAGINATION */
+        .load-more-btn {
+            grid-column: 1 / -1;
+            margin: 20px;
+            padding: 12px 32px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .load-more-btn:hover {
+            background: #45a049;
+        }
+
+        .load-more-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* LOADER */
         .loader {
             text-align: center;
             padding: 20px;
             color: #999;
+            font-size: 14px;
         }
 
-        .spinner {
+        .loader-spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
@@ -385,31 +387,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ============ LOAD MORE BUTTON ============ */
-        .btn-load-more {
-            grid-column: 1 / -1;
-            margin: 20px;
-            padding: 12px 32px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background 0.3s;
-            display: none;
-        }
-
-        .btn-load-more:hover {
-            background: #45a049;
-        }
-
-        .btn-load-more.show {
-            display: block;
-        }
-
-        /* ============ TOAST NOTIFICATIONS ============ */
+        /* TOAST NOTIFICATIONS */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -438,12 +416,44 @@
                 opacity: 1;
             }
         }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .shop-header {
+                padding: 12px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .btn-filters {
+                width: 100%;
+            }
+
+            .shop-main.filters-open {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-panel {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                width: 100% !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                z-index: 999;
+            }
+        }
     </style>
 </head>
 <body>
     {% include 'components/header.html' %}
 
-    <main>
+    <div class="shop-container">
         <!-- SEARCH HEADER -->
         <div class="shop-header">
             <div class="search-container">
@@ -455,75 +465,65 @@
                         aria-label="Mahsulotlarni qidirish"
                         autocomplete="off"
                     >
-                    <button class="btn-reference" id="btn-toggle-filters" aria-label="Filterlarni ko'rsatish">
+                    <button class="btn-filters" id="btn-toggle-filters" aria-label="Filterlarni ko'rsatish">
                         <i class="fas fa-filter"></i> Filter
                     </button>
                 </div>
-                <div class="suggestions-dropdown" id="suggestions-dropdown" role="listbox"></div>
+                <div class="suggestions-dropdown" id="suggestions-dropdown"></div>
             </div>
         </div>
 
-        <!-- MAIN CONTAINER -->
-        <div class="shop-container" id="shop-container">
-            <!-- FILTER PANEL - LEFT -->
+        <!-- MAIN CONTENT -->
+        <div class="shop-main" id="shop-main">
+            <!-- FILTER PANEL -->
             <div class="filter-panel" id="filter-panel">
-                <!-- Category Filter -->
-                <div class="filter-section">
+                <div class="filter-group">
                     <label class="filter-label">Kategoriya</label>
                     <select id="filter-category" aria-label="Kategoriya bo'yicha filtrlash">
                         <option value="">Hamma kategoriya</option>
+                        <option value="1">Vitaminlar</option>
+                        <option value="2">Antibiotiklar</option>
+                        <option value="3">Og'riqtolg'an dori</option>
                     </select>
                 </div>
 
-                <!-- Price Range -->
-                <div class="filter-section">
-                    <label class="filter-label">Narx (so'm)</label>
-                    <input type="number" id="filter-min-price" min="0" placeholder="Eng kam" aria-label="Eng kam narx">
-                    <input type="number" id="filter-max-price" min="0" placeholder="Eng ko'p" style="margin-top: 8px;" aria-label="Eng ko'p narx">
+                <div class="filter-group">
+                    <label class="filter-label">Eng kam narx (so'm)</label>
+                    <input type="number" id="filter-min-price" min="0" placeholder="0" aria-label="Eng kam narx">
                 </div>
 
-                <!-- Brand Filter -->
-                <div class="filter-section">
-                    <label class="filter-label">Brand/Sotuvchi</label>
-                    <select id="filter-brand" aria-label="Brand bo'yicha filtrlash">
-                        <option value="">Hamma brand</option>
+                <div class="filter-group">
+                    <label class="filter-label">Eng ko'p narx (so'm)</label>
+                    <input type="number" id="filter-max-price" min="0" placeholder="999999" aria-label="Eng ko'p narx">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Sotuvchi/Brand</label>
+                    <select id="filter-brand" aria-label="Sotuvchi bo'yicha filtrlash">
+                        <option value="">Hamma sotuvchi</option>
                     </select>
                 </div>
 
-                <!-- Availability -->
-                <div class="filter-section">
-                    <label class="filter-label">Mavjudlik</label>
-                    <select id="filter-stock" aria-label="Mavjudlik bo'yicha filtrlash">
-                        <option value="">Hamma</option>
-                        <option value="true">Faqat sotuvda</option>
-                        <option value="false">Faqat sotuvda yo'q</option>
-                    </select>
-                </div>
-
-                <!-- Rating Filter -->
-                <div class="filter-section">
+                <div class="filter-group">
                     <label class="filter-label">Reyting (min)</label>
-                    <input type="number" id="filter-rating" min="0" max="5" step="0.1" placeholder="0 - 5" aria-label="Minimum reyting">
+                    <input type="number" id="filter-rating" min="0" max="5" step="0.1" placeholder="0" aria-label="Reyting filtri">
                 </div>
 
-                <!-- Reviews Count -->
-                <div class="filter-section">
+                <div class="filter-group">
                     <label class="filter-label">Fikrlar soni (min)</label>
-                    <input type="number" id="filter-reviews" min="0" placeholder="0" aria-label="Minimum fikrlar soni">
+                    <input type="number" id="filter-reviews" min="0" placeholder="0" aria-label="Fikrlar soni filtri">
                 </div>
 
-                <!-- Sort / Reference -->
-                <div class="filter-section">
+                <div class="filter-group">
                     <label class="filter-label">Saralash</label>
                     <select id="filter-ordering" aria-label="Saralash tartibi">
-                        <option value="-reviews_count">Eng ko'p sotib olingan</option>
-                        <option value="-updated_at">Eng ko'p ko'rilgan</option>
+                        <option value="-reviews_count">Eng ko'p fikr</option>
+                        <option value="-average_rating">Eng yaxshi reyting</option>
+                        <option value="price">Eng arzon</option>
+                        <option value="-price">Eng qimmat</option>
+                        <option value="-updated_at">Eng yangi</option>
                         <option value="name">A → Z</option>
                         <option value="-name">Z → A</option>
-                        <option value="-price">Eng qimmat</option>
-                        <option value="price">Eng arzon</option>
-                        <option value="-average_rating">Eng yaxshi reyting</option>
-                        <option value="reviews_count">Eng ko'p fikrlar</option>
                     </select>
                 </div>
             </div>
@@ -536,170 +536,142 @@
 
                 <div class="products-grid" id="products-grid">
                     <div class="empty-state">
-                        <div class="empty-icon">📦</div>
-                        <div class="empty-text">Qidirish yoki filterlardan foydalanib mahsulotlarni topish uchun urinib ko'ring</div>
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-text">Mahsulotlarni yuklash uchun qidirish yoki filterlardan foydalaning</div>
                     </div>
                 </div>
-
-                <button class="btn-load-more" id="btn-load-more">Yana mahsulotlar yuklash</button>
             </div>
         </div>
-    </main>
+    </div>
 
     {% include 'components/footer.html' %}
 
     <script>
-        // ============ CONSTANTS ============
-        const API_BASE = '/api/v1/products/';
-        const API_SUGGEST = '/api/v1/products/suggest/';
+        // ==================== CONSTANTS ====================
         const DEFAULT_IMG = '/static/images/default_avatar.png';
+        const API_PRODUCTS = '/api/v1/products/';
+        const API_SUGGESTIONS = '/api/v1/products/suggest/';
         const PAGE_SIZE = 24;
+        const DEBOUNCE_DELAY = 300;
 
-        // ============ STATE ============
-        let state = {
+        // ==================== STATE ====================
+        let shopState = {
             query: '',
-            category: '',
+            categoryId: '',
             minPrice: '',
             maxPrice: '',
-            brand: '',
-            stock: '',
-            rating: '',
-            reviews: '',
+            brandId: '',
+            ratingMin: '',
+            reviewsMin: '',
             ordering: '-reviews_count',
             page: 1,
-            results: [],
             totalCount: 0,
-            hasMore: true,
+            results: [],
             loading: false,
-            cache: new Map(),
+            hasMore: true,
         };
 
-        let debounceTimer = null;
+        let debounceTimers = {};
 
-        // ============ DOM REFS ============
+        // ==================== DOM REFS ====================
         const DOM = {
             searchInput: () => document.getElementById('search-input'),
             suggestionsDropdown: () => document.getElementById('suggestions-dropdown'),
             btnToggleFilters: () => document.getElementById('btn-toggle-filters'),
-            shopContainer: () => document.getElementById('shop-container'),
             filterPanel: () => document.getElementById('filter-panel'),
+            shopMain: () => document.getElementById('shop-main'),
             filterCategory: () => document.getElementById('filter-category'),
             filterMinPrice: () => document.getElementById('filter-min-price'),
             filterMaxPrice: () => document.getElementById('filter-max-price'),
             filterBrand: () => document.getElementById('filter-brand'),
-            filterStock: () => document.getElementById('filter-stock'),
             filterRating: () => document.getElementById('filter-rating'),
             filterReviews: () => document.getElementById('filter-reviews'),
             filterOrdering: () => document.getElementById('filter-ordering'),
             productsGrid: () => document.getElementById('products-grid'),
             resultCount: () => document.getElementById('result-count'),
-            btnLoadMore: () => document.getElementById('btn-load-more'),
         };
 
-        // ============ INIT ============
-        document.addEventListener('DOMContentLoaded', init);
-
-        function init() {
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             loadProducts();
-        }
+        });
 
-        // ============ EVENT LISTENERS ============
         function setupEventListeners() {
-            // Search with suggestions (debounced)
-            DOM.searchInput()?.addEventListener('input', (e) => {
+            // Search input - suggestions
+            DOM.searchInput()?.addEventListener('input', debounce((e) => {
                 const query = e.target.value.trim();
-                clearTimeout(debounceTimer);
-                
                 if (query.length >= 1) {
-                    debounceTimer = setTimeout(() => loadSuggestions(query), 150);
+                    loadSuggestions(query);
                 } else {
                     DOM.suggestionsDropdown().classList.remove('show');
                 }
-            });
+            }, 150));
 
-            // Search on Enter
             DOM.searchInput()?.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    state.query = e.target.value.trim();
-                    state.page = 1;
-                    state.results = [];
+                    shopState.query = e.target.value.trim();
+                    shopState.page = 1;
+                    shopState.results = [];
                     DOM.suggestionsDropdown().classList.remove('show');
                     loadProducts();
                 }
             });
 
-            // Close suggestions on blur
-            DOM.searchInput()?.addEventListener('blur', () => {
-                setTimeout(() => {
-                    DOM.suggestionsDropdown().classList.remove('show');
-                }, 100);
-            });
-
-            // Toggle filters
-            DOM.btnToggleFilters()?.addEventListener('click', () => {
-                DOM.shopContainer().classList.toggle('filters-visible');
-            });
-
-            // Filters change
-            [
-                { el: DOM.filterCategory, prop: 'category' },
-                { el: DOM.filterMinPrice, prop: 'minPrice' },
-                { el: DOM.filterMaxPrice, prop: 'maxPrice' },
-                { el: DOM.filterBrand, prop: 'brand' },
-                { el: DOM.filterStock, prop: 'stock' },
-                { el: DOM.filterRating, prop: 'rating' },
-                { el: DOM.filterReviews, prop: 'reviews' },
-                { el: DOM.filterOrdering, prop: 'ordering' },
-            ].forEach(({ el, prop }) => {
-                const elem = el();
-                if (elem) {
-                    elem.addEventListener('change', () => {
-                        state.category = DOM.filterCategory()?.value || '';
-                        state.minPrice = DOM.filterMinPrice()?.value || '';
-                        state.maxPrice = DOM.filterMaxPrice()?.value || '';
-                        state.brand = DOM.filterBrand()?.value || '';
-                        state.stock = DOM.filterStock()?.value || '';
-                        state.rating = DOM.filterRating()?.value || '';
-                        state.reviews = DOM.filterReviews()?.value || '';
-                        state.ordering = DOM.filterOrdering()?.value || '-reviews_count';
-                        state.page = 1;
-                        state.results = [];
-                        loadProducts();
-                    });
+            DOM.searchInput()?.addEventListener('focus', () => {
+                if (DOM.suggestionsDropdown().innerHTML) {
+                    DOM.suggestionsDropdown().classList.add('show');
                 }
             });
 
-            // Load more
-            DOM.btnLoadMore()?.addEventListener('click', () => {
-                state.page++;
-                loadProducts(true);
+            DOM.searchInput()?.addEventListener('blur', () => {
+                setTimeout(() => {
+                    DOM.suggestionsDropdown().classList.remove('show');
+                }, 150);
+            });
+
+            // Filter toggle
+            DOM.btnToggleFilters()?.addEventListener('click', () => {
+                DOM.shopMain().classList.toggle('filters-open');
+            });
+
+            // Filters
+            [DOM.filterCategory, DOM.filterMinPrice, DOM.filterMaxPrice, DOM.filterBrand, DOM.filterRating, DOM.filterReviews, DOM.filterOrdering].forEach((el, i) => {
+                const fn = el();
+                if (!fn) return;
+                fn.addEventListener('change', debounce(() => {
+                    shopState.categoryId = DOM.filterCategory()?.value || '';
+                    shopState.minPrice = DOM.filterMinPrice()?.value || '';
+                    shopState.maxPrice = DOM.filterMaxPrice()?.value || '';
+                    shopState.brandId = DOM.filterBrand()?.value || '';
+                    shopState.ratingMin = DOM.filterRating()?.value || '';
+                    shopState.reviewsMin = DOM.filterReviews()?.value || '';
+                    shopState.ordering = DOM.filterOrdering()?.value || '-reviews_count';
+                    shopState.page = 1;
+                    shopState.results = [];
+                    loadProducts();
+                }, 300));
             });
 
             // Infinite scroll
-            setupInfiniteScroll();
-        }
-
-        function setupInfiniteScroll() {
-            const sentinel = document.createElement('div');
-            sentinel.id = 'scroll-sentinel';
-            DOM.productsGrid().appendChild(sentinel);
-
             const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && state.hasMore && !state.loading) {
-                    state.page++;
+                if (entries[0].isIntersecting && shopState.hasMore && !shopState.loading) {
+                    shopState.page++;
                     loadProducts(true);
                 }
             }, { rootMargin: '200px' });
 
+            const sentinel = document.createElement('div');
+            sentinel.id = 'scroll-sentinel';
+            DOM.productsGrid().appendChild(sentinel);
             observer.observe(sentinel);
         }
 
-        // ============ SUGGESTIONS ============
+        // ==================== SUGGESTIONS ====================
         async function loadSuggestions(query) {
             try {
-                const res = await fetch(`${API_SUGGEST}?q=${encodeURIComponent(query)}&limit=10`);
-                const data = await res.json();
+                const response = await fetch(`${API_SUGGESTIONS}?q=${encodeURIComponent(query)}&limit=10`);
+                const data = await response.json();
                 const suggestions = data.suggestions || [];
 
                 if (suggestions.length === 0) {
@@ -708,127 +680,104 @@
                 }
 
                 const html = suggestions.map(s => `
-                    <div class="suggestion-item" tabindex="0" role="option" 
-                         onclick="selectSuggestion('${escapeHtml(s.name)}')"
-                         onkeypress="if(event.key==='Enter') selectSuggestion('${escapeHtml(s.name)}')">
+                    <div class="suggestion-item" tabindex="0" role="option" onclick="selectSuggestion('${escapeHtml(s.name)}')" onkeypress="if(event.key==='Enter') selectSuggestion('${escapeHtml(s.name)}')">
                         <div class="suggestion-name">${escapeHtml(s.name)}</div>
                         <div class="suggestion-meta">
-                            ${s.average_rating ? `⭐ ${s.average_rating}` : ''} 
-                            • ${formatPrice(s.price)} so'm
+                            ${s.average_rating ? `⭐ ${s.average_rating}` : ''}
+                            ${s.price ? `• ${formatPrice(s.price)} so'm` : ''}
                         </div>
                     </div>
                 `).join('');
 
                 DOM.suggestionsDropdown().innerHTML = html;
                 DOM.suggestionsDropdown().classList.add('show');
-            } catch (err) {
-                console.error('Suggestions error:', err);
+            } catch (error) {
+                console.error('Suggestions error:', error);
             }
         }
 
         function selectSuggestion(name) {
             DOM.searchInput().value = name;
-            state.query = name;
+            shopState.query = name;
             DOM.suggestionsDropdown().classList.remove('show');
-            state.page = 1;
-            state.results = [];
+            shopState.page = 1;
+            shopState.results = [];
             loadProducts();
         }
 
-        // ============ LOAD PRODUCTS ============
+        // ==================== PRODUCTS ====================
         async function loadProducts(append = false) {
-            state.loading = true;
+            shopState.loading = true;
 
             const params = new URLSearchParams();
-            if (state.query) params.append('q', state.query);
-            if (state.category) params.append('category', state.category);
-            if (state.minPrice) params.append('min_price', state.minPrice);
-            if (state.maxPrice) params.append('max_price', state.maxPrice);
-            if (state.brand) params.append('brand', state.brand);
-            if (state.stock) params.append('has_stock', state.stock);
-            if (state.rating) params.append('rating_min', state.rating);
-            if (state.reviews) params.append('reviews_min', state.reviews);
-            params.append('ordering', state.ordering);
-            params.append('page', state.page);
+            if (shopState.query) params.append('q', shopState.query);
+            if (shopState.categoryId) params.append('category', shopState.categoryId);
+            if (shopState.minPrice) params.append('min_price', shopState.minPrice);
+            if (shopState.maxPrice) params.append('max_price', shopState.maxPrice);
+            if (shopState.brandId) params.append('brand', shopState.brandId);
+            if (shopState.ratingMin) params.append('rating_min', shopState.ratingMin);
+            if (shopState.reviewsMin) params.append('reviews_min', shopState.reviewsMin);
+            params.append('ordering', shopState.ordering);
+            params.append('page', shopState.page);
             params.append('page_size', PAGE_SIZE);
 
-            const url = `${API_BASE}?${params}`;
-
-            // Check cache
-            if (state.cache.has(url)) {
-                processResults(state.cache.get(url), append);
-                state.loading = false;
-                return;
-            }
-
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('API error');
+                const response = await fetch(`${API_PRODUCTS}?${params.toString()}`);
+                if (!response.ok) throw new Error('API error');
+                
+                const data = await response.json();
 
-                const data = await res.json();
-                state.cache.set(url, data);
-                processResults(data, append);
-            } catch (err) {
-                console.error('Load products error:', err);
+                if (!append) {
+                    shopState.results = data.results || [];
+                } else {
+                    shopState.results.push(...(data.results || []));
+                }
+
+                shopState.totalCount = data.count || 0;
+                shopState.hasMore = !!data.next;
+
+                renderProducts();
+                updateResultCount();
+            } catch (error) {
+                console.error('Load products error:', error);
                 showToast('Mahsulotlarni yuklashda xato', true);
             } finally {
-                state.loading = false;
+                shopState.loading = false;
             }
         }
 
-        function processResults(data, append = false) {
-            if (!append) {
-                state.results = data.results || [];
-            } else {
-                state.results.push(...(data.results || []));
-            }
-
-            state.totalCount = data.count || 0;
-            state.hasMore = !!data.next;
-
-            renderProducts();
-            updateResultCount();
-
-            // Show filters panel when results loaded
-            if (state.results.length > 0) {
-                DOM.shopContainer().classList.add('filters-visible');
-            }
-        }
-
-        // ============ RENDERING ============
         function renderProducts() {
             const grid = DOM.productsGrid();
             if (!grid) return;
 
-            if (state.results.length === 0) {
+            if (shopState.results.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📦</div>
-                        <div class="empty-text">Hech qanday mahsulot topilmadi</div>
+                        <div class="empty-state-icon">📦</div>
+                        <div class="empty-state-text">Hech qanday mahsulot topilmadi</div>
                     </div>
                 `;
                 return;
             }
 
             const sentinel = grid.querySelector('#scroll-sentinel');
-            const html = state.results.map(p => {
-                const seller = p.seller_info?.shop_name || 'Noma\'lum';
+            const html = shopState.results.map(product => {
+                const seller = product.seller_info?.shop_name || 'Noma\'lum';
                 return `
-                    <div class="product-card" tabindex="0" role="button"
-                         aria-label="${escapeHtml(p.name)}"
-                         onclick="window.location='/products/${p.id}/'"
-                         onkeypress="if(event.key==='Enter') window.location='/products/${p.id}/'">
+                    <div class="product-card" tabindex="0" role="button" aria-label="${escapeHtml(product.name)}" 
+                         onclick="window.location.href='/products/${product.id}/'" 
+                         onkeypress="if(event.key==='Enter') window.location.href='/products/${product.id}/'">
                         <div class="product-image-wrap">
-                            <img src="${p.main_image || DEFAULT_IMG}" class="product-image" loading="lazy" alt="${escapeHtml(p.name)}">
+                            <img src="${product.main_image || DEFAULT_IMG}" class="product-image" loading="lazy" alt="${escapeHtml(product.name)}">
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name">${escapeHtml(p.name)}</h3>
-                            <div class="product-rating">
-                                <span class="product-stars">⭐ ${p.average_rating || 0}</span>
-                                <span class="product-reviews">${p.reviews_count || 0}</span>
-                            </div>
+                            <h3 class="product-name">${escapeHtml(product.name)}</h3>
                             <div class="product-seller">${escapeHtml(seller)}</div>
-                            <div class="product-price">${formatPrice(p.price)} so'm</div>
+                            <div class="product-rating">
+                                <span class="product-stars">⭐ ${product.average_rating || 0}</span>
+                                <span class="product-reviews">(${product.reviews_count || 0})</span>
+                            </div>
+                            <div class="product-price">${formatPrice(product.price)} so'm</div>
                         </div>
                     </div>
                 `;
@@ -836,18 +785,24 @@
 
             grid.innerHTML = html;
             grid.appendChild(sentinel);
-
-            DOM.btnLoadMore().classList.toggle('show', state.hasMore);
         }
 
         function updateResultCount() {
             const el = DOM.resultCount();
             if (el) {
-                el.textContent = `Natija: ${state.totalCount}`;
+                el.textContent = `Natija: ${shopState.totalCount}`;
             }
         }
 
-        // ============ UTILITIES ============
+        // ==================== UTILITIES ====================
+        function debounce(fn, delay) {
+            return function(...args) {
+                const id = fn.name || 'default';
+                clearTimeout(debounceTimers[id]);
+                debounceTimers[id] = setTimeout(() => fn(...args), delay);
+            };
+        }
+
         function formatPrice(price) {
             return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price || 0);
         }

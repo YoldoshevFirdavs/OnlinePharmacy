@@ -9,6 +9,11 @@ from .api_views import (
     UserListView, SettingsView, CalendarEventsView, DashboardStatsApiView,
     DriverApiView, BannedUsersListView, BanUserView, UnbanUserView, UserBanDetailView
 )
+from .api_admin import (
+    AdminAnalyticsAPIView,
+    UserHistoryAPIView,
+    UserOrderDetailAPIView,
+)
 from .views import seller_dashboard  # Added seller_dashboard
 from .views import (
     account_settings,
@@ -39,7 +44,17 @@ from .views import (
     user_delete,
     user_edit,
     user_list,
-    ban_list,  # Added ban list view
+    ban_list,
+    ban_create,
+    ban_edit,
+    ban_toggle_status,
+    ban_delete,  # Added ban CRUD views
+)
+from .views_admin import (
+    admin_analytics_dashboard,
+    user_history_view,
+    order_detail_view,
+    order_detail_admin_view,
 )
 
 app_name = "dashboard"
@@ -71,7 +86,11 @@ urlpatterns = [
     path("orders/<int:pk>/view/", order_view, name="order_view"),
     path("orders/<int:pk>/delete/", order_delete, name="order_delete"),
     path("audit-log/", audit_log_list, name="audit_log_list"),
-    path("bans/", ban_list, name="ban_list"),  # Added ban list URL
+    path("bans/", ban_list, name="ban_list"),
+    path("bans/create/", ban_create, name="ban_create"),
+    path("bans/<int:pk>/edit/", ban_edit, name="ban_edit"),
+    path("bans/<int:pk>/toggle/", ban_toggle_status, name="ban_toggle_status"),
+    path("bans/<int:pk>/delete/", ban_delete, name="ban_delete"),
     path("customize/", dashboard_customize, name="dashboard_customize"),
     path("delivery/", delivery_list, name="delivery_list"),
     path("delivery/create/", delivery_create, name="delivery_create"),
@@ -90,4 +109,14 @@ urlpatterns = [
         TemplateView.as_view(template_name="check_admin.html"),
         name="test_admin_login",
     ),
+    
+    # Admin Analytics API (Task #10)
+    path("api/admin/analytics/", AdminAnalyticsAPIView.as_view(), name="api_admin_analytics"),
+    path("api/admin/user/<int:user_id>/history/", UserHistoryAPIView.as_view(), name="api_user_history"),
+    path("api/admin/user/<int:user_id>/order/<int:order_id>/", UserOrderDetailAPIView.as_view(), name="api_order_detail"),
+    
+    # Admin Dashboard HTML pages (Task #10)
+    path("admin/analytics/", admin_analytics_dashboard, name="admin_analytics"),
+    path("admin/user/<int:user_id>/history/", user_history_view, name="user_history"),
+    path("admin/user/<int:user_id>/order/<int:order_id>/", order_detail_admin_view, name="admin_order_detail"),
 ]

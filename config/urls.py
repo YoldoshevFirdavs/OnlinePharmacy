@@ -84,6 +84,7 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
+    path("favicon.ico", RedirectView.as_view(url="/static/favicon.ico", permanent=True)),
 ]
 
 if settings.DEBUG:

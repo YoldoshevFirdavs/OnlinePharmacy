@@ -3,6 +3,7 @@ from rest_framework import serializers
 from orders.models import Cart, CartItem
 from pharmacy.models.medicine import Category, Medicine
 from pharmacy.models.misc import FlashSale, MedicineImage, ProductViewHistory, Review
+from users.models import Seller
 
 
 class RecursiveField(serializers.Serializer):
@@ -37,8 +38,24 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ["id", "user", "rating", "content", "date_posted"]
 
 
+class SellerBasicSerializer(serializers.ModelSerializer):
+    """Minimal seller info for product lists"""
+    user_name = serializers.ReadOnlyField(source="user.full_name")
+    avatar_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Seller
+        fields = ["id", "shop_name", "user_name", "avatar", "avatar_url", "rating"]
+
+    def get_avatar_url(self, obj):
+        if obj.avatar and hasattr(obj.avatar, "url"):
+            return obj.avatar.url
+        return "/static/images/default_avatar.png"
+
+
 class MedicineListSerializer(serializers.ModelSerializer):
     category = serializers.ReadOnlyField(source="category.name")
+    seller_info = SellerBasicSerializer(source="seller", read_only=True)
 
     class Meta:
         model = Medicine
@@ -50,7 +67,9 @@ class MedicineListSerializer(serializers.ModelSerializer):
             "price",
             "main_image",
             "average_rating",
+            "reviews_count",
             "stock",
+            "seller_info",
         ]
 
 
@@ -70,6 +89,7 @@ class MedicineDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     images = MedicineImageSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
+    seller_info = SellerBasicSerializer(source="seller", read_only=True)
 
     class Meta:
         model = Medicine
@@ -88,6 +108,7 @@ class MedicineDetailSerializer(serializers.ModelSerializer):
             "contraindications",
             "average_rating",
             "reviews_count",
+            "seller_info",
         ]
 
 
