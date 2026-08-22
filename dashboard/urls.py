@@ -64,6 +64,7 @@ from .views_admin import (
     order_detail_view,
     order_detail_admin_view,
     admin_order_view,
+    admin_recently_deleted,
 )
 
 app_name = "dashboard"
