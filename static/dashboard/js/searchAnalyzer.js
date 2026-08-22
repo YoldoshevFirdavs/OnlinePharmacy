@@ -5,6 +5,16 @@
 (function () {
     'use strict';
 
+    // Detect search engine (for analytics)
+    function detectSearchEngine() {
+        var referrer = document.referrer || '';
+        if (referrer.includes('google.com')) return { name: 'Google', param: 'q' };
+        if (referrer.includes('bing.com')) return { name: 'Bing', param: 'q' };
+        if (referrer.includes('yandex.ru')) return { name: 'Yandex', param: 'text' };
+        if (referrer.includes('duckduckgo.com')) return { name: 'DuckDuckGo', param: 'q' };
+        return null;
+    }
+
     function initSearchAnalyzer() {
         var searchInput = document.getElementById('globalSearch') || document.getElementById('tableSearch');
         if (!searchInput) {
