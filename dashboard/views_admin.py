@@ -79,6 +79,23 @@ def order_detail_admin_view(request, user_id, order_id):
 
 @login_required(login_url='dashboard:login_page')
 @user_passes_test(is_admin, redirect_field_name=None)
+def admin_recently_deleted(request):
+    """Admin page showing recently deleted (UndoLog) entries (last 24h)
+
+    This page uses the existing DeletedItemsAPIView at
+    /dashboard/api/admin/deleted-items/ and UndoDeleteAPIView at
+    /dashboard/api/admin/undo-delete/ for backend operations.
+    """
+    context = {
+        'page_title': 'Recently Deleted (24h)',
+        'deleted_items_api': '/dashboard/api/admin/deleted-items/',
+        'undo_api': '/dashboard/api/admin/undo-delete/',
+    }
+    return render(request, 'dashboard/admin/recently_deleted.html', context)
+
+
+@login_required(login_url='dashboard:login_page')
+@user_passes_test(is_admin, redirect_field_name=None)
 def order_detail_view(request, user_id, order_id):
     """
     Order detail page for admin
@@ -122,7 +139,7 @@ def order_detail_view(request, user_id, order_id):
 
 
 @login_required(login_url='dashboard:login_page')
-@user_passes_test(is_admin, redirect_field_name=None)
+@user_passes_test(is_admin, login_url='dashboard:not_allowed')
 def admin_order_view(request, order_id):
     """
     Admin order detail page - standalone page (not modal)
@@ -131,12 +148,14 @@ def admin_order_view(request, order_id):
     """
     try:
         from orders.models import Order
-        order = get_object_or_404(Order.objects.select_related('user', 'deliveryorder__driver__user').prefetch_related('items__product'), id=order_id)
+        order = get_object_or_404(Order.objects.select_related('user').prefetch_related('order_items'), id=order_id)
+        order_items = order.order_items.select_related('product').all()
     except:
         return HttpResponseForbidden("Order not found")
     
     context = {
         'page_title': f'Buyurtma #{order.id}',
         'order': order,
+        'order_items': order_items,
     }
-    return render(request, 'dashboard/admin/order_detail.html', context)
+    return render(request, 'dashboard/order/view.html', context)
