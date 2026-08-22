@@ -1,27 +1,17 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
-{% block title %}
-    {% if order %}
-        Buyurtmani tahrirlash #{{ order.id }}
-    {% else %}
-        Yangi buyurtma qo'shish
-    {% endif %}
-{% endblock %}
+{% block title %}Yangi Buyurtma{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">
-            <i class="fa-solid fa-cart-shopping"></i>
-            {% if order %}
-                Buyurtmani tahrirlash #{{ order.id }}
-            {% else %}
-                Yangi buyurtma qo'shish
-            {% endif %}
-        </h1>
-        <p class="page-subtitle">Mahsulot qo'shish uchun ID va miqdorni kiriting</p>
-    </div>
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-cart-plus"></i>
+        Yangi Buyurtma
+    </h1>
+    <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline">
+        <i class="fa-solid fa-arrow-left"></i> Orqaga
+    </a>
 </div>
 
 <div class="grid" style="grid-template-columns: 1fr; gap: 24px;">
@@ -31,21 +21,10 @@
             <h3 class="card__title">Mijoz ma'lumotlari</h3>
         </div>
         <div class="card__body">
-            {% if order %}
-            <div class="user-cell">
-                <i class="fa-solid fa-circle-user" style="color: #6a00f4;"></i>
-                <div style="margin-left: 12px;">
-                    <strong>{{ order.user.full_name|default:order.user.email }}</strong>
-                    <br>
-                    <span class="text-muted">{{ order.user.email }}</span>
-                </div>
-            </div>
-            <input type="hidden" name="user" value="{{ order.user.id }}">
-            {% else %}
             <div class="form-group">
                 <label class="form-label">Mijoz tanlash <span class="form-required">*</span></label>
                 <div class="form-select-wrapper">
-                    <select name="user" id="userSelect" class="form-select" required>
+                    <select name="customer_id" id="customerSelect" class="form-select" required>
                         <option value="">-- Mijoz tanlang --</option>
                         {% for user in users %}
                         <option value="{{ user.id }}">{{ user.email }} ({{ user.full_name|default:user.email }})</option>
@@ -53,22 +32,21 @@
                     </select>
                 </div>
             </div>
-            {% endif %}
             
             <div class="form-group">
-                <label class="form-label">Manzil <span class="form-required">*</span></label>
-                <textarea name="address" id="addressInput" class="form-control" rows="3" placeholder="Yetkazib berish manzili" {% if order %}value="{{ order.address|default:'' }}"{% endif %} required></textarea>
+                <label class="form-label">Yetkazib berish manzili <span class="form-required">*</span></label>
+                <textarea name="address" id="addressInput" class="form-control" rows="3" placeholder="Manzilni kiriting" required></textarea>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Qo'shimcha ma'lumotlar</label>
-                <textarea name="notes" id="notesInput" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumotlar (ixtiyoriy)" {% if order %}value="{{ order.notes|default:'' }}"{% endif %}></textarea>
+                <textarea name="notes" id="notesInput" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumotlar (ixtiyoriy)"></textarea>
             </div>
             
-            {% if user.user_cart %}
+            {% if cart %}
             <div class="alert alert--info" style="margin-top: 16px;">
                 <i class="fa-solid fa-shopping-cart"></i>
-                <span>Foydalanuvchining savatchasi bor - <a href="#" id="loadCartBtn" style="color: #6a00f4; text-decoration: none;">Savatchadan yuklash</a></span>
+                <span>Foydalanuvchining savatchasi topildi - <a href="#" id="createFromCartBtn" style="color: #6a00f4; text-decoration: none;">Savatchadan yaratish</a></span>
             </div>
             {% endif %}
         </div>
@@ -123,22 +101,7 @@
                         </tr>
                     </thead>
                     <tbody id="orderItemsTable">
-                        {% if order %}
-                            {% for item in order.order_items.all %}
-                            <tr>
-                                <td><strong>{{ item.product.id }}</strong></td>
-                                <td>{{ item.product.name }}</td>
-                                <td style="text-align: right;">{{ item.price_at_order }}</td>
-                                <td style="text-align: right;">{{ item.quantity }}</td>
-                                <td style="text-align: right; font-weight: 600; color: #6a00f4;">{{ item.subtotal }}</td>
-                                <td style="text-align: center;">
-                                    <button type="button" class="btn btn--sm btn--ghost btn--danger remove-item-btn" data-item-id="{{ item.id }}">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% endif %}
+                        <!-- Items will be added here -->
                     </tbody>
                 </table>
             </div>
@@ -146,9 +109,7 @@
             <!-- Summary -->
             <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e5ea;">
                 <span class="text-muted" style="font-size: 18px; font-weight: 600; margin-right: 16px;">Jami summa:</span>
-                <strong style="font-size: 24px; color: #6a00f4;" id="totalPrice">
-                    {% if order %}{{ order.total_price|default:'0.00' }}{% else %}0.00{% endif %}
-                </strong>
+                <strong style="font-size: 24px; color: #6a00f4;" id="totalPrice">0.00</strong>
                 <span style="font-size: 18px; color: #6a00f4;">so'm</span>
             </div>
         </div>
@@ -157,52 +118,32 @@
     <!-- Actions -->
     <div class="card" id="actionsCard">
         <div class="card__body" style="text-align: center;">
-            <button type="submit" form="orderForm" class="btn btn--primary" style="width: 200px;">
-                <i class="fa-solid fa-floppy-disk"></i>
-                {% if order %}Yangilash{% else %}Saqlash{% endif %}
+            <button type="button" id="saveOrderBtn" class="btn btn--primary" style="width: 200px;">
+                <i class="fa-solid fa-floppy-disk"></i> Saqlash
             </button>
             <button type="button" id="clearCartBtn" class="btn btn--outline" style="width: 200px; margin-left: 12px;">
                 <i class="fa-solid fa-trash"></i> Tozalash
             </button>
-            <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline" style="width: 200px; margin-left: 12px;">
-                <i class="fa-solid fa-arrow-left"></i> Orqaga
-            </a>
         </div>
     </div>
 </div>
 
-<!-- Hidden form -->
-<form id="orderForm" method="POST" action="{% if order %}{% url 'dashboard:order_edit' order.id %}{% else %}{% url 'dashboard:order_create' %}{% endif %}" style="display: none;">
+<!-- Hidden inputs for form submission -->
+<form id="orderForm" method="POST" action="{% url 'dashboard:api_admin_orders_create' %}" style="display: none;">
     {% csrf_token %}
-    {{ form.hidden_fields }}
-    <input type="hidden" name="user" id="formUserId" value="{% if order %}{{ order.user.id }}{% else %}{{ form.user.value|default:'' }}{% endif %}">
-    <input type="hidden" name="address" id="formAddress" value="{% if order %}{{ order.address|default:'' }}{% else %}{{ form.address.value|default:'' }}{% endif %}">
-    <input type="hidden" name="notes" id="formNotes" value="{% if order %}{{ order.notes|default:'' }}{% else %}{{ form.notes|default:'' }}{% endif %}">
+    <input type="hidden" name="customer_id" id="formCustomerId">
+    <input type="hidden" name="address" id="formAddress">
+    <input type="hidden" name="notes" id="formNotes">
     <input type="hidden" name="items_json" id="formItemsJson">
-    <input type="hidden" name="total_price" id="formTotalPrice" value="{% if order %}{{ order.total_price|default:'0' }}{% else %}0{% endif %}">
 </form>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Order Create/Edit JS
+// Order Create JS
 let orderItems = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Load existing items if editing
-    {% if order %}
-        {% for item in order.order_items.all %}
-        orderItems.push({
-            item_id: {{ item.id }},
-            product_id: {{ item.product.id }},
-            product_name: "{{ item.product.name|escapejs }}",
-            unit_price: {{ item.price_at_order }},
-            quantity: {{ item.quantity }},
-            stock: {{ item.product.stock }}
-        });
-        {% endfor %}
-    {% endif %}
-    
     const addProductBtn = document.getElementById('addProductBtn');
     const productIdInput = document.getElementById('productIdInput');
     const productQtyInput = document.getElementById('productQtyInput');
@@ -211,17 +152,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderItemsTable = document.getElementById('orderItemsTable');
     const itemsCountSpan = document.getElementById('itemsCount');
     const totalPriceSpan = document.getElementById('totalPrice');
+    const saveOrderBtn = document.getElementById('saveOrderBtn');
     const clearCartBtn = document.getElementById('clearCartBtn');
-    const loadCartBtn = document.getElementById('loadCartBtn');
-    const orderForm = document.getElementById('orderForm');
+    const createFromCartBtn = document.getElementById('createFromCartBtn');
     
-    // Load cart items
+    // Load cart items if exists
+    {% if cart %}
+    const loadCartBtn = document.getElementById('createFromCartBtn');
     if (loadCartBtn) {
         loadCartBtn.addEventListener('click', function(e) {
             e.preventDefault();
             loadCartItems();
         });
     }
+    {% endif %}
     
     // Add product
     if (addProductBtn) {
@@ -248,12 +192,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
-                    // Add or update item
+                    // Add item
                     const existingItem = orderItems.find(item => item.product_id === data.id);
                     if (existingItem) {
                         const newQty = existingItem.quantity + quantity;
                         if (newQty > data.stock) {
-                            alert(`Mahsulotni jami miqdori ombor miqdoridan oshib ketishi mumkin! Maksimal: ${data.stock}`);
+                            alert(`Mahsulotni jami miqdori ombor miqdoridan oshib ketishi mumkin! maksimal: ${data.stock}`);
                             return;
                         }
                         existingItem.quantity = newQty;
@@ -271,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     productInfoText.textContent = `${data.name} (${quantity} ta) qo'shildi`;
                     productInfo.style.display = 'block';
                     
+                    // Clear inputs
                     productIdInput.value = '';
                     productQtyInput.value = '';
                     
@@ -288,35 +233,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Remove item
     orderItemsTable.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-item-btn')) {
-            const itemId = e.target.dataset.itemId;
-            
-            if (itemId) {
-                // For existing order items (editing)
-                fetch(`/dashboard/api/admin/orders/${itemId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        orderItems = orderItems.filter(item => !item.item_id || item.item_id != itemId);
-                        updateUI();
-                    }
-                });
-            } else {
-                // For new items
-                const productId = parseInt(e.target.dataset.productId);
-                orderItems = orderItems.filter(item => item.product_id !== productId);
-                updateUI();
-            }
+            const id = parseInt(e.target.dataset.productId);
+            orderItems = orderItems.filter(item => item.product_id !== id);
+            updateUI();
         }
     });
     
     // Update quantity
     orderItemsTable.addEventListener('input', function(e) {
         if (e.target.classList.contains('item-qty')) {
-            const productId = parseInt(e.target.dataset.productId);
+            const id = parseInt(e.target.dataset.productId);
             const newQty = parseInt(e.target.value);
             
             if (newQty <= 0) {
@@ -324,19 +250,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            const item = orderItems.find(item => item.product_id === productId);
+            const item = orderItems.find(item => item.product_id === id);
             if (item && newQty > item.stock) {
                 alert(`Jami miqdor ombor miqdoridan oshib ketishi mumkin! Maksimal: ${item.stock}`);
                 e.target.value = item.quantity;
                 return;
             }
             
-            if (item) {
-                item.quantity = newQty;
-                updateUI();
-            }
+            item.quantity = newQty;
+            updateUI();
         }
     });
+    
+    // Save order
+    if (saveOrderBtn) {
+        saveOrderBtn.addEventListener('click', function() {
+            if (orderItems.length === 0) {
+                alert('Buyurtmaga hech qanday mahsulot qo\'shilmadi!');
+                return;
+            }
+            
+            const customerId = document.getElementById('customerSelect').value;
+            const address = document.getElementById('addressInput').value;
+            const notes = document.getElementById('notesInput').value;
+            
+            if (!customerId) {
+                alert('Mijozni tanlang!');
+                return;
+            }
+            
+            if (!address.trim()) {
+                alert('Manzilni kiriting!');
+                return;
+            }
+            
+            // Prepare form data
+            document.getElementById('formCustomerId').value = customerId;
+            document.getElementById('formAddress').value = address;
+            document.getElementById('formNotes').value = notes;
+            document.getElementById('formItemsJson').value = JSON.stringify(orderItems.map(item => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit_price: item.unit_price
+            })));
+            
+            // Submit form
+            document.getElementById('orderForm').submit();
+        });
+    }
     
     // Clear cart
     if (clearCartBtn) {
@@ -345,24 +306,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 orderItems = [];
                 updateUI();
             }
-        });
-    }
-    
-    // Update form before submit
-    if (orderForm) {
-        orderForm.addEventListener('submit', function(e) {
-            document.getElementById('formItemsJson').value = JSON.stringify(orderItems.map(item => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                unit_price: item.unit_price
-            })));
-            
-            // Calculate total
-            let total = 0;
-            orderItems.forEach(item => {
-                total += item.quantity * item.unit_price;
-            });
-            document.getElementById('formTotalPrice').value = total;
         });
     }
     
@@ -386,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td style="text-align: right; font-weight: 600; color: #6a00f4;">${parseFloat(lineTotal).toFixed(2)}</td>
                 <td style="text-align: center;">
-                    <button type="button" class="btn btn--sm btn--ghost btn--danger remove-item-btn" data-product-id="${item.product_id}" data-item-id="${item.item_id || ''}">
+                    <button type="button" class="remove-item-btn" data-product-id="${item.product_id}" style="background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 16px;">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -399,7 +342,9 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPriceSpan.textContent = parseFloat(total).toFixed(2);
     }
     
+    {% if cart %}
     function loadCartItems() {
+        // Fetch cart items from API
         fetch('/api/v1/cart/')
             .then(response => response.json())
             .then(data => {
@@ -421,21 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Savatchani yuklashda xatolik yuz berdi!');
             });
     }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    {% endif %}
 });
 </script>
 {% endblock %}

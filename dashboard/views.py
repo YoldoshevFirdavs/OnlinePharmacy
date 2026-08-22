@@ -1379,22 +1379,81 @@ def order_create(request):
     try:
         if request.method == "POST":
             try:
-                form = OrderForm(request.POST)
-                if form.is_valid():
+                from django.http import JsonResponse
+                import json
+                
+                # Handle both form data and JSON
+                if request.content_type == 'application/json':
+                    data = json.loads(request.body) if request.body else {}
+                    user_id = data.get('user_id') or data.get('customer_id')
+                    address = data.get('address', '')
+                    items = data.get('items', [])
+                    
+                    if not user_id or not items:
+                        return JsonResponse({'status': 'error', 'message': 'user_id and items required'}, status=400)
+                    
+                    # Validate user
                     try:
-                        with transaction.atomic():
-                            form.save()
-                            messages.success(request, "Buyurtma muvaffaqiyatli yaratildi.")
-                            return redirect("dashboard:order_list")
-                    except Exception as save_error:
-                        logger.error(f"Error saving order: {str(save_error)}")
-                        messages.error(request, "Buyurtmani saqlashda xatolik yuz berdi.")
-                        return render(request, "dashboard/order/form.html", {"form": form})
+                        customer = CustomUser.objects.get(id=user_id)
+                    except CustomUser.DoesNotExist:
+                        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+                    
+                    with transaction.atomic():
+                        order = Order.objects.create(
+                            user=customer,
+                            address=address,
+                            total_price=0
+                        )
+                        
+                        total = 0
+                        for item in items:
+                            product_id = item.get('product_id')
+                            quantity = item.get('quantity', 1)
+                            
+                            try:
+                                product = Medicine.objects.select_for_update().get(id=product_id)
+                            except Medicine.DoesNotExist:
+                                transaction.set_rollback(True)
+                                return JsonResponse({'status': 'error', 'message': f'Product {product_id} not found'}, status=400)
+                            
+                            if quantity > product.stock:
+                                transaction.set_rollback(True)
+                                return JsonResponse({'status': 'error', 'message': f'Not enough stock for {product.name}'}, status=400)
+                            
+                            line_price = product.price * quantity
+                            OrderItem.objects.create(
+                                order=order,
+                                product=product,
+                                quantity=quantity,
+                                price_at_order=product.price
+                            )
+                            
+                            total += line_price
+                            product.stock -= quantity
+                            product.save()
+                        
+                        order.total_price = total
+                        order.save()
+                    
+                    return JsonResponse({'status': 'success', 'order_id': order.id, 'total_price': str(order.total_price)}, status=201)
                 else:
-                    for field, errors in form.errors.items():
-                        for error in errors:
-                            messages.error(request, f"{field}: {error}")
-                    return render(request, "dashboard/order/form.html", {"form": form})
+                    # Handle form data
+                    form = OrderForm(request.POST)
+                    if form.is_valid():
+                        try:
+                            with transaction.atomic():
+                                form.save()
+                                messages.success(request, "Buyurtma muvaffaqiyatli yaratildi.")
+                                return redirect("dashboard:order_list")
+                        except Exception as save_error:
+                            logger.error(f"Error saving order: {str(save_error)}")
+                            messages.error(request, "Buyurtmani saqlashda xatolik yuz berdi.")
+                            return render(request, "dashboard/order/form.html", {"form": form})
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                messages.error(request, f"{field}: {error}")
+                        return render(request, "dashboard/order/form.html", {"form": form})
             except Exception as form_error:
                 logger.error(f"Form processing error in order_create: {str(form_error)}")
                 messages.error(request, "Buyurtma yaratishda xatolik yuz berdi.")
@@ -1403,7 +1462,8 @@ def order_create(request):
         else:
             try:
                 form = OrderForm()
-                ctx = {"form": form}
+                users = CustomUser.objects.filter(is_active=True).order_by('email')
+                ctx = {"form": form, "users": users}
                 return render(request, "dashboard/order/form.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in order_create: {str(get_error)}")
@@ -1603,3 +1663,96 @@ def delivery_delete(request, pk):
         logger.error(f"Unexpected error in delivery_delete: {str(e)}")
         messages.error(request, "Noma'lum xatolik yuz berdi.")
         return redirect("dashboard:delivery_list")
+
+
+@login_required_decorator(login_url="dashboard:login_page")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
+@require_http_methods(["GET", "POST"])
+def order_create(request):
+    """Order yaratish."""
+    try:
+        if request.method == "POST":
+            try:
+                from django.http import JsonResponse
+                import json
+                
+                data = json.loads(request.body) if request.body else {}
+                
+                customer_id = data.get('customer_id')
+                address = data.get('address', '')
+                notes = data.get('notes', '')
+                items = data.get('items', [])
+                
+                if not customer_id or not items or len(items) == 0:
+                    return JsonResponse({'status': 'error', 'message': 'customer_id and items required'}, status=400)
+                
+                from orders.models import Order, OrderItem
+                from pharmacy.models import Medicine
+                
+                # Validate customer
+                try:
+                    customer = CustomUser.objects.get(id=customer_id)
+                except CustomUser.DoesNotExist:
+                    return JsonResponse({'status': 'error', 'message': 'Customer not found'}, status=404)
+                
+                with transaction.atomic():
+                    order = Order.objects.create(
+                        user=customer,
+                        address=address,
+                        notes=notes,
+                        total_price=0
+                    )
+                    
+                    total = 0
+                    for item in items:
+                        product_id = item.get('product_id')
+                        quantity = item.get('quantity', 1)
+                        
+                        # Validate product
+                        try:
+                            product = Medicine.objects.select_for_update().get(id=product_id)
+                        except Medicine.DoesNotExist:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'status': 'error', 'message': f'Product {product_id} not found'}, status=400)
+                        
+                        # Validate stock
+                        if quantity > product.stock:
+                            transaction.set_rollback(True)
+                            return JsonResponse({'status': 'error', 'message': f'Not enough stock for {product.name}'}, status=400)
+                        
+                        # Create order item
+                        line_price = product.price * quantity
+                        OrderItem.objects.create(
+                            order=order,
+                            product=product,
+                            quantity=quantity,
+                            price_at_order=product.price
+                        )
+                        
+                        total += line_price
+                        product.stock -= quantity
+                        product.save()
+                    
+                    order.total_price = total
+                    order.save()
+                
+                return JsonResponse({'status': 'success', 'order_id': order.id, 'total_price': str(order.total_price)}, status=201)
+                
+            except Exception as form_error:
+                logger.error(f"Form processing error in order_create: {str(form_error)}")
+                return JsonResponse({'status': 'error', 'message': str(form_error)}, status=400)
+        else:
+            # GET - Render create page
+            try:
+                from custom_auth.models import CustomUser
+                users = CustomUser.objects.filter(is_active=True).order_by('email')
+                ctx = {"users": users}
+                return render(request, "dashboard/admin/orders_create.html", ctx)
+            except Exception as get_error:
+                logger.error(f"Error loading form in order_create: {str(get_error)}")
+                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                return redirect("dashboard:order_list")
+    except Exception as e:
+        logger.error(f"Unexpected error in order_create: {str(e)}")
+        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        return redirect("dashboard:order_list")

@@ -79,12 +79,11 @@ class AdminOrderCreateAPIView(APIView):
             # Create order with transaction
             with transaction.atomic():
                 order = Order.objects.create(
-                    customer=customer,
+                    user=customer,
                     status=data.get('status', 'Pending'),
                     address=data.get('address', ''),
                     notes=data.get('notes', ''),
                     total_price=total_price,
-                    created_at=datetime.now(),
                 )
                 
                 # Create order items
@@ -93,7 +92,7 @@ class AdminOrderCreateAPIView(APIView):
                         order=order,
                         product_id=item['product_id'],
                         quantity=item['quantity'],
-                        price=item.get('unit_price', 0),
+                        price_at_order=item.get('unit_price', 0),
                     )
             
             return Response({
