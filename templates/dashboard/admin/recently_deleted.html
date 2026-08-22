@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>{{ page_title }}</h1>
+<input type="hidden" id="deletedItemsApi" value="{{ deleted_items_api }}">
+<input type="hidden" id="undoApi" value="{{ undo_api }}">
+
+<div class="card">
+  <div class="card-body">
+    <table class="table" id="recentlyDeletedTable">
+      <thead>
+        <tr>
+          <th>Item Type</th>
+          <th>Item ID</th>
+          <th>Display Name</th>
+          <th>Deleted At</th>
+          <th>Deleted By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{% static 'dashboard/js/recently_deleted.js' %}"></script>
+{% endblock %}

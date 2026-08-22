@@ -1,8 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
-from users.views import TestAdminLoginView
-
 from .api_views import (
     DeliveryDriverViewSet, SessionCheckView, SalesStatsView, CategoryListView,
     ProductListView, OrderListView, RecentOrderListView, OrderStatusUpdateView,
@@ -19,7 +17,11 @@ from .api_admin_orders import (
     AdminOrderUpdateAPIView,
     AdminOrderListAPIView,
 )
-from .views import seller_dashboard  # Added seller_dashboard
+from .api_admin_undo import (
+    UndoDeleteAPIView,
+    DeletedItemsAPIView,
+)
+from .views import seller_dashboard, seller_profile, product_full_guide  # Added seller and product views
 from .views import (
     account_settings,
     audit_log_list,
@@ -74,7 +76,7 @@ urlpatterns = [
     path("login/", login_page, name="login_page"),
     path("logout/", logout_page, name="logout_page"),
     path("account/", account_settings, name="account_dashboard"),
-    path("account-settings/", account_settings, name="account_settings"),
+    # path("account-settings/", account_settings, name="account_settings"),
     path("categories/", category_list, name="category_list"),
     path("categories/create/", category_create, name="category_create"),
     path("categories/<int:pk>/edit/", category_edit, name="category_edit"),
@@ -84,6 +86,7 @@ urlpatterns = [
     path("medicines/<int:pk>/edit/", medicine_edit, name="medicine_edit"),
     path("medicines/<int:pk>/delete/", medicine_delete, name="medicine_delete"),
     path("users/", user_list, name="user_list"),
+    path("users/<int:user_id>/profile/", seller_profile, name="seller_profile"),
     path("users/create/", user_create, name="user_create"),
     path("users/<int:pk>/edit/", user_edit, name="user_edit"),
     path("users/<int:pk>/delete/", user_delete, name="user_delete"),
@@ -128,9 +131,14 @@ urlpatterns = [
     path("api/admin/orders/create/", AdminOrderCreateAPIView.as_view(), name="api_admin_orders_create"),
     path("api/admin/orders/<int:pk>/", AdminOrderUpdateAPIView.as_view(), name="api_admin_orders_update"),
     
+    # Admin Undo API
+    path("api/admin/undo-delete/", UndoDeleteAPIView.as_view(), name="api_admin_undo_delete"),
+    path("api/admin/deleted-items/", DeletedItemsAPIView.as_view(), name="api_admin_deleted_items"),
+    
     # Admin Dashboard HTML pages (Task #10)
     path("admin/analytics/", admin_analytics_dashboard, name="admin_analytics"),
     path("admin/user/<int:user_id>/history/", user_history_view, name="user_history"),
     path("admin/user/<int:user_id>/order/<int:order_id>/", order_detail_admin_view, name="admin_order_detail"),
     path("admin/orders/<int:order_id>/view/", admin_order_view, name="admin_order_view"),
+    path("admin/recently-deleted/", admin_recently_deleted, name="admin_recently_deleted"),
 ]
