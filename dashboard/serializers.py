@@ -4,7 +4,6 @@ from rest_framework import serializers
 from orders.models import Order
 from pharmacy.models import Category, Medicine
 from users.models import CustomUser
-from users.serializers import UserSerializer
 
 
 class DashboardCategorySerializer(serializers.ModelSerializer):

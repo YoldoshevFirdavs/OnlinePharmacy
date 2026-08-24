@@ -1,5 +1,4 @@
 from django.contrib.auth.management.commands import createsuperuser
-from django.core.management import CommandError
 
 
 class Command(createsuperuser.Command):

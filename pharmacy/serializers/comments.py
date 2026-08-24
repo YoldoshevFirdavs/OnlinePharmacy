@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from pharmacy.models.comments import CommentLike, ProductComment
-from users.serializers import UserPublicSerializer
 
 
 class CommentLikeSerializer(serializers.ModelSerializer):

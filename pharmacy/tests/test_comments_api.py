@@ -7,7 +7,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from pharmacy.models.comments import CommentAnalysis, CommentLike, ProductComment
+from pharmacy.models.comments import CommentLike, ProductComment
 from pharmacy.models.medicine import Category, Medicine
 from users.models import CustomUser
 

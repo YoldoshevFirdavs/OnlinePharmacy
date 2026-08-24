@@ -7,7 +7,6 @@ from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.views.decorators.cache import never_cache
 
 from .models import BanRecord
 

@@ -341,7 +341,6 @@ class BannedUsersListView(APIView):
 
     def get(self, request):
         """Vaqtli va permanent banlar jadvalini olish."""
-        from django.utils import timezone
 
         # Hozirda bannalangan foydalanuvchilar
         banned_users = (

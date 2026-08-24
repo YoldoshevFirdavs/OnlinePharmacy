@@ -4,7 +4,7 @@ Tests middleware functionality, request processing, and integration
 """
 
 from datetime import timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.http import HttpResponse

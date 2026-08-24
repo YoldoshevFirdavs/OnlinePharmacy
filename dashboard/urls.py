@@ -6,23 +6,13 @@ from .api_admin_orders import AdminOrderCreateAPIView, AdminOrderListAPIView, Ad
 from .api_admin_undo import DeletedItemsAPIView, UndoDeleteAPIView
 from .api_stats import DailyOrdersStatsAPIView, SummaryStatsAPIView
 from .api_views import (
-    BannedUsersListView,
-    BanUserView,
-    CalendarEventsView,
     CategoryListView,
     DashboardStatsApiView,
     DeliveryDriverViewSet,
-    DriverApiView,
-    OrderListView,
-    OrderStatusUpdateView,
     ProductListView,
     RecentOrderListView,
     SalesStatsView,
     SessionCheckView,
-    SettingsView,
-    UnbanUserView,
-    UserBanDetailView,
-    UserListView,
 )
 from .views import ban_delete  # Added ban CRUD views
 from .views import (  # Added seller and product views
@@ -68,7 +58,6 @@ from .views_admin import (
     admin_order_view,
     admin_recently_deleted,
     order_detail_admin_view,
-    order_detail_view,
     user_history_view,
 )
 

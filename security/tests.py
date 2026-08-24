@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.test import Client, TestCase
-from django.urls import reverse
 from django.utils import timezone
 
 from .models import BanRecord
@@ -150,7 +149,6 @@ class BanRateLimitTestCase(TestCase):
 
     def test_rate_limit_threshold_reached(self):
         """Test rate limit creates temporary ban"""
-        from django.core.cache import cache
 
         # Simulate rapid requests from same IP
         ip = "192.168.1.100"

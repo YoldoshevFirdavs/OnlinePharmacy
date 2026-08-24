@@ -5,7 +5,6 @@ Supports both Windows and Unix-like systems
 """
 
 import argparse
-import datetime
 import logging
 import os
 import subprocess

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from pharmacy.models.comments import CommentAnalysis, ProductComment
+from pharmacy.models.comments import ProductComment
 
 
 @receiver(post_save, sender=ProductComment)

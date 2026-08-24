@@ -1,8 +1,6 @@
-from django.db import transaction
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import generics, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,7 +8,7 @@ from rest_framework.views import APIView
 
 from pharmacy.models.medicine import Medicine
 
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order
 from .serializers import (
     ArrivalSerializer,
     CartItemSerializer,
@@ -18,7 +16,6 @@ from .serializers import (
     DeliveryOrderSerializer,
     LocationSerializer,
     OrderDetailSerializer,
-    OrderItemSerializer,
     OrderListSerializer,
     OrderStatusUpdateSerializer,
 )
