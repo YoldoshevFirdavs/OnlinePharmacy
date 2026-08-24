@@ -10,3 +10,22 @@ def site_configuration(request):
             "experience_years": 1,
         }
     return {"site_config": config}
+
+
+def social_links(request):
+    """Social media links for templates"""
+    return {
+        "social_telegram": "https://t.me/onlinepharmacy_uz",
+        "social_instagram": "https://instagram.com/onlinepharmacy_uz",
+        "social_facebook": "https://facebook.com/onlinepharmacy_uz",
+    }
+
+
+def footer_links(request):
+    """Footer navigation links for templates"""
+    return {
+        "about_url": "/about/",
+        "contact_url": "/contact/",
+        "terms_url": "/terms/",
+        "privacy_url": "/privacy/",
+    }

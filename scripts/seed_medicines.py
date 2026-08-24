@@ -1,11 +1,12 @@
 # scripts/seed_medicines.py
 from decimal import Decimal
+
 from django.db import transaction
-from django.utils import timezone
-from faker import Faker
 
 # Disconnect signals before seed to prevent AuditLog entries
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
+from django.utils import timezone
+from faker import Faker
 
 # Store original signal receivers
 _original_medicine_save = None
@@ -18,19 +19,27 @@ def disconnect_signals():
     """Disconnect AuditLog signals before seed."""
     global _original_medicine_save, _original_medicine_delete, _original_category_save, _original_category_delete
 
-    from pharmacy.signals import log_medicine_save, log_medicine_delete, log_category_save, log_category_delete
-    from pharmacy.models import Medicine, Category
+    from pharmacy.models import Category, Medicine
+    from pharmacy.signals import log_category_delete, log_category_save, log_medicine_delete, log_medicine_save
 
-    _original_medicine_save = post_save.disconnect(sender=Medicine, dispatch_uid="log_medicine_save", receiver=log_medicine_save)
-    _original_medicine_delete = post_delete.disconnect(sender=Medicine, dispatch_uid="log_medicine_delete", receiver=log_medicine_delete)
-    _original_category_save = post_save.disconnect(sender=Category, dispatch_uid="log_category_save", receiver=log_category_save)
-    _original_category_delete = post_delete.disconnect(sender=Category, dispatch_uid="log_category_delete", receiver=log_category_delete)
+    _original_medicine_save = post_save.disconnect(
+        sender=Medicine, dispatch_uid="log_medicine_save", receiver=log_medicine_save
+    )
+    _original_medicine_delete = post_delete.disconnect(
+        sender=Medicine, dispatch_uid="log_medicine_delete", receiver=log_medicine_delete
+    )
+    _original_category_save = post_save.disconnect(
+        sender=Category, dispatch_uid="log_category_save", receiver=log_category_save
+    )
+    _original_category_delete = post_delete.disconnect(
+        sender=Category, dispatch_uid="log_category_delete", receiver=log_category_delete
+    )
 
 
 def reconnect_signals():
     """Reconnect AuditLog signals after seed."""
-    from pharmacy.signals import log_medicine_save, log_medicine_delete, log_category_save, log_category_delete
-    from pharmacy.models import Medicine, Category
+    from pharmacy.models import Category, Medicine
+    from pharmacy.signals import log_category_delete, log_category_save, log_medicine_delete, log_medicine_save
 
     if _original_medicine_save is not False:
         post_save.connect(log_medicine_save, sender=Medicine, dispatch_uid="log_medicine_save")
@@ -85,7 +94,7 @@ def run(*args):
             medicines_to_create = []
             for category in created_categories:
                 for _ in range(products_per_category):
-                    name = faker.unique.word().title() + ' ' + faker.word().title()
+                    name = faker.unique.word().title() + " " + faker.word().title()
                     slug = faker.unique.slug()
                     price = round(faker.pyfloat(left_digits=3, right_digits=2, positive=True), 2)
                     stock = faker.random_int(min=0, max=500)

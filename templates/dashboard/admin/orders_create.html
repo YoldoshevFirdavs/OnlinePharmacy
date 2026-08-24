@@ -9,9 +9,11 @@
         <i class="fa-solid fa-cart-plus"></i>
         Yangi Buyurtma
     </h1>
-    <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline">
-        <i class="fa-solid fa-arrow-left"></i> Orqaga
-    </a>
+    <div class="page-header__actions">
+        <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline">
+            <i class="fa-solid fa-arrow-left"></i> Orqaga
+        </a>
+    </div>
 </div>
 
 <div class="grid" style="grid-template-columns: 1fr; gap: 24px;">

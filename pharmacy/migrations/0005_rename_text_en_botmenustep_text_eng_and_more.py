@@ -22,8 +22,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="botinlinebutton",
             name="title_eng",
-            field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="Tugma nomi (EN)"
-            ),
+            field=models.CharField(blank=True, max_length=255, null=True, verbose_name="Tugma nomi (EN)"),
         ),
     ]

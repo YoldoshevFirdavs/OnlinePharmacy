@@ -27,11 +27,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import users.otp_service as otp_service
+from dashboard.forms import AccountSettingsForm
 from pharmacy.permissons import IsVerifiedSeller
 from security.locks import is_locked, record_failed_attempt, reset_lockout
-from dashboard.forms import AccountSettingsForm
+from security.middleware import get_client_ip
+from security.models import AuditLog, BanRecord
 
-from .models import CustomUser, Seller, SubscribedUser
+from .models import CustomUser, DeliveryDriver, Seller, SubscribedUser
 
 # Import dashboard permissions
 try:
@@ -40,18 +42,17 @@ except ImportError:
     # Fallback if dashboard app not available
     def is_admin(user):
         try:
-            return user.is_authenticated and getattr(user, 'role', None) == 'admin'
+            return user.is_authenticated and getattr(user, "role", None) == "admin"
         except Exception:
             return False
 
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.generic import TemplateView, FormView
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 import users.tasks as tasks
@@ -63,6 +64,7 @@ from .otp_service import (
     OtpHash,
     bind_session_to_user,
     check_rate_limit,
+    claim_admin_session,
     create_admin_session,
     create_otp_session,
     delete_admin_code,
@@ -144,6 +146,74 @@ def _user_requires_password(user: CustomUser) -> bool:
     return Seller.objects.filter(user=user).exists()
 
 
+def _is_admin_identity(user: CustomUser) -> bool:
+    if not user:
+        return False
+    role = str(getattr(user, "role", "") or "").lower()
+    return bool(role == "admin" and getattr(user, "is_staff", False) and getattr(user, "is_superuser", False))
+
+
+def _write_auth_audit(request, user, action, description, *, target_type="auth", target_id=None, meta=None):
+    with transaction.atomic():
+        AuditLog.objects.create(
+            user=user,
+            action=action,
+            description=description,
+            ip_address=getattr(request, "META", {}).get("REMOTE_ADDR"),
+            target_type=target_type,
+            target_id=getattr(user, "id", target_id),
+            meta={
+                **(meta or {}),
+                "ip": getattr(request, "META", {}).get("REMOTE_ADDR"),
+                "request_path": getattr(request, "path", None),
+                "request_method": getattr(request, "method", None),
+            },
+        )
+
+
+def _create_phone_otp_fallback(request, user):
+    if not user or not user.phone_number:
+        return None
+
+    with transaction.atomic():
+        otp_code = generate_numeric_code(TELEGRAM_OTP_LENGTH)
+        hashed_otp, salt = otp_service.hash_otp_with_salt(otp_code)
+        session = create_otp_session(purpose="telegram")
+        store_otp_hash(
+            user.phone_number,
+            OtpHash(hash=hashed_otp, salt=salt),
+            ttl=300,
+        )
+        bind_session_to_user(
+            session.session_id,
+            user.id,
+            user.phone_number,
+            ttl=300,
+        )
+        _write_auth_audit(
+            request,
+            user,
+            "Phone OTP requested",
+            "Non-admin OTP fallback requested after Telegram login attempt.",
+        )
+    return session
+
+
+def _create_telegram_otp_session(request, user, identifier):
+    with transaction.atomic():
+        session = create_otp_session(purpose="telegram")
+        otp_code = generate_numeric_code(TELEGRAM_OTP_LENGTH)
+        store_bot_otp(session.session_id, otp_code, ttl=300)
+        bind_session_to_user(session.session_id, user.id, identifier, ttl=300)
+        _write_auth_audit(
+            request,
+            user,
+            "Telegram OTP requested",
+            "Telegram OTP login flow started for a non-admin user.",
+        )
+    return session
+
+
 def _check_password_if_required(user: CustomUser, password: str | None) -> None:
     if not _user_requires_password(user):
         return
@@ -156,6 +226,8 @@ User = get_user_model()
 MAX_ATTEMPTS = getattr(settings, "ADMIN_LOGIN_MAX_ATTEMPTS", 5)
 BAN_SECONDS = getattr(settings, "ADMIN_BAN_SECONDS", 3600)
 SESSION_TIMEOUT = getattr(settings, "ADMIN_SESSION_TIMEOUT", 600)
+ADMIN_LINK_TTL = 300
+ADMIN_DEEPLINK_MAX_ATTEMPTS = 10
 
 
 class AdminLoginViewSet(viewsets.ViewSet):
@@ -173,9 +245,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
         username = data.get("username")
         email = data.get("email")
 
-        identifier = (
-            email or phone_number or username or request.META.get("REMOTE_ADDR")
-        )
+        identifier = email or phone_number or username or request.META.get("REMOTE_ADDR")
 
         if otp_service.is_banned(identifier):
             return Response(
@@ -200,20 +270,23 @@ class AdminLoginViewSet(viewsets.ViewSet):
         elif action == "gmail_oauth":
             return self._handle_gmail_oauth(request, data, identifier)
 
-        return Response(
-            {"error": "Noma'lum action"}, status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({"error": "Noma'lum action"}, status=status.HTTP_400_BAD_REQUEST)
 
     def _login_user(self, request, user, identifier):
-        if not user.is_staff:
+        if not _is_admin_identity(user):
             otp_service.record_failed_attempt(identifier)
-            return Response(
-                {"error": "Foydalanuvchi admin emas."}, status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"error": "Foydalanuvchi admin emas."}, status=status.HTTP_403_FORBIDDEN)
 
-        user.backend = "django.contrib.auth.backends.ModelBackend"
-        login(request, user)
-        request.session.set_expiry(SESSION_TIMEOUT)
+        with transaction.atomic():
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            login(request, user)
+            request.session.set_expiry(SESSION_TIMEOUT)
+            _write_auth_audit(
+                request,
+                user,
+                "Admin password login successful",
+                "Admin login completed with password.",
+            )
         otp_service.reset_failed_attempts(identifier)
 
         # FIXED: Role is determined from server-side data, not hardcoded
@@ -275,31 +348,59 @@ class AdminLoginViewSet(viewsets.ViewSet):
             try:
                 user = CustomUser.objects.get(phone_number=phone_number)
             except CustomUser.DoesNotExist:
-                pass
+                with transaction.atomic():
+                    user = CustomUser.objects.create(
+                        phone_number=phone_number,
+                        telegram_id=telegram_id or None,
+                        role="user",
+                    )
+                    _write_auth_audit(
+                        request,
+                        user,
+                        "Telegram user created",
+                        "New user created from an unknown Telegram login phone.",
+                    )
         elif telegram_id:
             try:
                 user = CustomUser.objects.get(telegram_id=telegram_id)
             except CustomUser.DoesNotExist:
                 pass
 
-        if user == None:
-            # Ban user in database - vaqtli ban 1 soat uchun
-            try:
-                admin_user = CustomUser.objects.filter(is_staff=True).first()
-                ban_user = CustomUser.objects.filter(email=identifier).first() or CustomUser.objects.filter(phone_number=identifier).first()
-                if ban_user and ban_user != admin_user:
-                    ban_user.ban_user("admin_login", duration_seconds=3600, reason="Admin topilmadi", banned_by=admin_user)
-            except:
-                pass
+        if user is None:
             otp_service.record_failed_attempt(identifier)
             return Response(
-                {"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND
+                {
+                    "fallback": "otp",
+                    "message": "Telegram akkaunti admin bilan bog‘lanmagan. Telefon OTP orqali kiring.",
+                    "otp_endpoint": "/api/v1/users/login/telegram/",
+                    "session_id": None,
+                    "expected_length": TELEGRAM_OTP_LENGTH,
+                    "deeplink": None,
+                    "verification_link": None,
+                    "otp_sent": False,
+                    "role": "user",
+                    "is_admin": False,
+                    "bot_message": "Telefon OTP orqali kiring.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        if not user.is_staff:
+        if not _is_admin_identity(user):
             otp_service.record_failed_attempt(identifier)
             return Response(
-                {"error": "Foydalanuvchi admin emas."}, status=status.HTTP_403_FORBIDDEN
+                {
+                    "fallback": "otp",
+                    "message": "Telegram login faqat adminlar uchun. Telefon OTP orqali kiring.",
+                    "otp_endpoint": "/api/v1/users/login/telegram/",
+                    "session_id": None,
+                    "expected_length": TELEGRAM_OTP_LENGTH,
+                    "deeplink": None,
+                    "otp_sent": False,
+                    "role": "user",
+                    "is_admin": False,
+                    "bot_message": "Telefon OTP orqali kiring.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         otp_identifier = phone_number if phone_number else telegram_id
@@ -310,15 +411,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        otp = generate_numeric_code(length=6)
-        logger.info(
-            "Generated OTP for admin telegram login for %s",
-            mask_pii(str(otp_identifier)),
-        )
-
-        session_info = create_admin_session(
-            user.email or str(otp_identifier), user_id=user.id
-        )
+        session_info = create_admin_session(str(phone_number), user_id=user.id)
         session_id = session_info.get("session_id")
         if not session_id:
             return Response(
@@ -326,21 +419,30 @@ class AdminLoginViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        otp_service.store_admin_code_hash(session_id, otp)
+        admin_session = cache.get(f"admin_session:{session_id}") or {}
+        admin_session["phone_number"] = str(phone_number)
+        admin_session["flow"] = "telegram_deeplink"
+        cache.set(f"admin_session:{session_id}", admin_session, timeout=1800)
 
-        # Send OTP via Celery task
-        if user.email:
-            tasks.send_otp_email.delay(user.email, otp)
-
-        logger.info(
-            "Telegram login initiated for identifier=%s", mask_pii(str(otp_identifier))
+        _write_auth_audit(
+            request,
+            user,
+            "Admin Telegram login requested",
+            "Admin Telegram login flow started.",
         )
+
+        logger.info("Telegram login initiated for identifier=%s", mask_pii(str(otp_identifier)))
 
         return Response(
             {
                 "session_id": session_id,
-                "message": "OTP yuborildi. Telegram orqali tasdiqlang.",
-                "expected_length": 6,
+                "message": "Telegram orqali admin tasdiqlashi kutilmoqda.",
+                "expected_length": 0,
+                "deeplink": f"https://t.me/{os.getenv('AUTH_BOT_USERNAME', 'authversabot').lstrip('@')}?start={session_id}",
+                "otp_sent": False,
+                "role": "admin",
+                "is_admin": True,
+                "bot_message": "Telegram orqali admin tasdiqlashi kutilmoqda.",
                 "avatar_url": user.get_avatar_url,
             },
             status=status.HTTP_200_OK,
@@ -370,15 +472,18 @@ class AdminLoginViewSet(viewsets.ViewSet):
 
         if user is None:
             otp_service.record_failed_attempt(identifier)
-            return Response(
-                {"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND)
 
-        if not user.is_staff:
+        if not _is_admin_identity(user):
             otp_service.record_failed_attempt(identifier)
             return Response(
-                {"error": "Foydalanuvchi admin emas."}, status=status.HTTP_403_FORBIDDEN
+                {"error": "Bu OTP faqat adminlar uchun."},
+                status=status.HTTP_403_FORBIDDEN,
             )
+
+        if not _is_admin_identity(user):
+            otp_service.record_failed_attempt(identifier)
+            return Response({"error": "Foydalanuvchi admin emas."}, status=status.HTTP_403_FORBIDDEN)
 
         otp = generate_numeric_code(length=6)
         logger.info("Generated OTP for admin login for %s", mask_pii(str(identifier)))
@@ -392,6 +497,13 @@ class AdminLoginViewSet(viewsets.ViewSet):
             )
 
         otp_service.store_admin_code_hash(session_id, otp)
+
+        _write_auth_audit(
+            request,
+            user,
+            "Admin OTP requested",
+            "Admin OTP login flow started.",
+        )
 
         if email:
             tasks.send_otp_email.delay(email, otp)
@@ -433,9 +545,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
-            return Response(
-                {"error": "OTP noto‘g‘ri."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "OTP noto‘g‘ri."}, status=status.HTTP_400_BAD_REQUEST)
 
         # OTP is correct, retrieve user from session meta
         user = None
@@ -460,16 +570,19 @@ class AdminLoginViewSet(viewsets.ViewSet):
 
         if user is None:
             otp_service.record_failed_attempt(identifier)
-            return Response(
-                {"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND)
 
         otp_service.delete_admin_code(session_id)  # Delete OTP from cache
-        otp_service.delete_admin_session(
-            session_id
-        )  # Delete session after successful login
+        otp_service.delete_admin_session(session_id)  # Delete session after successful login
 
-        login(request, user)
+        with transaction.atomic():
+            login(request, user)
+            _write_auth_audit(
+                request,
+                user,
+                "Admin OTP login successful",
+                "Admin login completed with OTP.",
+            )
 
         # FIXED: Use determine_role() helper instead of hardcoded logic
         from .serializers import determine_role
@@ -511,9 +624,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
     def verify(self, request, *args, **kwargs):
         session_id = request.query_params.get("session_id")
         if not session_id:
-            return Response(
-                {"detail": "session_id required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "session_id required"}, status=status.HTTP_400_BAD_REQUEST)
 
         session_meta = otp_service.get_admin_session_meta(session_id)
         if not session_meta:
@@ -524,10 +635,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
             return Response({"status": "banned"}, status=status.HTTP_403_FORBIDDEN)
         # Check if session is expired (based on creation time and duration)
         created_at_timestamp = session_meta.get("created_at")
-        if (
-            created_at_timestamp
-            and (time.time() - created_at_timestamp) > settings.ADMIN_SESSION_DURATION
-        ):
+        if created_at_timestamp and (time.time() - created_at_timestamp) > settings.ADMIN_SESSION_DURATION:
             return Response({"status": "expired"}, status=status.HTTP_200_OK)
 
         # The 'verify' endpoint is for polling. The actual login happens in 'verify_otp'.
@@ -543,7 +651,33 @@ class AdminLoginViewSet(viewsets.ViewSet):
                     status=status.HTTP_200_OK,
                 )
 
-            refresh = RefreshToken.for_user(user)
+            if not _is_admin_identity(user):
+                return Response({"status": "rejected"}, status=status.HTTP_403_FORBIDDEN)
+
+            if session_meta.get("flow") == "telegram_deeplink":
+                bot_username = os.getenv("AUTH_BOT_USERNAME", "authversabot").lstrip("@")
+                return Response(
+                    {
+                        "status": "verified",
+                        "success": True,
+                        "verified": True,
+                        "requires_deeplink": True,
+                        "verification_link": f"https://t.me/{bot_username}?start={session_id}",
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            with transaction.atomic():
+                login(request, user)
+                _write_auth_audit(
+                    request,
+                    user,
+                    "Admin Telegram login successful",
+                    "Admin Telegram callback completed.",
+                )
+                refresh = RefreshToken.for_user(user)
+
+            otp_service.delete_admin_session(session_id)
 
             # FIXED: Determine role from server-side data, not hardcoded
             from .serializers import determine_role
@@ -553,6 +687,8 @@ class AdminLoginViewSet(viewsets.ViewSet):
             return Response(
                 {
                     "status": "verified",
+                    "success": True,
+                    "verified": True,
                     "access": str(refresh.access_token),
                     "refresh": str(refresh),
                     "redirect": reverse("dashboard:dashboard-admin"),
@@ -577,9 +713,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
 
         session_id = data.get("session_id")
         code = data.get("code")
-        identifier = (
-            data.get("email") or data.get("phone_number") or data.get("username")
-        )
+        identifier = data.get("email") or data.get("phone_number") or data.get("username")
 
         if not session_id or not code:
             return Response(
@@ -589,13 +723,9 @@ class AdminLoginViewSet(viewsets.ViewSet):
 
         # Rate limiting check
         if identifier:
-            is_allowed, remaining = otp_service.check_rate_limit(
-                f"admin_login:{identifier}"
-            )
+            is_allowed, remaining = otp_service.check_rate_limit(f"admin_login:{identifier}")
             if not is_allowed:
-                logger.warning(
-                    "Rate limit exceeded for admin login: identifier=%s", identifier
-                )
+                logger.warning("Rate limit exceeded for admin login: identifier=%s", identifier)
                 return Response(
                     {
                         "banned": True,
@@ -619,9 +749,7 @@ class AdminLoginViewSet(viewsets.ViewSet):
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
-            return Response(
-                {"error": "OTP noto‘g‘ri."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "OTP noto‘g‘ri."}, status=status.HTTP_400_BAD_REQUEST)
 
         # OTP is correct, retrieve user from session meta
         user = None
@@ -647,14 +775,10 @@ class AdminLoginViewSet(viewsets.ViewSet):
 
         if user is None:
             otp_service.record_failed_attempt(identifier)
-            return Response(
-                {"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Admin topilmadi."}, status=status.HTTP_404_NOT_FOUND)
 
         otp_service.delete_admin_code(session_id)  # Delete OTP from cache
-        otp_service.delete_admin_session(
-            session_id
-        )  # Delete session after successful login
+        otp_service.delete_admin_session(session_id)  # Delete session after successful login
 
         # Reset rate limit on successful login
         if identifier:
@@ -753,7 +877,7 @@ class RegistrationView(APIView):
         request.session.save()
 
         bot_username = os.getenv("AUTH_BOT_USERNAME", "authversabot").lstrip("@")
-        verification_link = f"https.t.me/{bot_username}?start={session.session_id}"
+        deeplink = f"https://t.me/{bot_username}?start={session.session_id}"
         logger.info("Registration handled for user_id=%s", user.id)
 
         response = Response(
@@ -761,7 +885,7 @@ class RegistrationView(APIView):
                 "message": "OTP yuborildi",
                 "session_id": session.session_id,
                 "expected_length": otp_length,
-                "verification_link": verification_link,
+                "deeplink": deeplink,
                 "incognito": incognito,
                 "avatar_url": user.get_avatar_url,
             },
@@ -781,14 +905,11 @@ class TelegramLoginView(APIView):
         phone_number = serializer.validated_data.get("phone_number")
         telegram_id = serializer.validated_data.get("telegram_id")
         name = serializer.validated_data.get("name", "")
-        role = serializer.validated_data.get("role", "user")  # Get requested role
 
-        identifier = phone_number or telegram_id
+        identifier = phone_number
 
         ip_address = request.META.get("REMOTE_ADDR")
-        account_key = (
-            f"telegram:{identifier}" if telegram_id else f"phone:{phone_number}"
-        )
+        account_key = f"telegram:{identifier}" if telegram_id else f"phone:{phone_number}"
 
         if is_locked(account_key):
             logger.warning(f"Account locked out for IP {ip_address}.")
@@ -797,38 +918,83 @@ class TelegramLoginView(APIView):
                 status=status.HTTP_423_LOCKED,
             )
 
+        if is_banned(identifier):
+            return Response(
+                {
+                    "fallback": "otp",
+                    "message": "Bu login identifikatori permanent banlangan.",
+                    "otp_required": False,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         incognito_header = request.headers.get("X-Incognito", "false").lower() == "true"
         incognito_payload = request.data.get("incognito", False)
         incognito = incognito_header or incognito_payload
 
-        user = None
-        if telegram_id:
-            user = CustomUser.objects.filter(telegram_id=telegram_id).first()
-        if not user and phone_number:
-            user = CustomUser.objects.filter(phone_number=phone_number).first()
+        user = CustomUser.objects.filter(phone_number=phone_number).first()
 
-        if not user:
-            # Create new user with role
-            user = CustomUser.objects.create(
-                phone_number=phone_number, 
-                telegram_id=telegram_id, 
-                full_name=name,
-                role=role  # Set role
-            )
-            logger.info(f"New user created via Telegram login with role={role}")
-        else:
-            # Update existing user
-            if not user.telegram_id and telegram_id:
+        if user is None and phone_number:
+            with transaction.atomic():
+                user = CustomUser.objects.create(
+                    phone_number=phone_number,
+                    telegram_id=telegram_id or None,
+                    full_name=name,
+                    role="user",
+                )
+                _write_auth_audit(
+                    request,
+                    user,
+                    "Telegram user created",
+                    "New user created with a Telegram identity.",
+                )
+        elif user is not None and telegram_id and not user.telegram_id:
+            with transaction.atomic():
                 user.telegram_id = telegram_id
-            if name and user.full_name != name:
-                user.full_name = name
-            if not user.phone_number and phone_number:
-                user.phone_number = phone_number
-            # Update role if different and user is not already admin
-            if role != user.role and user.role != 'admin':
-                user.role = role
-            user.save()
-            logger.info(f"Existing user updated via Telegram login, role={role}")
+                if name and not user.full_name:
+                    user.full_name = name
+                user.save(update_fields=["telegram_id", "full_name"])
+                _write_auth_audit(
+                    request,
+                    user,
+                    "Telegram identity linked",
+                    "Telegram identity linked to an existing user.",
+                )
+
+        if not user or not _is_admin_identity(user):
+            session = _create_telegram_otp_session(request, user, identifier) if user else None
+            if session:
+                return Response(
+                    {
+                        "fallback": "otp",
+                        "message": "Telegram orqali 4 xonali OTP yuborildi.",
+                        "otp_required": True,
+                        "session_id": session.session_id,
+                        "expected_length": TELEGRAM_OTP_LENGTH,
+                        "delivery": "telegram",
+                        "deeplink": f"https://t.me/{os.getenv('AUTH_BOT_USERNAME', 'authversabot').lstrip('@')}?start={session.session_id}",
+                        "otp_sent": True,
+                        "role": "user",
+                        "is_admin": False,
+                        "bot_message": "Telegram botdagi 4 xonali kodni kiriting.",
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            return Response(
+                {
+                    "fallback": "otp",
+                    "message": "Telegram login faqat adminlar uchun. Telefon OTP orqali kiring.",
+                    "otp_required": True,
+                    "expected_length": TELEGRAM_OTP_LENGTH,
+                    "session_id": None,
+                    "deeplink": None,
+                    "otp_sent": False,
+                    "role": "user",
+                    "is_admin": False,
+                    "bot_message": "Telefon OTP orqali kiring.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         session = create_otp_session(purpose="telegram")
         otp_length = TELEGRAM_OTP_LENGTH
@@ -839,35 +1005,31 @@ class TelegramLoginView(APIView):
         bind_session_to_user(session.session_id, user.id, identifier)
 
         bot_username = os.getenv("AUTH_BOT_USERNAME", "authversabot").lstrip("@")
-        deeplink = f"https.t.me/{bot_username}?start={session.session_id}"
+        web_link = f"https://t.me/{bot_username}?start={session.session_id}"
+
+        _write_auth_audit(
+            request,
+            user,
+            "Admin Telegram login requested",
+            "Admin Telegram login flow started.",
+        )
 
         logger.info(f"Telegram login initiated for user_id={user.id}, role={user.role}")
 
-        decr_ip_score(
-            ip_address, delta=getattr(settings, "AUTH_IP_SCORE_DECAY_SUCCESS", 5)
-        )
+        decr_ip_score(ip_address, delta=getattr(settings, "AUTH_IP_SCORE_DECAY_SUCCESS", 5))
 
-        # Role-based response
-        is_admin = user.role == 'admin'
-        
         response_data = {
-            "message": "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring.",
+            "message": "Admin Telegram tasdiqlashi boshlandi.",
             "session_id": session.session_id,
             "expected_length": otp_length,
-            "deeplink": deeplink,
+            "deeplink": web_link,
             "otp_sent": True,
             "incognito": incognito,
             "avatar_url": user.get_avatar_url,
-            "role": user.role,
-            "is_admin": is_admin,
-            "bot_message": "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring.",
+            "role": "admin",
+            "is_admin": True,
+            "bot_message": "Admin Telegram tasdiqlashi boshlandi.",
         }
-        
-        # Role-specific messaging (FIX for runbot1.oy)
-        if is_admin:
-            response_data["bot_message"] = "Admin login: Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring."
-        else:
-            response_data["bot_message"] = "Telegram bot orqali kod yuborildi. Iltimos, botni tekshiring."
 
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -884,9 +1046,7 @@ class EmailLoginView(APIView):
         full_name = serializer.validated_data.get("full_name", "")
 
         if not email:
-            return Response(
-                {"email": "This field is required."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"email": "This field is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         ip_address = request.META.get("REMOTE_ADDR")
         account_key = f"email:{email}"
@@ -901,9 +1061,7 @@ class EmailLoginView(APIView):
         try:
             allowed, _ = check_rate_limit(f"email_login_ip:{ip_address}")
             if not allowed:
-                logger.warning(
-                    f"Rate limit exceeded for IP: {ip_address} on Email login."
-                )
+                logger.warning(f"Rate limit exceeded for IP: {ip_address} on Email login.")
                 return Response(
                     {"detail": "Too many requests. Please try again later."},
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -966,9 +1124,7 @@ class EmailLoginView(APIView):
         request.session.save()
 
         try:
-            if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False) or not getattr(
-                settings, "USE_CELERY", True
-            ):
+            if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False) or not getattr(settings, "USE_CELERY", True):
                 tasks.send_otp_email(email, otp_code)
                 logger.info("Email OTP sent")
             else:
@@ -981,9 +1137,7 @@ class EmailLoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        decr_ip_score(
-            ip_address, delta=getattr(settings, "AUTH_IP_SCORE_DECAY_SUCCESS", 5)
-        )
+        decr_ip_score(ip_address, delta=getattr(settings, "AUTH_IP_SCORE_DECAY_SUCCESS", 5))
 
         return Response(
             {
@@ -1013,9 +1167,7 @@ class VerifyOtpView(APIView):
         identifier = serializer.validated_data.get("identifier", "")
 
         try:
-            is_valid, message, session = otp_service.verify_otp_once(
-                session_id, code, identifier
-            )
+            is_valid, message, session = otp_service.verify_otp_once(session_id, code, identifier)
 
             if is_valid:
                 user_id = session.get("user_id")
@@ -1028,11 +1180,27 @@ class VerifyOtpView(APIView):
                 try:
                     user = CustomUser.objects.get(id=user_id)
 
-                    # Create Django session
-                    login(request, user)
+                    if _is_admin_identity(user):
+                        return Response(
+                            {
+                                "ok": False,
+                                "error": "Adminlar Telegram orqali alohida login qiladi.",
+                            },
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
 
-                    # Generate JWT tokens
-                    refresh = RefreshToken.for_user(user)
+                    # Create Django session
+                    with transaction.atomic():
+                        login(request, user)
+                        _write_auth_audit(
+                            request,
+                            user,
+                            "OTP login successful",
+                            "Non-admin OTP login completed.",
+                        )
+
+                        # Generate JWT tokens
+                        refresh = RefreshToken.for_user(user)
 
                     # FIXED: Use determine_role() helper for consistency
                     from .serializers import determine_role
@@ -1040,9 +1208,7 @@ class VerifyOtpView(APIView):
                     role = determine_role(user)
 
                     # Determine redirect URL based on role
-                    redirect_url = reverse(
-                        "account"
-                    )  # Default redirect for simple users
+                    redirect_url = reverse("account")  # Default redirect for simple users
                     if role == "admin":
                         redirect_url = reverse("dashboard:dashboard-admin")
                     elif role == "seller":
@@ -1068,16 +1234,20 @@ class VerifyOtpView(APIView):
                         status=status.HTTP_404_NOT_FOUND,
                     )
             else:
+                # Handle different error types
                 http_status = status.HTTP_400_BAD_REQUEST
-                if message == "too_many_attempts":
+
+                if message == "invalid_code":
+                    http_status = status.HTTP_401_UNAUTHORIZED
+                elif message == "too_many_attempts":
                     http_status = status.HTTP_403_FORBIDDEN
+                elif message == "session_not_found_or_expired":
+                    http_status = status.HTTP_400_BAD_REQUEST
 
                 return Response({"ok": False, "error": message}, status=http_status)
 
         except Exception as e:
-            logger.exception(
-                "OTP verify error for session_id=%s error=%s", session_id, str(e)[:100]
-            )
+            logger.exception("OTP verify error for session_id=%s error=%s", session_id, str(e)[:100])
             log_error_to_dashboard("verify_otp", identifier, str(e)[:200])
             return Response(
                 {"ok": False, "error": "server_error"},
@@ -1160,15 +1330,17 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
 
 class SellerViewSet(viewsets.ModelViewSet):
-    queryset = Seller.objects.all()
+    queryset = Seller.objects.all().order_by("id")
     serializer_class = SellerSerializer
     permission_classes = [IsOwnerOrAdmin]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return Seller.objects.all()
-        return Seller.objects.filter(user=user)
+            return Seller.objects.all().order_by("id")
+        if user.is_authenticated:
+            return Seller.objects.filter(user=user).order_by("id")
+        return Seller.objects.all().order_by("id")
 
 
 class SubscribedUserViewSet(viewsets.ModelViewSet):
@@ -1191,9 +1363,7 @@ class SubscribedUserViewSet(viewsets.ModelViewSet):
             token = dumps(subscriber.email)
             verify_url = f"{self.request.build_absolute_uri('/subscribe/')}{token}/"
             try:
-                tasks.send_subscription_verification_email.delay(
-                    subscriber.email, verify_url
-                )
+                tasks.send_subscription_verification_email.delay(subscriber.email, verify_url)
             except Exception as e:
                 logger.error("Subscription email enqueue failed")
 
@@ -1233,9 +1403,7 @@ class SubscriberCreateView(CreateAPIView):
             token = dumps(subscriber.email)
             verify_url = f"{self.request.build_absolute_uri('/api/v1/users/subscribe/verify/')}{token}/"
             try:
-                tasks.send_subscription_verification_email.delay(
-                    subscriber.email, verify_url
-                )
+                tasks.send_subscription_verification_email.delay(subscriber.email, verify_url)
             except Exception as e:
                 logger.error("Subscription email enqueue failed")
 
@@ -1268,12 +1436,22 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        logout(request)
-        response = Response(
-            {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
-        )
-        response.delete_cookie("sessionid")
-        response.delete_cookie("csrftoken")
+        with transaction.atomic():
+            logout(request)
+            refresh_token = request.COOKIES.get("refresh_token")
+            if refresh_token:
+                try:
+                    RefreshToken(refresh_token).blacklist()
+                except Exception:
+                    logger.warning("Refresh token blacklist failed during logout")
+            response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+            for cookie_name in (
+                settings.SESSION_COOKIE_NAME,
+                settings.CSRF_COOKIE_NAME,
+                "access_token",
+                "refresh_token",
+            ):
+                response.delete_cookie(cookie_name)
         return response
 
 
@@ -1281,22 +1459,21 @@ class LogoutJWTView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        response = Response(
-            {"detail": "Successfully logged out from JWT."}, status=status.HTTP_200_OK
-        )
-        refresh_token = request.COOKIES.get("refresh_token")
-
-        if refresh_token:
-            try:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
-                logger.info("Refresh token blacklisted.")
-            except Exception as e:
-                logger.warning(f"Failed to blacklist refresh token")
-        else:
-            logger.info("No refresh token found in cookies to blacklist.")
-
-        response.delete_cookie("refresh_token")
+        with transaction.atomic():
+            response = Response({"detail": "Successfully logged out from JWT."}, status=status.HTTP_200_OK)
+            refresh_token = request.COOKIES.get("refresh_token")
+            if refresh_token:
+                try:
+                    RefreshToken(refresh_token).blacklist()
+                except Exception:
+                    logger.warning("Failed to blacklist refresh token")
+            for cookie_name in (
+                settings.SESSION_COOKIE_NAME,
+                settings.CSRF_COOKIE_NAME,
+                "access_token",
+                "refresh_token",
+            ):
+                response.delete_cookie(cookie_name)
         return response
 
 
@@ -1318,7 +1495,14 @@ class DetermineRoleView(APIView):
         from .serializers import determine_role
 
         serializer = RoleDetermineSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "role": "user",
+                    "detail": "Telefon raqami noto'g'ri. Iltimos, +998 90 123 45 67 kabi haqiqiy raqam kiriting.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         phone_number = serializer.validated_data.get("phone_number")
         email = serializer.validated_data.get("email")
@@ -1343,21 +1527,20 @@ class DetermineRoleView(APIView):
 
                     if not create_params:
                         return Response(
-                            {
-                                "detail": "Email or phone number required to determine role or create user."
-                            },
+                            {"detail": "Email or phone number required to determine role or create user."},
                             status=status.HTTP_400_BAD_REQUEST,
                         )
 
-                    user, created = CustomUser.objects.get_or_create(**create_params)
+                    user, created = CustomUser.objects.get_or_create(
+                        defaults={"role": "user"},
+                        **create_params,
+                    )
                     if created:
                         logger.info(f"New user created via determine_role: {user.id}")
                         # FIXED: Use determine_role() helper for consistency
                         return Response(
                             {
-                                "role": determine_role(
-                                    user
-                                ),  # Server-side authoritative role
+                                "role": determine_role(user),  # Server-side authoritative role
                                 "avatar_url": user.get_avatar_url,
                             },
                             status=status.HTTP_201_CREATED,
@@ -1368,16 +1551,99 @@ class DetermineRoleView(APIView):
                     {"detail": "Could not create user profile."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-        
+
         # Debugging: Log user's staff/superuser status
         if settings.DEBUG and user:
-            logger.debug(f"DetermineRoleView: User {user.email} (ID: {user.id}) - is_staff: {user.is_staff}, is_superuser: {user.is_superuser}")
+            logger.debug(
+                f"DetermineRoleView: User {user.email} (ID: {user.id}) - is_staff: {user.is_staff}, is_superuser: {user.is_superuser}"
+            )
 
         # FIXED: Use determine_role() helper instead of hardcoded logic
         role = determine_role(user)
-        return Response(
-            {"role": role, "avatar_url": user.get_avatar_url}, status=status.HTTP_200_OK
+        return Response({"role": role, "avatar_url": user.get_avatar_url}, status=status.HTTP_200_OK)
+
+
+class UniqueFieldAvailabilityView(APIView):
+    """Return whether a given user field value already exists."""
+
+    permission_classes = [AllowAny]
+    field_name = None
+
+    def _normalize_value(self, value):
+        value = str(value or "").strip()
+        if not value:
+            return ""
+        if self.field_name == "email":
+            return value.lower()
+
+        digits = "".join(ch for ch in value if ch.isdigit())
+        if not digits:
+            return ""
+        if value.startswith("+") or value.startswith("00"):
+            return "+" + digits.lstrip("0") if digits.startswith("998") else "+" + digits
+        if len(digits) == 9:
+            return f"+{settings.PHONENUMBER_DEFAULT_REGION_CODE}{digits}"
+        return "+" + digits
+
+    def _get_value(self, request):
+        if self.field_name == "email":
+            value = request.GET.get("email") or request.POST.get("email") or (request.data or {}).get("email")
+        else:
+            value = (
+                request.GET.get("phone_number")
+                or request.POST.get("phone_number")
+                or (request.data or {}).get("phone_number")
+                or request.GET.get("phone")
+                or request.POST.get("phone")
+                or (request.data or {}).get("phone")
+            )
+        return value
+
+    def _get_exclude_user_id(self, request):
+        value = (
+            request.GET.get("exclude_user_id")
+            or request.POST.get("exclude_user_id")
+            or (request.data or {}).get("exclude_user_id")
         )
+        if value is None:
+            return None
+        value = str(value).strip()
+        return value if value.isdigit() else None
+
+    def _handle(self, request, *args, **kwargs):
+        value = self._get_value(request)
+        if value is None or str(value).strip() == "":
+            return Response({"exists": False, "valid": False}, status=400)
+
+        normalized_value = self._normalize_value(value)
+        if not normalized_value:
+            return Response({"exists": False, "valid": False}, status=400)
+
+        queryset = CustomUser.objects.all()
+        if self.field_name == "email":
+            queryset = queryset.filter(email__iexact=normalized_value)
+        else:
+            queryset = queryset.filter(phone_number=normalized_value)
+
+        exclude_user_id = self._get_exclude_user_id(request)
+        if exclude_user_id is not None:
+            queryset = queryset.exclude(id=exclude_user_id)
+
+        return Response({"exists": queryset.exists(), "value": normalized_value})
+
+    def get(self, request, *args, **kwargs):
+        return self._handle(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self._handle(request, *args, **kwargs)
+
+
+class CheckEmailView(UniqueFieldAvailabilityView):
+    field_name = "email"
+
+
+class CheckPhoneView(UniqueFieldAvailabilityView):
+    field_name = "phone_number"
 
 
 class AccountDashboardView(LoginRequiredMixin, TemplateView):
@@ -1393,7 +1659,13 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "dashboard/index.html"
 
     def test_func(self):
-        return self.request.user.is_staff
+        user = self.request.user
+        return bool(
+            user.is_authenticated
+            and user.is_staff
+            and user.is_superuser
+            and str(getattr(user, "role", "") or "").lower() == "admin"
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1435,9 +1707,7 @@ class CheckSessionView(generics.GenericAPIView):
                 return err
 
         serializer = self.get_serializer(request.user)
-        return Response(
-            {"ok": True, "user": serializer.data}, status=status.HTTP_200_OK
-        )
+        return Response({"ok": True, "user": serializer.data}, status=status.HTTP_200_OK)
 
 
 class StripeConfigView(APIView):
@@ -1464,9 +1734,7 @@ class TestAdminLoginView(APIView):
         email = data.get("email")
         password = data.get("password")
 
-        identifier = (
-            email or phone_number or username or request.META.get("REMOTE_ADDR")
-        )
+        identifier = email or phone_number or username or request.META.get("REMOTE_ADDR")
 
         user = None
 
@@ -1487,14 +1755,10 @@ class TestAdminLoginView(APIView):
 
         # After all checks, validate the user
         if user is None:
-            return Response(
-                {"error": "Noto‘g‘ri ma’lumotlar."}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return Response({"error": "Noto‘g‘ri ma’lumotlar."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not user.is_staff:
-            return Response(
-                {"error": "Kirish huquqi yo‘q."}, status=status.HTTP_403_FORBIDDEN
-            )
+        if not _is_admin_identity(user):
+            return Response({"error": "Kirish huquqi yo‘q."}, status=status.HTTP_403_FORBIDDEN)
 
         login(request, user)
 
@@ -1521,11 +1785,11 @@ def auth_view(request):
 class AccountView(FormView):
     template_name = "account.html"
     form_class = AccountSettingsForm
-    success_url = '/account/'
+    success_url = "/account/"
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('login')
+            return redirect("login")
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self):
@@ -1533,105 +1797,262 @@ class AccountView(FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['instance'] = self.get_object()
+        kwargs["instance"] = self.get_object()
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        
-        context['user'] = user
-        context['user_role'] = user.role if user.role else 'user'
-        
+
+        context["user"] = user
+        context["user_role"] = user.role if user.role else "user"
+        context["show_old_password"] = user.has_usable_password()
+
         # Add orders if available
         try:
             from orders.models import Order
-            context['orders'] = Order.objects.filter(user=user).order_by('-date')[:10]
+
+            context["orders"] = Order.objects.filter(user=user).order_by("-date")[:10]
         except Exception:
-            context['orders'] = []
-        
+            context["orders"] = []
+
         return context
 
     def form_valid(self, form):
         user = form.save(commit=False)
-        
+
         # Handle password change
-        old_password = form.cleaned_data.get('old_password')
-        new_password1 = form.cleaned_data.get('new_password1')
-        new_password2 = form.cleaned_data.get('new_password2')
-        
+        old_password = form.cleaned_data.get("old_password")
+        new_password1 = form.cleaned_data.get("new_password1")
+        new_password2 = form.cleaned_data.get("new_password2")
+
         if new_password1:
-            if not old_password or not user.check_password(old_password):
-                form.add_error('old_password', 'Eski parol noto\'g\'ri')
+            if user.has_usable_password() and (not old_password or not user.check_password(old_password)):
+                form.add_error("old_password", "Eski parol noto'g'ri")
                 return self.form_invalid(form)
-            
+
             if new_password1 != new_password2:
-                form.add_error('new_password2', 'Yangi parollar mos kelmadi')
+                form.add_error("new_password2", "Yangi parollar mos kelmadi")
                 return self.form_invalid(form)
-            
+
             user.set_password(new_password1)
-        
+
         user.save()
-        
+
         from django.contrib import messages
-        messages.success(self.request, 'Profil ma\'lumotlari muvaffaqiyatli saqlandi!')
-        
+
+        messages.success(self.request, "Profil ma'lumotlari muvaffaqiyatli saqlandi!")
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
         from django.contrib import messages
-        messages.error(self.request, 'Forma xatolar bilan to\'ldirilgan')
+
+        messages.error(self.request, "Forma xatolar bilan to'ldirilgan")
         return self.render_to_response(self.get_context_data(form=form))
 
 
 class AdminCheckView(TemplateView):
     template_name = "admin_check_deeplink.html"
 
+    @staticmethod
+    def _is_expired(session_data):
+        created_at = session_data.get("created_at")
+        return bool(session_data.get("expired") or (created_at and time.time() - created_at >= ADMIN_LINK_TTL))
+
+    @staticmethod
+    def _mark_expired(session_id, session_data):
+        session_data["expired"] = True
+        cache.set(f"admin_session:{session_id}", session_data, timeout=1800)
+
+    @staticmethod
+    def _json_request(request):
+        return request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    @staticmethod
+    def _request_fingerprint(request):
+        return (
+            request.COOKIES.get("device_fp")
+            or request.META.get("HTTP_X_DEVICE_FINGERPRINT")
+            or request.META.get("HTTP_AUTHORIZATION_FINGERPRINT")
+        )
+
     def get(self, request, *args, **kwargs):
         session_id = request.GET.get("session")
         otp = request.GET.get("otp")
 
-        if not session_id or not otp:
-            return redirect("auth")
+        if not session_id:
+            return self.render_to_response({"session_expired": True})
 
         stored_data = cache.get(f"admin_session:{session_id}")
 
-        if stored_data and stored_data["otp"] == otp:
-            try:
-                user = CustomUser.objects.get(id=stored_data["user_id"], is_staff=True)
+        if not stored_data:
+            return self.render_to_response({"session_expired": True})
 
-                refresh = RefreshToken.for_user(user)
-                access_token = str(refresh.access_token)
-                refresh_token = str(refresh)
-
-                cache.delete(f"admin_session:{session_id}")
-
-                context = {
-                    "access_token": access_token,
-                    "refresh_token": refresh_token,
-                    "username": user.full_name or user.email,
-                    "user_role": "admin",
-                    "avatar_url": user.get_avatar_url,
+        if self._is_expired(stored_data):
+            self._mark_expired(session_id, stored_data)
+            return self.render_to_response(
+                {
+                    "session_id": session_id,
+                    "session_expired": True,
                 }
-                return self.render_to_response(context)
+            )
 
-            except CustomUser.DoesNotExist:
-                pass
+        if stored_data.get("used"):
+            return self.render_to_response(
+                {
+                    "session_id": session_id,
+                    "already_completed": True,
+                }
+            )
 
-        return redirect("auth")
+        return self.render_to_response(
+            {
+                "session_id": session_id,
+                "pending_verification": bool(stored_data),
+                "telegram_verified": bool(stored_data.get("verified")),
+                "attempts": stored_data.get("attempts", 0),
+            }
+        )
 
+    def post(self, request, *args, **kwargs):
+        fingerprint = self._request_fingerprint(request)
+        client_ip = get_client_ip(request)
+        session_id = request.GET.get("session", "").strip() or request.POST.get("session_id", "").strip()
+        stored_data = get_admin_session_meta(session_id)
+
+        if stored_data and int(stored_data.get("attempts", 0)) >= ADMIN_DEEPLINK_MAX_ATTEMPTS:
+            banned_user = request.user if request.user.is_authenticated else None
+            ban_reason = "10 ta noto'g'ri admin deep-link urinishidan keyin permanent ban"
+            with transaction.atomic():
+                BanRecord.objects.create(
+                    ip=client_ip or None,
+                    fingerprint=fingerprint,
+                    user=banned_user,
+                    reason=ban_reason,
+                    ban_type="permanent",
+                    created_by="telegram",
+                    attempts=int(stored_data.get("attempts", 0)),
+                    source=request.path,
+                    meta={"session_id": session_id, "flow": "telegram_deeplink"},
+                )
+            return redirect("not_allowed")
+
+        if not stored_data:
+            response = {"session_id": session_id, "session_expired": True, "error": "Session ended"}
+            return (
+                JsonResponse(response, status=410) if self._json_request(request) else self.render_to_response(response)
+            )
+
+        if self._is_expired(stored_data):
+            self._mark_expired(session_id, stored_data)
+            response = {"session_id": session_id, "session_expired": True, "error": "Session ended"}
+            return (
+                JsonResponse(response, status=410) if self._json_request(request) else self.render_to_response(response)
+            )
+
+        if stored_data.get("used"):
+            response = {"session_id": session_id, "already_completed": True}
+            return JsonResponse(response) if self._json_request(request) else self.render_to_response(response)
+
+        if not stored_data.get("verified"):
+            response = {
+                "session_id": session_id,
+                "pending_verification": True,
+                "error": "Avval Telegramdagi telefon tasdiqlashni yakunlang.",
+            }
+            return (
+                JsonResponse(response, status=400) if self._json_request(request) else self.render_to_response(response)
+            )
+
+        try:
+            user = CustomUser.objects.get(id=stored_data.get("user_id"))
+        except CustomUser.DoesNotExist:
+            response = {"session_id": session_id, "error": "Admin topilmadi."}
+            return (
+                JsonResponse(response, status=404) if self._json_request(request) else self.render_to_response(response)
+            )
+
+        submitted_phone = request.POST.get("phone_number", "").strip()
+        submitted_name = request.POST.get("full_name", "").strip()
+        submitted_email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+
+        normalize_phone = lambda value: "".join(ch for ch in str(value or "") if ch.isdigit())
+        expected_phone = stored_data.get("phone_number") or stored_data.get("identifier")
+        matches_admin = (
+            submitted_email.casefold() == (user.email or "").casefold()
+            and normalize_phone(submitted_phone) == normalize_phone(expected_phone)
+            and submitted_name == (user.full_name or "")
+            and user.check_password(password)
+        )
+        if not matches_admin or not _is_admin_identity(user):
+            stored_data["attempts"] = int(stored_data.get("attempts", 0)) + 1
+            with transaction.atomic():
+                cache.set(f"admin_session:{session_id}", stored_data, timeout=1800)
+                if stored_data["attempts"] >= ADMIN_DEEPLINK_MAX_ATTEMPTS:
+                    ban_reason = "10 ta noto'g'ri admin deep-link urinishidan keyin permanent ban"
+                    banned_user = request.user if request.user.is_authenticated else None
+                    BanRecord.objects.create(
+                        ip=client_ip or None,
+                        fingerprint=fingerprint,
+                        user=banned_user,
+                        reason=ban_reason,
+                        ban_type="permanent",
+                        created_by="telegram",
+                        attempts=stored_data["attempts"],
+                        source=request.path,
+                        meta={"session_id": session_id, "flow": "telegram_deeplink"},
+                    )
+            response = {
+                "session_id": session_id,
+                "pending_verification": True,
+                "error": "Admin ma'lumotlari mos kelmadi.",
+                "attempts": stored_data["attempts"],
+            }
+            if stored_data["attempts"] >= ADMIN_DEEPLINK_MAX_ATTEMPTS:
+                return redirect("not_allowed")
+            return (
+                JsonResponse(response, status=400) if self._json_request(request) else self.render_to_response(response)
+            )
+
+        if not claim_admin_session(session_id):
+            response = {"session_id": session_id, "already_completed": True}
+            return JsonResponse(response) if self._json_request(request) else self.render_to_response(response)
+
+        refresh = RefreshToken.for_user(user)
+        with transaction.atomic():
+            login(request, user)
+            _write_auth_audit(
+                request,
+                user,
+                "Admin Telegram callback successful",
+                "Admin Telegram callback completed.",
+            )
+
+        response = {
+            "success": True,
+            "access_token": str(refresh.access_token),
+            "refresh_token": str(refresh),
+            "username": user.full_name or user.email,
+            "user_role": "admin",
+            "avatar_url": user.get_avatar_url,
+        }
+        return JsonResponse(response) if self._json_request(request) else self.render_to_response(response)
 
 
 # ============================================
 # SUBSCRIPTION VERIFICATION PAGE
 # ============================================
 
+
 class SubscriptionVerifyPageView(TemplateView):
     """Subscription verification page - standalone template view."""
-    template_name = 'subscribe.html'
-    
+
+    template_name = "subscribe.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        token = self.kwargs.get('token')
-        context['token'] = token
+        token = self.kwargs.get("token")
+        context["token"] = token
         return context

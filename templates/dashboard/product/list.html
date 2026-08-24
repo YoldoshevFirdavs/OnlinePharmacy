@@ -1,23 +1,16 @@
 {% extends 'dashboard/list.html' %}
-{% load static %}
+{% load static pharmacy_tags %}
 
 {% block title %}Mahsulotlar{% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">
-            <i class="fa-solid fa-pills"></i>
-            Mahsulotlar
-        </h1>
-        <p class="page-subtitle">Barcha mahsulotlarni boshqarish</p>
-    </div>
-    <div class="page-actions">
-        <a href="{% url 'dashboard:medicine_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i>
-            Qo'shish
-        </a>
-    </div>
+{% block page_title_icon %}<i class="fa-solid fa-pills"></i>{% endblock %}
+{% block page_title_text %}Mahsulotlar{% endblock %}
+
+{% block page_actions %}
+<div class="page-header__actions">
+    <a href="{% url 'dashboard:medicine_create' %}" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i> Qo'shish
+    </a>
 </div>
 {% endblock %}
 
@@ -39,8 +32,8 @@
         <td>{{ medicine.id }}</td>
         <td>
             <div class="table-image">
-                {% if medicine.image %}
-                <img src="{{ medicine.image.url }}" alt="{{ medicine.name }}" loading="lazy">
+                {% if medicine.image and medicine.image.name %}
+                <img src="{{ medicine.image|safe_image_url }}" alt="{{ medicine.name }}" loading="lazy">
                 {% else %}
                 <div class="table-image__placeholder">
                     <i class="fa-solid fa-image"></i>
@@ -65,6 +58,7 @@
                 <button type="button"
                         class="btn btn--sm btn--ghost btn--danger medicine-delete-btn"
                         data-medicine-id="{{ medicine.pk }}"
+                        data-delete-url="{% url 'dashboard:medicine_delete' medicine.pk %}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -81,3 +75,24 @@
     </tr>
 {% endif %}
 {% endblock %}
+
+{% block extra_content %}
+<!-- ═══════ Pagination ═══════ -->
+{% if page_obj %}
+<nav class="pagination-wrapper" id="paginationWrapper" aria-label="Sahifalar">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li><a href="?page={{ num }}" class="pagination__link{% if page_obj.number == num %} active{% endif %}">{{ num }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-right"></i></a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

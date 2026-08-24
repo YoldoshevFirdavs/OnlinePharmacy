@@ -1,166 +1,85 @@
 {% extends 'dashboard/list.html' %}
-{% load static %}
 
-{% block title %}Ban Records - Dashboard{% endblock %}
+{% block title %}Banlar{% endblock %}
 
-{% block content %}
-{% block page_header %}
-<div class="page-header" id="pageHeader">
-    <h1 class="page-title">
-        <i class="fa-solid fa-ban"></i>
-        Ban Records
-    </h1>
-    <p class="page-subtitle">Blok qilingan IP, fingerprint va foydalanuvchilar</p>
-    <div class="page-actions">
-        <a href="{% url 'dashboard:ban_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i> Yaratish
-        </a>
-    </div>
+{% block page_title_icon %}<i class="fa-solid fa-ban"></i>{% endblock %}
+{% block page_title_text %}Banlar{% endblock %}
+
+{% block page_actions %}
+<div class="page-header__actions">
+    <a href="{% url 'dashboard:ban_create' %}" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i> Yangi Ban
+    </a>
 </div>
 {% endblock %}
 
-<!-- ═══════ Filter / Search Bar ═══════ -->
-<div class="list-toolbar" id="listToolbar">
-    <div class="list-toolbar__search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="tableSearch" placeholder="Jadvalda qidirish…" autocomplete="off">
-    </div>
-    <div class="list-toolbar__actions">
-        <span class="list-toolbar__count" id="tableCount"></span>
-    </div>
-</div>
+{% block table_head %}
+<th>ID</th>
+<th>Foydalanuvchi</th>
+<th>Sabab</th>
+<th>Boshlangan sana</th>
+<th>Tugash sana</th>
+<th>Status</th>
+<th>Amallar</th>
+{% endblock %}
 
-<!-- ═══════ Data Table ═══════ -->
-<div class="card card--table" id="listTableCard">
-    <div class="card__body table-responsive">
-        <table class="data-table" id="dataTable">
-            <thead>
-                <tr>
-                    {% block table_head %}
-                    <th>Identifikator</th>
-                    <th>Ban Turi</th>
-                    <th>Sababi</th>
-                    <th>Yaratilgan</th>
-                    <th>Tugash Vaqti</th>
-                    <th>Urinishlar</th>
-                    <th>Status</th>
-                    <th>Amallar</th>
-                    {% endblock %}
-                </tr>
-            </thead>
-            <tbody>
-                {% block table_body %}
-                {% if bans %}
-                    {% for ban in bans %}
-                    <tr>
-                        <td>
-                            <div class="user-cell">
-                                <i class="fa-solid fa-fingerprint"></i>
-                                <span>
-                                    {% if ban.ip %}
-                                        IP: {{ ban.ip }}
-                                    {% elif ban.fingerprint %}
-                                        FP: {{ ban.fingerprint|truncatechars:20 }}
-                                    {% elif ban.user %}
-                                        User: {{ ban.user.email }}
-                                    {% else %}
-                                        Unknown
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="tag
-                                {% if ban.ban_type == 'permanent' %}tag--danger
-                                {% else %}tag--warning
-                                {% endif %}">
-                                {% if ban.ban_type == 'permanent' %}
-                                    Doimiy
-                                {% else %}
-                                    Vaqtli
-                                {% endif %}
-                            </span>
-                        </td>
-                        <td title="{{ ban.reason }}">
-                            {{ ban.reason|truncatechars:50 }}
-                        </td>
-                        <td>
-                            <span title="{{ ban.created_at|date:'Y-m-d H:i:s' }}">
-                                {{ ban.created_at|date:"d.m.Y H:i" }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if ban.ban_type == 'permanent' %}
-                                <span class="text-muted">Doimiy</span>
-                            {% elif ban.expires_at %}
-                                {% if ban.expires_at > now %}
-                                    <span class="text-danger">{{ ban.expires_at|date:"d.m.Y H:i" }}</span>
-                                {% else %}
-                                    <span class="text-muted" style="text-decoration: line-through;">{{ ban.expires_at|date:"d.m.Y H:i" }}</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                        <td style="text-align: center;">
-                            {{ ban.attempts }}
-                        </td>
-                        <td>
-                            <span class="tag
-                                {% if ban.is_active %}tag--success
-                                {% else %}tag--secondary
-                                {% endif %}">
-                                {% if ban.is_active %}
-                                    Faol
-                                {% else %}
-                                    O'chirilgan
-                                {% endif %}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="table-actions">
-                                <button type="button" 
-                                        class="btn btn--sm btn--ghost btn--primary ban-view-btn"
-                                        data-ban-id="{{ ban.id }}"
-                                        title="Ko'rish">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                <a href="{% url 'dashboard:ban_edit' ban.id %}" 
-                                   class="btn btn--sm btn--ghost" 
-                                   title="Tahrirlash">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-                                <form method="post" action="{% url 'dashboard:ban_toggle_status' ban.id %}" style="display: inline;" onsubmit="return confirm('Ban statusini almashtirmoqchimisiz?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn--sm btn--ghost {% if ban.is_active %}btn--success{% else %}btn--danger{% endif %}" 
-                                            title="{% if ban.is_active %}O'chirish{% else %}Faol qilish{% endif %}">
-                                        <i class="fa-solid {% if ban.is_active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
-                                    </button>
-                                </form>
-                                <button type="button" 
-                                        class="btn btn--sm btn--ghost btn--danger ban-delete-btn"
-                                        data-ban-id="{{ ban.id }}"
-                                        title="O'chirish">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                <tr class="data-table__empty">
-                    <td colspan="8">
-                        <i class="fa-solid fa-inbox"></i>
-                        <span>Ban records topilmadi</span>
-                    </td>
-                </tr>
-                {% endif %}
-                {% endblock %}
-            </tbody>
-        </table>
-    </div>
-</div>
+{% block table_body %}
+{% for ban in bans %}
+<tr>
+    <td>{{ forloop.counter }}</td>
+    <td>
+        {% if ban.user %}
+            <div>{{ ban.user.full_name|default:ban.user.email|default:ban.user.phone_number }}</div>
+            <small style="color: #666;">{{ ban.user.email }}</small>
+        {% else %}
+            <span style="color: #999;">Noma'lum</span>
+        {% endif %}
+    </td>
+    <td>{{ ban.reason|default:"Sabab ko'rsatilmagan" }}</td>
+    <td>{{ ban.created_at|date:"d.m.Y H:i" }}</td>
+    <td>
+        {% if ban.expires_at %}
+            {{ ban.expires_at|date:"d.m.Y H:i" }}
+        {% else %}
+            <span style="color: #999;">Doimiy</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if ban.is_active %}
+            <span class="badge badge--success">Faol</span>
+        {% else %}
+            <span class="badge badge--danger">No faol</span>
+        {% endif %}
+    </td>
+    <td class="actions">
+        <a href="{% url 'dashboard:ban_detail' ban.id %}" class="btn btn--sm btn--ghost" title="Ko'rish">
+            <i class="fa-solid fa-eye"></i>
+        </a>
+        <a href="{% url 'dashboard:ban_edit' ban.id %}" class="btn btn--sm btn--ghost btn--primary" title="Tahrirlash">
+            <i class="fa-solid fa-pen-to-square"></i>
+        </a>
+        <button type="button" 
+                class="btn btn--sm btn--ghost btn--danger ban-delete-btn"
+                data-ban-id="{{ ban.id }}"
+                data-delete-url="{% url 'dashboard:ban_delete' ban.id %}"
+                title="O'chirish">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="empty-state">
+        <div class="empty-icon">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+        <p>Hech qanday ban topilmadi</p>
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}
 
+{% block extra_content %}
 <!-- ═══════ Pagination ═══════ -->
 {% if page_obj %}
 <nav class="pagination-wrapper" id="paginationWrapper" aria-label="Sahifalar">
@@ -177,237 +96,6 @@
     </ul>
 </nav>
 {% endif %}
-
-<!-- ═══════ Ban Detail Modal ═══════ -->
-<div id="banDetailModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px; align-items: center; justify-content: center;">
-    <div class="modal-content" style="background: var(--clr-surface, #ffffff); border-radius: 16px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.12)); padding: 40px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h2 style="margin: 0; color: var(--clr-text, #1a1a2e); font-size: 24px;">Ban Ma'lumotlari</h2>
-            <button type="button" id="closeBanModal" style="background: none; border: none; font-size: 28px; cursor: pointer; color: var(--clr-muted, #6b7280);">&times;</button>
-        </div>
-        
-        <div id="banDetailContent" style="min-height: 300px;">
-            <div style="text-align: center; padding: 40px;">
-                <i class="fa-solid fa-spinner" style="font-size: 32px; color: var(--clr-primary, #6a00f4); animation: spin 1s linear infinite;"></i>
-                <p style="margin-top: 16px; color: var(--clr-muted, #6b7280);">Yuklanmoqda...</p>
-            </div>
-        </div>
-        
-        <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
-            <button type="button" id="closeBanModalBtn" class="btn btn--outline">Yopish</button>
-            <a href="" id="editBanLink" class="btn btn--primary">Tahrirlash</a>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
-{% block extra_js %}
-{{ block.super }}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ═══════ BAN DELETE HANDLER (AJAX) ═══════
-    document.querySelectorAll('.ban-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi? Bu amal qayta qaytarib bo\'lmaydi!')) return;
-            deleteItem(this, 'ban', {% url 'dashboard:ban_delete' 0 %}.replace('0', this.dataset.banId));
-        });
-    });
-    
-    // ═══════ BAN VIEW HANDLER (MODAL) ═══════
-    document.querySelectorAll('.ban-view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const banId = this.dataset.banId;
-            openBanModal(banId);
-        });
-    });
-    
-    // ═══════ MODAL CONTROLS ═══════
-    const modal = document.getElementById('banDetailModal');
-    const closeBtn = document.getElementById('closeBanModal');
-    const closeBtn2 = document.getElementById('closeBanModalBtn');
-    const editLink = document.getElementById('editBanLink');
-    
-    function closeModal() {
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeModal);
-    }
-    if (closeBtn2) {
-        closeBtn2.addEventListener('click', closeModal);
-    }
-    
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    }
-    
-    // ═══════ MODAL FUNCTIONS ═══════
-    async function openBanModal(banId) {
-        const modal = document.getElementById('banDetailModal');
-        const content = document.getElementById('banDetailContent');
-        const editLink = document.getElementById('editBanLink');
-        
-        if (!modal || !content) return;
-        
-        modal.style.display = 'flex';
-        
-        try {
-            const response = await fetch(`/dashboard/bans/${banId}/view/`);
-            if (!response.ok) throw new Error('API xatolik');
-            
-            const html = await response.text();
-            content.innerHTML = html;
-            
-            // Update edit link
-            if (editLink) {
-                editLink.href = `/dashboard/bans/${banId}/edit/`;
-            }
-            
-            // Re-bind delete button in modal
-            const deleteBtn = content.querySelector('.ban-delete-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function() {
-                    if (confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi?')) {
-                        fetch(`/dashboard/bans/${banId}/delete/`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': getCookie('csrftoken'),
-                            },
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                closeModal();
-                                window.location.href = '/dashboard/bans/';
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Re-bind toggle button in modal
-            const toggleForm = content.querySelector('.ban-toggle-form');
-            if (toggleForm) {
-                toggleForm.addEventListener('submit', function(e) {
-                    if (!confirm('Ban statusini almashtirmoqchimisiz?')) {
-                        e.preventDefault();
-                    }
-                });
-            }
-            
-        } catch (error) {
-            console.error('Error:', error);
-            content.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: var(--clr-error, #e74c3c);">
-                    <i class="fa-solid fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 16px; display: block;"></i>
-                    <p>Ban ma'lumotlarini yuklashda xatolik yuz berdi.</p>
-                    <button onclick="openBanModal(${banId})" class="btn btn--primary" style="margin-top: 16px;">Qayta urinib ko'rish</button>
-                </div>
-            `;
-        }
-    }
-    
-    // Get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // Simple notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: ${type === 'success' ? '#00b894' : type === 'error' ? '#e74c3c' : '#0066ff'};
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-    
-    // Delete handler
-    function deleteItem(btn, type, url) {
-        const row = btn.closest('tr');
-        
-        // Remove row instantly with quick fade
-        if (row) {
-            row.style.transition = 'opacity 0.15s ease';
-            row.style.opacity = '0';
-            setTimeout(() => row.remove(), 150);
-        }
-        
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Restore row if delete failed
-                if (row) {
-                    row.style.opacity = '1';
-                }
-                showNotification(`${type} o'chirishda xatolik yuz berdi.`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Delete error:', error);
-            // Restore row if delete failed
-            if (row) {
-                row.style.opacity = '1';
-            }
-            showNotification(`Xatolik: ${error.message}`, 'error');
-        });
-    }
-});
-
-// Add animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(400px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(400px); opacity: 0; }
-    }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .fa-spin { animation: spin 1s linear infinite; }
-    .modal { display: flex; flex-direction: column; }
-`;
-document.head.appendChild(style);
-{% endblock %}
+{% block extra_js %}{% endblock %}

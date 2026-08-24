@@ -671,6 +671,18 @@ a:hover {
     color: var(--clr-primary);
 }
 
+.page-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    flex-shrink: 0;
+}
+
+.page-header__actions .btn {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
 .page-subtitle {
     margin: 0.25rem 0 0;
     color: var(--clr-muted);
@@ -950,12 +962,29 @@ a:hover {
 
 .user-cell {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
 }
 
 .user-cell i {
     color: var(--clr-primary);
+}
+
+.user-cell--avatar {
+    gap: 12px;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 2px solid var(--clr-border);
+    flex-shrink: 0;
+    background: var(--clr-surface);
 }
 
 .inline-form {

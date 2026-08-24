@@ -1,14 +1,7 @@
 from django.contrib import admin
 
 from .models.medicine import Category, Medicine
-from .models.misc import (
-    BotInlineButton,
-    BotMenuStep,
-    FlashSale,
-    MedicineImage,
-    Review,
-    SiteConfiguration,
-)
+from .models.misc import BotInlineButton, BotMenuStep, FlashSale, MedicineImage, Review, SiteConfiguration
 
 
 @admin.register(SiteConfiguration)
@@ -34,9 +27,9 @@ class MedicineAdmin(admin.ModelAdmin):
     list_per_page = 50
     list_max_show_all = 50  # Limit "Show all" to prevent loading all records
     prepopulated_fields = {"slug": ("name",)}
-    
+
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('category').prefetch_related('images')
+        return super().get_queryset(request).select_related("category").prefetch_related("images")
 
 
 class BotInlineButtonInline(admin.TabularInline):

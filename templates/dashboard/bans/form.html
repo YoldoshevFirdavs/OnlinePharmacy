@@ -49,13 +49,29 @@
                 <span class="form-hint">Ban qilish vaqtini tanlang</span>
             </div>
 
-            <!-- EXPIRES DAYS (only for temporary) -->
+            <!-- EXPIRES TIME (only for temporary) -->
             <div class="form-group" id="expiresGroup" {% if ban and ban.ban_type == 'permanent' %}style="display: none;"{% endif %}>
-                <label for="id_expires_days" class="form-label">
-                    Vaqt ( kunlar )
+                <label class="form-label">
+                    Ban Vaqti
                 </label>
-                <input type="number" name="expires_days" id="id_expires_days" value="{{ expires_days|default:7 }}" min="1" max="3650" class="form-control" placeholder="Kunlar soni">
-                <span class="form-hint">Vaqtli ban uchun kunlar sonini kiriting (masalan: 7)</span>
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px;">
+                    <div>
+                        <input type="number" name="expires_value" id="id_expires_value" value="{{ expires_value|default:7 }}" min="1" max="99999" class="form-control" placeholder="Miqdor">
+                        <span class="form-hint">Miqdorni kiriting</span>
+                    </div>
+                    <div>
+                        <select name="expires_unit" id="id_expires_unit" class="form-select">
+                            <option value="seconds" {% if expires_unit == 'seconds' %}selected{% endif %}>Sekund</option>
+                            <option value="minutes" {% if expires_unit == 'minutes' %}selected{% endif %}>Daqiqa</option>
+                            <option value="hours" {% if expires_unit == 'hours' %}selected{% endif %}>Soat</option>
+                            <option value="days" {% if expires_unit == 'days' or expires_unit == '' %}selected{% endif %}>Kun</option>
+                            <option value="weeks" {% if expires_unit == 'weeks' %}selected{% endif %}>Hafta</option>
+                            <option value="months" {% if expires_unit == 'months' %}selected{% endif %}>Oy</option>
+                            <option value="years" {% if expires_unit == 'years' %}selected{% endif %}>Yil</option>
+                        </select>
+                        <span class="form-hint">Vaqt birligini tanlang</span>
+                    </div>
+                </div>
             </div>
 
             <!-- REASON -->
@@ -125,13 +141,39 @@
 document.addEventListener('DOMContentLoaded', function() {
     const banTypeSelect = document.getElementById('id_ban_type');
     const expiresGroup = document.getElementById('expiresGroup');
+    const fingerprintField = document.getElementById('id_fingerprint');
+    const userSelect = document.getElementById('id_user');
     
+    // Toggle expires group based on ban type
     if (banTypeSelect) {
         banTypeSelect.addEventListener('change', function() {
             if (this.value === 'permanent') {
                 expiresGroup.style.display = 'none';
             } else {
                 expiresGroup.style.display = 'block';
+            }
+        });
+    }
+    
+    // Auto-generate fingerprint when user is selected
+    if (userSelect && fingerprintField) {
+        userSelect.addEventListener('change', function() {
+            if (this.value) {
+                // Generate fingerprint from current device + user ID
+                const userId = this.value;
+                const fingerprintData = `${userId}_${navigator.userAgent}_${screen.width}x${screen.height}`;
+                
+                // Simple hash
+                let hash = 0;
+                for (let i = 0; i < fingerprintData.length; i++) {
+                    const char = fingerprintData.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                
+                const generatedFingerprint = Math.abs(hash).toString(16).substring(0, 32);
+                fingerprintField.value = generatedFingerprint;
+                fingerprintField.title = `Generated for User ${userId}`;
             }
         });
     }

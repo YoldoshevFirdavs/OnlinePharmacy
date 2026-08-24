@@ -38,19 +38,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
     if DEBUG:
-        logger.warning(
-            "SECRET_KEY not found in environment. Using a default, insecure key for development."
-        )
+        logger.warning("SECRET_KEY not found in environment. Using a default, insecure key for development.")
         SECRET_KEY = "django-insecure-fallback-for-development-only"
     else:
-        raise ImproperlyConfigured(
-            "The DJANGO_SECRET_KEY environment variable must be set in production."
-        )
+        raise ImproperlyConfigured("The DJANGO_SECRET_KEY environment variable must be set in production.")
 
 # Strip whitespace/CRLF from each entry — Windows .env files often have \r artifacts
-ALLOWED_HOSTS = [
-    h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h.strip()
-]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -67,7 +61,6 @@ INSTALLED_APPS = [
     "orders",
     "billing",
     "payments",
-    "custom_auth",
     "security",
     "rest_framework",
     "rest_framework_simplejwt",
@@ -90,10 +83,10 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "security.middleware.BanMiddleware",  # NEW: Ban middleware with 403 direct response
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "security.middleware.BanMiddleware",  # Ban middleware AFTER auth to check user bans
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "config.middleware.DeviceFingerprintMiddleware",  # DISABLED: Replaced by BanMiddleware
     # "config.middleware.BanCheckMiddleware",  # DISABLED: Replaced by BanMiddleware
@@ -179,22 +172,19 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "20/min", "user": "300/min"},
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/min",
+        "user": "300/min",
+        # Lenient rate for GET requests (caching-friendly)
+        "comments_get": "1000/min",
+    },
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", 15))
-    ),
-    "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 30))
-    ),
-    "ROTATE_REFRESH_TOKENS": os.getenv("JWT_ROTATE_REFRESH_TOKENS", "true").lower()
-    == "true",
-    "BLACKLIST_AFTER_ROTATION": os.getenv(
-        "JWT_BLACKLIST_AFTER_ROTATION", "true"
-    ).lower()
-    == "true",
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", 30))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 7))),
+    "ROTATE_REFRESH_TOKENS": os.getenv("JWT_ROTATE_REFRESH_TOKENS", "true").lower() == "true",
+    "BLACKLIST_AFTER_ROTATION": os.getenv("JWT_BLACKLIST_AFTER_ROTATION", "true").lower() == "true",
     "UPDATE_LAST_LOGIN": os.getenv("JWT_UPDATE_LAST_LOGIN", "true").lower() == "true",
     "SIGNING_KEY": SECRET_KEY,
     "VERIFYING_KEY": None,
@@ -211,15 +201,18 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
-    "SLIDING_TOKEN_LIFETIME": timedelta(
-        minutes=int(os.getenv("JWT_SLIDING_TOKEN_LIFETIME_MINUTES", 60))
-    ),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_SLIDING_TOKEN_LIFETIME_MINUTES", 60))),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(
         days=int(os.getenv("JWT_SLIDING_TOKEN_REFRESH_TOKEN_LIFETIME_DAYS", 7))
     ),
     # ADDED: Custom serializer for token obtain to include role in JWT claims
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
 }
+
+SESSION_COOKIE_AGE = 1800
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+ADMIN_SESSION_TIMEOUT = 1800
+ADMIN_SESSION_DURATION = 1800
 
 CORS_ALLOWED_ORIGINS = [
     o.strip()
@@ -229,15 +222,11 @@ CORS_ALLOWED_ORIGINS = [
     ).split(",")
     if o.strip()
 ]
-CORS_ALLOW_ALL_ORIGINS = (
-    DEBUG or os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
-)
+CORS_ALLOW_ALL_ORIGINS = DEBUG or os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
 CORS_ALLOW_CREDENTIALS = True
 
 PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "UZ")
-PHONENUMBER_DEFAULT_REGION_CODE = os.getenv(
-    "PHONENUMBER_DEFAULT_REGION_CODE", "998"
-)  # Added this line
+PHONENUMBER_DEFAULT_REGION_CODE = os.getenv("PHONENUMBER_DEFAULT_REGION_CODE", "998")  # Added this line
 
 AUTH_BOT_TOKEN = os.getenv("AUTH_BOT_TOKEN", "")
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
@@ -285,9 +274,7 @@ class SensitiveDataFilter(logging.Filter):
             for field in ["password", "otp", "secret", "token"]:
                 # Fix: Use re.escape and a simpler regex pattern without lookbehind
                 pattern = re.escape(field) + r"[:=]\s*(\S+)"
-                record.msg = re.sub(
-                    pattern, field + ": ********", record.msg, flags=re.IGNORECASE
-                )
+                record.msg = re.sub(pattern, field + ": ********", record.msg, flags=re.IGNORECASE)
 
         return True
 
@@ -355,9 +342,7 @@ GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")  # This is for Django Cache
 # Celery Redis connection configuration
-CELERY_REDIS_HOST = os.getenv(
-    "CELERY_REDIS_HOST", "localhost"
-)  # Default to localhost for local dev
+CELERY_REDIS_HOST = os.getenv("CELERY_REDIS_HOST", "localhost")  # Default to localhost for local dev
 CELERY_BROKER_URL = f"redis://{CELERY_REDIS_HOST}:6379/1"
 CELERY_RESULT_BACKEND = f"redis://{CELERY_REDIS_HOST}:6379/1"
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -400,15 +385,11 @@ SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "
 # Required in production so request.is_secure() returns True behind the proxy.
 # Must be disabled locally (no Nginx proxy in front of runserver).
 _proxy_ssl_header = os.getenv("SECURE_PROXY_SSL_HEADER", "False").lower() == "true"
-SECURE_PROXY_SSL_HEADER = (
-    ("HTTP_X_FORWARDED_PROTO", "https") if _proxy_ssl_header else None
-)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if _proxy_ssl_header else None
 
 # HSTS — only meaningful when HTTPS is active.
 SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))  # 0 = disabled
-SECURE_HSTS_INCLUDE_SUBDOMAINS = (
-    os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False").lower() == "true"
-)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False").lower() == "true"
 SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -456,10 +437,10 @@ FINGERPRINT_LOG_RATE_LIMITS = os.getenv("FINGERPRINT_LOG_RATE_LIMITS", "True").l
 # ============================================
 
 # Admin login maximum failed attempts before ban
-ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "7"))
+ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "10"))
 
 # Admin ban duration in seconds (1 hour = 3600)
 ADMIN_BAN_SECONDS = int(os.getenv("ADMIN_BAN_SECONDS", "3600"))
 
-# Admin session timeout in seconds (10 minutes = 600)
-ADMIN_SESSION_TIMEOUT = int(os.getenv("ADMIN_SESSION_TIMEOUT", "600"))
+# Admin session timeout in seconds (30 minutes = 1800)
+ADMIN_SESSION_TIMEOUT = int(os.getenv("ADMIN_SESSION_TIMEOUT", "1800"))

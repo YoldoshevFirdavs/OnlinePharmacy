@@ -25,15 +25,11 @@ class Migration(migrations.Migration):
                 ("about_us_text", models.TextField(verbose_name="Biz haqimizda matni")),
                 (
                     "clients_count",
-                    models.PositiveIntegerField(
-                        default=0, verbose_name="Mijozlar soni"
-                    ),
+                    models.PositiveIntegerField(default=0, verbose_name="Mijozlar soni"),
                 ),
                 (
                     "experience_years",
-                    models.PositiveIntegerField(
-                        default=0, verbose_name="Tajriba yillari"
-                    ),
+                    models.PositiveIntegerField(default=0, verbose_name="Tajriba yillari"),
                 ),
             ],
             options={

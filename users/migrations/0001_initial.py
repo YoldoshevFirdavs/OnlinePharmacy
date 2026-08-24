@@ -31,9 +31,7 @@ class Migration(migrations.Migration):
                 ("password", models.CharField(max_length=128, verbose_name="password")),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
                 ),
                 (
                     "is_superuser",
@@ -46,9 +44,7 @@ class Migration(migrations.Migration):
                 ("phone_number", models.CharField(max_length=15, unique=True)),
                 (
                     "telegram_id",
-                    models.CharField(
-                        blank=True, max_length=255, null=True, unique=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True, unique=True),
                 ),
                 ("auth_code", models.CharField(blank=True, max_length=6, null=True)),
                 ("is_verified", models.BooleanField(default=False)),
@@ -56,9 +52,7 @@ class Migration(migrations.Migration):
                 ("address", models.CharField(blank=True, max_length=255)),
                 (
                     "avatar",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="users_profile_avatars"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="users_profile_avatars"),
                 ),
                 (
                     "date_joined",
@@ -116,9 +110,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "avatar",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="users_profile_avatars"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="users_profile_avatars"),
                 ),
                 ("shop_name", models.CharField(max_length=255)),
                 ("slug", models.SlugField(blank=True, null=True, unique=True)),

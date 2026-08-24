@@ -1,4 +1,4 @@
-{% load static %}
+{% load static pharmacy_tags %}
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -342,7 +342,7 @@
                         {% for product in products %}
                             <div class="product-card" onclick="window.location.href='/products/{{ product.id }}/'">
                                 <div class="product-image-wrap">
-                                    <img src="{{ product.main_image.url|default:'/static/images/default_avatar.png' }}" 
+                                    <img src="{{ product.main_image|safe_image_url }}" 
                                          class="product-image" loading="lazy" alt="{{ product.name }}">
                                 </div>
                                 <div class="product-info">
@@ -363,5 +363,6 @@
     </main>
 
     {% include 'components/footer.html' %}
+    <script src="{% static 'js/header.js' %}"></script>
 </body>
 </html>

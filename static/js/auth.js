@@ -175,7 +175,7 @@ function setBlockInfo(identifier, info) {
     if (!AUTH_CONFIG.ENABLE_BLOCKING) return;
     try {
         localStorage.setItem(BLOCK_KEY_PREFIX + identifier, JSON.stringify(info));
-    }  catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -275,8 +275,7 @@ async function loadCountriesData() {
             if (SUPPORTED_COUNTRIES.includes(countryCode)) {
                 AUTH_CONFIG.PHONE_PATTERNS[countryCode] = {
                     prefixes: [countryData.dial_code],
-                    // Assuming a default mask if not provided, or derive from dial_code length
-                    regex: new RegExp(`^\\${countryData.dial_code}\\d{${countryData.phone_format.replace(/[^#]/g, '').length}}$`),
+                    localDigits: countryData.phone_format.replace(/[^#]/g, '').length,
                     placeholder: countryData.phone_format,
                     mask: countryData.phone_format,
                     flag: countryCode
@@ -377,12 +376,13 @@ function formatPhoneNumber() {
 
 function validatePhoneNumber(phoneNumber) {
     const countryData = AUTH_CONFIG.PHONE_PATTERNS[selectedCountry];
-    if (!countryData || !countryData.regex) {
-        console.warn(`No regex found for country ${selectedCountry}`);
+    if (!countryData || !countryData.localDigits) {
         return false;
     }
-    const cleanNum = countryPrefixInput.value + phoneNumber.replace(/\s+/g, '');
-    return countryData.regex.test(cleanNum);
+    const prefix = countryPrefixInput.value.trim();
+    const localDigits = phoneNumber.replace(/\D/g, '');
+    return countryData.prefixes.includes(prefix)
+        && localDigits.length === countryData.localDigits;
 }
 
 function setupPhoneInputAndCountrySelector() {
@@ -422,12 +422,25 @@ function setupPhoneInputAndCountrySelector() {
 
     countrySelectorWrapper.addEventListener('click', (e) => {
         e.stopPropagation();
-        countryDropdown.classList.toggle('show');
+        const expanded = countryDropdown.classList.toggle('show');
+        countrySelectorWrapper.setAttribute('aria-expanded', String(expanded));
+    });
+
+    countrySelectorWrapper.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            countrySelectorWrapper.click();
+        }
+        if (e.key === 'Escape') {
+            countryDropdown.classList.remove('show');
+            countrySelectorWrapper.setAttribute('aria-expanded', 'false');
+        }
     });
 
     document.addEventListener('click', (e) => {
         if (!countrySelectorWrapper.contains(e.target) && !countryDropdown.contains(e.target)) {
             countryDropdown.classList.remove('show');
+            countrySelectorWrapper.setAttribute('aria-expanded', 'false');
         }
     });
 
@@ -704,14 +717,26 @@ async function handleOtpResend() {
 
         if (currentUserRole === 'admin') {
             endpoint = AUTH_CONFIG.AUTH_ENDPOINTS.admin_login;
-            payload.action = 'request_otp';
+            payload.action = currentAuthMethod === 'telegram' ? 'telegram' : 'request_otp';
         }
 
         const response = await sendRequest(endpoint, 'POST', payload);
         if (response.session_id) {
             currentSessionId = response.session_id;
             localStorage.setItem('currentSessionId', currentSessionId);
+            const link = response.verification_link || response.deeplink;
+            if (currentAuthMethod === 'telegram' && link) {
+                const telegramTab = window.open(link, '_blank', 'noopener,noreferrer');
+                if (telegramTab) {
+                    telegramTab.focus();
+                } else {
+                    showErrorBanner('Telegram oynasini ochib bo\'lmadi. Brauzer popup oynalarini ruxsat bering.');
+                }
+            }
             showOtpPopup(_('otp_sent'));
+            if (currentAuthMethod === 'telegram' && currentUserRole === 'admin') {
+                startSessionPolling(currentSessionId);
+            }
         } else {
             showErrorBanner(response.message || _('error_requesting_otp'));
             recordFailedAttempt(currentIdentifier);
@@ -755,12 +780,38 @@ function startSessionPolling(sessionId) {
     console.debug(`[Auth] Starting session polling for session_id: ${sessionId}`);
     if (pollingInterval) clearInterval(pollingInterval);
 
+    let pollCount = 0;
+    const maxPolls = 60;
+
     pollingInterval = setInterval(async () => {
+        pollCount += 1;
+        if (pollCount > maxPolls) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            showErrorBanner(_('otp_session_expired'));
+            return;
+        }
         try {
-            const response = await fetch(`/api/v1/users/login/check-session/?session_id=${sessionId}`);
+            const response = await fetch(`/api/v1/users/admin/login/status/?session_id=${encodeURIComponent(sessionId)}`, {
+                credentials: 'same-origin'
+            });
             const data = await response.json();
+            if (response.status === 404 || data.status === 'expired' || data.status === 'rejected') {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                showErrorBanner(_('otp_session_expired'));
+                return;
+            }
             if (data.success && data.verified) {
-                console.debug('[Auth] Session verified via polling. Completing login.');
+                if (data.requires_deeplink) {
+                    console.debug('[Auth] Telegram contact verified. Waiting for the one-time admin link.');
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                    hideOtpPopup();
+                    showErrorBanner('Telegram tasdiqlandi. Bot yuborgan admin linkini oching.');
+                    return;
+                }
+                console.debug('[Auth] Admin Telegram session verified. Completing login.');
                 clearInterval(pollingInterval);
                 pollingInterval = null;
                 hideOtpPopup();
@@ -776,13 +827,13 @@ function startSessionPolling(sessionId) {
                     window.updateHeaderAfterLogin();
                 }
 
-                const redirectUrl = getRedirectUrlByRole(data.role);
+                const redirectUrl = getRedirectUrlByRole(data.role || 'admin');
                 showSuccessAnimationAndRedirect(redirectUrl);
             }
         } catch (error) {
             console.error("Polling error:", error);
         }
-    }, 2000);
+    }, 5000);
 
     // FIX: Add a listener to clear the interval if the user navigates away
     window.addEventListener('beforeunload', () => {
@@ -836,8 +887,13 @@ async function handleAdminTelegramOtpRequest() {
             currentIdentifier = fullPhoneNumber;
             localStorage.setItem('currentSessionId', currentSessionId);
             localStorage.setItem('currentIdentifier', currentIdentifier);
-            if (response.deeplink) {
-                window.open(response.deeplink, '_blank');
+            const telegramLink = response.verification_link || response.deeplink;
+            if (telegramLink) {
+                const telegramTab = window.open(telegramLink, '_blank', 'noopener,noreferrer');
+                if (telegramTab) telegramTab.focus();
+            } else {
+                showErrorBanner(_('error_requesting_otp'));
+                return;
             }
             showOtpPopup("Telegram orqali tasdiqlash kutilmoqda...");
             startSessionPolling(currentSessionId);
@@ -998,7 +1054,6 @@ async function handleAdminPasswordLogin() {
 // FIX: Added debounce to prevent spamming the OTP request button.
 let isRequestingOtp = false;
 const otpRequestDebounceTime = 5000; // 5 seconds
-
 async function handleOtpRequest() {
     if (isRequestingOtp) {
         console.warn('[Auth] OTP request is already in progress. Please wait.');
@@ -1053,7 +1108,7 @@ async function handleOtpRequest() {
             const localCountryPrefixInput = document.getElementById('country-prefix-input');
             if (!localPhoneInput || !localCountryPrefixInput) throw new Error("Tizim xatosi: Telefon raqam kiritish maydonlari topilmadi.");
 
-            let rawPhoneNumber = localPhoneInput.value.replace(/\s+/g, '');
+            let rawPhoneNumber = localPhoneInput.value.replace(/\D/g, '');
             let prefix = localCountryPrefixInput.value.trim();
             if (!prefix.startsWith('+')) prefix = '+' + prefix.replace(/\D/g, '');
 
@@ -1082,7 +1137,15 @@ async function handleOtpRequest() {
         console.debug("Sending OTP request to:", endpoint);
         const response = await sendRequest(endpoint, 'POST', payload);
 
-        if (response.session_id) {
+        if (response.fallback === 'otp' && response.session_id) {
+            currentAuthMethod = 'telegram';
+            currentUserRole = 'user';
+            currentSessionId = response.session_id;
+            currentIdentifier = identifier;
+            localStorage.setItem('currentSessionId', currentSessionId);
+            localStorage.setItem('currentIdentifier', currentIdentifier);
+            showOtpPopup(response.message || _('otp_sent'));
+        } else if (response.session_id) {
             resetFieldLock(fieldId);
             currentSessionId = response.session_id;
             currentIdentifier = identifier;
@@ -1090,8 +1153,17 @@ async function handleOtpRequest() {
             localStorage.setItem('currentIdentifier', currentIdentifier);
 
             if (currentAuthMethod === 'telegram') {
-                const link = response.deeplink || response.verification_link;
-                if (link) window.open(link, '_blank');
+                const link = response.verification_link || response.deeplink;
+                if (link) {
+                    const telegramLoginBtn = document.getElementById('telegram-login');
+                    if (telegramLoginBtn) {
+                        telegramLoginBtn.href = link;
+                        telegramLoginBtn.target = '_blank';
+                        telegramLoginBtn.rel = 'noopener noreferrer';
+                    }
+                    const telegramTab = window.open(link, '_blank', 'noopener,noreferrer');
+                    if (telegramTab) telegramTab.focus();
+                }
                 showOtpPopup("Telegram orqali tasdiqlash kutilmoqda...");
                 startSessionPolling(currentSessionId);
             } else {
@@ -1110,8 +1182,6 @@ async function handleOtpRequest() {
         if (getCodeBtn) getCodeBtn.disabled = false;
     }
 }
-
-
 // =============================================================================
 // Success Animation and Redirection
 // =============================================================================
@@ -1234,9 +1304,11 @@ function validateEmail(email) {
 
 function validatePhoneNumberFormat() {
     const countryData = AUTH_CONFIG.PHONE_PATTERNS[selectedCountry];
-    if (!countryData || !countryData.regex) return false;
-    const cleanNum = countryPrefixInput.value + phoneInput.value.replace(/\s+/g, '');
-    return countryData.regex.test(cleanNum);
+    if (!countryData || !countryData.localDigits) return false;
+    const prefix = countryPrefixInput.value.trim();
+    const localDigits = phoneInput.value.replace(/\D/g, '');
+    return countryData.prefixes.includes(prefix)
+        && localDigits.length === countryData.localDigits;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1247,8 +1319,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const emailInput = document.getElementById('email');
     const emailValidator = document.getElementById('email-validator');
     const phoneInput = document.getElementById('phone');
-    const phoneValidator = document.getElementById('phone-validator');
+    const phoneValidator = document.getElementById('phone-error-message');
     const getCodeBtn = document.getElementById('get-code-btn');
+    const telegramLoginBtn = document.getElementById('telegram-login');
+
+    async function updateTelegramVisibility(identifier) {
+        if (!telegramLoginBtn) return;
+        telegramLoginBtn.classList.remove('hidden-field');
+        telegramLoginBtn.setAttribute('aria-hidden', 'false');
+    }
 
     let isEmailValid = false;
     let isPhoneValid = false;
@@ -1277,6 +1356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             checkFormValidity();
         });
+        emailInput.addEventListener('blur', () => updateTelegramVisibility(emailInput.value.trim()));
     }
 
     if (phoneInput && phoneValidator) {
@@ -1295,7 +1375,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     const gmailLoginBtn = document.getElementById('gmail-login');
-    const telegramLoginBtn = document.getElementById('telegram-login');
     passwordInput = document.getElementById('password'); // Assuming this exists
     loginModeToggleBtn = document.getElementById('login-mode-toggle-btn'); // Assuming this exists
     const loginWithPasswordBtn = document.getElementById('login-with-password-btn'); // Assuming this exists
@@ -1312,7 +1391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         emailGroup.classList.remove('hidden-field');
         phoneGroup.classList.add('hidden-field');
         nameGroup.classList.remove('hidden-field');
-        if(phoneErrorMessage) phoneErrorMessage.textContent = '';
+        if (phoneErrorMessage) phoneErrorMessage.textContent = '';
         currentAuthMethod = 'gmail';
         if (otpPopupInput) {
             otpPopupInput.maxLength = 6;
@@ -1351,7 +1430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             emailGroup.classList.remove('hidden-field');
             phoneGroup.classList.add('hidden-field');
             nameGroup.classList.remove('hidden-field');
-            if(phoneErrorMessage) phoneErrorMessage.textContent = '';
+            if (phoneErrorMessage) phoneErrorMessage.textContent = '';
             currentAuthMethod = 'gmail';
             if (otpPopupInput) {
                 otpPopupInput.maxLength = 6;
@@ -1372,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             phoneGroup.classList.remove('hidden-field');
             emailGroup.classList.add('hidden-field');
             nameGroup.classList.remove('hidden-field');
-            if(phoneErrorMessage) phoneErrorMessage.textContent = '';
+            if (phoneErrorMessage) phoneErrorMessage.textContent = '';
             currentAuthMethod = 'telegram';
             if (otpPopupInput) {
                 otpPopupInput.maxLength = 4;
@@ -1390,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // FIX: Expose updateHeaderAfterLogin to window for header refresh after login
-window.updateHeaderAfterLogin = function() {
+window.updateHeaderAfterLogin = function () {
     console.debug('[Auth] updateHeaderAfterLogin called');
 
     const token = localStorage.getItem('access_token');
@@ -1408,9 +1487,9 @@ window.updateHeaderAfterLogin = function() {
 };
 
 // FIX: Add loadUser function for header.js compatibility
-window.loadUser = async function() {
+window.loadUser = async function () {
     console.debug('[Auth] loadUser called');
-    
+
     const token = localStorage.getItem('access_token');
     if (!token) {
         console.warn('[Auth] No access token for loadUser');
@@ -1429,10 +1508,10 @@ window.loadUser = async function() {
 
         if (response.ok) {
             const user = await response.json();
-            
+
             // Get full_name, username, or email - NOT role!
             const username = user.full_name || user.username || user.email || localStorage.getItem('username');
-            
+
             // Update localStorage
             localStorage.setItem('username', username || '');
             localStorage.setItem('avatar_url', user.avatar_url || '');

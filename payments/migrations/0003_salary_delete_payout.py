@@ -24,9 +24,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "amount",
-                    models.DecimalField(
-                        decimal_places=2, help_text="Salary amount.", max_digits=10
-                    ),
+                    models.DecimalField(decimal_places=2, help_text="Salary amount.", max_digits=10),
                 ),
                 (
                     "status",

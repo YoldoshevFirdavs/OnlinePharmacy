@@ -29,12 +29,8 @@ class Command(BaseCommand):
                 name=cat_name, defaults={"slug": slug, "is_default": True}
             )
             if created:
-                self.stdout.write(
-                    self.style.SUCCESS(f"Successfully added category: {cat_name}")
-                )
+                self.stdout.write(self.style.SUCCESS(f"Successfully added category: {cat_name}"))
             else:
-                self.stdout.write(
-                    self.style.WARNING(f"Category already exists: {cat_name}")
-                )
+                self.stdout.write(self.style.WARNING(f"Category already exists: {cat_name}"))
 
         self.stdout.write(self.style.SUCCESS("Category seeding complete."))

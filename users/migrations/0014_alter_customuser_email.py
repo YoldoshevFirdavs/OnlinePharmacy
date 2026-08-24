@@ -13,8 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="customuser",
             name="email",
-            field=models.EmailField(
-                default="admin@example.com", max_length=254, unique=True
-            ),
+            field=models.EmailField(default="admin@example.com", max_length=254, unique=True),
         ),
     ]

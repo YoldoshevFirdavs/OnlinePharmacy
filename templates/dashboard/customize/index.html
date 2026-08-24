@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<!-- All cards horizontal -->
+<!-- All cards horizontal - fit width -->
 <div class="customize-row" id="customizeGrid">
 
     <!-- Brand Name & Sticker -->
@@ -109,15 +109,21 @@
         </div>
     </div>
 
-    <!-- Save -->
-    <div class="card card--customize card--save" id="customizeSaveCard">
-        <div class="card__body">
-            <p class="save-hint"><i class="fa-solid fa-circle-info"></i> O'zgarishlar faqat "Saqlash" bosilganda qo'llaniladi.</p>
-            <button type="button" class="btn btn--primary btn--block" id="btnSaveCustomize">
-                <i class="fa-solid fa-floppy-disk"></i> Save changes
-            </button>
-        </div>
-    </div>
-
 </div>
+
+<!-- Fixed Footer Actions (bottom of page, not in card) -->
+<div class="customize-footer-actions" id="customizeFooterActions">
+    <button type="button" class="btn btn--secondary" id="btnCancelCustomize">
+        <i class="fa-solid fa-xmark"></i> Bekor qilish
+    </button>
+    <button type="button" class="btn btn--primary" id="btnSaveCustomize">
+        <i class="fa-solid fa-floppy-disk"></i> Saqlash
+    </button>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'dashboard/js/customize.js' %}"></script>
 {% endblock %}

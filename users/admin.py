@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    CustomUser,
-    DeliveryDriver,
-    Operator,
-    Seller,
-    SubscribedUser,
-    TelegrambotUser,
-)
+from .models import CustomUser, DeliveryDriver, Operator, Seller, SubscribedUser, TelegrambotUser
 
 
 @admin.register(CustomUser)

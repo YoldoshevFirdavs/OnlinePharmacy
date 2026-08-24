@@ -21,7 +21,6 @@
         <td><strong>#{{ order.id }}</strong></td>
         <td>
             <div class="user-cell">
-                <i class="fa-solid fa-circle-user"></i>
                 <span>{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
             </div>
         </td>

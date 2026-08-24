@@ -1,4 +1,4 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   push:
@@ -7,7 +7,45 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-  build:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff .
+
+    - name: Check code formatting with black
+      run: |
+        black --check --diff .
+
+  test:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -41,11 +79,9 @@ jobs:
       DB_HOST: localhost
       DB_PORT: 5432
       REDIS_URL: redis://localhost:6379/0
-      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend # Use in-memory email backend for tests
-      # Add other environment variables as needed for your settings.py
-      # For example, if you have SOCIAL_TELEGRAM, etc.
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       SOCIAL_TELEGRAM: "https://t.me/testbot"
-      CORS_ORIGINS: "http://localhost:3000,http://localhost:8000" # Example for local testing
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:8000"
 
     steps:
     - uses: actions/checkout@v3
@@ -53,7 +89,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10' # Or your preferred Python version
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
@@ -61,12 +97,11 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
 
-    - name: Wait for Postgres and Redis to be ready
+    - name: Wait for Postgres and Redis
       run: |
         echo "Waiting for Postgres..."
         for i in $(seq 1 10); do
           nc -z localhost 5432 && break
-          echo "Postgres not ready, waiting 5 more seconds..."
           sleep 5
         done
         echo "Postgres is ready."
@@ -74,56 +109,18 @@ jobs:
         echo "Waiting for Redis..."
         for i in $(seq 1 10); do
           nc -z localhost 6379 && break
-          echo "Redis not ready, waiting 5 more seconds..."
           sleep 5
         done
         echo "Redis is ready."
 
     - name: Run migrations
       run: |
-        python manage.py migrate
+        python manage.py migrate --noinput
 
-#    - name: Run Django tests
-#      run: |
-#        pytest --maxfail=1 --disable-warnings -q || true
-#
+    - name: Run Django system checks
+      run: |
+        python manage.py check
 
-#    - name: Install Playwright browsers
-#      run: |
-#        npx playwright install --with-deps
-
-#    - name: Run Playwright tests
-#      run: |
-#        # This command runs all Playwright tests, including the new E2E tests for conditional reCAPTCHA.
-#        npx playwright test frontend/tests/e2e_auth.spec.js
-#      env:
-#        # Ensure Playwright tests use the correct base URL for the Django server
-#        # In a real scenario, you might run the Django server in the background here
-#        # For now, assuming it's accessible at localhost:8000
-#        BASE_URL: http://localhost:8000
-
-#    - name: Lint with flake8
-#      run: |
-#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
-
-#    - name: Check code formatting with black
-#      run: |
-#        black --check .
-#
-#    - name: Check import sorting with isort
-#      run: |
-#        isort --check-only .
-
-    # Optional: Upload test results
-    # - name: Upload pytest results
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: pytest-results
-    #     path: junit.xml # If pytest is configured to output JUnit XML
-
-    # - name: Upload Playwright test results
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: playwright-results
-    #     path: test-results/ # Default Playwright test results directory
+    - name: Run pytest
+      run: |
+        pytest -v --tb=short

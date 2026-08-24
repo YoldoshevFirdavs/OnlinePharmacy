@@ -34,11 +34,7 @@ def _get_client_ip(request):
 
 def _log_rejection(event, request, target_id=None, reason=""):
     """Write structured security log entry for every rejected request."""
-    requester_id = (
-        str(request.user.id)
-        if request.user and request.user.is_authenticated
-        else "anonymous"
-    )
+    requester_id = str(request.user.id) if request.user and request.user.is_authenticated else "anonymous"
     ip = _get_client_ip(request)
     ts = timezone.now().isoformat()
     logger.warning(
@@ -116,8 +112,7 @@ def require_self_or_admin(request, target_user_id):
         if acting_as == "true":
             # Permitted — log for audit trail
             logger.info(
-                "[SECURITY] timestamp=%s event=ADMIN_ACTING_AS requester_id=%s "
-                "target_id=%s ip=%s",
+                "[SECURITY] timestamp=%s event=ADMIN_ACTING_AS requester_id=%s " "target_id=%s ip=%s",
                 timezone.now().isoformat(),
                 requester_id,
                 target_id,

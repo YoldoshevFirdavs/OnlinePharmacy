@@ -6,38 +6,38 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pharmacy', '0011_comments'),
+        ("pharmacy", "0011_comments"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='customeruserhistory',
-            new_name='pharmacy_cu_user_id_12c7bc_idx',
-            old_name='pharmacy_cu_user_id_timestamp_idx',
+            model_name="customeruserhistory",
+            new_name="pharmacy_cu_user_id_12c7bc_idx",
+            old_name="pharmacy_cu_user_id_timestamp_idx",
         ),
         migrations.RenameIndex(
-            model_name='customeruserhistory',
-            new_name='pharmacy_cu_action_94ec48_idx',
-            old_name='pharmacy_cu_action_timestamp_idx',
+            model_name="customeruserhistory",
+            new_name="pharmacy_cu_action_94ec48_idx",
+            old_name="pharmacy_cu_action_timestamp_idx",
         ),
         migrations.RenameIndex(
-            model_name='customeruserhistory',
-            new_name='pharmacy_cu_product_18c580_idx',
-            old_name='pharmacy_cu_product_timestamp_idx',
+            model_name="customeruserhistory",
+            new_name="pharmacy_cu_product_18c580_idx",
+            old_name="pharmacy_cu_product_timestamp_idx",
         ),
         migrations.RenameIndex(
-            model_name='productcomment',
-            new_name='pharmacy_pr_product_6ff48f_idx',
-            old_name='pharmacy_pr_product_created_idx',
+            model_name="productcomment",
+            new_name="pharmacy_pr_product_6ff48f_idx",
+            old_name="pharmacy_pr_product_created_idx",
         ),
         migrations.RenameIndex(
-            model_name='productcomment',
-            new_name='pharmacy_pr_user_id_1d03ec_idx',
-            old_name='pharmacy_pr_user_created_idx',
+            model_name="productcomment",
+            new_name="pharmacy_pr_user_id_1d03ec_idx",
+            old_name="pharmacy_pr_user_created_idx",
         ),
         migrations.RenameIndex(
-            model_name='productcomment',
-            new_name='pharmacy_pr_is_appr_0ddddd_idx',
-            old_name='pharmacy_pr_approved_created_idx',
+            model_name="productcomment",
+            new_name="pharmacy_pr_is_appr_0ddddd_idx",
+            old_name="pharmacy_pr_approved_created_idx",
         ),
     ]

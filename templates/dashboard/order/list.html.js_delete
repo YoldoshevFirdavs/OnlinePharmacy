@@ -1,0 +1,76 @@
+<!-- Delete AJAX Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Order delete buttons
+    document.querySelectorAll('.order-delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const orderId = this.dataset.orderId;
+            
+            if (!confirm(`Buyurtma #${orderId} o'chirilsinmi?\n\nBu amal qaytarilmaydi!`)) {
+                return;
+            }
+            
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            
+            // Send delete request
+            fetch(`/dashboard/orders/${orderId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove row from table
+                    const row = btn.closest('tr');
+                    row.style.opacity = '0.5';
+                    setTimeout(() => {
+                        row.remove();
+                        showNotification('Buyurtma o\'chirildi', 'success');
+                        
+                        // Refresh page after 1 sec
+                        setTimeout(() => window.location.reload(), 1000);
+                    }, 300);
+                } else {
+                    showNotification(data.message || 'Xatolik yuz berdi', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Server xatosi', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            });
+        });
+    });
+});
+
+// Helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    // Simple notification (update to use your notification system)
+    alert(message);
+}
+</script>

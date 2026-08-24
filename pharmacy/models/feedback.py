@@ -13,9 +13,7 @@ class Feedback(models.Model):
     full_name = models.CharField(max_length=255, verbose_name="Foydalanuvchi ismi")
     phone_number = models.CharField(max_length=20, verbose_name="Telefon raqami")
     email = models.EmailField(blank=True, null=True, verbose_name="Email manzili")
-    subject = models.CharField(
-        max_length=20, choices=SUBJECT_CHOICES, default="other", verbose_name="Mavzu"
-    )
+    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES, default="other", verbose_name="Mavzu")
     message = models.TextField(verbose_name="Xabar matni")
 
     is_replied = models.BooleanField(default=False, verbose_name="Javob berildi")

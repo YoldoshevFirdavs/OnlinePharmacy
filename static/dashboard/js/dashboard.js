@@ -116,6 +116,11 @@
             return null;
         }
 
+        var existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
         var primary = getPrimaryColor();
 
         salesChartInstance = new Chart(canvas.getContext('2d'), {
@@ -194,10 +199,29 @@
 
     function renderDashboardStats(stats) {
         if (!stats) return;
-        for (const key in stats) {
-            const el = document.getElementById(`stat-${key}`);
+        var mapping = {
+            'total_categories': 'statCategories',
+            'total_medicines': 'statProducts',
+            'total_customers': 'statCustomers',
+            'total_orders': 'statOrders',
+            'pending_orders': 'statPending',
+            'delivered_orders': 'statDelivered',
+            'total_users': 'statUsers',
+            'total_drivers': 'statDeliverers',
+            'out_of_stock': 'statOutOfStock',
+            'total_staff': 'statStaff'
+        };
+        for (var key in mapping) {
+            var cardId = mapping[key];
+            var valEl = document.querySelector('#' + cardId + ' .stat-card__value');
+            if (valEl && stats[key] !== undefined) {
+                valEl.textContent = stats[key];
+            }
+        }
+        for (var k in stats) {
+            var el = document.getElementById('stat-' + k);
             if (el) {
-                el.textContent = stats[key];
+                el.textContent = stats[k];
             }
         }
     }
@@ -432,6 +456,7 @@
             });
         }
 
+        // Save button
         var saveBtn = document.getElementById('btnSaveCustomize');
         if (saveBtn) {
             saveBtn.addEventListener('click', function () {
@@ -453,6 +478,24 @@
                         Swal.fire({ icon: 'info', title: 'Mahalliy saqlandi', text: 'Sozlamalar brauzerda saqlandi.', confirmButtonText: 'OK' });
                     }
                 });
+            });
+        }
+
+        // Cancel button - close customize page or reset
+        var cancelBtn = document.getElementById('btnCancelCustomize');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function () {
+                if (confirm('Barcha o\'zgarishlar bekor qilinsinmi?')) {
+                    // Reset to saved values
+                    var savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+                    var savedAccent = localStorage.getItem(ACCENT_KEY) || '#6a00f4';
+                    
+                    applyTheme(savedTheme, true);
+                    applyAccentColor(savedAccent, true);
+                    
+                    // Go back to dashboard or refresh
+                    window.location.href = '/dashboard/admin/';
+                }
             });
         }
     }
@@ -551,10 +594,7 @@
     /* ── Dashboard page bootstrap ─────────────────────────────── */
 
     function initDashboardPage() {
-        if (document.getElementById('salesChart')) {
-            initSalesChart();
-        }
-
+        // Charts and live polling are initialized directly in index.html extra_js
         fetchDashboardStats()
             .then(renderDashboardStats)
             .catch(function () { /* SSR fallback */ });

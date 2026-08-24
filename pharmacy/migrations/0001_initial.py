@@ -104,9 +104,7 @@ class Migration(migrations.Migration):
                 ("is_prescription_required", models.BooleanField(default=False)),
                 (
                     "main_image",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="medicines/main/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="medicines/main/"),
                 ),
                 ("updated_at", models.DateTimeField(auto_now=True)),
             ],

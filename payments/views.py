@@ -32,9 +32,7 @@ def create_salary(request):
     try:
         driver_profile = DeliveryDriver.objects.get(id=driver_id)
     except DeliveryDriver.DoesNotExist:
-        return Response(
-            {"detail": "Driver not found."}, status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({"detail": "Driver not found."}, status=status.HTTP_404_NOT_FOUND)
 
     salary = Salary.objects.create(
         driver=driver_profile,

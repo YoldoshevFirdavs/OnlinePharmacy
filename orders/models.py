@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 
 from pharmacy.models.medicine import Medicine
@@ -6,9 +7,7 @@ from users.models import DeliveryDriver
 
 
 class Cart(models.Model):
-    user = models.OneToOneField(
-        "users.CustomUser", on_delete=models.CASCADE, related_name="user_cart"
-    )
+    user = models.OneToOneField("users.CustomUser", on_delete=models.CASCADE, related_name="user_cart")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -33,12 +32,22 @@ class Order(models.Model):
         ("Returned", "Returned"),
     ]
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     address = models.TextField(blank=True, null=True)
+    phone_number = models.CharField(
+        max_length=20, blank=True, null=True, help_text="Ixtiyoriy telefon raqami. Yetkazib berish uchun ishlatiladi."
+    )
+    payment_method = models.CharField(
+        max_length=20,
+        choices=[
+            ("cash", "Naqd pul"),
+            ("card", "Karta"),
+        ],
+        default="cash",
+        help_text="To'lov usuli",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
 
@@ -47,9 +56,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="order_items"
-    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
     product = models.ForeignKey(Medicine, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField()
     price_at_order = models.DecimalField(max_digits=12, decimal_places=2)
@@ -59,9 +66,7 @@ class OrderItem(models.Model):
 
 
 class DeliveryOrder(models.Model):
-    driver = models.ForeignKey(
-        DeliveryDriver, on_delete=models.SET_NULL, null=True, blank=True
-    )
+    driver = models.ForeignKey(DeliveryDriver, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.CharField(
         max_length=50,

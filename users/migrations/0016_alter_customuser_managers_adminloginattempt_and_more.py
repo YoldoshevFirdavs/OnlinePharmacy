@@ -39,11 +39,7 @@ class Migration(migrations.Migration):
                 ("blocked_until", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                "indexes": [
-                    models.Index(
-                        fields=["fingerprint"], name="users_admin_fingerp_3e3242_idx"
-                    )
-                ],
+                "indexes": [models.Index(fields=["fingerprint"], name="users_admin_fingerp_3e3242_idx")],
             },
         ),
         migrations.CreateModel(

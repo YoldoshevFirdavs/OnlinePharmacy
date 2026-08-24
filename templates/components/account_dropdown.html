@@ -11,7 +11,7 @@
         {% if user.role == 'admin' %}
             <li><a id="account-link" href="/dashboard/account/"><i class="fas fa-user-cog"></i> {% trans "Account" %}</a></li>
         {% elif user.role == 'seller' %}
-            <li><a id="account-link" href="/dashboard/seller/account-settings/"><i class="fas fa-user-cog"></i> {% trans "Account" %}</a></li>
+            <li><a id="account-link" href="/dashboard/seller/account/"><i class="fas fa-user-cog"></i> {% trans "Account" %}</a></li>
         {% else %}
             <li><a id="account-link" href="/account/"><i class="fas fa-user-circle"></i> {% trans "Account" %}</a></li>
         {% endif %}

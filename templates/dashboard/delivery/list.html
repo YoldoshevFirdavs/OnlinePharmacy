@@ -3,21 +3,14 @@
 
 {% block title %}Yetkazib beruvchilar{% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <div>
-        <h1 class="page-header__title">
-            <i class="fa-solid fa-truck"></i>
-            Yetkazib beruvchilar
-        </h1>
-        <p class="page-header__subtitle">Barcha yetkazib beruvchilarni boshqarish</p>
-    </div>
-    <div class="page-header__actions">
-        <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i>
-            Qo'shish
-        </a>
-    </div>
+{% block page_title_icon %}<i class="fa-solid fa-truck"></i>{% endblock %}
+{% block page_title_text %}Yetkazib beruvchilar{% endblock %}
+
+{% block page_actions %}
+<div class="page-header__actions">
+    <a href="{% url 'dashboard:delivery_create' %}" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i> Qo'shish
+    </a>
 </div>
 {% endblock %}
 
@@ -58,6 +51,7 @@
                 <button type="button"
                         class="btn btn--sm btn--ghost btn--danger driver-delete-btn"
                         data-driver-id="{{ driver.pk }}"
+                        data-delete-url="{% url 'dashboard:delivery_delete' driver.pk %}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -75,7 +69,26 @@
 {% endif %}
 {% endblock %}
 
+{% block extra_content %}
+<!-- ═══════ Pagination ═══════ -->
+{% if page_obj %}
+<nav class="pagination-wrapper" id="paginationWrapper" aria-label="Sahifalar">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li><a href="?page={{ num }}" class="pagination__link{% if page_obj.number == num %} active{% endif %}">{{ num }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-right"></i></a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
 {% block extra_js %}
 {{ block.super }}
-<script src="{% static 'dashboard/js/delivery.js' %}"></script>
+<script src="{% static 'dashboard/js/delete_handlers.js' %}"></script>
 {% endblock %}

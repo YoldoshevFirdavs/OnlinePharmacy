@@ -39,9 +39,7 @@ class CartViewSet(viewsets.ViewSet):
         try:
             product = Medicine.objects.get(id=product_id)
         except Medicine.DoesNotExist:
-            return Response(
-                {"error": "Mahsulot topilmadi."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Mahsulot topilmadi."}, status=status.HTTP_400_BAD_REQUEST)
 
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -59,9 +57,7 @@ class CartViewSet(viewsets.ViewSet):
         try:
             product = Medicine.objects.get(id=product_id)
         except Medicine.DoesNotExist:
-            return Response(
-                {"error": "Mahsulot topilmadi."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Mahsulot topilmadi."}, status=status.HTTP_400_BAD_REQUEST)
 
         cart, created = Cart.objects.get_or_create(user=request.user)
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -87,9 +83,7 @@ class CartViewSet(viewsets.ViewSet):
         quantity = request.data.get("quantity")
 
         if quantity is None:
-            return Response(
-                {"error": "Quantity is required."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Quantity is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         cart = get_object_or_404(Cart, user=request.user)
         cart_item = get_object_or_404(CartItem, cart=cart, product__id=product_id)
@@ -129,9 +123,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Check if the user is authenticated
         if self.request.user.is_authenticated:
             return self.queryset.filter(user=self.request.user)
-        return (
-            self.queryset.none()
-        )  # Return an empty queryset for unauthenticated users
+        return self.queryset.none()  # Return an empty queryset for unauthenticated users
 
     def get_serializer_class(self):
         if self.action in ["retrieve"]:
@@ -195,9 +187,7 @@ class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = LocationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         # Bu yerda location logikasi yoziladi (masalan, DBga saqlash yoki cache)
-        return Response(
-            {"status": "Location updated", "location": serializer.validated_data}
-        )
+        return Response({"status": "Location updated", "location": serializer.validated_data})
 
 
 class OrderAcceptView(APIView):

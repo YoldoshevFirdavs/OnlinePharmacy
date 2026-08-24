@@ -1,6 +1,59 @@
 [tool.black]
-line-length = 88
+line-length = 120
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | venvs310
+  | \.vscode
+  | __pycache__
+  | \.pytest_cache
+  | \.mypy_cache
+  | node_modules
+  | build
+  | dist
+)/
+'''
 
 [tool.isort]
 profile = "black"
-skip = ["venv", ".venv", "venvs310"]
+line_length = 120
+skip = ["venv", ".venv", "venvs310", "node_modules", "__pycache__", ".pytest_cache"]
+known_first_party = ["config", "users", "dashboard", "pharmacy", "orders", "billing", "payments", "security", "telegram_bot"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "--strict-markers --tb=short"
+testpaths = ["tests", ""]
+norecursedirs = [".git", ".venv", "venv", "node_modules", "staticfiles", "mediafiles"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "manage.py",
+    "setup.py",
+    "*/__init__.py",
+    "*/wsgi.py",
+    "*/asgi.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

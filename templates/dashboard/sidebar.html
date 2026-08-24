@@ -76,6 +76,14 @@
                 </a>
             </li>
 
+            <!-- Recently Deleted (Undo) -->
+            <li class="sidebar-item{% if request.resolver_match.url_name == 'admin_recently_deleted' %} active{% endif %}">
+                <a href="{% url 'dashboard:admin_recently_deleted' %}" class="sidebar-link">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span>Recently Deleted</span>
+                </a>
+            </li>
+
             <!-- Banlar -->
             <li class="sidebar-item{% if request.resolver_match.url_name == 'ban_list' %} active{% endif %}">
                 <a href="{% url 'dashboard:ban_list' %}" class="sidebar-link">

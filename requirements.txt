@@ -59,6 +59,9 @@ requests                     # HTTP requests library
 pytest==8.3.5                # Testing framework
 pytest-django==4.12.0        # Django plugin for pytest
 
+# Monitoring & Observability
+prometheus-client==0.20.0    # Prometheus client library
+
 # Other integrations
 phonenumbers>=8.13.25        # Phone number validation
 google-genai                 # Google AI Studio SDK

@@ -33,9 +33,7 @@ class DashboardCategorySerializer(serializers.ModelSerializer):
 
 
 class DashboardProductSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(
-        source="category.name", read_only=True, default="—"
-    )
+    category_name = serializers.CharField(source="category.name", read_only=True, default="—")
     quantity = serializers.IntegerField(source="stock", read_only=True)
     image_url = serializers.SerializerMethodField()
     edit_url = serializers.SerializerMethodField()
@@ -98,11 +96,7 @@ class DashboardOrderSerializer(serializers.ModelSerializer):
             request = self.context.get("request")
             avatar_url = None
             if obj.user.avatar and hasattr(obj.user.avatar, "url"):
-                avatar_url = (
-                    request.build_absolute_uri(obj.user.avatar.url)
-                    if request
-                    else obj.user.avatar.url
-                )
+                avatar_url = request.build_absolute_uri(obj.user.avatar.url) if request else obj.user.avatar.url
 
             return {
                 "id": obj.user.id,
@@ -114,12 +108,7 @@ class DashboardOrderSerializer(serializers.ModelSerializer):
 
     def get_username(self, obj):
         if obj.user:
-            return (
-                obj.user.full_name
-                or obj.user.email
-                or obj.user.phone_number
-                or str(obj.user.pk)
-            )
+            return obj.user.full_name or obj.user.email or obj.user.phone_number or str(obj.user.pk)
         return "Anonymous"
 
     def get_total(self, obj):

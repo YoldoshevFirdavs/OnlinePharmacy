@@ -252,13 +252,22 @@
                 <div class="last-updated" id="revenue-chart-updated"></div>
             </div>
             
-            <!-- Order Status Distribution -->
+            <!-- Payment Method Distribution Chart -->
             <div class="chart-card">
-                <div class="chart-title">Order Status Distribution</div>
+                <div class="chart-title">Payment Method Distribution</div>
                 <div class="chart-container">
-                    <canvas id="order-status-chart"></canvas>
+                    <canvas id="payment-method-chart"></canvas>
                 </div>
-                <div class="last-updated" id="status-chart-updated"></div>
+                <div class="last-updated" id="payment-chart-updated"></div>
+            </div>
+            
+            <!-- Category Revenue Chart -->
+            <div class="chart-card">
+                <div class="chart-title">Category Revenue</div>
+                <div class="chart-container">
+                    <canvas id="category-revenue-chart"></canvas>
+                </div>
+                <div class="last-updated" id="category-chart-updated"></div>
             </div>
         </div>
     </div>
@@ -269,6 +278,8 @@
         let dailyOrdersChart = null;
         let dailyRevenueChart = null;
         let orderStatusChart = null;
+        let paymentMethodChart = null;
+        let categoryRevenueChart = null;
         
         // Auto-refresh interval (1 minute)
         const REFRESH_INTERVAL = {{ refresh_interval }};
@@ -411,6 +422,70 @@
                     }
                 });
             }
+            
+            // Payment method distribution pie chart
+            const paymentMethodLabels = data.charts.payment_method.map(p => {
+                if (p.payment_method === 'cash') return 'Naqd pul';
+                if (p.payment_method === 'card') return 'Karta';
+                return p.payment_method;
+            });
+            const paymentMethodValues = data.charts.payment_method.map(p => p.count);
+            
+            if (paymentMethodChart) {
+                paymentMethodChart.data.labels = paymentMethodLabels;
+                paymentMethodChart.data.datasets[0].data = paymentMethodValues;
+                paymentMethodChart.update();
+            } else {
+                const ctx = document.getElementById('payment-method-chart').getContext('2d');
+                paymentMethodChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: paymentMethodLabels,
+                        datasets: [{
+                            data: paymentMethodValues,
+                            backgroundColor: [
+                                '#28a745',
+                                '#0066cc',
+                                '#ffc107'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+            
+            // Category revenue bar chart
+            const categoryLabels = data.charts.category_revenue.map(c => c.category_name);
+            const categoryValues = data.charts.category_revenue.map(c => parseFloat(c.total_revenue) || 0);
+            
+            if (categoryRevenueChart) {
+                categoryRevenueChart.data.labels = categoryLabels;
+                categoryRevenueChart.data.datasets[0].data = categoryValues;
+                categoryRevenueChart.update();
+            } else {
+                const ctx = document.getElementById('category-revenue-chart').getContext('2d');
+                categoryRevenueChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryLabels,
+                        datasets: [{
+                            label: 'Daromad (so\'m)',
+                            data: categoryValues,
+                            backgroundColor: '#6a00f4',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
         }
         
         function updateTimestamp() {
@@ -418,6 +493,8 @@
             document.getElementById('orders-chart-updated').textContent = `Updated: ${now}`;
             document.getElementById('revenue-chart-updated').textContent = `Updated: ${now}`;
             document.getElementById('status-chart-updated').textContent = `Updated: ${now}`;
+            document.getElementById('payment-chart-updated').textContent = `Updated: ${now}`;
+            document.getElementById('category-chart-updated').textContent = `Updated: ${now}`;
         }
     </script>
 </body>

@@ -9,9 +9,7 @@ from .medicine import Medicine
 class SiteConfiguration(models.Model):
     about_us_text = models.TextField(verbose_name="Biz haqimizda matni")
     clients_count = models.PositiveIntegerField(default=0, verbose_name="Mijozlar soni")
-    experience_years = models.PositiveIntegerField(
-        default=0, verbose_name="Tajriba yillari"
-    )
+    experience_years = models.PositiveIntegerField(default=0, verbose_name="Tajriba yillari")
 
     def __str__(self):
         return "Sayt Konfiguratsiyasi"
@@ -32,18 +30,12 @@ class SiteConfiguration(models.Model):
 
 class ReviewApprovedManager(models.Manager):
     def get_queryset(self):
-        return (
-            super().get_queryset().filter(Q(is_ai_checked=True) & Q(is_approved=True))
-        )
+        return super().get_queryset().filter(Q(is_ai_checked=True) & Q(is_approved=True))
 
 
 class Review(models.Model):
-    user = models.ForeignKey(
-        "users.CustomUser", on_delete=models.CASCADE, related_name="reviews"
-    )
-    medicine = models.ForeignKey(
-        Medicine, on_delete=models.CASCADE, related_name="reviews"
-    )
+    user = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE, related_name="reviews")
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, related_name="reviews")
     rating = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text="1 dan 5 gacha baho bering",
@@ -95,9 +87,7 @@ class ProductViewHistory(models.Model):
 
 
 class MedicineImage(models.Model):
-    medicine = models.ForeignKey(
-        Medicine, related_name="images", on_delete=models.CASCADE
-    )
+    medicine = models.ForeignKey(Medicine, related_name="images", on_delete=models.CASCADE)
     image = models.ImageField(upload_to="medicines/gallery/")
     is_primary = models.BooleanField(default=False)
 
@@ -123,16 +113,10 @@ class BotMenuStep(models.Model):
 
 
 class BotInlineButton(models.Model):
-    menu_step = models.ForeignKey(
-        BotMenuStep, on_delete=models.CASCADE, related_name="buttons"
-    )
+    menu_step = models.ForeignKey(BotMenuStep, on_delete=models.CASCADE, related_name="buttons")
     title_uz = models.CharField(max_length=255, verbose_name="Tugma nomi (UZ)")
-    title_ru = models.CharField(
-        max_length=255, verbose_name="Tugma nomi (RU)", blank=True, null=True
-    )
-    title_eng = models.CharField(
-        max_length=255, verbose_name="Tugma nomi (EN)", blank=True, null=True
-    )
+    title_ru = models.CharField(max_length=255, verbose_name="Tugma nomi (RU)", blank=True, null=True)
+    title_eng = models.CharField(max_length=255, verbose_name="Tugma nomi (EN)", blank=True, null=True)
     callback_id = models.IntegerField()
     row_number = models.PositiveIntegerField(default=1)
     sort_order = models.PositiveIntegerField(default=1)

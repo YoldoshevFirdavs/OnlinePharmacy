@@ -11,23 +11,16 @@ class Command(createsuperuser.Command):
         if "phone_number" in self.UserModel.REQUIRED_FIELDS:
             self.UserModel.REQUIRED_FIELDS.remove("phone_number")
         # Add email to required fields if it's not the USERNAME_FIELD
-        if (
-            self.UserModel.USERNAME_FIELD != "email"
-            and "email" not in self.UserModel.REQUIRED_FIELDS
-        ):
+        if self.UserModel.USERNAME_FIELD != "email" and "email" not in self.UserModel.REQUIRED_FIELDS:
             self.UserModel.REQUIRED_FIELDS.append("email")
 
     def handle(self, *args, **options):
         # Ensure email is prompted as the username field
-        self.username_field = self.UserModel._meta.get_field(
-            self.UserModel.USERNAME_FIELD
-        )
+        self.username_field = self.UserModel._meta.get_field(self.UserModel.USERNAME_FIELD)
 
         # Temporarily set REQUIRED_FIELDS to ensure email is asked
         original_required_fields = self.UserModel.REQUIRED_FIELDS
-        self.UserModel.REQUIRED_FIELDS = [
-            self.UserModel.USERNAME_FIELD
-        ]  # Make email required for this command
+        self.UserModel.REQUIRED_FIELDS = [self.UserModel.USERNAME_FIELD]  # Make email required for this command
 
         super().handle(*args, **options)
 
@@ -41,11 +34,7 @@ class Command(createsuperuser.Command):
             while input_value is None:
                 input_value = self.get_field_input(field, message, default)
                 if not input_value:
-                    self.stderr.write(
-                        self.style.ERROR(
-                            f"{field.verbose_name} bo'sh bo'lishi mumkin emas."
-                        )
-                    )
+                    self.stderr.write(self.style.ERROR(f"{field.verbose_name} bo'sh bo'lishi mumkin emas."))
                     input_value = None  # Ask again
             return input_value
         elif field.name == "phone_number":  # Make phone_number optional

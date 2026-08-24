@@ -6,9 +6,7 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-_redis_url = getattr(settings, "REDIS_URL", None) or os.getenv(
-    "REDIS_URL", "redis://redis:6379/0"
-)
+_redis_url = getattr(settings, "REDIS_URL", None) or os.getenv("REDIS_URL", "redis://redis:6379/0")
 try:
     redis_client = redis.StrictRedis.from_url(_redis_url, decode_responses=True)
 except Exception as e:

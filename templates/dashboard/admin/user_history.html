@@ -40,6 +40,7 @@
                         <th>Mahsulot/Sotuvchi</th>
                         <th>Tafsilotlar</th>
                         <th>IP manzil</th>
+                        <th>Amallar</th>
                     </tr>
                 </thead>
                 <tbody id="history-tbody">
@@ -164,7 +165,7 @@ function renderHistory(items) {
         
         // Details from meta
         let details = '-';
-        let orderViewUrl = '';
+        let orderId = null;
         if (item.meta) {
             try {
                 const meta = typeof item.meta === 'string' ? JSON.parse(item.meta) : item.meta;
@@ -172,12 +173,28 @@ function renderHistory(items) {
                 if (meta.rating) details = `Bahosi: ${meta.rating}★`;
                 if (meta.order_id) {
                     details = `Buyurtma #${meta.order_id}`;
-                    orderViewUrl = `/dashboard/admin/orders/${meta.order_id}/view/`;
+                    orderId = meta.order_id;
                 }
             } catch (e) {}
         }
         
-        // Build row HTML
+        // Build row HTML with Actions
+        let actionButtons = '';
+        
+        if (orderId) {
+            // If history is linked to an order, show view/edit/delete buttons
+            actionButtons = `
+                <div class="table-actions" style="display: flex; gap: 6px;">
+                    <a href="/dashboard/admin/orders/${orderId}/view/" class="btn btn--sm btn--ghost btn--primary" title="Buyurtmani ko'rish">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="/dashboard/orders/${orderId}/edit/" class="btn btn--sm btn--ghost" title="Tahrirlash">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                </div>
+            `;
+        }
+        
         let rowHtml = `
             <td><strong>#${item.id}</strong></td>
             <td><span title="${new Date(item.timestamp).toLocaleString()}">${new Date(item.timestamp).toLocaleDateString('uz-UZ')} ${new Date(item.timestamp).toLocaleTimeString('uz-UZ')}</span></td>
@@ -185,17 +202,18 @@ function renderHistory(items) {
             <td>${item.product ? `<strong>${item.product}</strong>` : (item.seller ? item.seller : '-')}</td>
             <td>${details}</td>
             <td><code>${item.ip_address}</code></td>
+            <td>${actionButtons}</td>
         `;
-        
-        // Add view button if order_id exists
-        if (orderViewUrl) {
-            rowHtml += `<td><a href="${orderViewUrl}" class="btn btn--sm btn--primary" style="padding: 6px 12px;">Ko'rish</a></td>`;
-        }
         
         row.innerHTML = rowHtml;
         
         tbody.appendChild(row);
     });
+    
+    // Add delete event listeners via global initDeleteHandlers
+    if (window.initDeleteHandlers) {
+        window.initDeleteHandlers();
+    }
 }
 
 function updatePagination() {

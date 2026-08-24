@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     {% load static %}
     <meta charset="UTF-8">
@@ -10,15 +11,25 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f8f9fa;
             color: #333;
         }
 
-        main { min-height: calc(100vh - 200px); }
+        main {
+            min-height: calc(100vh - 200px);
+        }
 
         /* ============ SHOP HEADER - STICKY ============ */
         .shop-header {
@@ -28,7 +39,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .search-container {
@@ -86,7 +97,7 @@
             overflow-y: auto;
             display: none;
             z-index: 1100;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         .suggestions-dropdown.show {
@@ -269,7 +280,7 @@
         }
 
         .product-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform: translateY(-4px);
             border-color: #4caf50;
         }
@@ -382,7 +393,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* ============ LOAD MORE BUTTON ============ */
@@ -409,6 +422,64 @@
             display: block;
         }
 
+        /* ============ PAGINATION CONTROLS ============ */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 20px;
+            padding: 16px;
+        }
+
+        .btn-pagination {
+            padding: 10px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-pagination:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .btn-pagination:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination-pages {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pagination-page {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .pagination-page:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        .pagination-page.active {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
         /* ============ TOAST NOTIFICATIONS ============ */
         .toast {
             position: fixed;
@@ -418,7 +489,7 @@
             color: white;
             padding: 16px 20px;
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 9999;
             font-size: 14px;
             animation: slideUp 0.3s ease-out;
@@ -433,6 +504,7 @@
                 transform: translateY(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -440,6 +512,7 @@
         }
     </style>
 </head>
+
 <body>
     {% include 'components/header.html' %}
 
@@ -448,13 +521,8 @@
         <div class="shop-header">
             <div class="search-container">
                 <div class="search-box">
-                    <input 
-                        type="text" 
-                        id="search-input" 
-                        placeholder="Dori, vitamin yoki mahsulot nomini qidirish..."
-                        aria-label="Mahsulotlarni qidirish"
-                        autocomplete="off"
-                    >
+                    <input type="text" id="search-input" placeholder="Dori, vitamin yoki mahsulot nomini qidirish..."
+                        aria-label="Mahsulotlarni qidirish" autocomplete="off">
                     <button class="btn-reference" id="btn-toggle-filters" aria-label="Filterlarni ko'rsatish">
                         <i class="fas fa-filter"></i> Filter
                     </button>
@@ -479,7 +547,8 @@
                 <div class="filter-section">
                     <label class="filter-label">Narx (so'm)</label>
                     <input type="number" id="filter-min-price" min="0" placeholder="Eng kam" aria-label="Eng kam narx">
-                    <input type="number" id="filter-max-price" min="0" placeholder="Eng ko'p" style="margin-top: 8px;" aria-label="Eng ko'p narx">
+                    <input type="number" id="filter-max-price" min="0" placeholder="Eng ko'p" style="margin-top: 8px;"
+                        aria-label="Eng ko'p narx">
                 </div>
 
                 <!-- Brand Filter -->
@@ -503,7 +572,8 @@
                 <!-- Rating Filter -->
                 <div class="filter-section">
                     <label class="filter-label">Reyting (min)</label>
-                    <input type="number" id="filter-rating" min="0" max="5" step="0.1" placeholder="0 - 5" aria-label="Minimum reyting">
+                    <input type="number" id="filter-rating" min="0" max="5" step="0.1" placeholder="0 - 5"
+                        aria-label="Minimum reyting">
                 </div>
 
                 <!-- Reviews Count -->
@@ -526,6 +596,14 @@
                         <option value="reviews_count">Eng ko'p fikrlar</option>
                     </select>
                 </div>
+
+                <!-- Reset Filter Button -->
+                <div class="filter-section">
+                    <button id="btn-reset-filters" class="btn-reset"
+                        style="width: 100%; padding: 12px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                        <i class="fa-solid fa-redo"></i> Filterlarni tozalaish
+                    </button>
+                </div>
             </div>
 
             <!-- RESULTS AREA -->
@@ -537,11 +615,17 @@
                 <div class="products-grid" id="products-grid">
                     <div class="empty-state">
                         <div class="empty-icon">📦</div>
-                        <div class="empty-text">Qidirish yoki filterlardan foydalanib mahsulotlarni topish uchun urinib ko'ring</div>
+                        <div class="empty-text">Qidirish yoki filterlardan foydalanib mahsulotlarni topish uchun urinib
+                            ko'ring</div>
                     </div>
                 </div>
 
-                <button class="btn-load-more" id="btn-load-more">Yana mahsulotlar yuklash</button>
+                <!-- Pagination Controls -->
+                <div class="pagination-wrapper" id="pagination-wrapper">
+                    <button class="btn-pagination" id="btn-page-prev" disabled>« Oldingi</button>
+                    <div class="pagination-pages" id="pagination-pages"></div>
+                    <button class="btn-pagination" id="btn-page-next">Keyingi »</button>
+                </div>
             </div>
         </div>
     </main>
@@ -553,7 +637,7 @@
         const API_BASE = '/api/v1/products/';
         const API_SUGGEST = '/api/v1/products/suggest/';
         const DEFAULT_IMG = '/static/images/default_avatar.png';
-        const PAGE_SIZE = 24;
+        const PAGE_SIZE = 50;
 
         // ============ STATE ============
         let state = {
@@ -593,15 +677,93 @@
             filterOrdering: () => document.getElementById('filter-ordering'),
             productsGrid: () => document.getElementById('products-grid'),
             resultCount: () => document.getElementById('result-count'),
-            btnLoadMore: () => document.getElementById('btn-load-more'),
+            btnPagePrev: () => document.getElementById('btn-page-prev'),
+            btnPageNext: () => document.getElementById('btn-page-next'),
+            paginationPages: () => document.getElementById('pagination-pages'),
+            btnResetFilters: () => document.getElementById('btn-reset-filters'),
         };
 
         // ============ INIT ============
         document.addEventListener('DOMContentLoaded', init);
 
         function init() {
+            loadCategoriesAndBrands();  // Load filters from API
+            setupPagination();          // Setup pagination UI
             setupEventListeners();
             loadProducts();
+        }
+
+        // ============ LOAD CATEGORIES & BRANDS ============
+        async function loadCategoriesAndBrands() {
+            try {
+                // Load categories
+                const catRes = await fetch('/api/v1/products/categories/?limit=100');
+                if (catRes.ok) {
+                    const catData = await catRes.json();
+                    const categories = catData.results || (Array.isArray(catData) ? catData : []);
+
+                    const catSelect = DOM.filterCategory();
+                    if (catSelect) {
+                        const uncategorizedCount = await getUncategorizedCount();
+
+                        // Add "Hamma kategoriya" option
+                        const defaultOpt = document.createElement('option');
+                        defaultOpt.value = '';
+                        defaultOpt.textContent = 'Hamma kategoriya';
+                        catSelect.appendChild(defaultOpt);
+
+                        // Add uncategorized option if there are items
+                        if (uncategorizedCount > 0) {
+                            const uncatOpt = document.createElement('option');
+                            uncatOpt.value = 'null';
+                            uncatOpt.textContent = `Kategoriyasiz (${uncategorizedCount})`;
+                            catSelect.appendChild(uncatOpt);
+                        }
+
+                        // Add categories
+                        categories.forEach(cat => {
+                            const opt = document.createElement('option');
+                            opt.value = cat.id;
+                            opt.textContent = cat.name;
+                            catSelect.appendChild(opt);
+                        });
+                    }
+                }
+
+                // Load brands/sellers
+                const brandRes = await fetch('/api/v1/users/sellers/?limit=100');
+                if (brandRes.ok) {
+                    const brandData = await brandRes.json();
+                    const brands = brandData.results || (Array.isArray(brandData) ? brandData : []);
+
+                    const brandSelect = DOM.filterBrand();
+                    if (brandSelect) {
+                        const defaultOpt = document.createElement('option');
+                        defaultOpt.value = '';
+                        defaultOpt.textContent = 'Hamma brand';
+                        brandSelect.appendChild(defaultOpt);
+
+                        brands.forEach(brand => {
+                            const opt = document.createElement('option');
+                            opt.value = brand.id;
+                            opt.textContent = brand.shop_name || brand.name;
+                            brandSelect.appendChild(opt);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('Load categories/brands notice:', err);
+            }
+        }
+
+        async function getUncategorizedCount() {
+            try {
+                const res = await fetch('/api/v1/products/?category=null&page_size=1');
+                const data = await res.json();
+                return data.count || 0;
+            } catch (err) {
+                return 0;
+            }
         }
 
         // ============ EVENT LISTENERS ============
@@ -610,7 +772,7 @@
             DOM.searchInput()?.addEventListener('input', (e) => {
                 const query = e.target.value.trim();
                 clearTimeout(debounceTimer);
-                
+
                 if (query.length >= 1) {
                     debounceTimer = setTimeout(() => loadSuggestions(query), 150);
                 } else {
@@ -670,29 +832,35 @@
                 }
             });
 
-            // Load more
-            DOM.btnLoadMore()?.addEventListener('click', () => {
-                state.page++;
-                loadProducts(true);
+            // Reset filters
+            DOM.btnResetFilters()?.addEventListener('click', () => {
+                // Clear all filters
+                DOM.searchInput().value = '';
+                DOM.filterCategory().value = '';
+                DOM.filterMinPrice().value = '';
+                DOM.filterMaxPrice().value = '';
+                DOM.filterBrand().value = '';
+                DOM.filterStock().value = '';
+                DOM.filterRating().value = '';
+                DOM.filterReviews().value = '';
+                DOM.filterOrdering().value = '-reviews_count';
+
+                // Reset state
+                state.query = '';
+                state.category = '';
+                state.minPrice = '';
+                state.maxPrice = '';
+                state.brand = '';
+                state.stock = '';
+                state.rating = '';
+                state.reviews = '';
+                state.ordering = '-reviews_count';
+                state.page = 1;
+                state.results = [];
+
+                // Reload products
+                loadProducts();
             });
-
-            // Infinite scroll
-            setupInfiniteScroll();
-        }
-
-        function setupInfiniteScroll() {
-            const sentinel = document.createElement('div');
-            sentinel.id = 'scroll-sentinel';
-            DOM.productsGrid().appendChild(sentinel);
-
-            const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && state.hasMore && !state.loading) {
-                    state.page++;
-                    loadProducts(true);
-                }
-            }, { rootMargin: '200px' });
-
-            observer.observe(sentinel);
         }
 
         // ============ SUGGESTIONS ============
@@ -788,11 +956,7 @@
 
             renderProducts();
             updateResultCount();
-
-            // Show filters panel when results loaded
-            if (state.results.length > 0) {
-                DOM.shopContainer().classList.add('filters-visible');
-            }
+            updatePagination();
         }
 
         // ============ RENDERING ============
@@ -835,15 +999,96 @@
             }).join('');
 
             grid.innerHTML = html;
-            grid.appendChild(sentinel);
-
-            DOM.btnLoadMore().classList.toggle('show', state.hasMore);
         }
 
         function updateResultCount() {
             const el = DOM.resultCount();
             if (el) {
                 el.textContent = `Natija: ${state.totalCount}`;
+            }
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(state.totalCount / PAGE_SIZE);
+            const currentPage = state.page;
+
+            const btnPrev = DOM.btnPagePrev();
+            const btnNext = DOM.btnPageNext();
+            const pagesContainer = DOM.paginationPages();
+
+            if (!btnPrev || !btnNext || !pagesContainer) return;
+
+            // Update buttons
+            btnPrev.disabled = currentPage <= 1;
+            btnNext.disabled = currentPage >= totalPages || totalPages === 0;
+
+            // Generate page buttons
+            let html = '';
+
+            // Show first page
+            if (totalPages > 1) {
+                html += `<button class="pagination-page ${currentPage === 1 ? 'active' : ''}" data-page="1">1</button>`;
+            }
+
+            // Show ellipsis if needed
+            if (currentPage > 3 && totalPages > 5) {
+                html += '<span class="pagination-ellipsis">...</span>';
+            }
+
+            // Show middle pages
+            const startPage = Math.max(2, currentPage - 1);
+            const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i > 1 && i < totalPages) {
+                    html += `<button class="pagination-page ${currentPage === i ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                }
+            }
+
+            // Show last page
+            if (totalPages > 1) {
+                if (currentPage < totalPages - 2 && totalPages > 5) {
+                    html += '<span class="pagination-ellipsis">...</span>';
+                }
+                html += `<button class="pagination-page ${currentPage === totalPages ? 'active' : ''}" data-page="${totalPages}">${totalPages}</button>`;
+            }
+
+            pagesContainer.innerHTML = html;
+
+            // Add event listeners
+            pagesContainer.querySelectorAll('.pagination-page').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = parseInt(btn.dataset.page);
+                    if (page !== state.page) {
+                        state.page = page;
+                        loadProducts();
+                    }
+                });
+            });
+        }
+
+        // ============ PAGINATION SETUP ============
+        function setupPagination() {
+            const btnPrev = DOM.btnPagePrev();
+            const btnNext = DOM.btnPageNext();
+
+            if (btnPrev) {
+                btnPrev.addEventListener('click', () => {
+                    if (state.page > 1) {
+                        state.page--;
+                        loadProducts();
+                    }
+                });
+            }
+
+            if (btnNext) {
+                btnNext.addEventListener('click', () => {
+                    const totalPages = Math.ceil(state.totalCount / PAGE_SIZE);
+                    if (state.page < totalPages) {
+                        state.page++;
+                        loadProducts();
+                    }
+                });
             }
         }
 
@@ -866,5 +1111,8 @@
             setTimeout(() => div.remove(), 3000);
         }
     </script>
+    <script type="module" src="{% static 'js/footer.js' %}"></script>
+    <script type="module" src="{% static 'js/header.js' %}"></script>
 </body>
+
 </html>

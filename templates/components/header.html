@@ -5,12 +5,12 @@
     <div class="header-left">
       <a href="/" class="header-logo" aria-label="Pharmacy home">
         <svg class="logo-svg" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="40" height="40" rx="10" fill="url(#logo_grad)"/>
-          <path d="M20 10V30M10 20H30" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          <rect width="40" height="40" rx="10" fill="url(#logo_grad)" />
+          <path d="M20 10V30M10 20H30" stroke="white" stroke-width="4" stroke-linecap="round" />
           <defs>
             <linearGradient id="logo_grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#6a00f4"/>
-              <stop offset="1" stop-color="#b084f4"/>
+              <stop stop-color="#6a00f4" />
+              <stop offset="1" stop-color="#b084f4" />
             </linearGradient>
           </defs>
         </svg>
@@ -20,30 +20,37 @@
 
     <!-- Center: Navigation -->
     <nav id="header-nav" class="header-nav" role="navigation" aria-label="Primary">
-      <button id="header-hamburger" class="header-hamburger" aria-expanded="false" aria-controls="header-nav-menu" aria-label="Open menu">
+      <button id="header-hamburger" class="header-hamburger" aria-expanded="false" aria-controls="header-nav-menu"
+        aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
 
       <ul id="header-nav-menu" class="header-nav-menu" role="menubar">
-        <li role="none"><a role="menuitem" id="nav-home" data-nav="home" class="header-nav-link" href="/">Bosh sahifa</a></li>
-        <li role="none"><a role="menuitem" id="nav-shop" data-nav="shop" class="header-nav-link" href="/shop/">Do'kon</a></li>
-        <li role="none"><a role="menuitem" id="nav-about" data-nav="about" class="header-nav-link" href="/about/">Biz haqimizda</a></li>
-        <li role="none"><a role="menuitem" id="nav-contact" data-nav="contact" class="header-nav-link" href="/contact/">Aloqa</a></li>
+        <li role="none"><a role="menuitem" id="nav-home" data-nav="home" class="header-nav-link" href="/">Bosh
+            sahifa</a></li>
+        <li role="none"><a role="menuitem" id="nav-shop" data-nav="shop" class="header-nav-link"
+            href="/shop/">Do'kon</a></li>
+        <li role="none"><a role="menuitem" id="nav-about" data-nav="about" class="header-nav-link" href="/about/">Biz
+            haqimizda</a></li>
+        <li role="none"><a role="menuitem" id="nav-contact" data-nav="contact" class="header-nav-link"
+            href="/contact/">Aloqa</a></li>
       </ul>
     </nav>
 
     <!-- Right: Actions (auth + cart) -->
     <div class="header-right">
-        <!-- Authentication links for non-logged-in users -->
-        <div id="auth-links" style="display: none;">
-            <a href="/auth/" id="login-button" class="btn-login-header">Kirish</a>
-        </div>
+      <!-- Authentication links for non-logged-in users -->
+      <div id="auth-links" style="display: none;">
+        <a href="/auth/" id="login-button" class="btn-login-header">Kirish</a>
+      </div>
 
-        <!-- NOTE: Account dropdown for logged-in users -->
-        {% include 'components/account_dropdown.html' %}
+      <!-- NOTE: Account dropdown for logged-in users -->
+      {% include 'components/account_dropdown.html' %}
 
-        <a href="{% url 'cart' %}" id="cartIcon" class="header-cart cart-link" aria-label="View cart" style="display: none;">Cart 🛒 <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span></a>
+      <a href="{% url 'cart' %}" id="cartIcon" class="header-cart cart-link" aria-label="View cart"
+        style="display: none;">Cart 🛒 <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span></a>
     </div>
   </div>
 </header>
+<script src="{% static 'js/cart_badge.js' %}"></script>
 <div id="header-overlay" class="header-overlay"></div>

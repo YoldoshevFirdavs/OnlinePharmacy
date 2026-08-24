@@ -5,22 +5,23 @@ Admin dashboard HTML views
 - Order detail page
 """
 
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
-from users.models import CustomUser
+from django.shortcuts import get_object_or_404, render
+
 from orders.models import Order
+from users.models import CustomUser
 
 
 def is_admin(user):
     """Check if user is admin"""
     try:
-        return user.is_authenticated and getattr(user, 'role', None) == 'admin'
+        return user.is_authenticated and getattr(user, "role", None) == "admin"
     except:
         return False
 
 
-@login_required(login_url='dashboard:login_page')
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def admin_analytics_dashboard(request):
     """
@@ -28,13 +29,13 @@ def admin_analytics_dashboard(request):
     Charts auto-refresh every 60 seconds (1 minute)
     """
     context = {
-        'page_title': 'Analytics Dashboard',
-        'refresh_interval': 60000,  # 1 minute in milliseconds
+        "page_title": "Analytics Dashboard",
+        "refresh_interval": 60000,  # 1 minute in milliseconds
     }
-    return render(request, 'dashboard/admin/analytics.html', context)
+    return render(request, "dashboard/admin/analytics.html", context)
 
 
-@login_required(login_url='dashboard:login_page')
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def user_history_view(request, user_id):
     """
@@ -45,16 +46,16 @@ def user_history_view(request, user_id):
         user = get_object_or_404(CustomUser, id=user_id)
     except:
         return HttpResponseForbidden("User not found")
-    
+
     context = {
-        'page_title': f'User History - {user.full_name or user.phone_number}',
-        'target_user': user,
-        'user_id': user_id,
+        "page_title": f"User History - {user.full_name or user.phone_number}",
+        "target_user": user,
+        "user_id": user_id,
     }
-    return render(request, 'dashboard/admin/user_history.html', context)
+    return render(request, "dashboard/admin/user_history.html", context)
 
 
-@login_required(login_url='dashboard:login_page')
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def order_detail_admin_view(request, user_id, order_id):
     """
@@ -66,18 +67,18 @@ def order_detail_admin_view(request, user_id, order_id):
         order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
-    
+
     context = {
-        'page_title': f'Order #{order.id}',
-        'target_user': user,
-        'order': order,
-        'user_id': user_id,
-        'order_id': order_id,
+        "page_title": f"Order #{order.id}",
+        "target_user": user,
+        "order": order,
+        "user_id": user_id,
+        "order_id": order_id,
     }
-    return render(request, 'dashboard/admin/order_detail.html', context)
+    return render(request, "dashboard/admin/order_detail.html", context)
 
 
-@login_required(login_url='dashboard:login_page')
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def admin_recently_deleted(request):
     """Admin page showing recently deleted (UndoLog) entries (last 24h)
@@ -87,14 +88,14 @@ def admin_recently_deleted(request):
     /dashboard/api/admin/undo-delete/ for backend operations.
     """
     context = {
-        'page_title': 'Recently Deleted (24h)',
-        'deleted_items_api': '/dashboard/api/admin/deleted-items/',
-        'undo_api': '/dashboard/api/admin/undo-delete/',
+        "page_title": "Recently Deleted (24h)",
+        "deleted_items_api": "/dashboard/api/admin/deleted-items/",
+        "undo_api": "/dashboard/api/admin/undo-delete/",
     }
-    return render(request, 'dashboard/admin/recently_deleted.html', context)
+    return render(request, "dashboard/admin/recently_deleted.html", context)
 
 
-@login_required(login_url='dashboard:login_page')
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def order_detail_view(request, user_id, order_id):
     """
@@ -106,16 +107,18 @@ def order_detail_view(request, user_id, order_id):
         order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
-    
+
     context = {
-        'page_title': f'Order #{order.id}',
-        'target_user': user,
-        'order': order,
-        'user_id': user_id,
-        'order_id': order_id,
+        "page_title": f"Order #{order.id}",
+        "target_user": user,
+        "order": order,
+        "user_id": user_id,
+        "order_id": order_id,
     }
-    return render(request, 'dashboard/admin/order_detail.html', context)
-@login_required(login_url='dashboard:login_page')
+    return render(request, "dashboard/admin/order_detail.html", context)
+
+
+@login_required(login_url="/auth/")
 @user_passes_test(is_admin, redirect_field_name=None)
 def order_detail_view(request, user_id, order_id):
     """
@@ -127,19 +130,19 @@ def order_detail_view(request, user_id, order_id):
         order = get_object_or_404(Order, id=order_id, user=user)
     except:
         return HttpResponseForbidden("Order not found")
-    
+
     context = {
-        'page_title': f'Order #{order.id}',
-        'target_user': user,
-        'order': order,
-        'user_id': user_id,
-        'order_id': order_id,
+        "page_title": f"Order #{order.id}",
+        "target_user": user,
+        "order": order,
+        "user_id": user_id,
+        "order_id": order_id,
     }
-    return render(request, 'dashboard/admin/order_detail.html', context)
+    return render(request, "dashboard/admin/order_detail.html", context)
 
 
-@login_required(login_url='dashboard:login_page')
-@user_passes_test(is_admin, login_url='dashboard:not_allowed')
+@login_required(login_url="/auth/")
+@user_passes_test(is_admin, login_url="dashboard:not_allowed")
 def admin_order_view(request, order_id):
     """
     Admin order detail page - standalone page (not modal)
@@ -148,14 +151,15 @@ def admin_order_view(request, order_id):
     """
     try:
         from orders.models import Order
-        order = get_object_or_404(Order.objects.select_related('user').prefetch_related('order_items'), id=order_id)
-        order_items = order.order_items.select_related('product').all()
+
+        order = get_object_or_404(Order.objects.select_related("user").prefetch_related("order_items"), id=order_id)
+        order_items = order.order_items.select_related("product").all()
     except:
         return HttpResponseForbidden("Order not found")
-    
+
     context = {
-        'page_title': f'Buyurtma #{order.id}',
-        'order': order,
-        'order_items': order_items,
+        "page_title": f"Buyurtma #{order.id}",
+        "order": order,
+        "order_items": order_items,
     }
-    return render(request, 'dashboard/order/view.html', context)
+    return render(request, "dashboard/order/view.html", context)

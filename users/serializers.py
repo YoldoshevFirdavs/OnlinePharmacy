@@ -36,6 +36,8 @@ def validate_image_file(file):
 class PhoneNumberField(serializers.CharField):
 
     def to_internal_value(self, data):
+        if isinstance(data, (list, tuple)):
+            data = data[0] if data else ""
         data = str(data).strip()
         if not data:
             return None
@@ -45,9 +47,7 @@ class PhoneNumberField(serializers.CharField):
 
         try:
 
-            parsed_number = phonenumbers.parse(
-                data, settings.PHONENUMBER_DEFAULT_REGION
-            )
+            parsed_number = phonenumbers.parse(data, settings.PHONENUMBER_DEFAULT_REGION)
             if not phonenumbers.is_valid_number(parsed_number):
 
                 parsed_number = phonenumbers.parse(data)
@@ -58,18 +58,14 @@ class PhoneNumberField(serializers.CharField):
         except phonenumbers.phonenumberutil.NumberParseException:
             raise serializers.ValidationError("Telefon raqami noto‘g‘ri formatda.")
         except Exception:
-            raise serializers.ValidationError(
-                "Telefon raqamini tekshirishda xato yuz berdi."
-            )
+            raise serializers.ValidationError("Telefon raqamini tekshirishda xato yuz berdi.")
 
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     phone_number = PhoneNumberField(required=False, allow_blank=True, allow_null=True)
     role = serializers.SerializerMethodField()
-    avatar = serializers.ImageField(
-        validators=[validate_image_file], required=False, allow_null=True
-    )
+    avatar = serializers.ImageField(validators=[validate_image_file], required=False, allow_null=True)
 
     class Meta:
         model = CustomUser
@@ -110,7 +106,7 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.seller.get_avatar_url
         if obj.avatar:
             return obj.avatar.url
-        return "/static/images/default_avatar.png"
+        return "/static/images/default/default_avatar.png"
 
     def get_role(self, obj):
         """Compute a single, primary role based on user properties using the helper function."""
@@ -118,7 +114,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_phone_number(self, value):
         if not value:
-            return value # Allow empty phone number if not required
+            return value  # Allow empty phone number if not required
         try:
             parsed_number = phonenumbers.parse(value, settings.PHONENUMBER_DEFAULT_REGION)
             if not phonenumbers.is_valid_number(parsed_number):
@@ -127,32 +123,20 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Telefon raqami noto'g'ri formatda.")
 
         if self.instance and value:
-            if (
-                CustomUser.objects.exclude(id=self.instance.id)
-                .filter(phone_number=value)
-                .exists()
-            ):
-                raise serializers.ValidationError(
-                    "Bu telefon raqami allaqachon mavjud."
-                )
-        elif not self.instance and value: # For create operations
+            if CustomUser.objects.exclude(id=self.instance.id).filter(phone_number=value).exists():
+                raise serializers.ValidationError("Bu telefon raqami allaqachon mavjud.")
+        elif not self.instance and value:  # For create operations
             if CustomUser.objects.filter(phone_number=value).exists():
-                raise serializers.ValidationError(
-                    "Bu telefon raqami allaqachon mavjud."
-                )
+                raise serializers.ValidationError("Bu telefon raqami allaqachon mavjud.")
         return value
 
     def validate_email(self, value):
         if value == "":
-            return None # Allow empty email if not required
+            return None  # Allow empty email if not required
         if self.instance and value:
-            if (
-                CustomUser.objects.exclude(id=self.instance.id)
-                .filter(email=value)
-                .exists()
-            ):
+            if CustomUser.objects.exclude(id=self.instance.id).filter(email=value).exists():
                 raise serializers.ValidationError("Bu Gmail manzili allaqachon mavjud.")
-        elif not self.instance and value: # For create operations
+        elif not self.instance and value:  # For create operations
             if CustomUser.objects.filter(email=value).exists():
                 raise serializers.ValidationError("Bu Gmail manzili allaqachon mavjud.")
         return value
@@ -213,7 +197,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         if hasattr(obj, "seller") and obj.seller:
             return obj.seller.get_avatar_url
-        return obj.avatar.url if obj.avatar else "/static/images/default_avatar.png"
+        return obj.avatar.url if obj.avatar else "/static/images/default/default_avatar.png"
 
     def get_role(self, obj):
         """Compute a single, primary role based on user properties using the helper function."""
@@ -274,9 +258,7 @@ class RegisterSerializer(serializers.Serializer):
         phone = data.get("phone_number")
         email = data.get("email")
         if not phone and not email:
-            raise serializers.ValidationError(
-                "Telefon raqami yoki email manzili kiritilishi shart."
-            )
+            raise serializers.ValidationError("Telefon raqami yoki email manzili kiritilishi shart.")
         return data
 
 
@@ -292,10 +274,8 @@ class TelegramLoginSerializer(serializers.Serializer):
         telegram_id = data.get("telegram_id")
 
         if not phone_number and not telegram_id:
-            raise serializers.ValidationError(
-                "Telegram orqali kirish uchun telefon raqami yoki Telegram ID kerak."
-            )
-        
+            raise serializers.ValidationError("Telegram orqali kirish uchun telefon raqami yoki Telegram ID kerak.")
+
         # Validate role
         role = data.get("role", "user")
         if role not in ["user", "admin", "seller"]:
@@ -312,7 +292,7 @@ class VerifyOTPSerializer(serializers.Serializer):
     session_id = serializers.CharField(required=True)
     code = serializers.CharField(required=True, write_only=True)
     identifier = serializers.CharField(required=False, allow_blank=True)
-    action = serializers.CharField(required=True)
+    # Note: action field was removed - not used in OTP verification endpoint
 
     def validate_code(self, value):
         """Validate OTP code is not empty."""
@@ -346,9 +326,7 @@ class SubscribedUserSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Email kiritilishi shart.")
         if not value.lower().endswith("@gmail.com"):
-            raise serializers.ValidationError(
-                "Faqat gmail.com manzillari qabul qilinadi."
-            )
+            raise serializers.ValidationError("Faqat gmail.com manzillari qabul qilinadi.")
         return value
 
     def create(self, validated_data):
@@ -374,9 +352,7 @@ class AdminSetupSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         if not value.lower().endswith("@gmail.com"):
-            raise serializers.ValidationError(
-                "Faqat gmail.com manzillari qabul qilinadi."
-            )
+            raise serializers.ValidationError("Faqat gmail.com manzillari qabul qilinadi.")
         return value
 
 
@@ -426,9 +402,7 @@ class TestAdminLoginSerializer(serializers.Serializer):
         password = data.get("password")
         full_name = data.get("full_name")
         # Normalize phone number if provided, using the field's logic
-        phone_number_internal = self.fields["phone_number"].to_internal_value(
-            data.get("phone_number")
-        )
+        phone_number_internal = self.fields["phone_number"].to_internal_value(data.get("phone_number"))
 
         user = User.objects.filter(email__iexact=email, is_staff=True).first()
 
@@ -487,14 +461,10 @@ class AdminLoginSerializer(serializers.Serializer):
 
         if action == "request_verification":
             if not (email or phone_number):
-                raise serializers.ValidationError(
-                    "request_verification requires email or phone_number"
-                )
+                raise serializers.ValidationError("request_verification requires email or phone_number")
         elif action == "request_otp":
             if not (email or phone_number):
-                raise serializers.ValidationError(
-                    "request_otp requires email or phone_number"
-                )
+                raise serializers.ValidationError("request_otp requires email or phone_number")
         elif action == "telegram":
             if not (phone_number or data.get("telegram_id")):
                 pass  # validation handled in view for now
@@ -507,9 +477,7 @@ class AdminLoginSerializer(serializers.Serializer):
                 pass
         elif action == "credentials":
             if not (username or email or phone_number) or not password:
-                raise serializers.ValidationError(
-                    "credentials requires identifier and password"
-                )
+                raise serializers.ValidationError("credentials requires identifier and password")
         else:
             raise serializers.ValidationError("Unknown action")
 
@@ -521,12 +489,8 @@ class GmailOAuthSerializer(serializers.Serializer):
     redirect_uri = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, data):
-        if not getattr(settings, "GOOGLE_CLIENT_ID", None) or not getattr(
-            settings, "GOOGLE_CLIENT_SECRET", None
-        ):
-            raise serializers.ValidationError(
-                "Google OAuth client credentials not configured"
-            )
+        if not getattr(settings, "GOOGLE_CLIENT_ID", None) or not getattr(settings, "GOOGLE_CLIENT_SECRET", None):
+            raise serializers.ValidationError("Google OAuth client credentials not configured")
         return data
 
     def build_token_exchange_payload(self):
@@ -559,69 +523,74 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
-
 class UserBanSerializer(serializers.ModelSerializer):
     """Ban mehanism bilan bog'liq user ma'lumotlari."""
-    banned_by_name = serializers.CharField(source='banned_by.full_name', read_only=True, allow_null=True)
+
+    banned_by_name = serializers.CharField(source="banned_by.full_name", read_only=True, allow_null=True)
     ban_until_formatted = serializers.SerializerMethodField()
     is_ban_active = serializers.SerializerMethodField()
     time_remaining_seconds = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CustomUser
         fields = [
-            'id',
-            'email',
-            'phone_number',
-            'full_name',
-            'role',
-            'banned_for',
-            'ban_reason',
-            'ban_until',
-            'ban_until_formatted',
-            'is_permanent_ban',
-            'banned_by',
-            'banned_by_name',
-            'is_ban_active',
-            'time_remaining_seconds',
+            "id",
+            "email",
+            "phone_number",
+            "full_name",
+            "role",
+            "banned_for",
+            "ban_reason",
+            "ban_until",
+            "ban_until_formatted",
+            "is_permanent_ban",
+            "banned_by",
+            "banned_by_name",
+            "is_ban_active",
+            "time_remaining_seconds",
         ]
         read_only_fields = [
-            'id',
-            'banned_by_name',
-            'is_ban_active',
-            'time_remaining_seconds',
-            'ban_until_formatted',
+            "id",
+            "banned_by_name",
+            "is_ban_active",
+            "time_remaining_seconds",
+            "ban_until_formatted",
         ]
-    
+
     def get_ban_until_formatted(self, obj):
         """Ban tugash vaqtini insan o'qiga tushunadigan formatda qaytarish."""
         if not obj.ban_until:
             return None
         from django.utils.timezone import localtime
+
         local_time = localtime(obj.ban_until)
-        return local_time.strftime('%Y-%m-%d %H:%M:%S')
-    
+        return local_time.strftime("%Y-%m-%d %H:%M:%S")
+
     def get_is_ban_active(self, obj):
         """Ban hozir faol yoki yo'q."""
         return obj.is_active_ban()
-    
+
     def get_time_remaining_seconds(self, obj):
         """Vaqtli ban uchun qolgan sekund soni."""
         if not obj.ban_until or obj.is_permanent_ban:
             return None
         from django.utils import timezone
+
         remaining = (obj.ban_until - timezone.now()).total_seconds()
         return max(0, int(remaining))
 
 
 class BanUserSerializer(serializers.Serializer):
     """Ban berish uchun serializer."""
+
     user_id = serializers.IntegerField()
     page = serializers.CharField(max_length=255, help_text="Qaysi page uchun ban (masalan: 'admin_login')")
-    duration_seconds = serializers.IntegerField(required=False, allow_null=True, help_text="Vaqtli ban bo'lsa, necha sekundga. Null bo'lsa, permanent ban.")
+    duration_seconds = serializers.IntegerField(
+        required=False, allow_null=True, help_text="Vaqtli ban bo'lsa, necha sekundga. Null bo'lsa, permanent ban."
+    )
     reason = serializers.CharField(max_length=500, required=False, allow_blank=True)
     is_permanent = serializers.BooleanField(default=False)
-    
+
     def validate_user_id(self, value):
         """User mavjudligini tekshirish."""
         try:
@@ -629,36 +598,34 @@ class BanUserSerializer(serializers.Serializer):
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Foydalanuvchi topilmadi.")
         return value
-    
+
     def create(self, validated_data):
         """Ban berish."""
-        user = CustomUser.objects.get(id=validated_data['user_id'])
-        page = validated_data['page']
-        duration_seconds = validated_data.get('duration_seconds')
-        reason = validated_data.get('reason', '')
-        is_permanent = validated_data.get('is_permanent', False)
-        
+        user = CustomUser.objects.get(id=validated_data["user_id"])
+        page = validated_data["page"]
+        duration_seconds = validated_data.get("duration_seconds")
+        reason = validated_data.get("reason", "")
+        is_permanent = validated_data.get("is_permanent", False)
+
         # Admin user-ni get qilish (banned_by field uchun)
         from rest_framework.request import Request
-        if hasattr(self, 'context') and 'request' in self.context:
-            admin_user = self.context['request'].user if self.context['request'].user.is_authenticated else None
+
+        if hasattr(self, "context") and "request" in self.context:
+            admin_user = self.context["request"].user if self.context["request"].user.is_authenticated else None
         else:
             admin_user = None
-        
+
         user.ban_user(
-            page=page,
-            duration_seconds=duration_seconds,
-            reason=reason,
-            banned_by=admin_user,
-            is_permanent=is_permanent
+            page=page, duration_seconds=duration_seconds, reason=reason, banned_by=admin_user, is_permanent=is_permanent
         )
         return user
 
 
 class UnbanUserSerializer(serializers.Serializer):
     """Ban olib tashlash uchun serializer."""
+
     user_id = serializers.IntegerField()
-    
+
     def validate_user_id(self, value):
         """User mavjudligini tekshirish."""
         try:
@@ -666,9 +633,9 @@ class UnbanUserSerializer(serializers.Serializer):
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError("Foydalanuvchi topilmadi.")
         return value
-    
+
     def create(self, validated_data):
         """Ban olib tashlash."""
-        user = CustomUser.objects.get(id=validated_data['user_id'])
+        user = CustomUser.objects.get(id=validated_data["user_id"])
         user.unban_user()
         return user

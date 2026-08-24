@@ -13,9 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="deliverer",
             name="avatar",
-            field=models.ImageField(
-                blank=True, null=True, upload_to="deliverer_avatars/"
-            ),
+            field=models.ImageField(blank=True, null=True, upload_to="deliverer_avatars/"),
         ),
         migrations.AlterField(
             model_name="customuser",
