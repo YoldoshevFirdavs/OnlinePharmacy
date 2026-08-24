@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
-from orders.models import Order
+from orders.models import Order, OrderItem
 from pharmacy.models import Category, Medicine
 from security.models import AuditLog
 from users.models import CustomUser, DeliveryDriver, Seller
