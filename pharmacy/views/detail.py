@@ -1,7 +1,6 @@
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 
-from pharmacy.models import Category, Medicine
+from pharmacy.models import Medicine
 
 
 def product_detail(request, product_id):

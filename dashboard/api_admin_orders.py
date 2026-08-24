@@ -4,7 +4,6 @@ Admin Order API endpoints
 - Update Order
 """
 
-from datetime import datetime
 
 from django.db import transaction
 from rest_framework import status

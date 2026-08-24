@@ -1,16 +1,11 @@
 import logging
-from datetime import timedelta
 
 from celery import shared_task
-from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import EmailMessage, get_connection, send_mail
-from django.db import transaction
 from django.template.loader import render_to_string
-from django.utils import timezone
 
 from config import email_config
-from users.models import DeliveryDriver
 
 logger = logging.getLogger(__name__)
 

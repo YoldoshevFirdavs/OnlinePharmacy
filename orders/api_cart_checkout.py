@@ -200,7 +200,7 @@ class CheckoutAPIView(APIView):
             # Record AuditLog and History inside on_commit
             def log_checkout():
                 # History - har bir user uchun
-                from pharmacy.models.misc import ProductViewHistory
+                pass
 
                 # Create order history entry
                 history_description = (

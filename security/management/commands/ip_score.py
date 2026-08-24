@@ -1,6 +1,6 @@
 import logging
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from security.ip_score import decr_ip_score, get_ip_score, incr_ip_score, reset_ip_score
 

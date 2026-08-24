@@ -17,7 +17,7 @@ import logging
 import secrets
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
 from django.core.cache import cache

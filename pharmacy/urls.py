@@ -4,7 +4,6 @@ from rest_framework.routers import DefaultRouter
 from .api_views import MedicineListView, product_detail, product_suggestions
 from .views.comments import ProductCommentViewSet
 from .views.detail import product_detail, product_full_guide
-from .views.history import UserHistoryViewSet
 from .views.product import (
     CategoryViewSet,
     FlashSaleViewSet,

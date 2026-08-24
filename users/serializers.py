@@ -1,7 +1,6 @@
 import phonenumbers
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
 from phonenumbers import PhoneNumberFormat
 from PIL import Image
 from rest_framework import serializers
@@ -608,7 +607,6 @@ class BanUserSerializer(serializers.Serializer):
         is_permanent = validated_data.get("is_permanent", False)
 
         # Admin user-ni get qilish (banned_by field uchun)
-        from rest_framework.request import Request
 
         if hasattr(self, "context") and "request" in self.context:
             admin_user = self.context["request"].user if self.context["request"].user.is_authenticated else None

@@ -5,7 +5,6 @@ import time
 from pathlib import Path
 
 import requests
-from django.db import transaction
 from dotenv import load_dotenv
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.error import TelegramError

@@ -5,20 +5,18 @@ import traceback
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.decorators import user_passes_test
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from orders.models import Order, OrderItem
 from pharmacy.models import Category, Medicine
 from security.models import AuditLog
-from users.models import CustomUser, DeliveryDriver, Seller
+from users.models import CustomUser, DeliveryDriver
 
 from .forms import AccountSettingsForm, CategoryForm, DeliveryDriverForm, MedicineForm, OrderForm, UserForm
 

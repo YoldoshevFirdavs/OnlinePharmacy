@@ -1,25 +1,16 @@
-import hashlib
-import json
 import logging
 import os
-import random
-import secrets
-import string
 import time
-from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired, dumps, loads
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from PIL import Image
-from rest_framework import generics, permissions, serializers, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.generics import CreateAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -28,12 +19,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 import users.otp_service as otp_service
 from dashboard.forms import AccountSettingsForm
-from pharmacy.permissons import IsVerifiedSeller
-from security.locks import is_locked, record_failed_attempt, reset_lockout
+from security.locks import is_locked
 from security.middleware import get_client_ip
 from security.models import AuditLog, BanRecord
 
-from .models import CustomUser, DeliveryDriver, Seller, SubscribedUser
+from .models import CustomUser, Seller, SubscribedUser
 
 # Import dashboard permissions
 try:
@@ -49,15 +39,14 @@ except ImportError:
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic import FormView, TemplateView
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 import users.tasks as tasks
 from orders.models import Order
-from security.ip_score import decr_ip_score, get_ip_score, incr_ip_score, reset_ip_score
+from security.ip_score import decr_ip_score
 
 from .otp_service import (
     TELEGRAM_OTP_LENGTH,
@@ -67,29 +56,16 @@ from .otp_service import (
     claim_admin_session,
     create_admin_session,
     create_otp_session,
-    delete_admin_code,
-    delete_admin_session,
-    delete_otp,
     generate_numeric_code,
-    get_admin_code_hash,
     get_admin_session_meta,
-    get_bot_otp,
-    get_otp_hash,
     is_banned,
-    record_failed_attempt,
-    reset_failed_attempts,
-    store_admin_code_hash,
     store_bot_otp,
     store_otp_hash,
-    verify_admin_code,
-    verify_otp_code,
-    verify_otp_once,
 )
 from .permissions import IsOwnerOrAdmin
 from .serializers import (
     AdminLoginSerializer,
     GmailOAuthSerializer,
-    PhoneNumberField,
     RegisterSerializer,
     RoleDetermineSerializer,
     SellerSerializer,
@@ -99,7 +75,6 @@ from .serializers import (
     UserPublicSerializer,
     UserSerializer,
     VerifyOTPSerializer,
-    VerifySerializer,
 )
 
 logger = logging.getLogger(__name__)

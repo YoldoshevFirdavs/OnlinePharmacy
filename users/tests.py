@@ -3,16 +3,14 @@ Comprehensive tests for the verify_otp endpoint.
 Tests cover: payload validation, session not found, invalid code, too many attempts, and success path.
 """
 
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from users.otp_service import OtpHash, get_otp_hash, get_session_meta, store_otp_hash
 from users.serializers import VerifyOTPSerializer
 
 User = get_user_model()

@@ -5,7 +5,6 @@ Enhanced to handle both user bans and fingerprint bans from cache
 """
 
 import logging
-import re
 
 from django.core.cache import cache
 from django.core.management.base import BaseCommand

@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
 
 logger = logging.getLogger(__name__)
 

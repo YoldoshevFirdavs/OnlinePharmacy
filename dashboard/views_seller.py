@@ -1,10 +1,7 @@
 """Seller profile views"""
 
-from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, render
-from django.utils.decorators import method_decorator
-from django.views import View
 
 from pharmacy.models import Medicine
 from users.models import CustomUser

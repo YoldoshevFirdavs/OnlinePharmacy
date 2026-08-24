@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from pharmacy.models.history import CustomerUserHistory
-from pharmacy.models.medicine import Medicine
 
 
 class CustomerUserHistorySerializer(serializers.ModelSerializer):

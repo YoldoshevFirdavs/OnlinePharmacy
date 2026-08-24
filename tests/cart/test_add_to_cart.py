@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from orders.api_cart_checkout import CartAddAPIView, CartSummaryAPIView, CheckoutAPIView
+from orders.api_cart_checkout import CartAddAPIView, CartSummaryAPIView
 
 
 @pytest.mark.django_db

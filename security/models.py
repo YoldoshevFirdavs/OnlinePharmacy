@@ -204,7 +204,6 @@ class UndoLog(models.Model):
     @classmethod
     def create_for_delete(cls, item, item_type, deleted_by=None):
         """Create undo log entry for deleted item"""
-        import json
         from datetime import timedelta
 
         # Get item data
@@ -261,7 +260,7 @@ class UndoLog(models.Model):
                 }
 
         elif item_type == "order":
-            from orders.models import Order, OrderItem
+            from orders.models import Order
 
             if isinstance(item, Order):
                 deleted_data = {
