@@ -1,9 +1,13 @@
 # Testing
-pytest>=8.3,<9.0
-pytest-django>=4.8,<5.0
-coverage>=7.6,<8.0
+pytest==8.3.5                # Testing framework
+pytest-django==4.12.0        # Django plugin for pytest
+coverage>=7.6,<8.0           # Code coverage measurement
 
-# Linting and formatting
-flake8>=7.1,<8.0
-black>=24.8,<25.0
-isort>=5.13,<6.0
+# Code Quality & Linting
+flake8>=7.1,<8.0             # Python linter
+black>=24.8,<25.0            # Code formatter
+isort>=5.13,<6.0             # Import sorter
+
+# Utilities
+autoflake>=2.0               # Remove unused imports automatically
+
