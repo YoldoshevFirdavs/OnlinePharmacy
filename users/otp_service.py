@@ -15,6 +15,9 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+# Get custom user model
+User = get_user_model()
+
 # ============================================
 # CONSTANTS
 # ============================================
