@@ -1,30 +1,38 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
+from .api_admin import AdminAnalyticsAPIView, UserHistoryAPIView, UserOrderDetailAPIView
+from .api_admin_orders import AdminOrderCreateAPIView, AdminOrderListAPIView, AdminOrderUpdateAPIView
+from .api_admin_undo import DeletedItemsAPIView, UndoDeleteAPIView
+from .api_stats import DailyOrdersStatsAPIView, SummaryStatsAPIView
 from .api_views import (
-    DeliveryDriverViewSet, SessionCheckView, SalesStatsView, CategoryListView,
-    ProductListView, OrderListView, RecentOrderListView, OrderStatusUpdateView,
-    UserListView, SettingsView, CalendarEventsView, DashboardStatsApiView,
-    DriverApiView, BannedUsersListView, BanUserView, UnbanUserView, UserBanDetailView
+    BannedUsersListView,
+    BanUserView,
+    CalendarEventsView,
+    CategoryListView,
+    DashboardStatsApiView,
+    DeliveryDriverViewSet,
+    DriverApiView,
+    OrderListView,
+    OrderStatusUpdateView,
+    ProductListView,
+    RecentOrderListView,
+    SalesStatsView,
+    SessionCheckView,
+    SettingsView,
+    UnbanUserView,
+    UserBanDetailView,
+    UserListView,
 )
-from .api_admin import (
-    AdminAnalyticsAPIView,
-    UserHistoryAPIView,
-    UserOrderDetailAPIView,
-)
-from .api_admin_orders import (
-    AdminOrderCreateAPIView,
-    AdminOrderUpdateAPIView,
-    AdminOrderListAPIView,
-)
-from .api_admin_undo import (
-    UndoDeleteAPIView,
-    DeletedItemsAPIView,
-)
-from .views import seller_dashboard, seller_profile, product_full_guide  # Added seller and product views
-from .views import (
+from .views import ban_delete  # Added ban CRUD views
+from .views import (  # Added seller and product views
     account_settings,
     audit_log_list,
+    ban_create,
+    ban_edit,
+    ban_list,
+    ban_toggle_status,
+    ban_view,
     category_create,
     category_delete,
     category_edit,
@@ -47,33 +55,28 @@ from .views import (
     order_edit,
     order_list,
     order_view,
+    product_full_guide,
+    seller_dashboard,
+    seller_profile,
     user_create,
     user_delete,
     user_edit,
     user_list,
-    ban_list,
-    ban_create,
-    ban_edit,
-    ban_view,
-    ban_toggle_status,
-    ban_delete,  # Added ban CRUD views
 )
 from .views_admin import (
     admin_analytics_dashboard,
-    user_history_view,
-    order_detail_view,
-    order_detail_admin_view,
     admin_order_view,
     admin_recently_deleted,
+    order_detail_admin_view,
+    order_detail_view,
+    user_history_view,
 )
 
 app_name = "dashboard"
 
 urlpatterns = [
     path("admin/", main_dashboard, name="dashboard-admin"),
-    path(
-        "seller/", seller_dashboard, name="seller_dashboard"
-    ),  # Added seller dashboard URL
+    path("seller/", seller_dashboard, name="seller_dashboard"),  # Added seller dashboard URL
     path("login/", login_page, name="login_page"),
     path("logout/", logout_page, name="logout_page"),
     path("account/", account_settings, name="account_dashboard"),
@@ -121,21 +124,27 @@ urlpatterns = [
         TemplateView.as_view(template_name="check_admin.html"),
         name="test_admin_login",
     ),
-    
     # Admin Analytics API (Task #10)
     path("api/admin/analytics/", AdminAnalyticsAPIView.as_view(), name="api_admin_analytics"),
     path("api/admin/user/<int:user_id>/history/", UserHistoryAPIView.as_view(), name="api_user_history"),
-    path("api/admin/user/<int:user_id>/order/<int:order_id>/", UserOrderDetailAPIView.as_view(), name="api_order_detail"),
-    
+    path(
+        "api/admin/user/<int:user_id>/order/<int:order_id>/", UserOrderDetailAPIView.as_view(), name="api_order_detail"
+    ),
     # Admin Order API
     path("api/admin/orders/", AdminOrderListAPIView.as_view(), name="api_admin_orders"),
     path("api/admin/orders/create/", AdminOrderCreateAPIView.as_view(), name="api_admin_orders_create"),
     path("api/admin/orders/<int:pk>/", AdminOrderUpdateAPIView.as_view(), name="api_admin_orders_update"),
-    
     # Admin Undo API
     path("api/admin/undo-delete/", UndoDeleteAPIView.as_view(), name="api_admin_undo_delete"),
     path("api/admin/deleted-items/", DeletedItemsAPIView.as_view(), name="api_admin_deleted_items"),
-    
+    # Live Stats API
+    path("api/stats/orders/", DailyOrdersStatsAPIView.as_view(), name="api_stats_orders"),
+    path("api/stats/summary/", SummaryStatsAPIView.as_view(), name="api_stats_summary"),
+    path("api/stats/main/", DashboardStatsApiView.as_view(), name="api_stats_main"),
+    path("api/stats/sales/", SalesStatsView.as_view(), name="api_stats_sales"),
+    path("api/categories/", CategoryListView.as_view(), name="api_categories"),
+    path("api/products/", ProductListView.as_view(), name="api_products"),
+    path("api/orders/recent/", RecentOrderListView.as_view(), name="api_orders_recent"),
     # Admin Dashboard HTML pages (Task #10)
     path("admin/analytics/", admin_analytics_dashboard, name="admin_analytics"),
     path("admin/user/<int:user_id>/history/", user_history_view, name="user_history"),

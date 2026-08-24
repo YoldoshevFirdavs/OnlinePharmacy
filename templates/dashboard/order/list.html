@@ -3,31 +3,26 @@
 
 {% block title %}Buyurtmalar{% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">
-            <i class="fa-solid fa-cart-shopping"></i>
-            Buyurtmalar
-        </h1>
-    </div>
-    <div class="page-actions">
-        <a href="{% url 'dashboard:order_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i>
-            Qo'shish
-        </a>
-    </div>
+{% block page_title_icon %}<i class="fa-solid fa-cart-shopping"></i>{% endblock %}
+{% block page_title_text %}Buyurtmalar{% endblock %}
+
+{% block page_actions %}
+<div class="page-header__actions">
+    <a href="{% url 'dashboard:order_create' %}" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i> Qo'shish
+    </a>
 </div>
 {% endblock %}
 
 {% block table_head %}
-<th>ID</th>
+<th><a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=id" style="text-decoration: none; color: inherit;">ID</a></th>
 <th>Mijoz</th>
 <th>Mahsulotlar soni</th>
 <th>Jami summa</th>
+<th>To'lov usuli</th>
 <th>Status</th>
 <th>Yetkazuvchi</th>
-<th>Yaratilgan sana</th>
+<th><a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=created_at" style="text-decoration: none; color: inherit;">Yaratilgan sana</a></th>
 <th>Amallar</th>
 {% endblock %}
 
@@ -38,12 +33,18 @@
         <td><strong>#{{ order.id }}</strong></td>
         <td>
             <div class="user-cell">
-                <i class="fa-solid fa-circle-user"></i>
                 <span>{{ order.user.full_name|default:order.user.email|default:order.user.phone_number|default:"—" }}</span>
             </div>
         </td>
         <td>{{ order.order_items.count|default:"0" }}</td>
         <td><strong>{{ order.total_price|default:"0" }} so'm</strong></td>
+        <td>
+            <span class="tag tag--{{ order.payment_method|default:'cash' }}">
+                {% if order.payment_method == 'cash' %}Naqd pul
+                {% elif order.payment_method == 'card' %}Karta
+                {% else %}{{ order.payment_method|default:"Naqd pul" }}{% endif %}
+            </span>
+        </td>
         <td>
             <span class="tag tag--{% if order.status == 'Delivered' %}success{% elif order.status == 'Pending' %}warning{% elif order.status == 'Cancelled' %}error{% else %}info{% endif %}">
                 {{ order.status|default:"—" }}
@@ -72,6 +73,7 @@
                 <button type="button" 
                         class="btn btn--sm btn--ghost btn--danger order-delete-btn"
                         data-order-id="{{ order.id }}"
+                        data-delete-url="{% url 'dashboard:order_delete' order.id %}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -81,7 +83,7 @@
     {% endfor %}
 {% else %}
     <tr class="data-table__empty">
-        <td colspan="8">
+        <td colspan="9">
             <i class="fa-solid fa-inbox"></i>
             <span>Buyurtmalar topilmadi</span>
         </td>

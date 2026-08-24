@@ -8,9 +8,7 @@ from django.core.mail import send_mail
 logger = logging.getLogger(__name__)
 
 
-@shared_task(
-    bind=True, default_retry_delay=300, max_retries=3
-)  # Retry after 5 minutes, up to 3 times
+@shared_task(bind=True, default_retry_delay=300, max_retries=3)  # Retry after 5 minutes, up to 3 times
 def send_otp_email(self, email: str, otp: str):
     """Send OTP to a user's email address with retry logic."""
     logger.info(
@@ -33,9 +31,7 @@ def send_otp_email(self, email: str, otp: str):
         try:
             self.retry(exc=exc)
         except MaxRetriesExceededError:
-            logger.critical(
-                "Max retries exceeded for OTP email to %s. Giving up.", email
-            )
+            logger.critical("Max retries exceeded for OTP email to %s. Giving up.", email)
 
 
 @shared_task
@@ -66,9 +62,7 @@ def clear_expired_sessions():
         return 0
 
 
-@shared_task(
-    bind=True, default_retry_delay=300, max_retries=3
-)  # Retry after 5 minutes, up to 3 times
+@shared_task(bind=True, default_retry_delay=300, max_retries=3)  # Retry after 5 minutes, up to 3 times
 def send_subscription_verification_email(self, email: str, verify_url: str):
     """Send subscription verification email with link and retry logic."""
     logger.info(
@@ -87,9 +81,7 @@ def send_subscription_verification_email(self, email: str, verify_url: str):
         )
         logger.info("Subscription verification email successfully sent to %s", email)
     except Exception as exc:
-        logger.error(
-            "Failed to send subscription verification email to %s: %s", email, exc
-        )
+        logger.error("Failed to send subscription verification email to %s: %s", email, exc)
         try:
             self.retry(exc=exc)
         except MaxRetriesExceededError:

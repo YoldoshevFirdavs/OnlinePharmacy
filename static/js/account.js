@@ -246,22 +246,20 @@ async function handleLogout() {
         return;
     }
     try {
-        // Assuming a logout API endpoint exists, e.g., /api/v1/auth/logout/
-        // If your logout is handled purely client-side by clearing tokens, this might not be needed.
-        // If it's a server-side logout (e.g., invalidating session/token), uncomment and adjust:
-        // await sendRequest('/api/v1/auth/logout/', 'POST');
+        await sendRequest('/api/v1/users/logout/', 'POST');
+        await sendRequest('/api/v1/users/logout/jwt/', 'POST');
         alert(_('logout_success'));
     } catch (error) {
         console.error(ACCOUNT_CONFIG.I18N.uz.logout_error, error);
         alert(error.detail || _('logout_error'));
     } finally {
-        // Clear all local storage related to auth
-        localStorage.clear(); // More robust: clears all items
-        localStorage.removeItem('currentSessionId');
-        localStorage.removeItem('currentIdentifier');
-        localStorage.removeItem('showOtpPopup');
+        [
+            'access_token', 'refresh_token', 'username', 'avatar_url', 'user_role',
+            'user_email', 'user_id', 'currentSessionId', 'currentIdentifier',
+            'currentAuthMethod', 'showOtpPopup'
+        ].forEach(key => localStorage.removeItem(key));
         sessionStorage.clear();
-        window.location.href = ACCOUNT_CONFIG.AUTH_PAGE_URL;
+        window.location.replace(ACCOUNT_CONFIG.AUTH_PAGE_URL);
     }
 }
 

@@ -231,67 +231,123 @@
         
         <h1>Kirishga Ruxsat Berilmagan</h1>
         
-        <div class="status {% if ban.ban_type == 'temporary' %}temporary{% else %}permanent{% endif %}">
-            {% if ban.ban_type == 'temporary' %}
-                ⏱️ Vaqtli Blok
-            {% else %}
-                🔒 Doimiy Blok
-            {% endif %}
+        {% if ban.is_permanent or ban.ban_type == 'permanent' or is_permanent or fp_is_permanent %}
+        <div class="status permanent">
+            🔒 Doimiy Blok
         </div>
+        {% else %}
+        <div class="status temporary">
+            ⏱️ Vaqtli Blok
+        </div>
+        {% endif %}
         
         <!-- Reason -->
         <div class="reason">
             <div class="reason-title">📋 Blok Sababi</div>
-            <div class="reason-text">{{ ban.reason }}</div>
+            <div class="reason-text">
+                {% if ban.reason %}
+                    {{ ban.reason }}
+                {% elif ban_reason %}
+                    {{ ban_reason }}
+                {% elif fp_ban_reason %}
+                    {{ fp_ban_reason }}
+                {% else %}
+                    Noma'lum sabab
+                {% endif %}
+            </div>
         </div>
         
         <!-- Details -->
         <div class="details">
             <div class="detail-item">
                 <div class="detail-label">Blok Vaqti</div>
-                <div class="detail-value">{{ ban.created_at|date:"d.m.Y H:i:s" }}</div>
+                <div class="detail-value">
+                    {% if ban.created_at %}
+                        {{ ban.created_at|date:"d.m.Y H:i:s" }}
+                    {% elif ban_created_at %}
+                        {{ ban_created_at|date:"d.m.Y H:i:s" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
             </div>
             
             <div class="detail-item">
                 <div class="detail-label">Blok Turi</div>
                 <div class="detail-value">
-                    {% if ban.ban_type == 'temporary' %}
-                        Vaqtli ({{ ban.attempts }} xato)
-                    {% else %}
+                    {% if ban.ban_type == 'permanent' or ban.is_permanent or is_permanent or fp_is_permanent %}
                         Doimiy
+                    {% else %}
+                        Vaqtli
                     {% endif %}
                 </div>
             </div>
             
-            {% if ban.expires_at %}
+            {% if ban.expires_at or ban_until or fp_ban_expires_at %}
             <div class="detail-item">
                 <div class="detail-label">Tugash Vaqti</div>
-                <div class="detail-value">{{ ban.expires_at|date:"d.m.Y H:i:s" }}</div>
+                <div class="detail-value">
+                    {% if ban.expires_at %}
+                        {{ ban.expires_at|date:"d.m.Y H:i:s" }}
+                    {% elif ban_until %}
+                        {{ ban_until|date:"d.m.Y H:i:s" }}
+                    {% elif fp_ban_expires_at %}
+                        {{ fp_ban_expires_at|date:"d.m.Y H:i:s" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
             
             <div class="detail-item">
                 <div class="detail-label">Manba</div>
-                <div class="detail-value">{{ ban.get_created_by_display }}</div>
+                <div class="detail-value">
+                    {% if ban.created_by %}
+                        {{ ban.created_by }}
+                    {% elif banned_for %}
+                        {{ banned_for }}
+                    {% elif fp_banned_for %}
+                        {{ fp_banned_for }}
+                    {% else %}
+                        Noma'lum
+                    {% endif %}
+                </div>
             </div>
             
-            {% if ban.source %}
+            {% if device_fingerprint or ban.fingerprint %}
             <div class="detail-item">
-                <div class="detail-label">URL</div>
-                <div class="detail-value">{{ ban.source }}</div>
+                <div class="detail-label">Qurilma Belgi</div>
+                <div class="detail-value">
+                    {% if device_fingerprint %}
+                        {{ device_fingerprint }}
+                    {% elif ban.fingerprint %}
+                        {{ ban.fingerprint|truncatechars:15 }}
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
             
-            {% if ip %}
+            {% if ip or ban.ip %}
             <div class="detail-item">
                 <div class="detail-label">IP Manzil</div>
-                <div class="detail-value">{{ ip }}</div>
+                <div class="detail-value">
+                    {% if ip %}
+                        {{ ip }}
+                    {% elif ban.ip %}
+                        {{ ban.ip }}
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
         </div>
         
         <!-- Timer for temporary ban -->
-        {% if ban.ban_type == 'temporary' and ban.expires_at %}
+        {% if ban.ban_type != 'permanent' and ban.ban_type != 'permanent' and ban.expires_at %}
+        <div class="timer">
+            <strong>Blok hali</strong> <span id="countdown"></span> <strong>vaqt qoldi</strong>
+        </div>
+        {% elif not is_permanent and not fp_is_permanent and ban_until or fp_ban_expires_at %}
         <div class="timer">
             <strong>Blok hali</strong> <span id="countdown"></span> <strong>vaqt qoldi</strong>
         </div>
@@ -299,7 +355,7 @@
         
         <!-- Actions -->
         <div class="actions">
-            {% if ban.ban_type == 'temporary' %}
+            {% if ban.ban_type != 'permanent' and not is_permanent and not fp_is_permanent %}
             <a href="javascript:location.reload()" class="btn btn-primary">🔄 Qayta Urinib Ko'rish</a>
             {% endif %}
             <a href="/" class="btn btn-secondary">🏠 Bosh Sahifa</a>
@@ -309,24 +365,16 @@
         <div class="support">
             <div class="support-title">📞 Yordam Kerakmi?</div>
             <div class="support-contact">
-                {% if support_email %}
-                <a href="mailto:{{ support_email }}" class="support-link">📧 {{ support_email }}</a>
-                {% endif %}
-                {% if support_phone %}
-                <a href="tel:{{ support_phone }}" class="support-link">☎️ {{ support_phone }}</a>
-                {% endif %}
-            </div>
-            <div style="margin-top: 15px; font-size: 11px; color: #CCC;">
-                <span class="code">{{ ban.fingerprint|default:"" }}</span>
+                {% comment %} Support contact info if available {% endcomment %}
             </div>
         </div>
     </div>
     
     <script>
         // Countdown timer for temporary ban
-        {% if ban.ban_type == 'temporary' and ban.expires_at %}
+        {% if ban.expires_at %}
         (function() {
-            const expiresAt = new Date('{{ ban.expires_at|date:"Y-m-d\TH:i:s.000000Z" }}').getTime();
+            const expiresAt = new Date('{{ ban.expires_at|date:"Y-m-d\TH:i:s" }}').getTime();
             
             function updateCountdown() {
                 const now = new Date().getTime();
@@ -345,7 +393,34 @@
                 setTimeout(updateCountdown, 1000);
             }
             
-            updateCountdown();
+            if (document.getElementById('countdown')) {
+                updateCountdown();
+            }
+        })();
+        {% elif ban_until %}
+        (function() {
+            const expiresAt = new Date('{{ ban_until|date:"Y-m-d\TH:i:s" }}').getTime();
+            
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const diff = expiresAt - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('countdown').textContent = '0 daqiqa';
+                    return;
+                }
+                
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('countdown').textContent = `${minutes} daqiqa ${seconds} soniya`;
+                
+                setTimeout(updateCountdown, 1000);
+            }
+            
+            if (document.getElementById('countdown')) {
+                updateCountdown();
+            }
         })();
         {% endif %}
     </script>

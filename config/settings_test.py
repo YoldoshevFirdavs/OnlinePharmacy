@@ -15,7 +15,7 @@ if not SECRET_KEY:
     SECRET_KEY = "test-secret-key-for-django-tests"
 
 DEBUG = True  # Always True for tests
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "web", "db", "redis"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     "djoser",
     "drf_yasg",
     "corsheaders",
-    "custom_auth",
     "users",
     "pharmacy",
     "orders",
@@ -50,7 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "config.middleware.SecurityHeadersMiddleware",
+    "security.middleware.BanMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -90,9 +89,7 @@ DATABASES = {
 
 REDIS_HOST = "redis" if IS_DOCKER else "localhost"
 REDIS_PORT = 6379
-REDIS_URL = (
-    os.getenv("REDIS_URL") or f"redis://{REDIS_HOST}:{REDIS_PORT}/1"
-)  # Use DB 1 for tests
+REDIS_URL = os.getenv("REDIS_URL") or f"redis://{REDIS_HOST}:{REDIS_PORT}/1"  # Use DB 1 for tests
 
 CACHES = {
     "default": {
@@ -121,10 +118,19 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Phonenumber field configuration
+PHONENUMBER_DEFAULT_REGION = "UZ"
+
+# OTP Configuration for tests
+OTP_MAX_ATTEMPTS = 5
+OTP_ATTEMPT_RESET_TIMEOUT = 3600  # 1 hour
+
+# Fingerprint and Rate Limiting Configuration
+FINGERPRINT_RATE_THRESHOLD = 5
+FINGERPRINT_TEMP_BAN_DURATION = 1  # minutes
+
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
@@ -162,9 +168,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         "OPTIONS": {"min_length": 8},

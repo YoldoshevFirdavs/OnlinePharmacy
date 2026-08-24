@@ -57,16 +57,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="flashsale",
             name="product",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"),
         ),
         migrations.AddField(
             model_name="cartitem",
             name="product",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"),
         ),
         migrations.AddField(
             model_name="medicineimage",
@@ -107,16 +103,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="productviewhistory",
             name="product",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"),
         ),
         migrations.AddField(
             model_name="productviewhistory",
             name="user",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="review",
@@ -139,9 +131,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="stocklog",
             name="medicine",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="pharmacy.medicine"),
         ),
         migrations.AddField(
             model_name="stocklog",

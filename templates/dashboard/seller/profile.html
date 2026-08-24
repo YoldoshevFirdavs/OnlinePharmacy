@@ -1,0 +1,160 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}{{ seller.get_full_name|default:seller.email }} - Seller Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fa-solid fa-user-tie"></i>
+        {{ seller.get_full_name|default:seller.email }}
+    </h1>
+    <div class="page-actions">
+        <a href="{% url 'dashboard:user_list' %}" class="btn btn--outline">
+            <i class="fa-solid fa-arrow-left"></i> Orqaga
+        </a>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card__body">
+        <div class="seller-profile-header">
+            <div class="seller-avatar-large">
+                <img src="{{ seller.avatar.url|default:'/static/dashboard/images/default_avatar.png' }}" alt="{{ seller.get_full_name }}">
+            </div>
+            <div class="seller-info">
+                <h2>{{ seller.get_full_name|default:seller.email }}</h2>
+                <p class="seller-email">{{ seller.email }}</p>
+                <div class="seller-stats">
+                    <span class="stat">
+                        <strong>{{ seller_stats.total_products|default:0 }}</strong>
+                        Mahsulotlar
+                    </span>
+                    <span class="stat">
+                        <strong>{{ seller_stats.avg_rating|default:0|floatformat:1 }}</strong>
+                        Reyting
+                    </span>
+                    <span class="stat">
+                        <strong>{{ seller_stats.total_reviews|default:0 }}</strong>
+                        Fikrlar
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card__header">
+        <h2 class="card__title">
+            <i class="fa-solid fa-box"></i>
+            Mahsulotlar
+        </h2>
+    </div>
+    <div class="card__body">
+        {% if products %}
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nomi</th>
+                        <th>Kategoriya</th>
+                        <th>Narxi</th>
+                        <th>Stock</th>
+                        <th>Reyting</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>
+                            <a href="{% url 'dashboard:medicine_edit' product.pk %}" class="text-primary">
+                                {{ product.name }}
+                            </a>
+                        </td>
+                        <td>{{ product.category.name|default:'-' }}</td>
+                        <td>{{ product.price|floatformat:0 }} so'm</td>
+                        <td>
+                            <span class="tag {% if product.stock > 0 %}tag--success{% else %}tag--error{% endif %}">
+                                {{ product.stock }}
+                            </span>
+                        </td>
+                        <td>{{ product.average_rating|default:0|floatformat:1 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-box-open"></i>
+            <p>Ushbu sotuvchining hali mahsulotlari yo'q</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+<style>
+.seller-profile-header {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.seller-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #eee;
+}
+
+.seller-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-info h2 {
+    font-size: 20px;
+    margin: 0 0 8px 0;
+}
+
+.seller-email {
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.seller-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.seller-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #444;
+}
+
+.seller-stats .stat strong {
+    color: #4caf50;
+    font-size: 18px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    color: #ddd;
+}
+</style>

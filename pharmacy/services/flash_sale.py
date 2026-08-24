@@ -21,13 +21,9 @@ def check_flash_sale_status(request, product_id):
     try:
         product = Medicine.objects.get(id=product_id)
     except Medicine.DoesNotExist:
-        return Response(
-            {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    user_viewed = ProductViewHistory.objects.filter(
-        user=request.user, product=product
-    ).exists()
+    user_viewed = ProductViewHistory.objects.filter(user=request.user, product=product).exists()
 
     upcoming_flash_sale = FlashSale.objects.filter(
         product=product, start_time__lte=datetime.now() + timedelta(hours=24)

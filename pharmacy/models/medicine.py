@@ -4,9 +4,7 @@ from django.db.models import Q
 
 class MedicineManager(models.Manager):
     def search(self, query):
-        return self.filter(
-            Q(name__icontains=query) | Q(short_description__icontains=query)
-        ).distinct()
+        return self.filter(Q(name__icontains=query) | Q(short_description__icontains=query)).distinct()
 
 
 class MedicineAvailableManager(models.Manager):
@@ -14,19 +12,13 @@ class MedicineAvailableManager(models.Manager):
         return super().get_queryset().filter(is_active=True, stock__gt=0)
 
     def search(self, query):
-        return (
-            self.get_queryset()
-            .filter(Q(name__icontains=query) | Q(short_description__icontains=query))
-            .distinct()
-        )
+        return self.get_queryset().filter(Q(name__icontains=query) | Q(short_description__icontains=query)).distinct()
 
 
 class Medicine(models.Model):
     name = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(unique=True, db_index=True)
-    category = models.ForeignKey(
-        "Category", on_delete=models.PROTECT, related_name="medicines"
-    )
+    category = models.ForeignKey("Category", on_delete=models.PROTECT, related_name="medicines")
 
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     reviews_count = models.PositiveIntegerField(default=0)

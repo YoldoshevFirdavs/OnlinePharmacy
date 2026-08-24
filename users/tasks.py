@@ -46,9 +46,7 @@ def _send_via_configured_connection(subject, text_body, html_body, to_email):
         use_tls=email_config.EMAIL_USE_TLS,
         fail_silently=False,
     )
-    msg = EmailMessage(
-        subject, text_body, email_config.DEFAULT_FROM_EMAIL, [to_email], connection=conn
-    )
+    msg = EmailMessage(subject, text_body, email_config.DEFAULT_FROM_EMAIL, [to_email], connection=conn)
     if html_body:
         msg.attach_alternative(html_body, "text/html")
     msg.send(fail_silently=False)
@@ -99,16 +97,12 @@ def send_admin_login_email(self, email, token, token_lifetime_minutes=15):
             print(f"[Celery Task] send_admin_login_email: Kimga: {email}")
             print(f"[Celery Task] send_admin_login_email: Token: {token}")
             print(f"[Celery Task] send_admin_login_email: Link: {link}")
-            print(
-                f"[Celery Task] send_admin_login_email: From: {email_config.DEFAULT_FROM_EMAIL}"
-            )
+            print(f"[Celery Task] send_admin_login_email: From: {email_config.DEFAULT_FROM_EMAIL}")
 
         _send_via_configured_connection(subject, text_body, html_body, email)
         logger.info("Sent admin login email to %s (token=%s)", email, token)
         if email_config.DEBUG_PRINT_CONFIG:
-            print(
-                f"[Celery Task] send_admin_login_email: Email muvaffaqiyatli yuborildi to {email}"
-            )
+            print(f"[Celery Task] send_admin_login_email: Email muvaffaqiyatli yuborildi to {email}")
 
     except Exception as exc:
         logger.exception("Failed to send admin login email to %s: %s", email, exc)
@@ -156,9 +150,7 @@ def send_admin_login_email_sync(email, token, token_lifetime_minutes=15):
         use_tls=email_config.EMAIL_USE_TLS,
         fail_silently=False,
     )
-    msg = EmailMessage(
-        subject, text_body, email_config.DEFAULT_FROM_EMAIL, [email], connection=conn
-    )
+    msg = EmailMessage(subject, text_body, email_config.DEFAULT_FROM_EMAIL, [email], connection=conn)
     if html_body:
         msg.attach_alternative(html_body, "text/html")
     msg.send(fail_silently=False)
@@ -166,9 +158,7 @@ def send_admin_login_email_sync(email, token, token_lifetime_minutes=15):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=300)
-def send_subscription_verification_email(
-    self, to_email: str, verification_link: str
-) -> None:
+def send_subscription_verification_email(self, to_email: str, verification_link: str) -> None:
     """Sends a subscription verification email."""
     subject = "Confirm your subscription to OnlinePharmacy"
     text_body = (
@@ -183,31 +173,21 @@ def send_subscription_verification_email(
     if email_config.DEBUG_PRINT_CONFIG:
         print(f"\n[Celery Task] send_subscription_verification_email: Task boshlandi")
         print(f"[Celery Task] send_subscription_verification_email: Kimga: {to_email}")
-        print(
-            f"[Celery Task] send_subscription_verification_email: Link: {verification_link}"
-        )
-        print(
-            f"[Celery Task] send_subscription_verification_email: From: {email_config.DEFAULT_FROM_EMAIL}"
-        )
+        print(f"[Celery Task] send_subscription_verification_email: Link: {verification_link}")
+        print(f"[Celery Task] send_subscription_verification_email: From: {email_config.DEFAULT_FROM_EMAIL}")
 
     try:
         _send_via_configured_connection(subject, text_body, html_body, to_email)
         logger.info("Subscription verification email sent to %s", to_email)
         if email_config.DEBUG_PRINT_CONFIG:
-            print(
-                f"[Celery Task] send_subscription_verification_email: Email muvaffaqiyatli yuborildi to {to_email}"
-            )
+            print(f"[Celery Task] send_subscription_verification_email: Email muvaffaqiyatli yuborildi to {to_email}")
     except Exception as exc:
-        logger.exception(
-            "Failed to send subscription verification email to %s: %s", to_email, exc
-        )
+        logger.exception("Failed to send subscription verification email to %s: %s", to_email, exc)
         raise self.retry(exc=exc)
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=300)
-def send_simple_notification_email(
-    self, to_email: str, subject: str, body: str
-) -> None:
+def send_simple_notification_email(self, to_email: str, subject: str, body: str) -> None:
     """Sends a simple notification email."""
     text_body = body
     html_body = None
@@ -217,17 +197,13 @@ def send_simple_notification_email(
         print(f"[Celery Task] send_simple_notification_email: Kimga: {to_email}")
         print(f"[Celery Task] send_simple_notification_email: Mavzu: {subject}")
         print(f"[Celery Task] send_simple_notification_email: Xabar: {body}")
-        print(
-            f"[Celery Task] send_simple_notification_email: From: {email_config.DEFAULT_FROM_EMAIL}"
-        )
+        print(f"[Celery Task] send_simple_notification_email: From: {email_config.DEFAULT_FROM_EMAIL}")
 
     try:
         _send_via_configured_connection(subject, text_body, html_body, to_email)
         logger.info("Notification email sent to %s with subject %s", to_email, subject)
         if email_config.DEBUG_PRINT_CONFIG:
-            print(
-                f"[Celery Task] send_simple_notification_email: Email muvaffaqiyatli yuborildi to {to_email}"
-            )
+            print(f"[Celery Task] send_simple_notification_email: Email muvaffaqiyatli yuborildi to {to_email}")
     except Exception as exc:
         logger.exception("Failed to send notification email to %s: %s", to_email, exc)
         raise self.retry(exc=exc)
@@ -250,9 +226,7 @@ def send_otp_email(self, to_email: str, otp_code: str, user_name: str = None):
         _send_via_configured_connection(subject, text_body, html_body, to_email)
         logger.info("OTP email successfully sent to %s", to_email)
         if email_config.DEBUG_PRINT_CONFIG:
-            print(
-                f"[Celery Task] send_otp_email: Email muvaffaqiyatli yuborildi to {to_email}"
-            )
+            print(f"[Celery Task] send_otp_email: Email muvaffaqiyatli yuborildi to {to_email}")
     except Exception as exc:
         logger.exception("Failed to send OTP email to %s: %s", to_email, exc)
         raise self.retry(exc=exc)

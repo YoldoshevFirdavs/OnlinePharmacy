@@ -481,9 +481,6 @@
                             {% else %}
                                 <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="profile-avatar-img" id="profileAvatarImg">
                             {% endif %}
-                            <button type="button" class="avatar-edit-btn" id="btnEditAvatar" title="Rasmni o'zgartirish">
-                                <i class="fa-solid fa-pencil"></i>
-                            </button>
                         </div>
                         <h3 class="profile-name">{{ user.get_full_name|default:user.email|default:"User" }}</h3>
                         <p class="profile-role">
@@ -514,60 +511,55 @@
                             {% endif %}
 
                             {% for field in form %}
-                            <div class="form-group{% if field.errors %} form-group--error{% endif %}" id="group_{{ field.html_name }}">
-                                <label for="{{ field.id_for_label }}" class="form-label">
-                                    {{ field.label }}
-                                    {% if field.field.required %}<span class="form-required">*</span>{% endif %}
-                                </label>
-                                {% if field.html_name == 'email' %}
-                                    <input type="email" name="{{ field.name }}" id="id_email" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ user.id }}">
-                                    <div id="email-feedback" class="form-text"></div>
-                                {% elif field.html_name == 'phone_number' %}
-                                    <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ user.id }}">
-                                    <div id="phone-feedback" class="form-text"></div>
-                                {% elif field.html_name == 'avatar' %}
-                                    <div class="form-file-wrapper">
+                                {% if field.html_name != 'old_password' or user.has_usable_password %}
+                                <div class="form-group{% if field.errors %} form-group--error{% endif %}" id="group_{{ field.html_name }}">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                                    </label>
+                                    {% if field.html_name == 'email' %}
+                                        <input type="email" name="{{ field.name }}" id="id_email" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ user.id }}">
+                                        <div id="email-feedback" class="form-text"></div>
+                                    {% elif field.html_name == 'phone_number' %}
+                                        <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ user.id }}">
+                                        <div id="phone-feedback" class="form-text"></div>
+                                    {% elif field.html_name == 'new_password1' %}
                                         {{ field }}
-                                        <span class="form-file-label">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i> Faylni tanlang
-                                        </span>
-                                    </div>
-                                {% elif field.html_name == 'new_password1' %}
-                                    {{ field }}
-                                    <ul class="pwd-requirements" aria-live="polite">
-                                        <li class="pwd-req pwd-req--fail" data-key="len">
-                                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                            <span>Kamida 8 ta belgi</span>
-                                        </li>
-                                        <li class="pwd-req pwd-req--fail" data-key="upper">
-                                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                            <span>Kamida 1 ta katta harf (A-Z)</span>
-                                        </li>
-                                        <li class="pwd-req pwd-req--fail" data-key="lower">
-                                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                            <span>Kamida 1 ta kichik harf (a-z)</span>
-                                        </li>
-                                        <li class="pwd-req pwd-req--fail" data-key="digit">
-                                            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-                                            <span>Kamida 1 ta raqam (0-9)</span>
-                                        </li>
+                                        <ul class="pwd-requirements" aria-live="polite">
+                                            <li class="pwd-req pwd-req--fail" data-key="len">
+                                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                                <span>Kamida 8 ta belgi</span>
+                                            </li>
+                                            <li class="pwd-req pwd-req--fail" data-key="upper">
+                                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                                <span>Kamida 1 ta katta harf (A-Z)</span>
+                                            </li>
+                                            <li class="pwd-req pwd-req--fail" data-key="lower">
+                                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                                <span>Kamida 1 ta kichik harf (a-z)</span>
+                                            </li>
+                                            <li class="pwd-req pwd-req--fail" data-key="digit">
+                                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                                <span>Kamida 1 ta raqam (0-9)</span>
+                                            </li>
+                                        </ul>
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+
+                                    {% if field.help_text %}
+                                    <p class="form-hint">{{ field.help_text }}</p>
+                                    {% endif %}
+
+                                    {% if field.errors %}
+                                    <ul class="form-error-list">
+                                        {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                        {% endfor %}
                                     </ul>
-                                {% else %}
-                                    {{ field }}
+                                    {% endif %}
+                                </div>
                                 {% endif %}
-
-                                {% if field.help_text %}
-                                <p class="form-hint">{{ field.help_text }}</p>
-                                {% endif %}
-
-                                {% if field.errors %}
-                                <ul class="form-error-list">
-                                    {% for error in field.errors %}
-                                    <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-                            </div>
                             {% endfor %}
 
                             <div class="form-actions" id="formActions">
@@ -586,26 +578,6 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Avatar preview
-        var btnEdit = document.getElementById('btnEditAvatar');
-        var avatarInput = document.getElementById('id_avatar');
-        if (btnEdit && avatarInput) {
-            btnEdit.addEventListener('click', function(e) {
-                e.preventDefault();
-                avatarInput.click();
-            });
-            avatarInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        var img = document.getElementById('profileAvatarImg');
-                        if (img) img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
-        }
-
         // Password validator
         var RULES = [
             { key: 'len',   label: 'Kamida 8 ta belgi',       test: function(v){ return v.length >= 8; } },

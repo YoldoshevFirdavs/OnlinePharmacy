@@ -19,11 +19,7 @@ class IsVerifiedSeller(permissions.BasePermission):
         if request.user and request.user.is_authenticated:
             try:
                 seller = Seller.objects.get(user=request.user)
-                return (
-                    seller.is_verified
-                    and hasattr(obj, "seller")
-                    and obj.seller == seller
-                )
+                return seller.is_verified and hasattr(obj, "seller") and obj.seller == seller
             except Seller.DoesNotExist:
                 return False
         return False

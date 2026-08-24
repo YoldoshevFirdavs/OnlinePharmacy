@@ -64,17 +64,13 @@ class OtpHash:
     algorithm: str = "sha256"
 
     def to_json(self) -> str:
-        return json.dumps(
-            {"hash": self.hash, "salt": self.salt, "algorithm": self.algorithm}
-        )
+        return json.dumps({"hash": self.hash, "salt": self.salt, "algorithm": self.algorithm})
 
     @staticmethod
     def from_json(data: str) -> "OtpHash":
         try:
             d = json.loads(data) if isinstance(data, str) else data
-            return OtpHash(
-                hash=d["hash"], salt=d["salt"], algorithm=d.get("algorithm", "sha256")
-            )
+            return OtpHash(hash=d["hash"], salt=d["salt"], algorithm=d.get("algorithm", "sha256"))
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             logger.error(f"Failed to parse OtpHash: {str(e)[:50]}")
             raise ValueError("Invalid OtpHash format")
@@ -155,17 +151,13 @@ def create_otp_session(purpose: str) -> OtpSession:
     if purpose not in ("telegram", "email"):
         raise ValueError("Purpose must be 'telegram' or 'email'")
 
-    session = OtpSession(
-        session_id=generate_session_id(), purpose=purpose, created_at=timezone.now()
-    )
+    session = OtpSession(session_id=generate_session_id(), purpose=purpose, created_at=timezone.now())
 
     logger.info(f"OTP session created: {session.session_id[:8]}... ({purpose})")
     return session
 
 
-def bind_session_to_user(
-    session_id: str, user_id: int, identifier: str, ttl: int = OTP_TTL
-) -> bool:
+def bind_session_to_user(session_id: str, user_id: int, identifier: str, ttl: int = OTP_TTL) -> bool:
     """Store session metadata (user_id, identifier, timestamp)."""
     if not all([session_id, user_id, identifier]):
         logger.error("Missing required fields for bind_session_to_user")
@@ -329,9 +321,7 @@ def get_bot_otp(session_id: str) -> Optional[OtpHash]:
 # ============================================
 
 
-def verify_otp_once(
-    session_id: str, provided_code: str, identifier: str = None
-) -> Tuple[bool, str]:
+def verify_otp_once(session_id: str, provided_code: str, identifier: str = None) -> Tuple[bool, str]:
     """Verify OTP code and invalidate on success. Returns (is_valid, message) tuple."""
     if not all([session_id, provided_code]):
         msg = "Missing session_id or provided_code"

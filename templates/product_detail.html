@@ -1,4 +1,4 @@
-{% load static %}
+{% load static pharmacy_tags %}
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -344,24 +344,61 @@
             color: #333;
         }
 
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        /* Amazon-style horizontal scroll */
+        .related-scroll-container {
+            display: flex;
             gap: 16px;
+            overflow-x: auto;
+            padding: 8px 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd #f5f5f5;
+        }
+
+        .related-scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .related-scroll-container::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 3px;
+        }
+
+        .related-scroll-container::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 3px;
         }
 
         .related-card {
+            flex: 0 0 auto;
+            width: 160px;
             background: white;
             border: 1px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             overflow: hidden;
+            position: relative;
         }
 
         .related-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .related-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4caf50, #45a049);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .related-card:hover::before {
+            opacity: 1;
         }
 
         .related-image {
@@ -513,6 +550,94 @@
             z-index: 9998;
             pointer-events: none;
         }
+
+        /* REVIEWS SIDEBAR */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-overlay.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-content {
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .btn-close-sidebar {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .btn-close-sidebar:hover {
+            color: #333;
+        }
+
+        /* REVIEWS TOGGLE BUTTON */
+        .reviews-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-reviews-toggle {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-reviews-toggle:hover {
+            background: #e0e0e0;
+            border-color: #bbb;
+        }
+
+        .btn-reviews-toggle i {
+            color: #4caf50;
+        }
+            position: fixed;
+            z-index: 9998;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -533,14 +658,16 @@
             <!-- LEFT: IMAGES -->
             <div class="product-images">
                 <div class="product-main-image">
-                    <img id="main-image" src="{{ product.main_image.url|default:'/static/images/default_avatar.png' }}" alt="{{ product.name }}">
+                    <img id="main-image" src="{{ main_image_url }}" alt="{{ product.name }}">
                 </div>
                 {% if product.images.all %}
                     <div class="product-thumbnails">
                         {% for img in product.images.all %}
-                            <div class="thumbnail {% if img.is_primary %}active{% endif %}" onclick="switchImage(this, '{{ img.image.url }}')">
-                                <img src="{{ img.image.url }}" alt="Thumbnail">
-                            </div>
+                            {% if img.image and img.image.name %}
+                                <div class="thumbnail {% if img.is_primary %}active{% endif %}" onclick="switchImage(this, '{{ img.image|safe_image_url }}')">
+                                    <img src="{{ img.image|safe_image_url }}" alt="Thumbnail">
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -552,7 +679,7 @@
 
                 <!-- SELLER INFO -->
                 {% if product.seller %}
-                    <a href="{% url 'dashboard:seller_detail' product.seller.id %}" class="seller-info-link">
+                    <a href="{% url 'dashboard:seller_profile' product.seller.id %}" class="seller-info-link">
                         <div class="seller-info">
                             <div class="seller-avatar">
                                 <img src="{{ product.seller.avatar.url|default:'/static/images/default_avatar.png' }}" alt="{{ product.seller.shop_name }}">
@@ -576,6 +703,15 @@
                 <!-- DESCRIPTION -->
                 <div class="description">
                     {{ product.short_description }}
+                </div>
+
+                <!-- REVIEWS & COMMENTS -->
+                <div class="reviews-section">
+                    <h3 class="section-title">Fikrlar va baholar</h3>
+                    <button class="btn-reviews-toggle" id="btn-toggle-reviews">
+                        <i class="fas fa-comments"></i> 
+                        Ko'rish ({{ product.reviews_count }} fikr)
+                    </button>
                 </div>
 
                 <!-- PRICE -->
@@ -620,7 +756,7 @@
                         <input type="number" class="quantity-input" id="quantity" value="1" min="1" max="100">
                         <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
                     </div>
-                    <button class="btn-add-to-cart" id="btn-add-cart" onclick="addToCart()">
+                    <button class="btn-add-to-cart" id="btn-add-cart" data-product-id="{{ product.id }}">
                         <i class="fas fa-shopping-cart"></i> Savatchaga qo'sh
                     </button>
                 </div>
@@ -631,11 +767,11 @@
         {% if related_products %}
             <div class="related-products">
                 <h2 class="section-title">Shunga o'xshash mahsulotlar</h2>
-                <div class="related-grid">
+                <div class="related-scroll-container">
                     {% for related in related_products %}
                         <div class="related-card" onclick="window.location.href='/products/{{ related.id }}/'">
                             <div class="related-image">
-                                <img src="{{ related.main_image.url|default:'/static/images/default_avatar.png' }}" alt="{{ related.name }}">
+                                <img src="{{ related.main_image|safe_image_url }}" alt="{{ related.name }}">
                             </div>
                             <div class="related-info">
                                 <div class="related-name">{{ related.name }}</div>
@@ -665,6 +801,21 @@
         </div>
     </div>
 
+    <!-- REVIEWS SIDEBAR (Clean Slide-in Panel) -->
+    <div class="sidebar-overlay" id="reviews-sidebar">
+        <div class="sidebar-content" style="overflow-y: auto; max-height: 100vh; padding-bottom: 2rem;">
+            <div class="sidebar-header" style="position: sticky; top: 0; background: #ffffff; z-index: 10;">
+                <h2>Fikrlar va baholar</h2>
+                <button class="btn-close-sidebar" id="btn-close-sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding: 0 1.25rem;">
+                {% include 'product_comments.html' %}
+            </div>
+        </div>
+    </div>
+
     {% include 'components/footer.html' %}
 
     <script>
@@ -684,43 +835,19 @@
             input.value = Math.max(1, Math.min(100, val));
         }
 
-        function addToCart() {
-            if (!isAuthenticated) {
-                document.getElementById('login-modal').classList.add('show');
-                return;
-            }
+        // Toggle reviews sidebar
+        function toggleReviewsSidebar() {
+            const sidebar = document.getElementById('reviews-sidebar');
+            sidebar.classList.toggle('open');
+        }
 
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const btn = document.getElementById('btn-add-cart');
-            btn.disabled = true;
+        function closeReviewsSidebar() {
+            const sidebar = document.getElementById('reviews-sidebar');
+            sidebar.classList.remove('open');
+        }
 
-            fetch('/orders/cart/add-item/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: quantity,
-                }),
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    animateToCart(event.target);
-                    showToast('Savatchaga qo\'shildi!');
-                    document.getElementById('quantity').value = 1;
-                } else {
-                    showToast('Xato: ' + (data.error || 'Noma\'lum xato'), true);
-                }
-                btn.disabled = false;
-            })
-            .catch(err => {
-                console.error(err);
-                showToast('Xato yuz berdi', true);
-                btn.disabled = false;
-            });
+        function closeLoginModal() {
+            document.getElementById('login-modal')?.classList.remove('show');
         }
 
         function animateToCart(element) {
@@ -765,7 +892,7 @@
         }
 
         // Log product view for history (Task #7)
-        fetch('/api/v1/user/history/log/', {
+        fetch('/api/v1/products/user/history/log_action/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -776,9 +903,22 @@
                 product_id: productId,
             }),
         }).catch(() => {}); // Silent fail if not authenticated
+        
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnToggle = document.getElementById('btn-toggle-reviews');
+            const btnClose = document.getElementById('btn-close-sidebar');
+            
+            if (btnToggle) {
+                btnToggle.addEventListener('click', toggleReviewsSidebar);
+            }
+            
+            if (btnClose) {
+                btnClose.addEventListener('click', closeReviewsSidebar);
+            }
+        });
     </script>
-
-    <!-- Comments section (Task #9) -->
-    {% include 'product_comments.html' %}
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'shop/js/product_detail.js' %}"></script>
 </body>
 </html>

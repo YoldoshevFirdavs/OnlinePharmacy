@@ -40,6 +40,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class SellerBasicSerializer(serializers.ModelSerializer):
     """Minimal seller info for product lists"""
+
     user_name = serializers.ReadOnlyField(source="user.full_name")
     avatar_url = serializers.SerializerMethodField()
 
@@ -50,7 +51,7 @@ class SellerBasicSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         if obj.avatar and hasattr(obj.avatar, "url"):
             return obj.avatar.url
-        return "/static/images/default_avatar.png"
+        return "/static/images/default/default_avatar.png"
 
 
 class MedicineListSerializer(serializers.ModelSerializer):

@@ -1,42 +1,79 @@
-{% load static %}
+{% load static pharmacy_tags %}
 <!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} - To'liq Qo'llanma</title>
+    <title>{{ product.name }} - To'liq Qo'llanma - Online Pharmacy</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: #f8f9fa;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
         }
 
         .guide-container {
             max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 30px auto;
+            padding: 0 20px 50px;
         }
 
-        .guide-header {
-            background: white;
-            padding: 20px;
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            color: #475569;
+            padding: 10px 18px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* CARD WRAPPER */
+        .guide-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .guide-header {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
+            padding: 30px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #ffffff;
         }
 
         .guide-header-image {
             width: 100px;
             height: 100px;
-            background: #f5f5f5;
-            border-radius: 6px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
         }
@@ -50,111 +87,99 @@
         .guide-header-info h1 {
             font-size: 24px;
             font-weight: 700;
-            margin-bottom: 8px;
+            color: #0f172a;
+            margin-bottom: 6px;
         }
 
-        .guide-header-info p {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .btn-back {
-            display: inline-flex;
+        .guide-header-meta {
+            display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            gap: 12px;
             font-size: 14px;
+            color: #64748b;
+        }
+
+        .category-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 3px 10px;
+            border-radius: 20px;
             font-weight: 600;
-            transition: background 0.3s;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #333;
+            font-size: 12px;
         }
 
-        .btn-back:hover {
-            background: #e0e0e0;
+        /* BIG CONTENT BODY */
+        .guide-body {
+            padding: 36px 30px;
         }
 
-        .section {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
+        .guide-content-title {
             font-size: 18px;
             font-weight: 700;
+            color: #0f172a;
             margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #4caf50;
-            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .section-content {
-            font-size: 14px;
+        .guide-content-text {
+            font-size: 16px;
             line-height: 1.8;
-            color: #555;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            color: #334155;
+            white-space: pre-line;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
 
-        .empty-section {
-            color: #999;
-            font-style: italic;
+        /* KEY HIGHLIGHTS (Prescription, Storage) */
+        .guide-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
         }
 
-        /* WARNING SECTIONS */
-        .warning-section {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
+        .meta-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
         }
 
-        .warning-section .section-title {
-            border-bottom-color: #ffc107;
-            color: #856404;
+        .meta-box i {
+            font-size: 20px;
+            margin-top: 2px;
         }
 
-        .side-effects-section {
-            background: #ffebee;
-            border-left: 4px solid #ff5252;
+        .meta-box-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
         }
 
-        .side-effects-section .section-title {
-            border-bottom-color: #ff5252;
-            color: #c62828;
+        .meta-box-info p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
         }
 
-        .contraindications-section {
-            background: #ffe0e0;
-            border-left: 4px solid #d32f2f;
-        }
-
-        .contraindications-section .section-title {
-            border-bottom-color: #d32f2f;
-            color: #b71c1c;
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
             .guide-header {
                 flex-direction: column;
-                text-align: center;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 20px;
             }
-
-            .guide-header-info h1 {
-                font-size: 20px;
-            }
-
-            .section {
-                padding: 16px;
-            }
-
-            .section-title {
-                font-size: 16px;
+            .guide-body {
+                padding: 20px;
             }
         }
     </style>
@@ -165,85 +190,82 @@
     <div class="guide-container">
         <!-- BACK BUTTON -->
         <a href="/products/{{ product.id }}/" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Orqaga
+            <i class="fas fa-arrow-left"></i> Mahsulot sahifasiga qaytish
         </a>
 
-        <!-- HEADER -->
-        <div class="guide-header">
-            <div class="guide-header-image">
-                <img src="{{ product.main_image.url|default:'/static/images/default_avatar.png' }}" alt="{{ product.name }}">
+        <!-- MAIN CARD -->
+        <div class="guide-card">
+            <!-- HEADER -->
+            <div class="guide-header">
+                <div class="guide-header-image">
+                    <img src="{{ product.main_image|safe_image_url }}" alt="{{ product.name }}">
+                </div>
+                <div class="guide-header-info">
+                    <h1>{{ product.name }}</h1>
+                    <div class="guide-header-meta">
+                        {% if product.category %}
+                            <span class="category-badge">{{ product.category.name }}</span>
+                        {% endif %}
+                        {% if product.seller %}
+                            <span><i class="fas fa-store"></i> {{ product.seller.shop_name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="guide-header-info">
-                <h1>{{ product.name }}</h1>
-                <p>{{ product.category.name }}</p>
-                <p style="margin-top: 8px; font-size: 12px; color: #999;">
-                    {% if product.seller %}
-                        Sotuvchi: {{ product.seller.shop_name }}
+
+            <!-- BODY (ONE BIG COMPLETE DESCRIPTION) -->
+            <div class="guide-body">
+                <div class="guide-content-title">
+                    <i class="fas fa-file-medical-alt" style="color: #3b82f6;"></i> 
+                    Dori vositasi haqida to'liq ma'lumot va qo'llash bo'yicha ko'rsatma
+                </div>
+
+                <div class="guide-content-text">
+{% if product.instruction %}{{ product.instruction }}{% else %}{{ product.short_description|default:"Ushbu dori vositasi uchun to'liq qo'llanma matni hali kiritilmagan." }}{% endif %}
+                </div>
+
+                <!-- HIGHLIGHTS / EXTRA DETAILS -->
+                <div class="guide-meta-grid">
+                    {% if product.storage_conditions %}
+                    <div class="meta-box">
+                        <i class="fas fa-temperature-low" style="color: #0ea5e9;"></i>
+                        <div class="meta-box-info">
+                            <h4>Saqlash shartlari</h4>
+                            <p>{{ product.storage_conditions }}</p>
+                        </div>
+                    </div>
                     {% endif %}
-                </p>
+
+                    {% if product.is_prescription_required %}
+                    <div class="meta-box" style="border-left: 4px solid #ef4444; background: #fef2f2;">
+                        <i class="fas fa-prescription" style="color: #ef4444;"></i>
+                        <div class="meta-box-info">
+                            <h4 style="color: #991b1b;">Retsept talab qilinadi</h4>
+                            <p style="color: #b91c1c;">Ushbu dori vositasi shifokor retsepti asosida beriladi.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="meta-box" style="border-left: 4px solid #10b981;">
+                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                        <div class="meta-box-info">
+                            <h4>Retseptsiz beriladi</h4>
+                            <p>Ushbu dori vositasini erkin xarid qilishingiz mumkin.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- INSTRUCTION SECTION -->
-        {% if product.instruction %}
-            <div class="section">
-                <div class="section-title">📋 Qo'llanma va foydalanish</div>
-                <div class="section-content">{{ product.instruction }}</div>
-            </div>
-        {% endif %}
-
-        <!-- STORAGE CONDITIONS -->
-        {% if product.storage_conditions %}
-            <div class="section">
-                <div class="section-title">🧊 Saqlash shartlari</div>
-                <div class="section-content">{{ product.storage_conditions }}</div>
-            </div>
-        {% endif %}
-
-        <!-- SIDE EFFECTS WARNING -->
-        {% if product.side_effects %}
-            <div class="section side-effects-section">
-                <div class="section-title">⚠️ Yon ta'sirlar</div>
-                <div class="section-content">{{ product.side_effects }}</div>
-            </div>
-        {% else %}
-            <div class="section side-effects-section">
-                <div class="section-title">⚠️ Yon ta'sirlar</div>
-                <div class="section-content empty-section">Ma'lumot kiritilmagan</div>
-            </div>
-        {% endif %}
-
-        <!-- CONTRAINDICATIONS -->
-        {% if product.contraindications %}
-            <div class="section contraindications-section">
-                <div class="section-title">🔴 Qarama-qarshi ko'rsatmalar</div>
-                <div class="section-content">{{ product.contraindications }}</div>
-            </div>
-        {% else %}
-            <div class="section contraindications-section">
-                <div class="section-title">🔴 Qarama-qarshi ko'rsatmalar</div>
-                <div class="section-content empty-section">Ma'lumot kiritilmagan</div>
-            </div>
-        {% endif %}
-
-        <!-- PRESCRIPTION BADGE -->
-        {% if product.is_prescription_required %}
-            <div class="section" style="background: #e3f2fd; border-left: 4px solid #2196F3;">
-                <div class="section-title" style="border-bottom-color: #2196F3; color: #1565c0;">
-                    📝 Retsept talab qiladi
-                </div>
-                <div class="section-content">
-                    Ushbu dori sotib olish uchun shifokor retsepti talab qiladi. Iltimos, tib xodimi bilan maslahat qiling.
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- BACK TO PRODUCT -->
-        <a href="/products/{{ product.id }}/" class="btn-back" style="margin-top: 20px;">
-            <i class="fas fa-arrow-left"></i> Mahsulotga qaytish
-        </a>
+        <!-- BOTTOM BACK BUTTON -->
+        <div style="margin-top: 24px; text-align: center;">
+            <a href="/products/{{ product.id }}/" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Mahsulot sahifasiga qaytish
+            </a>
+        </div>
     </div>
 
     {% include 'components/footer.html' %}
+    <script src="{% static 'js/header.js' %}"></script>
 </body>
 </html>

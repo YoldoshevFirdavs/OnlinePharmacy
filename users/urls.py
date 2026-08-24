@@ -4,7 +4,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     AdminLoginViewSet,
-    CheckSessionView,
+    CheckEmailView,
+    CheckPhoneView,
     CookieRefreshView,
     CustomUserViewSet,
     DetermineRoleView,
@@ -17,7 +18,6 @@ from .views import (
     SubscribedUserViewSet,
     SubscriberCreateView,
     TelegramLoginView,
-    TestAdminLoginView,
     UserProfileViewSet,
     VerifyOtpView,
     VerifySubscriptionView,
@@ -32,9 +32,6 @@ urlpatterns = [
     path("login/telegram/", TelegramLoginView.as_view(), name="login-telegram"),
     path("login/email/", EmailLoginView.as_view(), name="login-email"),
     path("login/verify-otp/", VerifyOtpView.as_view(), name="user-verify-otp"),
-    path(
-        "login/check-session/", CheckSessionView.as_view(), name="login-check-session"
-    ),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
         "token/refresh/cookie/",
@@ -43,6 +40,8 @@ urlpatterns = [
     ),
     path("registration/", RegistrationView.as_view(), name="registration"),
     path("me/", UserProfileViewSet.as_view(), name="user_profile"),
+    path("check_email/", CheckEmailView.as_view(), name="check-email"),
+    path("check_phone/", CheckPhoneView.as_view(), name="check-phone"),
     path(
         "subscribe/verify/<str:token>/",
         VerifySubscriptionView.as_view(),
@@ -59,10 +58,14 @@ urlpatterns = [
         AdminLoginViewSet.as_view({"post": "verify_otp"}),
         name="verify_otp",
     ),
+    path(
+        "admin/login/status/",
+        AdminLoginViewSet.as_view({"get": "verify"}),
+        name="admin-login-status",
+    ),
     path("payments/stripe-config/", StripeConfigView.as_view(), name="stripe_config"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("logout/jwt/", LogoutJWTView.as_view(), name="logout-jwt"),
     path("determine_role/", DetermineRoleView.as_view(), name="determine-role"),
-    path("admin/check/", TestAdminLoginView.as_view(), name="admin-check"),
     path("", include(router.urls)),
 ]

@@ -12,9 +12,7 @@ from phonenumbers import PhoneNumberFormat
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(
-        self, email=None, phone_number=None, password=None, **extra_fields
-    ):
+    def _create_user(self, email=None, phone_number=None, password=None, **extra_fields):
         """
         Create and save a user with the given email or phone_number and password.
         """
@@ -33,21 +31,15 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("role", "user")
-        return self._create_user(
-            email=email, phone_number=phone_number, password=password, **extra_fields
-        )
+        return self._create_user(email=email, phone_number=phone_number, password=password, **extra_fields)
 
-    def create_superuser(
-        self, email=None, phone_number=None, password=None, **extra_fields
-    ):
+    def create_superuser(self, email=None, phone_number=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("role", "admin")
         if not email:
             raise ValueError("Superuser must have an email")
-        return self._create_user(
-            email=email, phone_number=phone_number, password=password, **extra_fields
-        )
+        return self._create_user(email=email, phone_number=phone_number, password=password, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -65,9 +57,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     full_name = models.CharField(max_length=255, blank=True)
     address = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(
-        upload_to="users_profile_avatars/", blank=True, null=True
-    )
+    avatar = models.ImageField(upload_to="users_profile_avatars/", blank=True, null=True)
     date_joined = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -75,35 +65,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     bad_comments_count = models.PositiveIntegerField(default=0)
     is_banned = models.BooleanField(default=False)  # Telegram login page uchun permanent ban
-    
+
     # banned_for - Boshqa barcha page'lar uchun vaqtli/permanent ban
     banned_for = models.CharField(
-        max_length=255, 
-        blank=True, 
+        max_length=255,
+        blank=True,
         null=True,
-        help_text="Qaysi page uchun ban qo'yilgan (masalan: 'admin_login', 'dashboard', etc.)"
+        help_text="Qaysi page uchun ban qo'yilgan (masalan: 'admin_login', 'dashboard', etc.)",
     )
-    ban_reason = models.CharField(
-        max_length=500, 
-        blank=True, 
-        null=True,
-        help_text="Ban berilgan sababi"
-    )
+    ban_reason = models.CharField(max_length=500, blank=True, null=True, help_text="Ban berilgan sababi")
     ban_until = models.DateTimeField(
-        blank=True, 
-        null=True,
-        help_text="Vaqtli ban bo'lsa, bu vaqtgacha ban davom etadi. Null bo'lsa, permanent ban."
+        blank=True, null=True, help_text="Vaqtli ban bo'lsa, bu vaqtgacha ban davom etadi. Null bo'lsa, permanent ban."
     )
     is_permanent_ban = models.BooleanField(
-        default=False,
-        help_text="Permanent ban bo'lsa True. Faqat boshqa adminlar ochishi mumkin."
+        default=False, help_text="Permanent ban bo'lsa True. Faqat boshqa adminlar ochishi mumkin."
     )
     banned_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="users_banned_by_me"
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="users_banned_by_me"
     )
 
     objects = CustomUserManager()
@@ -120,18 +98,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def get_avatar_url(self):
         if self.avatar:
             return self.avatar.url
-        return f"/static/images/default_avatar.png"
+        return "/static/images/default/default_avatar.png"
 
     def clean_phone_number(self):
         if self.phone_number:
             try:
-                parsed_number = phonenumbers.parse(
-                    self.phone_number, settings.PHONENUMBER_DEFAULT_REGION
-                )
+                parsed_number = phonenumbers.parse(self.phone_number, settings.PHONENUMBER_DEFAULT_REGION)
                 if phonenumbers.is_valid_number(parsed_number):
-                    self.phone_number = phonenumbers.format_number(
-                        parsed_number, PhoneNumberFormat.E164
-                    )
+                    self.phone_number = phonenumbers.format_number(parsed_number, PhoneNumberFormat.E164)
                 else:
                     self.phone_number = None  # Invalidate if not a valid number
             except phonenumbers.phonenumberutil.NumberParseException:
@@ -140,25 +114,25 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         self.clean_phone_number()
         super().save(*args, **kwargs)
-    
+
     def is_active_ban(self, page: str = None) -> bool:
         """
         Foydalanuvchi hozir bannalangan yoki yo'qligini tekshirish.
-        
+
         Args:
             page (str): Qaysi page uchun ban tekshirish (masalan 'admin_login')
                         Null bo'lsa, umumiy ban holatini qaytaradi
-        
+
         Returns:
             bool: Agarda ban qo'yilgan bo'lsa True
         """
         if page and self.banned_for != page:
             return False
-        
+
         # Agar permanent ban bo'lsa
         if self.is_permanent_ban and self.banned_for:
             return True
-        
+
         # Vaqtli ban bo'lsa, vaqtni tekshirish
         if self.ban_until:
             if timezone.now() < self.ban_until:
@@ -168,15 +142,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 self.banned_for = None
                 self.ban_until = None
                 self.is_permanent_ban = False
-                self.save(update_fields=['banned_for', 'ban_until', 'is_permanent_ban'])
+                self.save(update_fields=["banned_for", "ban_until", "is_permanent_ban"])
                 return False
-        
+
         return False
-    
-    def ban_user(self, page: str, duration_seconds: int = None, reason: str = None, banned_by = None, is_permanent: bool = False):
+
+    def ban_user(
+        self, page: str, duration_seconds: int = None, reason: str = None, banned_by=None, is_permanent: bool = False
+    ):
         """
         Foydalanuvchini ban qilish.
-        
+
         Args:
             page (str): Qaysi page uchun ban (masalan 'admin_login')
             duration_seconds (int): Vaqtli ban bo'lsa, necha sekundga ban (default None = permanent)
@@ -188,14 +164,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         self.ban_reason = reason
         self.banned_by = banned_by
         self.is_permanent_ban = is_permanent
-        
+
         if is_permanent:
             self.ban_until = None
         elif duration_seconds:
             self.ban_until = timezone.now() + timezone.timedelta(seconds=duration_seconds)
-        
+
         self.save()
-    
+
     def unban_user(self):
         """Ban olib tashlash."""
         self.banned_for = None
@@ -208,9 +184,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Seller(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    avatar = models.ImageField(
-        upload_to="users_profile_avatars/", blank=True, null=True
-    )
+    avatar = models.ImageField(upload_to="users_profile_avatars/", blank=True, null=True)
     shop_name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, null=True, blank=True)
     short_description = models.CharField(max_length=500, blank=True, null=True)
@@ -236,13 +210,11 @@ class Seller(models.Model):
     def get_avatar_url(self):
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar.url
-        return "/static/images/default_avatar.png"
+        return "/static/images/default/default_avatar.png"
 
 
 class TelegrambotUser(models.Model):
-    shop_user = models.ForeignKey(
-        CustomUser, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    shop_user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
     username = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
@@ -255,9 +227,7 @@ class TelegrambotUser(models.Model):
     is_active = models.BooleanField(default=True)
     is_banned = models.BooleanField(default=False)
     pays_count = models.BigIntegerField(null=True, blank=True)
-    total_cost = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
-    )
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"{self.username or 'No Name'} ({self.telegram_id})"
@@ -299,9 +269,7 @@ class SubscribedUser(models.Model):
 
 
 class DeliveryDriver(models.Model):
-    user = models.OneToOneField(
-        CustomUser, on_delete=models.CASCADE, related_name="delivery_profile"
-    )
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="delivery_profile")
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     vehicle_info = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(

@@ -100,7 +100,7 @@
 
     <div id="admin-check-error-banner" style="display: none;"></div>
 
-    <form id="admin-check-form" action="/api/v1/users/admin/check/" method="POST">
+    <form id="admin-check-form" action="/api/v1/users/admin/login/" method="POST">
         {% csrf_token %}
         <div class="form-group">
             <label for="admin-email">Email</label>
@@ -133,7 +133,7 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ADMIN_LOGIN_ENDPOINT = '/api/v1/users/admin/check/';
+        const ADMIN_LOGIN_ENDPOINT = '/api/v1/users/admin/login/';
 
         const adminCheckForm = document.getElementById('admin-check-form');
         const adminEmailInput = document.getElementById('admin-email');
@@ -195,6 +195,7 @@
                 }
 
                 const payload = {
+                    action: 'credentials',
                     email: email,
                     phone_number: phone_number,
                     full_name: full_name,
@@ -214,13 +215,12 @@
 
                     const data = await response.json();
 
-                    if (response.ok && data.ok && data.next) {
+                    if (response.ok && data.success && data.redirect) {
                         if (data.access) localStorage.setItem('access_token', data.access);
                         if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
                         localStorage.setItem('username', full_name);
                         localStorage.setItem('user_role', 'admin');
-                        const _ADMIN_ALLOWED = ['/dashboard/admin/', '/dashboard/'];
-                        window.location.href = _ADMIN_ALLOWED.includes(data.next) ? data.next : '/dashboard/admin/';
+                        window.location.href = data.redirect || '/dashboard/admin/';
                     } else {
                         const errorDetail = data.detail || (Array.isArray(data.non_field_errors) ? data.non_field_errors.join(' ') : "Admin ma'lumotlarini tekshirishda xatolik yuz berdi.");
                         showAdminError(errorDetail);

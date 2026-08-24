@@ -1,167 +1,223 @@
-# OnlinePharmacy - To'liq funksiyali elektron dorixona platformasi
+# OnlinePharmacy
 
-Ushbu loyiha Django, Django REST Framework, PostgreSQL va Docker kabi zamonaviy texnologiyalar asosida qurilgan to'liq funksiyali elektron tijorat platformasidir. Tizim foydalanuvchilarni ro'yxatdan o'tkazish, mahsulotlar katalogini boshqarish, savatcha, buyurtmalar va to'lovlarni amalga oshirish imkoniyatlarini o'z ichiga oladi.
+This is my first project — created by Firdavs Yo'ldashev.
 
-Platforma bir nechta foydalanuvchi rollarini (Mijoz, Sotuvchi, Yetkazib beruvchi, Admin) qo'llab-quvvatlaydi va har bir rol uchun maxsus funksionallikni taqdim etadi.
+OnlinePharmacy is a Django-based pharmacy and management platform for selling medicines, managing users, handling orders, and supporting admin operations. The project combines a storefront, seller/admin dashboard, notification flows, OTP authentication, and internal administrative tools in one monolithic Django application.
 
-## Asosiy xususiyatlar
+## Project purpose
 
-- **Ko'p rolli arxitektura:**
-  - **Mijoz:** Mahsulotlarni ko'rish, qidirish, savatchaga qo'shish va buyurtma berish.
-  - **Sotuvchi:** O'z mahsulotlarini boshqarish, buyurtmalarni ko'rish va statistikasini tahlil qilish.
-  - **Yetkazib beruvchi (Deliverer):** O'ziga tayinlangan buyurtmalarni ko'rish, statusini yangilash va yetkazib berish jarayonini boshqarish.
-  - **Admin:** Barcha tizimni to'liq boshqarish, foydalanuvchilar, mahsulotlar, buyurtmalar va faoliyat tarixini kuzatish.
-- **Xavfsiz autentifikatsiya:**
-  - JWT (JSON Web Tokens) orqali API xavfsizligi.
-  - Email yoki Telegram orqali bir martalik parol (OTP) yuborish orqali parolsiz tizimga kirish.
-- **Tahliliy Boshqaruv Paneli (Dashboard):**
-  - Sotuvlar, foydalanuvchilar, mahsulotlar va buyurtmalar bo'yicha real vaqtda yangilanadigan statistik ma'lumotlar.
-  - Interaktiv grafiklar va jadvallar.
-- **Asinxron vazifalar:**
-  - `Celery` va `Redis` yordamida email xabarlari va boshqa resurs talab qiladigan vazifalarni fonga o'tkazish.
-- **Kesh mexanizmi:**
-  - `Redis` yordamida tez-tez so'raladigan ma'lumotlarni (masalan, mahsulotlar ro'yxati) keshda saqlash orqali tizim tezligini oshirish.
-- **To'liq Docker bilan integratsiya:**
-  - `docker-compose` yordamida bir buyruq bilan butun loyihani (web-server, ma'lumotlar bazasi, Redis, Celery) ishga tushirish.
-- **Production'ga tayyor (Production-Ready):**
-  - `Nginx` (reverse proxy va statik fayllar uchun) va `Gunicorn` (WSGI server) bilan production muhitida ishlash uchun to'liq sozlangan.
+The main idea is to provide a working pharmacy platform with:
 
-## Texnologiyalar stekasi
+- customer-facing product browsing and order creation
+- multi-role access for admins, sellers, deliverers, and end users
+- dashboard pages for analytics, user history, and order management
+- secure authentication and OTP-based login workflows
+- API endpoints for admin actions, listing, and restore operations
+- deployment support via Docker, Gunicorn, and Nginx
 
-- **Backend**: Django 5.1, Django REST Framework
-- **Ma'lumotlar bazasi**: PostgreSQL 15
-- **Kesh va Xabar navbati (Broker)**: Redis 7
-- **Fon vazifalari**: Celery
-- **API Hujjatlari**: drf-yasg (Swagger/OpenAPI)
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript (Dashboard uchun)
-- **Deployment**: Docker, Nginx, Gunicorn
+## Architecture overview
 
-## Loyiha tuzilishi
+The project is split into Django apps, each with a clear purpose:
 
-Loyiha modullarga ajratilgan arxitekturaga asoslangan bo'lib, har bir ilova o'zining aniq vazifasini bajaradi:
+- `config/` — project settings, URL routing, middleware, and deployment config
+- `users/` — user model, profiles, authentication, OTP, delivery drivers, role logic
+- `pharmacy/` — medicines, categories, product metadata, history records
+- `orders/` — order flow, order items, cart/context-related business logic
+- `dashboard/` — admin and user dashboard pages, administrative API routes, account pages
+- `security/` — audit logs, undo operations, ban logic, request/device security checks
+- `billing/` and `payments/` — payment and billing integrations
+- `telegram_bot/` — Telegram bot integration and related bot flows
+- `templates/` and `static/` — frontend templates and static assets
 
-```
-online-pharmacy/
-├── config/              # Django loyihasining asosiy sozlamalari, URL'lar va ASGI/WSGI.
-├── dashboard/           # Admin paneli uchun frontend va backend logikasi.
-├── orders/              # Buyurtmalar, savatcha va ular bilan bog'liq amallar.
-├── pharmacy/            # Mahsulotlar, kategoriyalar, sharhlar va boshqa farmatsevtika logikasi.
-├── security/            # Xavfsizlikka oid modullar (AuditLog, middleware, ruxsatlar).
-├── static/              # Global statik fayllar (CSS, JS, rasm).
-├── templates/           # Global HTML andozalar.
-├── telegram_bot/        # Telegram bot logikasi va webhook'lar.
-├── users/               # Foydalanuvchilar, autentifikatsiya, OTP va profillar.
-├── docker-compose.yml   # Development muhiti uchun Docker Compose fayli.
-├── Dockerfile           # Asosiy Django ilovasi uchun Dockerfile.
-├── requirements.txt     # Python kutubxonalari ro'yxati.
-└── manage.py            # Django boshqaruv skripti.
-```
+## Core features
 
-## Tezkor ishga tushirish (Development)
+- user registration and OTP-based verification flow
+- admin dashboard with analytics and management tools
+- order creation and order status handling
+- product/category management
+- delivery driver management
+- audit and restore history with `UndoLog` support
+- Docker-based local development environment
+- API support using Django REST Framework
 
-1.  **Repozitoriyni kompyuterga yuklab oling:**
-    ```bash
-    git clone https://github.com/yourusername/online-pharmacy.git
-    cd online-pharmacy
-    ```
+## Local development
 
-2.  **`.env` faylini yarating:**
-    `.env.example` faylidan nusxa oling va ichidagi o'zgaruvchilarni o'zingizning sozlamalaringiz bilan to'ldiring. Bu faylda maxfiy kalitlar, ma'lumotlar bazasi parollari va boshqa muhim sozlamalar saqlanadi.
-    ```bash
-    cp .env.example .env
-    ```
+Use Docker Compose for local setup:
 
-3.  **Docker konteynerlarini ishga tushiring:**
-    Bu buyruq `Dockerfile` va `docker-compose.yml` fayllari asosida kerakli `image`larni quradi va barcha servislarni (web, db, redis, celery) ishga tushiradi.
-    ```bash
-    docker-compose up -d --build
-    ```
-
-4.  **Ma'lumotlar bazasi migratsiyalarini bajaring:**
-    Bu buyruq `web` konteyneri ichida `manage.py migrate` buyrug'ini ishga tushirib, ma'lumotlar bazasi jadvallarini yaratadi.
-    ```bash
-    docker-compose exec web python manage.py migrate
-    ```
-
-5.  **Superfoydalanuvchi yarating:**
-    Admin paneliga kirish uchun superuser yarating.
-    ```bash
-    docker-compose exec web python manage.py createsuperuser
-    ```
-
-6.  **Sayt va API'ga kiring:**
-    -   **Asosiy sayt:** `http://localhost:8000`
-    -   **Admin paneli:** `http://localhost:8000/admin/`
-    -   **API hujjatlari (Swagger):** `http://localhost:8000/api/v1/swagger/`
-
-## Xavfsizlik (Security)
-
-Loyihada zamonaviy veb-ilovalar uchun zarur bo'lgan ko'plab xavfsizlik choralari ko'rilgan va tahlil qilingan:
-
-- **SQL Injection:** Barcha ma'lumotlar bazasi so'rovlari Django ORM orqali amalga oshiriladi. Bu parametrlarni avtomatik ravishda zararsizlantirib, SQL in'ektsiya hujumlaridan yuqori darajada himoya qiladi. Loyihada xom SQL so'rovlari (`.raw()`, `.extra()`) ishlatilmagan.
-
-- **Cross-Site Scripting (XSS):** Django'ning standart andoza tizimi (`auto-escaping`) barcha o'zgaruvchilarni HTML'ga chiqarishdan oldin avtomatik ravishda zararsizlantiradi. `|safe` filtri ishlatilmaganligi sababli, foydalanuvchi kiritgan zararli skriptlarning ishga tushib ketish xavfi minimal darajada.
-
-- **CSRF (Cross-Site Request Forgery):** Django'ning standart `CsrfViewMiddleware` himoyasi barcha `POST`, `PUT`, `DELETE` so'rovlari uchun yoqilgan. Bu so'rovlarning faqat sizning saytingizdan kelganiga ishonch hosil qiladi.
-
-- **Fayl yuklash xavfsizligi:** Foydalanuvchi tomonidan yuklanadigan avatar fayllari `Pillow` kutubxonasi yordamida haqiqiy rasm ekanligi tekshiriladi. Bu faqat fayl kengaytmasiga emas, balki uning ichki tarkibiga asoslanadi va zararli skriptlarni rasm niqobi ostida yuklash xavfini kamaytiradi.
-
-- **Ruxsatlar (Permissions):** API endpoint'lar `IsAuthenticated`, `IsAdminUser`, `IsOwnerOrAdmin` kabi qat'iy ruxsatlar bilan himoyalangan. Bu har bir foydalanuvchi faqat o'ziga tegishli ma'lumotlarni ko'ra olishi va o'zgartira olishini ta'minlaydi. Masalan, obunachilar ro'yxati faqat adminlarga ko'rinadi.
-
-- **Parol xavfsizligi:** Parollar standart `PBKDF2` algoritmi yordamida xeshlangan holda saqlanadi. `AUTH_PASSWORD_VALIDATORS` orqali parollarning murakkabligi (uzunligi, sonlar, belgilar ishtiroki) tekshiriladi.
-
-- **Brute-Force himoyasi:** Noto'g'ri autentifikatsiya urinishlari Redis yordamida sanaladi. Ma'lum bir chegaradan oshganda (masalan, 10 daqiqada 5 ta xato), foydalanuvchi akkaunti vaqtincha bloklanadi.
-
-- **Xavfsizlik sarlavhalari (Security Headers):** Har bir HTTP javobga `Strict-Transport-Security` (HSTS), `X-Content-Type-Options`, `X-Frame-Options` kabi qo'shimcha xavfsizlik sarlavhalari qo'shiladi. Bu "clickjacking" va "MIME-sniffing" kabi brauzerga oid hujumlardan himoya qiladi.
-
-## Testlash
-
-Loyiha uchun yozilgan testlarni ishga tushirish:
 ```bash
-# Barcha ilovalar uchun testlarni ishga tushirish
-docker-compose exec web python manage.py test
-
-# Faqat 'users' ilovasi uchun testlarni ishga tushirish
-docker-compose exec web python manage.py test users
+docker compose up -d --build
 ```
 
-## Muhit o'zgaruvchilari (`.env` fayli)
+Then run the app migrations and static collection:
 
-Loyiha sozlamalari uchun `.env` faylida quyidagi o'zgaruvchilarni o'rnatish kerak:
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py collectstatic --noinput
+```
+
+Open the app in the browser at:
+
+```text
+http://localhost:8000
+```
+
+## Environment variables
+
+Create a `.env` file based on your local or production needs. Typical variables include:
 
 ```env
-# Django sozlamalari
-SECRET_KEY=your-super-secret-key-for-production
-DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,localhost
-
-# Ma'lumotlar bazasi (PostgreSQL)
+SECRET_KEY=your-secret-key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
 DB_NAME=pharmacy_db
-DB_USER=pharmacy_admin
-DB_PASSWORD=your-strong-database-password
+DB_USER=postgres
+DB_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
-
-# Redis
 REDIS_URL=redis://redis:6379/0
-
-# Celery
-CELERY_BROKER_URL=redis://redis:6379/1
-CELERY_RESULT_BACKEND=redis://redis:6379/1
-
-# Email (Gmail uchun misol)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=your-email@gmail.com
 EMAIL_HOST_PASSWORD=your-google-app-password
-
-# JWT
 JWT_SECRET=another-super-secret-key-for-jwt
-
-# CORS
-CORS_ALLOWED_ORIGINS=https://yourfrontenddomain.com,http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
 
----
-**Oxirgi yangilanish**: 2026-08-03
+## Testing
+
+The project includes pytest-based testing patterns and can run in a local environment without requiring a browser-based setup. Example commands:
+
+```bash
+pytest
+pytest tests/dashboard
+pytest tests/security
+```
+
+The repository also contains CI-oriented configuration for linting and tests, but browser-driven Playwright checks are optional and not required for the local unit-level flows.
+
+## Deployment
+
+For production or staging, the usual deployment pattern is:
+
+- EC2 or another Linux VM
+- Nginx as reverse proxy
+- Gunicorn as the Django WSGI server
+- PostgreSQL for production data
+- Redis for cache and task support
+- SSL certificates via Certbot
+
+Typical deployment steps:
+
+```bash
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py check
+```
+
+Then point Nginx to the Gunicorn service on localhost:8000 and serve static files from the collected `staticfiles` directory.
+
+## Monitoring Stack
+
+OnlinePharmacy includes a complete monitoring solution with Prometheus, Grafana, and Sentry:
+
+### Quick Start
+
+```bash
+# Start monitoring stack with Docker Compose
+docker compose up -d --build
+
+# Access monitoring tools:
+# - Prometheus: http://localhost:9090 (metrics collection)
+# - Grafana: http://localhost:3000 (login: admin/admin - visualization)
+# - Sentry: http://localhost:9000 (error tracking)
+# - Django Metrics: http://localhost:8000/metrics/ (raw metrics endpoint)
+```
+
+### Setup Monitoring
+
+1. **Grafana Dashboard**: Add Prometheus datasource at http://prometheus:9090
+2. **Sentry Configuration**: Set `SENTRY_DSN` in `.env`:
+   ```env
+   SENTRY_DSN=http://sentry:9000/
+   SENTRY_TRACES_SAMPLE_RATE=1.0
+   ```
+3. **View Metrics**: Access http://localhost:8000/metrics/ to see all collected metrics
+
+### Components
+
+- **Prometheus**: Scrapes Django `/metrics/` endpoint every 15 seconds
+- **Grafana**: Visualizes metrics with dashboards and alerts
+- **Sentry**: Captures errors, exceptions, and performance data
+- **django-prometheus**: Middleware that exports Django metrics
+
+For detailed monitoring setup, see [monitoring.md](monitoring.md).
+
+## Security notes
+
+- keep `.env` and secrets out of version control
+- use `DEBUG=False` in production
+- restrict admin routes to staff/admin users
+- handle CSRF for all state-changing requests
+- protect restore operations with proper checks and audit logging
+
+## Code Quality & Linting
+
+OnlinePharmacy uses industry-standard tools for code quality and formatting:
+
+### Tools Used
+
+- **black**: Code formatter (enforces consistent style)
+- **isort**: Import sorter (organizes imports alphabetically)
+- **flake8**: Linter (checks for style violations and errors)
+- **pytest**: Test framework
+
+### Local Development
+
+Before committing, ensure your code passes all checks:
+
+```bash
+# Format code with black
+black .
+
+# Sort imports with isort
+isort .
+
+# Check linting with flake8
+flake8 . --max-line-length=120
+
+# Run tests
+pytest
+
+# Or run all checks at once (recommended)
+black . && isort . && flake8 . --max-line-length=120 && pytest
+```
+
+### CI/CD Pipeline
+
+All checks run automatically on `push` and `pull_request`:
+
+1. **Linting** (flake8): Checks for syntax errors and style violations
+2. **Import Sorting** (isort): Ensures imports are properly organized
+3. **Code Formatting** (black): Validates code follows black style
+4. **Tests** (pytest): Runs all unit and integration tests
+
+See [.github/workflows/cm.yml](.github/workflows/cm.yml) for workflow details.
+
+### Configuration
+
+All tool configurations are in `pyproject.toml`:
+- Black: line length = 120
+- isort: profile = "black", compatible with black settings
+- flake8: max complexity = 10, max line length = 120
+- pytest: Django settings module configured
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Author
+
+Firdavs Yo'ldashev
+
+## Project status
+
+This repository is a working Django-based project used for local development and a strong base for further production hardening.

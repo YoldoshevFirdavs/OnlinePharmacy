@@ -6,11 +6,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from pharmacy.models.medicine import Category, Medicine
@@ -62,9 +58,7 @@ class MedicineViewSet(viewsets.ModelViewSet):
             range_days = 7
 
         if not 1 <= range_days <= 365:
-            return Response(
-                {"error": "Range must be between 1 and 365 days."}, status=400
-            )
+            return Response({"error": "Range must be between 1 and 365 days."}, status=400)
 
         since_date = timezone.now() - timedelta(days=range_days)
 
@@ -87,16 +81,12 @@ class MedicineViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.filter(
-        parent=None
-    )  # Only show top-level categories by default
+    queryset = Category.objects.filter(parent=None)  # Only show top-level categories by default
     serializer_class = CategorySerializer
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [
-                IsAuthenticated
-            ]  # Only authenticated users can create/update/delete categories
+            return [IsAuthenticated]  # Only authenticated users can create/update/delete categories
         return [AllowAny()]  # Anyone can view categories
 
 

@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional, Tuple
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.db import transaction
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 # ============================================
 
 OTP_TTL = 900  # 15 minutes
-ADMIN_SESSION_TTL = 600  # 10 minutes
+ADMIN_SESSION_TTL = 1800  # 30 minutes
 ADMIN_CODE_TTL = 300  # 5 minutes
 TELEGRAM_OTP_LENGTH = 4
 EMAIL_OTP_LENGTH = 6
@@ -60,17 +61,13 @@ class OtpHash:
     algorithm: str = "sha256"
 
     def to_json(self) -> str:
-        return json.dumps(
-            {"hash": self.hash, "salt": self.salt, "algorithm": self.algorithm}
-        )
+        return json.dumps({"hash": self.hash, "salt": self.salt, "algorithm": self.algorithm})
 
     @staticmethod
     def from_json(data: str) -> "OtpHash":
         try:
             d = json.loads(data) if isinstance(data, str) else data
-            return OtpHash(
-                hash=d["hash"], salt=d["salt"], algorithm=d.get("algorithm", "sha256")
-            )
+            return OtpHash(hash=d["hash"], salt=d["salt"], algorithm=d.get("algorithm", "sha256"))
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             logger.error(f"Failed to parse OtpHash: {str(e)[:50]}")
             raise ValueError("Invalid OtpHash format")
@@ -156,17 +153,13 @@ def create_otp_session(purpose: str, *args, **kwargs):
     if purpose not in ("telegram", "email"):
         raise ValueError("Purpose must be 'telegram' or 'email'")
 
-    session = OtpSession(
-        session_id=generate_session_id(), purpose=purpose, created_at=timezone.now()
-    )
+    session = OtpSession(session_id=generate_session_id(), purpose=purpose, created_at=timezone.now())
 
     logger.info(f"OTP session created: {session.session_id[:8]}... ({purpose})")
     return session
 
 
-def bind_session_to_user(
-    session_id: str, user_id: int, identifier: str, ttl: int = OTP_TTL
-) -> bool:
+def bind_session_to_user(session_id: str, user_id: int, identifier: str, ttl: int = OTP_TTL) -> bool:
     """Store session metadata (user_id, identifier, timestamp)."""
     if not all([session_id, user_id, identifier]):
         logger.error("Missing required fields for bind_session_to_user")
@@ -243,9 +236,7 @@ def increment_attempts(session_id: str) -> int:
         new_attempts = current_attempts + 1
         session["attempts"] = new_attempts
         cache.set(key, session, timeout=session.get("ttl", OTP_TTL))
-        logger.debug(
-            f"Incremented attempts for session {session_id[:8]}... to {new_attempts}"
-        )
+        logger.debug(f"Incremented attempts for session {session_id[:8]}... to {new_attempts}")
         return new_attempts
     except Exception as e:
         logger.error(f"increment_attempts error: {str(e)[:100]}")
@@ -267,9 +258,7 @@ def store_otp_hash(identifier: str, otp_hash_obj: OtpHash, ttl: int = OTP_TTL) -
         key = f"otp_code:{identifier}"
         json_data = otp_hash_obj.to_json()
         result = cache.set(key, json_data, timeout=ttl)
-        logger.info(
-            f"OTP hash stored (TTL: {ttl}s) key={key} - cache.set result: {result}"
-        )
+        logger.info(f"OTP hash stored (TTL: {ttl}s) key={key} - cache.set result: {result}")
         return result
     except Exception as e:
         logger.error(f"store_otp_hash error: {str(e)[:200]}")
@@ -327,6 +316,7 @@ def store_bot_otp(session_id: str, otp_code: str, ttl: int = OTP_TTL) -> bool:
 
         key = f"otp:{session_id}:telegram"
         cache.set(key, otp_hash_obj.to_json(), timeout=ttl)
+        cache.set(f"otp:{session_id}:telegram:delivery", otp_code, timeout=ttl)
         logger.info(f"Bot OTP stored: {session_id[:8]}... (TTL: {ttl}s)")
         return True
     except Exception as e:
@@ -338,21 +328,30 @@ def get_bot_otp(session_id: str) -> Optional[OtpHash]:
     """Retrieve bot OTP from cache."""
     if not session_id:
         return None
-
     try:
         key = f"otp:{session_id}:telegram"
         stored = cache.get(key)
-
         if stored is None:
             logger.debug(f"Bot OTP not found: {session_id[:8]}...")
             return None
-
         return OtpHash.from_json(stored)
     except ValueError as e:
         logger.warning(f"Invalid bot OTP format: {str(e)[:50]}")
         return None
     except Exception as e:
         logger.error(f"get_bot_otp error: {str(e)[:100]}")
+        return None
+
+
+def get_bot_otp_code(session_id: str) -> Optional[str]:
+    """Retrieve the short-lived delivery code for the Telegram bot."""
+    if not session_id:
+        return None
+    try:
+        code = cache.get(f"otp:{session_id}:telegram:delivery")
+        return str(code) if code else None
+    except Exception:
+        logger.warning("Failed to retrieve Telegram OTP delivery code")
         return None
 
 
@@ -375,9 +374,7 @@ def create_admin_session(identifier: str, user_id: int) -> Dict[str, Any]:
     }
     try:
         cache.set(key, meta, timeout=ADMIN_SESSION_TTL)
-        logger.info(
-            f"Admin session created: {session_id[:8]}... for {mask_pii(identifier)}"
-        )
+        logger.info(f"Admin session created: {session_id[:8]}... for {mask_pii(identifier)}")
         return {"session_id": session_id, **meta}
     except Exception as e:
         logger.error(f"create_admin_session error: {str(e)[:100]}")
@@ -395,9 +392,7 @@ def get_admin_session_meta(session_id: str) -> Optional[Dict[str, Any]]:
             logger.warning(f"Admin session not found: {session_id[:8]}...")
             return None
         if not isinstance(result, dict):
-            logger.error(
-                f"Admin session meta corrupted (type: {type(result).__name__})"
-            )
+            logger.error(f"Admin session meta corrupted (type: {type(result).__name__})")
             return None
         return result
     except Exception as e:
@@ -405,22 +400,16 @@ def get_admin_session_meta(session_id: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def verify_admin_session(
-    session_id: str, email: str
-) -> Tuple[bool, Optional[Dict[str, Any]]]:
+def verify_admin_session(session_id: str, email: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
     """
     Verifies an admin session by session_id and email.
     Returns (True, meta) or (False, None).
     """
     meta = get_admin_session_meta(session_id)
     if meta and meta.get("email") == email:
-        logger.info(
-            f"Admin session verified: {session_id[:8]}... for {mask_pii(email)}"
-        )
+        logger.info(f"Admin session verified: {session_id[:8]}... for {mask_pii(email)}")
         return True, meta
-    logger.warning(
-        f"Admin session verification failed for {session_id[:8]}... (email mismatch or not found)"
-    )
+    logger.warning(f"Admin session verification failed for {session_id[:8]}... (email mismatch or not found)")
     return False, None
 
 
@@ -434,9 +423,31 @@ def delete_admin_session(session_id: str) -> None:
         logger.error(f"delete_admin_session error: {str(e)[:100]}")
 
 
-def store_admin_code_hash(
-    session_id: str, code: str, ttl: int = ADMIN_CODE_TTL
-) -> bool:
+def claim_admin_session(session_id: str) -> Optional[Dict[str, Any]]:
+    """Atomically mark a verified admin session as consumed."""
+    if not session_id:
+        return None
+
+    lock_key = f"admin_session_lock:{session_id}"
+    session_key = f"admin_session:{session_id}"
+    if not cache.add(lock_key, True, timeout=5):
+        return None
+
+    try:
+        session = cache.get(session_key)
+        if not isinstance(session, dict) or session.get("used"):
+            return None
+        if not session.get("verified"):
+            return None
+
+        session["used"] = True
+        cache.set(session_key, session, timeout=ADMIN_SESSION_TTL)
+        return session
+    finally:
+        cache.delete(lock_key)
+
+
+def store_admin_code_hash(session_id: str, code: str, ttl: int = ADMIN_CODE_TTL) -> bool:
     """
     Stores a hashed admin verification code in cache, keyed by session_id.
     """
@@ -448,9 +459,7 @@ def store_admin_code_hash(
         otp_hash_obj = OtpHash(hash=hashed, salt=salt)
         key = f"admin_code:{session_id}"
         cache.set(key, otp_hash_obj.to_json(), timeout=ttl)
-        logger.info(
-            f"Admin code hash stored for session: {session_id[:8]}... (TTL: {ttl}s)"
-        )
+        logger.info(f"Admin code hash stored for session: {session_id[:8]}... (TTL: {ttl}s)")
         return True
     except Exception as e:
         logger.error(f"store_admin_code_hash error: {str(e)[:100]}")
@@ -486,24 +495,18 @@ def delete_admin_code(session_id: str) -> None:
         logger.error(f"delete_admin_code error: {str(e)[:100]}")
 
 
-def verify_admin_code(
-    session_id: str, provided_code: str
-) -> Tuple[bool, Optional[Dict[str, Any]]]:
+def verify_admin_code(session_id: str, provided_code: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
     """
     Verifies an admin code and returns the associated session meta on success.
     Returns (True, meta) or (False, None).
     """
     if not session_id or not provided_code:
-        logger.warning(
-            "Missing session_id or provided_code for admin code verification"
-        )
+        logger.warning("Missing session_id or provided_code for admin code verification")
         return False, None
 
     otp_hash_obj = get_admin_code_hash(session_id)
     if not otp_hash_obj:
-        logger.warning(
-            f"Admin code not found or expired for session: {session_id[:8]}..."
-        )
+        logger.warning(f"Admin code not found or expired for session: {session_id[:8]}...")
         return False, None
 
     is_valid = verify_otp_code(provided_code, otp_hash_obj)
@@ -514,9 +517,7 @@ def verify_admin_code(
             logger.info(f"Admin code verified for session: {session_id[:8]}...")
             return True, meta
         else:
-            logger.error(
-                f"Admin session meta not found after code verification for session: {session_id[:8]}..."
-            )
+            logger.error(f"Admin session meta not found after code verification for session: {session_id[:8]}...")
             return False, None
     else:
         logger.warning(f"Invalid admin code provided for session: {session_id[:8]}...")
@@ -540,7 +541,24 @@ def get_admin_ban_key(identifier: str) -> str:
 
 def is_banned(identifier: str) -> bool:
     """Checks if an admin identifier (IP, email, etc.) is currently banned."""
-    return cache.get(get_admin_ban_key(identifier)) is not None
+    if cache.get(get_admin_ban_key(identifier)) is not None:
+        return True
+    if not identifier:
+        return False
+    User = get_user_model()
+    return (
+        User.objects.filter(
+            is_permanent_ban=True,
+            banned_for="admin_login",
+        )
+        .filter(email__iexact=identifier)
+        .exists()
+        or User.objects.filter(
+            is_permanent_ban=True,
+            banned_for="admin_login",
+            phone_number=identifier,
+        ).exists()
+    )
 
 
 def record_failed_attempt(identifier: str) -> bool:
@@ -561,13 +579,22 @@ def record_failed_attempt(identifier: str) -> bool:
         ban_key = get_admin_ban_key(identifier)
         cache.set(ban_key, True, timeout=BAN_SECONDS)
         cache.delete(key)  # Clean up the attempts counter
+        User = get_user_model()
+        user = User.objects.filter(email__iexact=identifier).first()
+        if user is None:
+            user = User.objects.filter(phone_number=identifier).first()
+        if user is not None:
+            with transaction.atomic():
+                user.ban_user(
+                    "admin_login",
+                    reason="10 ta noto'g'ri admin login urinishidan keyin permanent ban",
+                    is_permanent=True,
+                )
         logger.warning(f"Admin identifier banned: {mask_pii(identifier)}")
         return True
     else:
         cache.set(key, attempts, timeout=BAN_SECONDS)
-        logger.info(
-            f"Admin failed attempt {attempts}/{MAX_ATTEMPTS} for: {mask_pii(identifier)}"
-        )
+        logger.info(f"Admin failed attempt {attempts}/{MAX_ATTEMPTS} for: {mask_pii(identifier)}")
         return False
 
 
@@ -580,14 +607,24 @@ def reset_failed_attempts(identifier: str):
 
 def is_admin_identifier(identifier: str) -> bool:
     """
-    Checks if the given identifier (email or phone number) belongs to an admin user.
+    Checks if the given identifier belongs to a properly configured admin user.
     """
     if not identifier:
         return False
     try:
         if "@" in identifier:
-            return User.objects.filter(email=identifier, is_staff=True).exists()
-        return User.objects.filter(phone_number=identifier, is_staff=True).exists()
+            return User.objects.filter(
+                email=identifier,
+                role="admin",
+                is_staff=True,
+                is_superuser=True,
+            ).exists()
+        return User.objects.filter(
+            phone_number=identifier,
+            role="admin",
+            is_staff=True,
+            is_superuser=True,
+        ).exists()
     except Exception as e:
         logger.error(f"Error checking admin identifier {mask_pii(identifier)}: {e}")
         return False
@@ -613,7 +650,7 @@ def verify_otp_once(
 
     session_meta = get_session_meta(session_id)
     if not session_meta:
-        msg = "Session expired or not found"
+        msg = "session_not_found_or_expired"
         logger.warning(msg)
         return False, msg, None
 
@@ -718,9 +755,7 @@ def hash_otp(otp: str, salt: str = None) -> Tuple[str, str]:
 # ============================================
 
 
-def _store_otp_for_test_session(
-    session: OtpSession, code: str, ttl_seconds: int = OTP_TTL
-) -> None:
+def _store_otp_for_test_session(session: OtpSession, code: str, ttl_seconds: int = OTP_TTL) -> None:
     """Legacy: Store OTP for test sessions"""
     try:
         store_bot_otp(session.session_id, code, ttl=ttl_seconds)

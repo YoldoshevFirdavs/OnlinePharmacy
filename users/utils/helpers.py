@@ -83,6 +83,6 @@ def determine_role(user):
     Agar user.role maydoni mavjud bo'lsa, uning qiymatini qaytaradi.
     Aks holda, None qaytaradi (masalan, Deliverer uchun).
     """
-    if hasattr(user, 'role') and user.role:
+    if hasattr(user, "role") and user.role:
         return user.role
     return None

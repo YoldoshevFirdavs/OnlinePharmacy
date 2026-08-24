@@ -348,7 +348,17 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <h1 class="admin-title">Admin Tekshirish</h1>
-                    <p class="admin-subtitle">Admin panelga kirish uchun ma'lumotlaringizni kiriting</p>
+                    <p class="admin-subtitle">
+                        {% if session_expired %}
+                            <span class="session-ended-message">Session ended</span>
+                        {% elif telegram_verified %}
+                            Telegram tasdiqlandi. Admin ma'lumotlarini kiriting.
+                        {% elif pending_verification %}
+                            Telegram tasdiqlanishi kutilmoqda. Tasdiqlangach, shu sahifani yangilang.
+                        {% else %}
+                            Admin panelga kirish uchun ma'lumotlaringizni kiriting
+                        {% endif %}
+                    </p>
                 </div>
 
                 <!-- ALERTS -->
@@ -363,7 +373,9 @@
                 </div>
 
                 <!-- FORM -->
-                <form id="admin-check-form">
+                <form id="admin-check-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="admin-session" name="session_id" value="{{ session_id|default:'' }}">
                     <div class="form-group">
                         <label for="admin-email">Email</label>
                         <input 
@@ -381,9 +393,11 @@
                         <input 
                             type="tel" 
                             id="admin-phone" 
+                            name="phone_number"
                             class="form-input" 
                             placeholder="+998 90 123 45 67"
                             autocomplete="tel"
+                            required
                         >
                     </div>
 
@@ -392,6 +406,7 @@
                         <input 
                             type="text" 
                             id="admin-name" 
+                            name="full_name"
                             class="form-input" 
                             placeholder="Ismingizni kiriting"
                             autocomplete="name"
@@ -405,6 +420,7 @@
                             <input 
                                 type="password" 
                                 id="admin-password" 
+                                name="password"
                                 class="form-input" 
                                 placeholder="Parolingizni kiriting"
                                 autocomplete="current-password"
@@ -429,7 +445,7 @@
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <h2 class="success-title">Muvaffaqiyat!</h2>
-                <p class="success-message">Siz muvaffaqiyatli tasdiqlandi. Admin panelga yo'naltirilmoqdasiz...</p>
+                <p class="success-message">Siz muvaffaqiyatli tasdiqlandingiz.Bu link ni vazifasi tugadi.</p>
                 <div class="alert alert-success" style="justify-content: center; border: none; background: transparent; color: var(--success); margin-top: 20px;">
                     <i class="fas fa-spinner"></i>
                     <span>Yuklanmoqda...</span>
@@ -457,6 +473,21 @@
             const formState = document.getElementById('form-state');
             const successState = document.getElementById('success-state');
 
+            const completedNow = {{ success|yesno:"true,false" }};
+            const alreadyCompleted = {{ already_completed|yesno:"true,false" }};
+            const sessionExpired = {{ session_expired|yesno:"true,false" }};
+            if (completedNow || alreadyCompleted) {
+                formState.style.display = 'none';
+                successState.classList.add('show');
+            }
+            if (sessionExpired) {
+                form.style.display = 'none';
+                showError('Session ended', true);
+            }
+            if ({{ error|yesno:"true,false" }}) {
+                showError({{ error|default:""|escapejs }});
+            }
+
             // Password visibility toggle
             passwordToggle.addEventListener('click', function() {
                 const type = passwordInput.type === 'password' ? 'text' : 'password';
@@ -468,7 +499,7 @@
             // Form submission
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const email = emailInput.value.trim();
                 const phone = phoneInput.value.trim();
                 const name = nameInput.value.trim();
@@ -484,28 +515,48 @@
                 submitBtn.innerHTML = '<span class="loading-spinner"></span> Tekshirilmoqda...';
 
                 try {
-                    const response = await fetch('/api/v1/admin/login/', {
+                    const response = await fetch(window.location.pathname + window.location.search, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-Device-Fingerprint': getCookie('device_fp') || ''
                         },
-                        body: JSON.stringify({
-                            action: 'credentials',
-                            email: email,
-                            password: password
+                        body: new URLSearchParams({
+                            session_id: document.getElementById('admin-session').value,
+                            email,
+                            phone_number: phone,
+                            full_name: name,
+                            password
                         })
                     });
 
+                    const contentType = response.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        document.open();
+                        document.write(await response.text());
+                        document.close();
+                        return;
+                    }
                     const data = await response.json();
 
                     if (response.ok && data.success) {
                         showSuccess();
                         setTimeout(() => {
-                            window.location.href = data.redirect || '/dashboard/admin/';
+                            window.location.href = '/dashboard/admin/';
                         }, 2000);
+                    } else if (data.session_expired) {
+                        form.style.display = 'none';
+                        showError('Session ended', true);
+                    } else if (data.already_completed) {
+                        showSuccess();
                     } else {
                         showError(data.error || 'Tasdiqlashda xatolik yuz berdi');
+                        emailInput.value = '';
+                        phoneInput.value = '';
+                        nameInput.value = '';
+                        passwordInput.value = '';
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = '<i class="fas fa-check"></i> Tasdiqlash';
                     }
@@ -517,12 +568,14 @@
                 }
             });
 
-            function showError(message) {
+            function showError(message, persistent = false) {
                 errorMessage.textContent = message;
                 errorAlert.classList.add('show');
-                setTimeout(() => {
-                    errorAlert.classList.remove('show');
-                }, 4000);
+                if (!persistent) {
+                    setTimeout(() => {
+                        errorAlert.classList.remove('show');
+                    }, 4000);
+                }
             }
 
             function showSuccess() {

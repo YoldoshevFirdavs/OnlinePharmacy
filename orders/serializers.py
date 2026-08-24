@@ -26,14 +26,14 @@ class OrderSerializer(serializers.ModelSerializer):
             "total_price",
             "status",
             "address",
+            "phone_number",
+            "payment_method",
             "created_at",
         ]
         read_only_fields = ["user", "total_price"]
 
     def get_total_price(self, obj):
-        return sum(
-            item.price_at_order * item.quantity for item in obj.order_items.all()
-        )
+        return sum(item.price_at_order * item.quantity for item in obj.order_items.all())
 
     def create(self, validated_data):
         user = self.context["request"].user
@@ -43,12 +43,20 @@ class OrderSerializer(serializers.ModelSerializer):
 
         for item in cart_items:
             if item.quantity > item.product.stock:
-                raise serializers.ValidationError(
-                    f"{item.product.name} uchun yetarli stock yo'q."
-                )
+                raise serializers.ValidationError(f"{item.product.name} uchun yetarli stock yo'q.")
 
         total = sum(item.product.price * item.quantity for item in cart_items)
-        order = Order.objects.create(customer=user, total_price=total, **validated_data)
+        # Use correct field name 'user' and include optional phone_number if present
+        order_data = {
+            "user": user,
+            "total_price": total,
+            "status": "Pending",
+            "address": validated_data.get("address", ""),
+            "payment_method": validated_data.get("payment_method", "cash"),  # Include payment_method
+        }
+        if "phone_number" in validated_data:
+            order_data["phone_number"] = validated_data["phone_number"]
+        order = Order.objects.create(**order_data)
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -182,16 +190,10 @@ class OrderListSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         if hasattr(obj, "total_price") and obj.total_price is not None:
             return obj.total_price
-        return sum(
-            item.price_at_order * item.quantity for item in obj.order_items.all()
-        )
+        return sum(item.price_at_order * item.quantity for item in obj.order_items.all())
 
     def get_short_address(self, obj):
-        return (
-            (obj.address[:80] + "...")
-            if obj.address and len(obj.address) > 80
-            else obj.address
-        )
+        return (obj.address[:80] + "...") if obj.address and len(obj.address) > 80 else obj.address
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):

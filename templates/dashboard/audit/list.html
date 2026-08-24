@@ -3,25 +3,17 @@
 
 {% block title %}Faoliyat tarixi{% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            Faoliyat tarixi
-        </h1>
-    </div>
-</div>
-{% endblock %}
+{% block page_title_icon %}<i class="fa-solid fa-clock-rotate-left"></i>{% endblock %}
+{% block page_title_text %}Faoliyat tarixi{% endblock %}
 
 {% block table_head %}
 <th>ID</th>
-<th>Foydalanuvchi</th>
+<th>Tuliq ismi</th>
+<th>Aniqlovchi</th>
 <th>Harakat</th>
 <th>Tavsif</th>
 <th>IP manzil</th>
 <th>Sana</th>
-<th>Amallar</th>
 {% endblock %}
 
 {% block table_body %}
@@ -31,9 +23,19 @@
         <td>{{ log.id }}</td>
         <td>
             <div class="user-cell">
-                <i class="fa-solid fa-circle-user"></i>
-                <span>{{ log.user|default:"Tizim" }}</span>
+                <span>{{ log.user.get_full_name|default:log.user.email|default:"Tizim" }}</span>
             </div>
+        </td>
+        <td>
+            <span class="text-muted">
+                {% if log.user.email %}
+                    {{ log.user.email }}
+                {% elif log.user.phone_number %}
+                    {{ log.user.phone_number }}
+                {% else %}
+                    —
+                {% endif %}
+            </span>
         </td>
         <td>
             <span class="tag tag--{{ log.action_type|default:'info' }}">{{ log.action|default:"—" }}</span>
@@ -41,16 +43,6 @@
         <td>{{ log.description|default:"—" }}</td>
         <td><code>{{ log.ip_address|default:"—" }}</code></td>
         <td>{{ log.timestamp|date:"d.m.Y H:i" }}</td>
-        <td>
-            <div class="table-actions">
-                <button type="button"
-                        class="btn btn--sm btn--ghost btn--danger auditlog-delete-btn"
-                        data-auditlog-id="{{ log.id }}"
-                        title="O'chirish">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        </td>
     </tr>
     {% endfor %}
 {% else %}

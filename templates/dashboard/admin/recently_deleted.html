@@ -1,14 +1,24 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
+{% block title %}{{ page_title|default:"Recently Deleted" }}{% endblock %}
+
 {% block content %}
-<h1>{{ page_title }}</h1>
+{% block page_header %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-trash-undo"></i>
+        {{ page_title|default:"Recently Deleted" }}
+    </h1>
+</div>
+{% endblock %}
+
 <input type="hidden" id="deletedItemsApi" value="{{ deleted_items_api }}">
 <input type="hidden" id="undoApi" value="{{ undo_api }}">
 
-<div class="card">
-  <div class="card-body">
-    <table class="table" id="recentlyDeletedTable">
+<div class="card card--table" id="recentlyDeletedCard">
+  <div class="card__body table-responsive">
+    <table class="data-table" id="recentlyDeletedTable">
       <thead>
         <tr>
           <th>Item Type</th>
@@ -20,11 +30,19 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td colspan="6">Loading...</td></tr>
+        <tr class="data-table__empty">
+          <td colspan="6">
+            <i class="fa-solid fa-inbox"></i>
+            <span>No recent deletions</span>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
+
+<!-- Pagination placeholder (JS will insert controls when implemented) -->
+<nav id="recentlyDeletedPagination" class="pagination-wrapper" style="display:none;"></nav>
 
 <script src="{% static 'dashboard/js/recently_deleted.js' %}"></script>
 {% endblock %}

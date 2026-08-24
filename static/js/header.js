@@ -77,17 +77,26 @@ function _h(key) {
 
 // NOTE: Function to clear authentication related data from storage
 function clearAuthStorage() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('avatar_url');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_email');
-    localStorage.removeItem('currentSessionId');
-    localStorage.removeItem('currentIdentifier');
-    localStorage.removeItem('showOtpPopup');
-    sessionStorage.clear(); // NOTE: Clear session storage as well
-    window.location.href = HEADER_CONFIG.AUTH_PAGE_URL; // NOTE: Redirect to login page
+    const authKeys = [
+        'access_token', 'refresh_token', 'username', 'avatar_url', 'user_role',
+        'user_email', 'user_id', 'currentSessionId', 'currentIdentifier',
+        'currentAuthMethod', 'showOtpPopup'
+    ];
+    authKeys.forEach(key => localStorage.removeItem(key));
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('auth_block_') || key.startsWith('field_bf_')) {
+            localStorage.removeItem(key);
+        }
+    });
+    sessionStorage.clear();
+    updateHeaderUI(false);
+    const profileElements = document.querySelectorAll(
+        '#header-username-display, #header-user-email, .account-user-name, .account-user-email'
+    );
+    profileElements.forEach(element => { element.textContent = ''; });
+    const avatar = document.getElementById('header-user-avatar');
+    if (avatar) avatar.src = HEADER_CONFIG.DEFAULT_AVATAR;
+    window.location.replace(HEADER_CONFIG.AUTH_PAGE_URL);
 }
 
 function getAuthHeaders() {
@@ -223,6 +232,7 @@ async function handleHeaderLogout(e) {
         await sendRequest(HEADER_CONFIG.LOGOUT_URL, 'POST', {
             csrfmiddlewaretoken: getCookie('csrftoken'),
         });
+        await sendRequest('/api/v1/users/logout/jwt/', 'POST');
     } catch (err) {
         console.warn('[Header] Logout xato:', err);
     } finally {
@@ -258,70 +268,3 @@ async function initHeader() {
 }
 
 document.addEventListener('DOMContentLoaded', initHeader);
-
-// COMPATIBILITY APPEND START
-(function startSessionChecker() {
-    const CHECK_URL = '/api/v1/users/login/check-session/';
-    const INTERVAL_MS = 300000; // 5 minutes
-    let checkInterval = null;
-    let consecutiveNetworkErrors = 0;
-    function getAuthToken() {
-        try {
-            return localStorage.getItem('access_token');
-        } catch (e) {
-            console.warn('Could not access localStorage to get auth token.');
-            return null;
-        }
-    }
-    async function checkSessionOnce() {
-        const token = getAuthToken();
-        // Only run the check if a token exists. If no token, the user is already logged out.
-        if (!token) {
-            if (checkInterval) clearInterval(checkInterval);
-            return;
-        }
-        try {
-            const res = await fetch(CHECK_URL, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` },
-                credentials: 'include' // Include cookies for session auth
-            });
-            consecutiveNetworkErrors = 0; // Reset on successful connection
-            if (res.status === 200) {
-                const data = await res.json().catch(() => null);
-                if (data && data.ok) {
-                    // Session is valid, do nothing.
-                    return;
-                }
-            }
-            // Any non-200 or ok:false response means the session is invalid
-            console.warn("Session expired or invalid. Logging out.");
-            // Use the existing clearAuthStorage function which handles cleanup and redirect.
-            if (typeof clearAuthStorage === 'function') {
-                clearAuthStorage();
-            } else {
-                // Fallback if clearAuthStorage is not available
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = '/auth/';
-            }
-        } catch (err) {
-            consecutiveNetworkErrors++;
-            console.warn(`Session check network error (${consecutiveNetworkErrors}).`);
-            // Stop polling after 5 consecutive network errors to avoid spamming a down server.
-            if (consecutiveNetworkErrors >= 5) {
-                console.error("Session check failed 5 consecutive times due to network errors. Pausing checks.");
-                if (checkInterval) {
-                    clearInterval(checkInterval);
-                    checkInterval = null;
-                }
-            }
-        }
-    }
-    // Start the checker
-    if (!checkInterval) {
-        checkInterval = setInterval(checkSessionOnce, INTERVAL_MS);
-    }
-    // Ensure it's cleared on page unload to prevent memory leaks in single-page apps
-    window.addEventListener('beforeunload', () => { if (checkInterval) clearInterval(checkInterval); });
-})();

@@ -154,11 +154,81 @@
     box-shadow: 0 4px 12px rgba(106, 0, 244, 0.25);
 }
 
+/* ── Customize Row - Horizontal Fit Cards ─────────────────────────── */
+
+.customize-row {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 10px 0 24px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.customize-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.customize-row::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.card.card--customize {
+    flex: 0 0 auto;
+    width: 320px;
+    min-width: 320px;
+}
+
+/* ── Fixed Footer Actions (bottom of page) ────────────────────────── */
+
+.customize-footer-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--clr-surface, #ffffff);
+    border-top: 1px solid var(--clr-border, #e2e8f0);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+}
+
+.customize-footer-actions .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.customize-footer-actions .btn--secondary {
+    background: var(--clr-surface, #ffffff);
+    border: 1px solid var(--clr-border, #e2e8f0);
+    color: var(--clr-text, #2d3748);
+}
+
+.customize-footer-actions .btn--secondary:hover {
+    background: var(--clr-muted-light, #f7fafc);
+}
+
+.customize-footer-actions .btn--primary {
+    background: var(--clr-primary, #6a00f4);
+    color: white;
+}
+
+.customize-footer-actions .btn--primary:hover {
+    background: var(--clr-primary-dark, #520cc4);
+}
+
 /* ── Toast Notifications ────────────────────────────────────────────── */
 
 .customize-toast {
     position: fixed;
-    bottom: 24px;
+    bottom: 100px;
     right: 24px;
     padding: 12px 22px;
     background: #2d3748;

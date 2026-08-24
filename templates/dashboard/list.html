@@ -4,19 +4,16 @@
 {% block title %}{{ page_title|default:"Ro'yxat" }}{% endblock %}
 
 {% block content %}
-{% block page_header %}
-<div class="page-header" id="pageHeader">
-    <h1 class="page-title">
-        <i class="fa-solid {{ page_icon|default:'fa-table-list' }}"></i>
-        {{ page_title|default:"Ro'yxat" }}
-    </h1>
-    {% if create_url %}
-    <a href="{{ create_url }}" class="btn btn--primary" id="btnCreate">
-        <i class="fa-solid fa-plus"></i> Qo'shish
-    </a>
-    {% endif %}
+<!-- Page Header with Actions -->
+<div class="page-header" style="margin-bottom: 24px;">
+    <div style="flex: 1;">
+        <h1 class="page-title">
+            {% block page_title_icon %}<i class="fa-solid fa-list"></i>{% endblock %}
+            {% block page_title_text %}{{ page_title|default:"Ro'yxat" }}{% endblock %}
+        </h1>
+    </div>
+    {% block page_actions %}{% endblock %}
 </div>
-{% endblock %}
 
 <!-- ═══════ Filter / Search Bar ═══════ -->
 <div class="list-toolbar" id="listToolbar">
@@ -76,161 +73,4 @@
 {% endif %}
 {% endblock %}
 
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ═══════ DELETE HANDLERS (AJAX) ═══════
-    
-    // Order delete
-    document.querySelectorAll('.order-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu buyurtmani o\'chirmoqchimisiz?')) return;
-            deleteItem(this, 'order', {% url 'dashboard:order_delete' 0 %}.replace('0', this.dataset.orderId));
-        });
-    });
-    
-    // User delete
-    document.querySelectorAll('.user-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu foydalanuvchini o\'chirmoqchimisiz?')) return;
-            deleteItem(this, 'user', {% url 'dashboard:user_delete' 0 %}.replace('0', this.dataset.userId));
-        });
-    });
-    
-    // Delivery/Driver delete
-    document.querySelectorAll('.driver-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu yetkazib beruvchini o\'chirmoqchimisiz?')) return;
-            deleteItem(this, 'driver', {% url 'dashboard:delivery_delete' 0 %}.replace('0', this.dataset.driverId));
-        });
-    });
-    
-    // Medicine delete
-    document.querySelectorAll('.medicine-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu mahsulotni o\'chirmoqchimisiz?')) return;
-            deleteItem(this, 'medicine', {% url 'dashboard:medicine_delete' 0 %}.replace('0', this.dataset.medicineId));
-        });
-    });
-    
-    // Category delete
-    document.querySelectorAll('.category-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu kategoriyani o\'chirmoqchimisiz?')) return;
-            deleteItem(this, 'category', {% url 'dashboard:category_delete' 0 %}.replace('0', this.dataset.categoryId));
-        });
-    });
-    
-    // Ban view
-    document.querySelectorAll('.ban-view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const banId = this.dataset.banId;
-            window.location.href = `/dashboard/bans/${banId}/view/`;
-        });
-    });
-    
-    // Ban delete
-    document.querySelectorAll('.ban-delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Ushbu ban o\'chirilishi haqida tasdiqlaysizmi? Bu amal qayta qaytarib bo\'lmaydi!')) return;
-            deleteItem(this, 'ban', {% url 'dashboard:ban_delete' 0 %}.replace('0', this.dataset.banId));
-        });
-    });
-    
-    // Universal delete handler
-    function deleteItem(btn, type, url) {
-        const row = btn.closest('tr');
-        
-        // Remove row instantly with quick fade
-        if (row) {
-            row.style.transition = 'opacity 0.15s ease';
-            row.style.opacity = '0';
-            setTimeout(() => row.remove(), 150);
-        }
-        
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Restore row if delete failed
-                if (row) {
-                    row.style.opacity = '1';
-                }
-                showNotification(`${type} o'chirishda xatolik yuz berdi.`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Delete error:', error);
-            // Restore row if delete failed
-            if (row) {
-                row.style.opacity = '1';
-            }
-            showNotification(`Xatolik: ${error.message}`, 'error');
-        });
-    }
-    
-    // Get CSRF token from cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // Simple notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: ${type === 'success' ? '#00b894' : type === 'error' ? '#e74c3c' : '#0066ff'};
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-});
-
-// Add animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(400px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(400px); opacity: 0; }
-    }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .fa-spin { animation: spin 1s linear infinite; }
-`;
-document.head.appendChild(style);
-</script>
+{% block extra_js %}{% endblock %}

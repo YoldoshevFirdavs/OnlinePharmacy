@@ -1,914 +1,520 @@
-<!-- Comments section for product detail page - YouTube style threaded comments -->
-<div id="comments-section" class="comments-container">
-    <div class="comments-header">
-        <h2>Comments</h2>
-        <button id="sort-comments-btn" class="btn btn-sm btn-outline-secondary">
-            Sort: <span id="sort-label">Most Recent</span>
-        </button>
-    </div>
-
-    <!-- Comment submission form -->
-    {% if user.is_authenticated %}
-    <div class="comment-form-container">
-        <div class="comment-form-header">
-            <img src="{{ user.avatar.url|default:'https://via.placeholder.com/40' }}" alt="{{ user.full_name }}" class="user-avatar">
-            <div>
-                <p class="user-name">{{ user.full_name|default:user.phone_number }}</p>
-                <p class="text-muted small">Commenting as you</p>
-            </div>
-        </div>
-
-        <form id="add-comment-form" class="comment-form">
-            {% csrf_token %}
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-
-            <!-- Rating selector (top-level only) -->
-            <div class="rating-selector">
-                <label>Rate this product:</label>
-                <div class="stars">
-                    <i class="star-icon" data-rating="1">★</i>
-                    <i class="star-icon" data-rating="2">★</i>
-                    <i class="star-icon" data-rating="3">★</i>
-                    <i class="star-icon" data-rating="4">★</i>
-                    <i class="star-icon" data-rating="5">★</i>
-                </div>
-                <span id="rating-display" class="ms-2">No rating</span>
-            </div>
-
-            <!-- Comment textarea -->
-            <textarea id="comment-content" name="content" class="form-control" placeholder="Share your thoughts..." rows="3" required></textarea>
-
-            <!-- Form actions -->
-            <div class="comment-form-actions">
-                <button type="submit" class="btn btn-primary">Post Comment</button>
-                <button type="reset" class="btn btn-secondary">Clear</button>
-            </div>
-        </form>
-    </div>
-    {% else %}
-    <div class="alert alert-info">
-        <a href="{% url 'account:login' %}">Sign in</a> to leave a comment
-    </div>
-    {% endif %}
-
-    <!-- Comments list -->
-    <div id="comments-list" class="comments-list">
-        <!-- Comments loaded dynamically via AJAX -->
-    </div>
-
-    <!-- Loading indicator -->
-    <div id="comments-loading" class="text-center py-4" style="display: none;">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading comments...</span>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    <nav id="comments-pagination" class="comments-pagination" style="display: none;">
-        <ul class="pagination justify-content-center">
-            <!-- Pagination buttons loaded dynamically -->
-        </ul>
-    </nav>
-</div>
-
-<!-- Comment item template (hidden, cloned for each comment) -->
-<template id="comment-template">
-    <div class="comment-item" data-comment-id="">
-        <div class="comment-header">
-            <img class="comment-avatar" src="" alt="">
-            <div class="comment-meta">
-                <p class="comment-author">
-                    <span class="author-name"></span>
-                    <span class="author-badge"></span>
-                </p>
-                <p class="comment-date"><span class="date-relative"></span></p>
-            </div>
-            {% if user.is_authenticated %}
-            <div class="comment-actions-menu">
-                <button class="btn-menu-toggle" title="More options">⋮</button>
-                <div class="dropdown-menu">
-                    <button class="comment-edit-btn" style="display: none;">Edit</button>
-                    <button class="comment-delete-btn" style="display: none;">Delete</button>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Rating display (for top-level comments) -->
-        <div class="comment-rating" style="display: none;">
-            <span class="rating-stars"></span>
-            <span class="rating-text"></span>
-        </div>
-
-        <!-- Comment content -->
-        <div class="comment-content">
-            <p class="comment-text"></p>
-        </div>
-
-        <!-- Comment actions (like, reply, etc.) -->
-        <div class="comment-actions">
-            <!-- Likes count -->
-            <span class="comment-likes" style="display: none;">
-                <span class="likes-icon">👍</span>
-                <span class="likes-count">0</span>
-            </span>
-
-            <!-- Emoji picker -->
-            <button class="btn-emoji-picker">😊 React</button>
-
-            <!-- Reply button -->
-            {% if user.is_authenticated %}
-            <button class="btn-reply">💬 Reply</button>
-            {% endif %}
-
-            <!-- Emoji reactions display -->
-            <div class="emoji-reactions"></div>
-        </div>
-
-        <!-- Replies (nested) -->
-        <div class="comment-replies" style="display: none;">
-            <!-- Replies loaded dynamically -->
-        </div>
-
-        <!-- Reply form (hidden by default) -->
-        <div class="reply-form-container" style="display: none;">
-            <div class="reply-form-header">
-                <p class="small">Replying to <span class="reply-to-author"></span></p>
-                <button class="btn-close-reply" type="button">×</button>
-            </div>
-            <form class="reply-form">
-                {% csrf_token %}
-                <textarea name="content" class="form-control" placeholder="Write a reply..." rows="2" required></textarea>
-                <div class="reply-form-actions">
-                    <button type="submit" class="btn btn-sm btn-primary">Reply</button>
-                    <button type="button" class="btn btn-sm btn-secondary btn-cancel-reply">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</template>
-
-<!-- Edit form template -->
-<template id="edit-form-template">
-    <div class="edit-form-container">
-        <form class="edit-form">
-            {% csrf_token %}
-            <textarea class="form-control" rows="3" required></textarea>
-            <div class="edit-form-actions">
-                <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                <button type="button" class="btn btn-sm btn-secondary btn-cancel-edit">Cancel</button>
-            </div>
-        </form>
-    </div>
-</template>
-
-<!-- Emoji picker template -->
-<template id="emoji-picker-template">
-    <div class="emoji-picker-container">
-        <div class="emoji-picker-header">
-            <p class="small">Choose reaction:</p>
-            <button class="btn-close-picker" type="button">×</button>
-        </div>
-        <div class="emoji-picker-grid">
-            <button class="emoji-option" data-emoji="like">👍</button>
-            <button class="emoji-option" data-emoji="heart">❤️</button>
-            <button class="emoji-option" data-emoji="laugh">😂</button>
-            <button class="emoji-option" data-emoji="wow">😮</button>
-            <button class="emoji-option" data-emoji="sad">😢</button>
-            <button class="emoji-option" data-emoji="angry">😠</button>
-        </div>
-    </div>
-</template>
-
+{% load pharmacy_tags %}
 <style>
+/* =========================================================
+   Product Comments & Reviews CSS (Modern Clean UI)
+   OnlinePharmacy - Firdavs Yo'ldashev
+   ========================================================= */
+
 .comments-container {
-    margin-top: 3rem;
-    padding: 2rem;
-    border-top: 1px solid #e0e0e0;
+    padding: 1.5rem 0;
 }
 
 .comments-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #edf2f7;
 }
 
 .comments-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #1a202c;
     margin: 0;
 }
 
-/* Comment form */
+/* Comment Form */
 .comment-form-container {
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .comment-form-header {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     object-fit: cover;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
 }
 
 .user-name {
     margin: 0;
     font-weight: 600;
     font-size: 0.9rem;
+    color: #1e293b;
 }
 
+/* Rating selector */
 .rating-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin-bottom: 1rem;
 }
 
 .rating-selector label {
-    display: block;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    color: #475569;
+    margin: 0;
 }
 
 .stars {
     display: inline-flex;
-    gap: 0.5rem;
-    margin-right: 1rem;
+    gap: 4px;
 }
 
 .star-icon {
-    font-size: 1.5rem;
-    color: #ddd;
+    font-size: 1.35rem;
+    color: #cbd5e1;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.15s ease, transform 0.15s ease;
+    user-select: none;
 }
 
 .star-icon:hover,
 .star-icon.active {
-    color: #ffc107;
+    color: #f59e0b;
+    transform: scale(1.1);
 }
 
 #rating-display {
     font-size: 0.85rem;
-    color: #666;
+    font-weight: 600;
+    color: #d97706;
 }
 
-.comment-form textarea {
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.comment-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.comment-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .comment-form-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 0.5rem;
+    margin-top: 0.75rem;
 }
 
-/* Comments list */
+.btn-post-comment {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-post-comment:hover {
+    background: #1d4ed8;
+}
+
+.btn-post-comment:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.btn-clear-comment {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.btn-clear-comment:hover {
+    background: #e2e8f0;
+}
+
+/* Comments List */
 .comments-list {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .comment-item {
-    padding: 1.5rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: #fff;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
     transition: box-shadow 0.2s;
 }
 
 .comment-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .comment-header {
     display: flex;
+    align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1rem;
-    position: relative;
+    margin-bottom: 0.5rem;
 }
 
 .comment-avatar {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     object-fit: cover;
-    flex-shrink: 0;
+    background: #f1f5f9;
 }
 
 .comment-meta {
     flex: 1;
-    min-width: 0;
 }
 
 .comment-author {
     margin: 0;
-    font-weight: 600;
     font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.author-name {
-    color: #1a1a1a;
-}
-
-.author-badge {
-    background: #ffc107;
-    color: #333;
-    padding: 0.2rem 0.5rem;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    display: inline-block;
+    font-weight: 600;
+    color: #1e293b;
 }
 
 .comment-date {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.8rem;
-    color: #999;
+    margin: 0;
+    font-size: 0.75rem;
+    color: #94a3b8;
 }
 
-.comment-actions-menu {
-    position: relative;
-}
-
-.btn-menu-toggle {
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    color: #999;
-}
-
-.btn-menu-toggle:hover {
-    color: #1a1a1a;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    min-width: 120px;
-}
-
-.dropdown-menu.show {
-    display: block;
-}
-
-.dropdown-menu button {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    background: none;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #1a1a1a;
-}
-
-.dropdown-menu button:hover {
-    background: #f0f0f0;
-}
-
-/* Rating display */
 .comment-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-}
-
-.rating-stars {
-    color: #ffc107;
-    letter-spacing: 2px;
-}
-
-/* Comment content */
-.comment-content {
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    color: #f59e0b;
 }
 
 .comment-text {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     line-height: 1.5;
-    color: #333;
-    word-wrap: break-word;
+    color: #334155;
 }
 
-/* Comment actions */
-.comment-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
+.empty-comments-state {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+    font-size: 0.95rem;
 }
 
-.comment-likes {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #999;
-}
-
-.btn-emoji-picker,
-.btn-reply {
-    background: none;
-    border: none;
-    color: #0066cc;
-    padding: 0;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-
-.btn-emoji-picker:hover,
-.btn-reply:hover {
-    text-decoration: underline;
-}
-
-/* Emoji reactions display */
-.emoji-reactions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.emoji-reaction {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.emoji-reaction:hover {
-    background: #e0e0e0;
-    border-color: #999;
-}
-
-.emoji-reaction.active {
-    background: #fff;
-    border-color: #0066cc;
-    color: #0066cc;
-}
-
-.emoji-reaction-emoji {
-    font-size: 1rem;
-}
-
-.emoji-reaction-count {
-    font-size: 0.75rem;
-    color: #666;
-}
-
-/* Emoji picker */
-.emoji-picker-container {
-    position: absolute;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 0.75rem;
-    z-index: 20;
-    min-width: 200px;
-}
-
-.emoji-picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.empty-comments-state i {
+    font-size: 2.5rem;
+    color: #cbd5e1;
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 0.5rem;
-}
-
-.emoji-picker-header p {
-    margin: 0;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.btn-close-picker {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #999;
-    padding: 0;
-    line-height: 1;
-}
-
-.emoji-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-}
-
-.emoji-option {
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    padding: 0.5rem;
-    font-size: 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.emoji-option:hover {
-    background: #e8f5ff;
-    border-color: #0066cc;
-    transform: scale(1.1);
-}
-
-/* Reply form */
-.reply-form-container {
-    margin-left: 2rem;
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #f9f9f9;
-    border-left: 3px solid #0066cc;
-    border-radius: 4px;
-}
-
-.reply-form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.reply-form-header p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #666;
-}
-
-.btn-close-reply {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #999;
-    padding: 0;
-    line-height: 1;
-}
-
-.reply-form textarea {
-    margin-bottom: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.reply-form-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Edit form */
-.edit-form-container {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 1rem;
-    margin: 1rem 0;
-}
-
-.edit-form textarea {
-    margin-bottom: 0.5rem;
-}
-
-.edit-form-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Replies nested */
-.comment-replies {
-    margin-top: 1.5rem;
-    margin-left: 1.5rem;
-    border-left: 2px solid #e0e0e0;
-    padding-left: 1rem;
-}
-
-.reply-item {
-    padding: 1rem;
-    background: #f9f9f9;
-    border-radius: 4px;
-    margin-bottom: 0.75rem;
-}
-
-/* Animations */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.comment-item {
-    animation: slideIn 0.3s ease-out;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .comment-header {
-        gap: 0.5rem;
-    }
-
-    .comment-actions {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .emoji-picker-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .reply-form-container {
-        margin-left: 0;
-        border-left: none;
-        border-top: 3px solid #0066cc;
-    }
+    display: block;
 }
 </style>
 
+<div id="comments-section-container" class="comments-container">
+    <div class="comments-header">
+        <h2>Fikrlar va baholar</h2>
+        <span id="comments-count-badge" style="font-size: 0.85rem; background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 20px; font-weight: 600;">0 ta</span>
+    </div>
+
+    <!-- Comment Form -->
+    {% if user.is_authenticated %}
+    <div class="comment-form-container">
+        <div class="comment-form-header">
+            <img src="{{ user.avatar|safe_image_url:'/static/images/default_avatar.png' }}" alt="{{ user.full_name }}" class="user-avatar">
+            <div>
+                <p class="user-name">{{ user.full_name|default:user.phone_number }}</p>
+            </div>
+        </div>
+
+        <form id="add-comment-form">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+
+            <!-- 5 Star Rating -->
+            <div class="rating-selector">
+                <label>Baholang:</label>
+                <div class="stars" id="comment-star-rating">
+                    <span class="star-icon" data-rating="1">★</span>
+                    <span class="star-icon" data-rating="2">★</span>
+                    <span class="star-icon" data-rating="3">★</span>
+                    <span class="star-icon" data-rating="4">★</span>
+                    <span class="star-icon" data-rating="5">★</span>
+                </div>
+                <span id="rating-display">Baholanmagan</span>
+                <input type="hidden" id="selected-rating" name="rating" value="">
+            </div>
+
+            <textarea id="comment-content" name="content" class="comment-textarea" placeholder="Mahsulot haqida fikringizni yozing..." rows="3" required></textarea>
+
+            <div class="comment-form-actions">
+                <button type="reset" class="btn-clear-comment" id="btn-clear-comment">Tozalash</button>
+                <button type="submit" class="btn-post-comment" id="btn-submit-comment">Fikr bildirish</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 1rem; text-align: center; margin-bottom: 1.5rem;">
+        <p style="margin: 0; color: #64748b; font-size: 0.9rem;">
+            Fikr qoldirish uchun <a href="{% url 'auth' %}" style="color: #2563eb; font-weight: 600; text-decoration: none;">Tizimga kiring</a>
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Comments List -->
+    <div id="comments-list" class="comments-list">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="comments-loading" style="text-align: center; padding: 1.5rem; display: none;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #3b82f6;"></i>
+    </div>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const productId = parseInt(document.querySelector('input[name="product_id"]').value);
-    let currentSort = 'recent';
-    let currentPage = 1;
-    const commentsPerPage = 50;
+(function() {
+    'use strict';
 
-    // Initialize
-    loadComments(currentPage);
-    setupEventListeners();
+    const pId = {{ product.id }};
+    let isSubmitting = false;
+    let selectedRatingVal = null;
 
-    function setupEventListeners() {
-        // Comment form submission
-        const addCommentForm = document.getElementById('add-comment-form');
-        if (addCommentForm) {
-            addCommentForm.addEventListener('submit', handleSubmitComment);
+    function getCsrfToken() {
+        let val = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(c => {
+                const parts = c.trim().split('=');
+                if (parts[0] === 'csrftoken') val = decodeURIComponent(parts[1]);
+            });
         }
+        return val;
+    }
 
-        // Rating stars
-        document.querySelectorAll('.star-icon').forEach(star => {
+    function initStarRating() {
+        const starContainer = document.getElementById('comment-star-rating');
+        if (!starContainer) return;
+        const stars = starContainer.querySelectorAll('.star-icon');
+        const display = document.getElementById('rating-display');
+        const ratingInput = document.getElementById('selected-rating');
+
+        stars.forEach(star => {
             star.addEventListener('click', function() {
-                const rating = this.dataset.rating;
-                document.querySelectorAll('.star-icon').forEach(s => {
-                    s.classList.toggle('active', s.dataset.rating <= rating);
+                const r = parseInt(this.dataset.rating);
+                selectedRatingVal = r;
+                if (ratingInput) ratingInput.value = r;
+                if (display) display.textContent = `${r} yulduz`;
+                stars.forEach(s => {
+                    const val = parseInt(s.dataset.rating);
+                    s.classList.toggle('active', val <= r);
                 });
-                document.getElementById('rating-display').textContent = `${rating} stars`;
             });
         });
 
-        // Sort button
-        document.getElementById('sort-comments-btn')?.addEventListener('click', toggleSort);
+        const btnClear = document.getElementById('btn-clear-comment');
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                selectedRatingVal = null;
+                if (ratingInput) ratingInput.value = '';
+                if (display) display.textContent = 'Baholanmagan';
+                stars.forEach(s => s.classList.remove('active'));
+            });
+        }
     }
 
-    async function loadComments(page = 1) {
-        const url = `/api/v1/products/${productId}/comments/?page=${page}&page_size=${commentsPerPage}`;
+    async function loadProductComments() {
+        const listEl = document.getElementById('comments-list');
+        const loadingEl = document.getElementById('comments-loading');
+        const badgeEl = document.getElementById('comments-count-badge');
+        if (!listEl) return;
+
+        if (loadingEl) loadingEl.style.display = 'block';
+
         try {
-            const response = await fetch(url);
-            const data = await response.json();
-            renderComments(data.results || []);
-        } catch (error) {
-            console.error('Error loading comments:', error);
-        }
-    }
-
-    function renderComments(comments) {
-        const commentsList = document.getElementById('comments-list');
-        commentsList.innerHTML = '';
-
-        comments.forEach(comment => {
-            const commentEl = createCommentElement(comment);
-            commentsList.appendChild(commentEl);
-        });
-    }
-
-    function createCommentElement(comment) {
-        const template = document.getElementById('comment-template');
-        const el = template.content.cloneNode(true);
-
-        // Set comment ID
-        el.querySelector('.comment-item').dataset.commentId = comment.id;
-
-        // User info
-        const userInfo = comment.user;
-        el.querySelector('.comment-avatar').src = userInfo.avatar || 'https://via.placeholder.com/36';
-        el.querySelector('.author-name').textContent = userInfo.name;
-
-        // Rating
-        if (comment.rating) {
-            el.querySelector('.comment-rating').style.display = 'flex';
-            el.querySelector('.rating-stars').textContent = '★'.repeat(comment.rating);
-            el.querySelector('.rating-text').textContent = `${comment.rating} stars`;
-        }
-
-        // Content
-        el.querySelector('.comment-text').textContent = comment.content;
-
-        // Date
-        el.querySelector('.date-relative').textContent = formatDate(comment.created_at);
-
-        // Likes
-        if (comment.likes_count > 0) {
-            el.querySelector('.comment-likes').style.display = 'inline-flex';
-            el.querySelector('.likes-count').textContent = comment.likes_count;
-        }
-
-        // Emoji reactions
-        renderEmojiReactions(el, comment);
-
-        // Action buttons
-        setupCommentActions(el, comment);
-
-        // Replies
-        if (comment.replies && comment.replies.length > 0) {
-            el.querySelector('.comment-replies').style.display = 'block';
-            comment.replies.forEach(reply => {
-                const replyEl = createReplyElement(reply);
-                el.querySelector('.comment-replies').appendChild(replyEl);
+            // Increase page size to reduce API calls - load up to 200 comments at once
+            const res = await fetch(`/api/v1/products/${pId}/comments/?page=1&page_size=200`, {
+                headers: { 'Accept': 'application/json' }
             });
-        }
-
-        return el;
-    }
-
-    function createReplyElement(reply) {
-        const template = document.getElementById('comment-template');
-        const el = template.content.cloneNode(true);
-        const itemEl = el.querySelector('.comment-item');
-        itemEl.classList.add('reply-item');
-
-        // Similar to comment but simpler (no rating, no new replies)
-        const userInfo = reply.user;
-        el.querySelector('.comment-avatar').src = userInfo.avatar || 'https://via.placeholder.com/36';
-        el.querySelector('.author-name').textContent = userInfo.name;
-        el.querySelector('.comment-text').textContent = reply.content;
-        el.querySelector('.date-relative').textContent = formatDate(reply.created_at);
-
-        // Hide nested replies
-        el.querySelector('.comment-replies').style.display = 'none';
-        el.querySelector('.btn-reply').style.display = 'none';
-
-        return itemEl;
-    }
-
-    function renderEmojiReactions(el, comment) {
-        const reactionsContainer = el.querySelector('.emoji-reactions');
-        if (comment.emoji_reactions && comment.emoji_reactions.length > 0) {
-            const grouped = {};
-            const emojiDisplay = {};
-            
-            comment.emoji_reactions.forEach(reaction => {
-                if (!grouped[reaction.emoji]) {
-                    grouped[reaction.emoji] = [];
+            if (!res.ok) {
+                if (res.status === 403) {
+                    throw new Error('Rate limit exceeded - please try again in a few moments');
                 }
-                grouped[reaction.emoji].push(reaction.user_id);
-                emojiDisplay[reaction.emoji] = reaction.emoji_display;
-            });
+                throw new Error(`Server error: ${res.status}`);
+            }
+            const data = await res.json();
+            const results = data.results || (Array.isArray(data) ? data : []);
 
-            Object.entries(grouped).forEach(([emoji, userIds]) => {
-                const btn = document.createElement('button');
-                btn.className = 'emoji-reaction';
-                btn.innerHTML = `<span class="emoji-reaction-emoji">${emojiDisplay[emoji]}</span><span class="emoji-reaction-count">${userIds.length}</span>`;
-                btn.addEventListener('click', () => toggleReaction(comment.id, emoji));
-                reactionsContainer.appendChild(btn);
-            });
+            if (badgeEl) badgeEl.textContent = `${results.length} ta`;
+
+            if (results.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-comments-state">
+                        <i class="far fa-comments"></i>
+                        Hozircha hech qanday fikr bildirilmagan. Birinchi bo'lib fikr qoldiring!
+                    </div>
+                `;
+            } else {
+                listEl.innerHTML = results.map(c => {
+                    const starsHtml = c.rating ? '★'.repeat(c.rating) + '☆'.repeat(5 - c.rating) : '';
+                    const ratingBlock = c.rating ? `<div class="comment-rating">${starsHtml} <span style="font-size:0.8rem; color:#64748b;">(${c.rating}/5)</span></div>` : '';
+                    const avatarUrl = (c.user && c.user.avatar) ? c.user.avatar : '/static/images/default_avatar.png';
+                    const userName = (c.user && c.user.name) ? c.user.name : 'Foydalanuvchi';
+                    const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('uz-UZ') : '';
+
+                    return `
+                        <div class="comment-item" data-id="${c.id}">
+                            <div class="comment-header">
+                                <img src="${avatarUrl}" class="comment-avatar" alt="${userName}" onerror="this.src='/static/images/default_avatar.png'">
+                                <div class="comment-meta">
+                                    <p class="comment-author">${userName}</p>
+                                    <span class="comment-date">${dateStr}</span>
+                                </div>
+                            </div>
+                            ${ratingBlock}
+                            <p class="comment-text">${escapeHtml(c.content)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (err) {
+            console.error('Comments load error:', err);
+            listEl.innerHTML = `<div style="color:#ef4444; padding:1rem; text-align:center;">Fikrlarni yuklashda xatolik yuz berdi: ${err.message}</div>`;
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
         }
     }
 
-    function setupCommentActions(el, comment) {
-        const emojiBtn = el.querySelector('.btn-emoji-picker');
-        emojiBtn?.addEventListener('click', (e) => showEmojiPicker(e, comment.id));
-
-        const replyBtn = el.querySelector('.btn-reply');
-        replyBtn?.addEventListener('click', () => showReplyForm(el));
-    }
-
-    function showEmojiPicker(e, commentId) {
-        const template = document.getElementById('emoji-picker-template');
-        const picker = template.content.cloneNode(true);
-
-        picker.querySelectorAll('.emoji-option').forEach(btn => {
-            btn.addEventListener('click', () => addReaction(commentId, btn.dataset.emoji, picker));
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function(m) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
         });
-
-        picker.querySelector('.btn-close-picker').addEventListener('click', () => picker.remove());
-
-        document.body.appendChild(picker);
     }
 
-    async function addReaction(commentId, emoji) {
-        try {
-            const response = await fetch(`/api/v1/comments/${commentId}/like/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({ emoji })
-            });
-            if (response.ok) {
-                loadComments(currentPage);
+    function setupCommentForm() {
+        const form = document.getElementById('add-comment-form');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (isSubmitting) return;
+
+            const contentInput = document.getElementById('comment-content');
+            const submitBtn = document.getElementById('btn-submit-comment');
+            const content = contentInput ? contentInput.value.trim() : '';
+
+            if (!content) return;
+
+            isSubmitting = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Yuborilmoqda...';
             }
-        } catch (error) {
-            console.error('Error adding reaction:', error);
-        }
-    }
 
-    async function handleSubmitComment(e) {
-        e.preventDefault();
-        const content = document.getElementById('comment-content').value;
-        const rating = document.querySelector('.star-icon.active')?.dataset.rating;
+            try {
+                const bodyData = {
+                    product: pId,
+                    content: content
+                };
+                if (selectedRatingVal) {
+                    bodyData.rating = parseInt(selectedRatingVal);
+                }
 
-        try {
-            const response = await fetch(`/api/v1/products/${productId}/comments/`, {
-                method: 'POST',
-                headers: {
+                const headers = {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    content,
-                    rating: rating ? parseInt(rating) : null,
-                    product: productId
-                })
-            });
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+                const token = localStorage.getItem('access_token');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
 
-            if (response.ok) {
-                document.getElementById('add-comment-form').reset();
-                loadComments(1);
-            }
-        } catch (error) {
-            console.error('Error submitting comment:', error);
-        }
-    }
+                const res = await fetch(`/api/v1/products/${pId}/comments/`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(bodyData)
+                });
 
-    function formatDate(dateStr) {
-        return new Date(dateStr).toLocaleDateString();
-    }
+                if (res.status === 401) {
+                    window.location.href = '/auth/';
+                    return;
+                }
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+                const data = await res.json();
+                if (res.ok && (data.id || data.content)) {
+                    form.reset();
+                    selectedRatingVal = null;
+                    const display = document.getElementById('rating-display');
+                    if (display) display.textContent = 'Baholanmagan';
+                    document.querySelectorAll('#comment-star-rating .star-icon').forEach(s => s.classList.remove('active'));
+
+                    // Real-time update product rating and count on the page
+                    if (data.product_average_rating !== undefined) {
+                        const ratingStarsEl = document.querySelector('.rating-stars');
+                        if (ratingStarsEl) {
+                            ratingStarsEl.innerHTML = `⭐ ${parseFloat(data.product_average_rating).toFixed(2)}`;
+                        }
+                    }
+                    if (data.product_reviews_count !== undefined) {
+                        const ratingTextCountEl = document.querySelector('.rating-text strong');
+                        if (ratingTextCountEl) {
+                            ratingTextCountEl.textContent = data.product_reviews_count;
+                        }
+                        const btnToggleEl = document.getElementById('btn-toggle-reviews');
+                        if (btnToggleEl) {
+                            btnToggleEl.innerHTML = `<i class="fas fa-comments"></i> Ko'rish (${data.product_reviews_count} fikr)`;
+                        }
+                    }
+
+                    // Reload list once
+                    await loadProductComments();
+                } else {
+                    alert(data.error || data.detail || 'Xatolik yuz berdi.');
+                }
+            } catch (err) {
+                console.error('Comment submit error:', err);
+                alert('Fikr yuborishda xatolik yuz berdi.');
+            } finally {
+                isSubmitting = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Fikr bildirish';
                 }
             }
-        }
-        return cookieValue;
+        });
     }
 
-    function toggleSort() {
-        currentSort = currentSort === 'recent' ? 'top' : 'recent';
-        document.getElementById('sort-label').textContent = currentSort === 'recent' ? 'Most Recent' : 'Top';
-        loadComments(1);
-    }
-
-    function showReplyForm(commentEl) {
-        const replyForm = commentEl.querySelector('.reply-form-container');
-        replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        initStarRating();
+        setupCommentForm();
+        loadProductComments();
+    });
+})();
 </script>

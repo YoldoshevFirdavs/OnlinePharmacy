@@ -228,7 +228,7 @@ async function addProduct() {
     }
     
     try {
-        const response = await fetch(`/api/v1/pharmacy/products/${productId}/`);
+        const response = await fetch(`/api/v1/products/${productId}/`);
         if (!response.ok) throw new Error('Product topilmadi');
         
         const product = await response.json();

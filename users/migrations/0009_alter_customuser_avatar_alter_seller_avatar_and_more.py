@@ -15,16 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="customuser",
             name="avatar",
-            field=models.ImageField(
-                blank=True, null=True, upload_to="users_profile_avatars/"
-            ),
+            field=models.ImageField(blank=True, null=True, upload_to="users_profile_avatars/"),
         ),
         migrations.AlterField(
             model_name="seller",
             name="avatar",
-            field=models.ImageField(
-                blank=True, null=True, upload_to="users_profile_avatars/"
-            ),
+            field=models.ImageField(blank=True, null=True, upload_to="users_profile_avatars/"),
         ),
         migrations.CreateModel(
             name="SubscribedUser",

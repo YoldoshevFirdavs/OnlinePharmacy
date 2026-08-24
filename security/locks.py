@@ -27,9 +27,7 @@ def record_failed_attempt(account_key: str):
     if v1 >= ACCOUNT_ATTEMPTS_10MIN:
         lock_key = f"acct:lock:{account_key}"
         set_with_ttl(lock_key, 1, LOCKOUT_TTL)
-        logger.warning(
-            f"Account {account_key} locked out for {LOCKOUT_TTL} seconds due to too many failed attempts."
-        )
+        logger.warning(f"Account {account_key} locked out for {LOCKOUT_TTL} seconds due to too many failed attempts.")
 
     logger.debug(f"Failed attempt recorded for {account_key}: 10min={v1}, 1day={v2}")
     return v1, v2

@@ -34,3 +34,4 @@ staticfiles/
 *.gz
 # Kiro IDE
 .kiro/
+logs

@@ -1,17 +1,14 @@
+import importlib
+import logging
 import os
 import sys
-import django
-import logging
-import importlib
-from dotenv import load_dotenv
-from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
 
+import django
+from dotenv import load_dotenv
+from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler, Updater
 
 # 1. Loglarni terminalda chiroyli ko'rish uchun sozlama
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 2. .env faylini yuklash
@@ -23,10 +20,11 @@ ADMIN_ID = os.getenv("ADMIN_ID")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 # Django-ni ishga tushirish
 from django.apps import apps
+
 if not apps.ready:
     django.setup()
 
@@ -35,6 +33,7 @@ import telegram_bot.handlers
 import telegram_bot.messages
 
 _HANDLERS_LOADED = False
+
 
 def reload_bot_handlers(dispatcher, force_reload=False):
     global _HANDLERS_LOADED
@@ -55,7 +54,8 @@ def reload_bot_handlers(dispatcher, force_reload=False):
 
         for route in routes:
             h_func = getattr(handlers_mod, route["handler"], None)
-            if not h_func: continue
+            if not h_func:
+                continue
 
             if route["type"] == "command":
                 dispatcher.add_handler(CommandHandler(route["trigger"], h_func), group=0)
@@ -70,10 +70,13 @@ def reload_bot_handlers(dispatcher, force_reload=False):
     except Exception as e:
         logger.error(f"❌ Reload xatosi: {e}", exc_info=True)
 
+
 def admin_refresh_bot(update, context):
-    if str(update.effective_user.id) != str(ADMIN_ID): return
+    if str(update.effective_user.id) != str(ADMIN_ID):
+        return
     reload_bot_handlers(context.dispatcher, force_reload=True)
     update.message.reply_text("✅ Bot kodi va matnlari yangilandi!")
+
 
 def main():
     if not BOT_TOKEN:
@@ -84,13 +87,15 @@ def main():
     dispatcher = updater.dispatcher
 
     from telegram_bot.handlers import ban_command, unban_command
-    dispatcher.add_handler(MessageHandler(Filters.regex('^/refresh$'), admin_refresh_bot), group=1)
-    dispatcher.add_handler(MessageHandler(Filters.regex('^/ban'), ban_command), group=1)
-    dispatcher.add_handler(MessageHandler(Filters.regex('^/unban'), unban_command), group=1)
+
+    dispatcher.add_handler(MessageHandler(Filters.regex("^/refresh$"), admin_refresh_bot), group=1)
+    dispatcher.add_handler(MessageHandler(Filters.regex("^/ban"), ban_command), group=1)
+    dispatcher.add_handler(MessageHandler(Filters.regex("^/unban"), unban_command), group=1)
 
     reload_bot_handlers(dispatcher)
 
     from telegram import BotCommand
+
     commands = [
         BotCommand("start", "Botni ishga tushirish"),
         BotCommand("help", "Yordam markazi"),
@@ -104,5 +109,6 @@ def main():
     updater.start_polling()
     updater.idle()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

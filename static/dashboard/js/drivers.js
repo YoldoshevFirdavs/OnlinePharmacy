@@ -64,25 +64,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Delete driver
-    document.querySelectorAll('.driver-delete-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const driverId = this.getAttribute('data-driver-id');
-            if (confirm('Are you sure you want to delete this driver?')) {
-                fetch(`/dashboard/api/drivers/${driverId}/`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    }
-                });
-            }
-        });
-    });
+    // Delete driver - now using delete_handlers.js
+    // The delete modal and handlers are now centralized in delete_handlers.js
+    console.log('Drivers page loaded - delete handlers are handled by delete_handlers.js');
 
     function getCookie(name) {
         let cookieValue = null;

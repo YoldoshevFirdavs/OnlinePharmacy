@@ -38,22 +38,16 @@ class Command(BaseCommand):
 
         if reset:
             reset_ip_score(ip_address)
-            self.stdout.write(
-                self.style.SUCCESS(f"Successfully reset score for IP: {ip_address}")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Successfully reset score for IP: {ip_address}"))
         elif incr_delta > 0:
             new_score = incr_ip_score(ip_address, delta=incr_delta)
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"Successfully incremented score for IP: {ip_address}. New score: {new_score}"
-                )
+                self.style.SUCCESS(f"Successfully incremented score for IP: {ip_address}. New score: {new_score}")
             )
         elif decr_delta > 0:
             new_score = decr_ip_score(ip_address, delta=decr_delta)
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"Successfully decremented score for IP: {ip_address}. New score: {new_score}"
-                )
+                self.style.SUCCESS(f"Successfully decremented score for IP: {ip_address}. New score: {new_score}")
             )
         else:
             score = get_ip_score(ip_address)

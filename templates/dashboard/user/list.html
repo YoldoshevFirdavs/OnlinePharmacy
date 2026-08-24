@@ -1,23 +1,17 @@
 {% extends 'dashboard/list.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}Foydalanuvchilar{% endblock %}
 
-{% block page_header %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">
-            <i class="fa-solid fa-users"></i>
-            Foydalanuvchilar
-        </h1>
-        <p class="page-subtitle">Barcha foydalanuvchilarni boshqarish</p>
-    </div>
-    <div class="page-actions">
-        <a href="{% url 'dashboard:user_create' %}" class="btn btn--primary">
-            <i class="fa-solid fa-plus"></i>
-            Qo'shish
-        </a>
-    </div>
+{% block page_title_icon %}<i class="fa-solid fa-users"></i>{% endblock %}
+{% block page_title_text %}Foydalanuvchilar{% endblock %}
+
+{% block page_actions %}
+<div class="page-header__actions">
+    <a href="{% url 'dashboard:user_create' %}" class="btn btn--primary">
+        <i class="fa-solid fa-plus"></i> Qo'shish
+    </a>
 </div>
 {% endblock %}
 
@@ -38,8 +32,8 @@
     <tr>
         <td>{{ u.id }}</td>
         <td>
-            <div class="user-cell">
-                <i class="fa-solid fa-circle-user"></i>
+            <div class="user-cell user-cell--avatar">
+                <img src="{{ u|user_avatar_url }}" alt="{{ u.full_name|default:u.email }}" class="user-avatar" onerror="this.src='/static/images/default_avatar.png'">
                 <span>{{ u.full_name|default:u.email|default:u.phone_number|default:"—" }}</span>
             </div>
         </td>
@@ -74,6 +68,7 @@
                 <button type="button" 
                         class="btn btn--sm btn--ghost btn--danger user-delete-btn"
                         data-user-id="{{ u.pk }}"
+                        data-delete-url="{% url 'dashboard:user_delete' u.pk %}"
                         title="O'chirish">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -90,3 +85,24 @@
     </tr>
 {% endif %}
 {% endblock %}
+
+{% block extra_content %}
+<!-- ═══════ Pagination ═══════ -->
+{% if page_obj %}
+<nav class="pagination-wrapper" id="paginationWrapper" aria-label="Sahifalar">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li><a href="?page={{ num }}" class="pagination__link{% if page_obj.number == num %} active{% endif %}">{{ num }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}" class="pagination__link"><i class="fa-solid fa-chevron-right"></i></a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

@@ -1,12 +1,6 @@
 from django.urls import path
 
-from .views import (
-    FingerprintBanStatusView,
-    ClearIPBlockView,
-    UnbanFingerprintView,
-    AdminBanStatsView,
-    UnbanRecordView,
-)
+from .views import AdminBanStatsView, ClearIPBlockView, FingerprintBanStatusView, UnbanFingerprintView, UnbanRecordView
 
 app_name = "security"
 

@@ -69,7 +69,6 @@
                 <div class="detail-value">
                     {% if ban.user %}
                         <div class="user-cell">
-                            <i class="fa-solid fa-circle-user"></i>
                             <span>{{ ban.user.email }} ({{ ban.user.get_full_name|default:ban.user.email }})</span>
                         </div>
                     {% else %}

@@ -48,19 +48,13 @@ class MedicineForm(forms.ModelForm):
             "side_effects": forms.Textarea(attrs={"class": "form-control"}),
             "contraindications": forms.Textarea(attrs={"class": "form-control"}),
             "storage_conditions": forms.TextInput(attrs={"class": "form-control"}),
-            "is_prescription_required": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
-            "main_image": forms.ClearableFileInput(
-                attrs={"class": "form-control-file"}
-            ),
+            "is_prescription_required": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "main_image": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
         }
 
 
 class UserForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False
-    )
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
 
     class Meta:
         model = CustomUser
@@ -76,10 +70,6 @@ class UserForm(forms.ModelForm):
             "is_verified",
             "role",
             "password",
-            "banned_for",
-            "ban_reason",
-            "ban_until",
-            "is_permanent_ban",
         ]
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -92,10 +82,6 @@ class UserForm(forms.ModelForm):
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_verified": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "role": forms.Select(attrs={"class": "form-control"}),
-            "banned_for": forms.TextInput(attrs={"class": "form-control", "placeholder": "Masalan: admin_login, dashboard, etc."}),
-            "ban_reason": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Ban berilgan sababi"}),
-            "ban_until": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-            "is_permanent_ban": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def save(self, commit=True):
@@ -122,25 +108,18 @@ class DeliveryDriverForm(forms.ModelForm):
 
 # Admin va Deliverer uchun Account Settings formasi
 class AccountSettingsForm(forms.ModelForm):
-    old_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False
-    )
-    new_password1 = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False
-    )
-    new_password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False
-    )
+    old_password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
+    new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
+    new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
 
     class Meta:
         model = CustomUser
-        fields = ["full_name", "email", "phone_number", "address", "avatar"]
+        fields = ["full_name", "email", "phone_number", "address"]
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),
-            "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
         }
 
     def clean(self):
@@ -149,13 +128,13 @@ class AccountSettingsForm(forms.ModelForm):
         new_password1 = cleaned_data.get("new_password1")
         new_password2 = cleaned_data.get("new_password2")
 
-        if new_password1 and not old_password:
-            self.add_error(
-                "old_password", "Parolni o'zgartirish uchun eski parolni kiriting."
-            )
+        has_password = self.instance.has_usable_password() if self.instance else False
+
+        if new_password1 and has_password and not old_password:
+            self.add_error("old_password", "Parolni o'zgartirish uchun eski parolni kiriting.")
         if new_password1 and new_password1 != new_password2:
             self.add_error("new_password2", "Yangi parollar mos kelmadi.")
-        if old_password and not self.instance.check_password(old_password):
+        if has_password and old_password and not self.instance.check_password(old_password):
             self.add_error("old_password", "Eski parol noto'g'ri.")
 
         return cleaned_data
@@ -164,10 +143,17 @@ class AccountSettingsForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ["user", "total_price", "status", "address"]
+        fields = ["user", "total_price", "status", "address", "payment_method"]
         widgets = {
             "user": forms.Select(attrs={"class": "form-control"}),
             "total_price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "status": forms.Select(attrs={"class": "form-control"}),
             "address": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "payment_method": forms.Select(
+                attrs={"class": "form-control"},
+                choices=[
+                    ("cash", "Naqd pul"),
+                    ("card", "Karta"),
+                ],
+            ),
         }

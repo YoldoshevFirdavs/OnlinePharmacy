@@ -14,7 +14,8 @@ def role_required(*roles):
             user = request.user
 
             if not user.is_authenticated:
-                return redirect("dashboard:login_page")
+                # Redirect to the public auth page
+                return redirect("/auth/")
 
             # Check if user has any of the required roles
             has_permission = False
