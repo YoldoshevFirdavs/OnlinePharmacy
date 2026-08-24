@@ -55,10 +55,6 @@ openpyxl                     # Excel file support
 stripe                       # Stripe payment integration
 requests                     # HTTP requests library
 
-# Testing
-pytest==8.3.5                # Testing framework
-pytest-django==4.12.0        # Django plugin for pytest
-
 # Monitoring & Observability
 prometheus-client==0.20.0    # Prometheus client library
 
