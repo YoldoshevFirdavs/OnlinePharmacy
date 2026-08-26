@@ -801,7 +801,7 @@ django_db_connections_current / django_db_connections_max
 **Environment Variables:**
 
 ```env
-# .env.prod
+# .env
 PROMETHEUS_SCRAPE_INTERVAL=30s
 GRAFANA_PASSWORD=<strong_password>
 ALERT_EMAIL=admin@onlinepharmacy.uz

@@ -139,7 +139,7 @@ class Order(models.Model):
 STRIPE_SECRET_KEY=sk_test_51...
 STRIPE_PUBLIC_KEY=pk_test_51...
 
-# .env.prod (production - use live keys)
+# .env (production - use live keys)
 STRIPE_SECRET_KEY=sk_live_... 
 STRIPE_PUBLIC_KEY=pk_live_...
 ```
@@ -809,7 +809,7 @@ PAYROLL_TAX_RATE=0.15
 DEBUG=True
 ```
 
-### Production (.env.prod)
+### Production (.env)
 
 ```env
 STRIPE_SECRET_KEY=sk_live_...

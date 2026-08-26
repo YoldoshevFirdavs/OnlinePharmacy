@@ -72,7 +72,7 @@ services:
       retries: 5
 ```
 
-**Production deployment** uses `.env.prod` with:
+**Production deployment** uses `.env` with:
 - Strong passwords (12+ characters with special chars)
 - SSL/TLS connection encryption (SSLMODE=require)
 - Read replicas for scaling
@@ -968,7 +968,7 @@ DB_PASSWORD=root
 DEBUG=True
 ```
 
-### Production (.env.prod)
+### Production (.env)
 
 ```env
 DB_HOST=pharmacy-db-prod.c.googlecloud.com
