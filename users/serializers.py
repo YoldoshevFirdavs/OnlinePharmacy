@@ -24,11 +24,14 @@ def determine_role(user):
 
 
 def validate_image_file(file):
+    """Validate that file is a valid image format."""
     try:
         img = Image.open(file)
         img.verify()
-    except Exception:
-        raise serializers.ValidationError("Yuklangan fayl yaroqli rasm emas.")
+    except IOError as e:
+        raise serializers.ValidationError(f"Fayl o'qilmadi yoki corrupt: {str(e)[:50]}")
+    except Exception as e:
+        raise serializers.ValidationError(f"Rasm tekshirilmadi: {type(e).__name__}")
     return file
 
 
@@ -152,23 +155,34 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        from django.db import transaction
+        
         password = validated_data.pop("password", None)
         avatar = validated_data.pop("avatar", None)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        try:
+            with transaction.atomic():
+                # Update non-sensitive fields
+                for attr, value in validated_data.items():
+                    setattr(instance, attr, value)
 
-        if password:
-            instance.set_password(password)
+                if password:
+                    instance.set_password(password)
 
-        if avatar:
-            if hasattr(instance, "seller") and instance.seller:
-                instance.seller.avatar = avatar
-                instance.seller.save()
-            else:
-                instance.avatar = avatar
+                # Update avatar - set on both user and seller for consistency
+                if avatar:
+                    instance.avatar = avatar  # Always set on user
+                    if hasattr(instance, "seller") and instance.seller:
+                        instance.seller.avatar = avatar
+                        instance.seller.save()
 
-        instance.save()
+                instance.save()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"User profile update failed for user {instance.id}: {str(e)}")
+            raise
+            
         return instance
 
 
