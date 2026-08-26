@@ -369,7 +369,7 @@ SESSION_CACHE_ALIAS = "default"
 # ---------------------------------------------------------------------------
 # HTTPS / Security settings — driven entirely by environment variables.
 # Local dev (.env):  all values below resolve to False / disabled.
-# Production (.env.prod): all values resolve to True / enabled.
+# Production (.env):  all values resolve to True / enabled.
 # ---------------------------------------------------------------------------
 
 # Django's built-in SSL redirect (SecurityMiddleware).
