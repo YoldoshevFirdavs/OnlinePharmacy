@@ -55,6 +55,11 @@ class MedicineForm(forms.ModelForm):
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
+    telegram_id = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "@username yoki 123456789"}),
+        required=False,
+        help_text="Telegram username (@username) yoki ID (raqamlar)",
+    )
 
     class Meta:
         model = CustomUser
@@ -62,6 +67,7 @@ class UserForm(forms.ModelForm):
             "full_name",
             "email",
             "phone_number",
+            "telegram_id",
             "address",
             "avatar",
             "is_staff",
@@ -75,6 +81,7 @@ class UserForm(forms.ModelForm):
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "telegram_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "@username yoki 123456789"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
@@ -83,6 +90,38 @@ class UserForm(forms.ModelForm):
             "is_verified": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "role": forms.Select(attrs={"class": "form-control"}),
         }
+
+    def clean_telegram_id(self):
+        """Validate Telegram ID"""
+        telegram_id = self.cleaned_data.get("telegram_id", "").strip()
+
+        if not telegram_id:
+            return telegram_id  # Allow empty
+
+        # Check format
+        if telegram_id.startswith("@"):
+            username = telegram_id[1:]
+            if not username.replace("_", "").isalnum() or len(username) < 5:
+                raise forms.ValidationError(
+                    "Telegram username noto'g'ri formatda. Namuna: @username (eng kamida 5 ta belgi)"
+                )
+        else:
+            if not telegram_id.isdigit():
+                raise forms.ValidationError(
+                    "Telegram ID raqamlar bilan yoki @username ko'rinishida bo'lishi kerak. Namuna: 123456789 yoki @username"
+                )
+            if len(telegram_id) < 5 or len(telegram_id) > 20:
+                raise forms.ValidationError("Telegram ID 5 dan 20 ta raqamdan iborat bo'lishi kerak.")
+
+        # Check uniqueness
+        qs = CustomUser.objects.filter(telegram_id=telegram_id)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Bu Telegram ID allaqachon ishlatilgan.")
+
+        return telegram_id
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -111,16 +150,54 @@ class AccountSettingsForm(forms.ModelForm):
     old_password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
     new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
     new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control"}), required=False)
+    telegram_id = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "@username yoki 123456789"}),
+        required=False,
+        help_text="Telegram username (@username) yoki ID (raqamlar)",
+    )
 
     class Meta:
         model = CustomUser
-        fields = ["full_name", "email", "phone_number", "address"]
+        fields = ["full_name", "email", "phone_number", "telegram_id", "address"]
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
+            "telegram_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "@username yoki 123456789"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+    def clean_telegram_id(self):
+        """Validate Telegram ID"""
+        telegram_id = self.cleaned_data.get("telegram_id", "").strip()
+
+        if not telegram_id:
+            return telegram_id  # Allow empty
+
+        # Check format
+        if telegram_id.startswith("@"):
+            username = telegram_id[1:]
+            if not username.replace("_", "").isalnum() or len(username) < 5:
+                raise forms.ValidationError(
+                    "Telegram username noto'g'ri formatda. Namuna: @username (eng kamida 5 ta belgi)"
+                )
+        else:
+            if not telegram_id.isdigit():
+                raise forms.ValidationError(
+                    "Telegram ID raqamlar bilan yoki @username ko'rinishida bo'lishi kerak. Namuna: 123456789 yoki @username"
+                )
+            if len(telegram_id) < 5 or len(telegram_id) > 20:
+                raise forms.ValidationError("Telegram ID 5 dan 20 ta raqamdan iborat bo'lishi kerak.")
+
+        # Check uniqueness
+        qs = CustomUser.objects.filter(telegram_id=telegram_id)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Bu Telegram ID allaqachon ishlatilgan.")
+
+        return telegram_id
 
     def clean(self):
         cleaned_data = super().clean()

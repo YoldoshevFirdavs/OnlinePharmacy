@@ -86,6 +86,14 @@
                         </label>
                         <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" {% if form.instance.pk %}data-user-id="{{ form.instance.pk }}"{% endif %}>
                         <div id="phone-feedback" class="form-text"></div>
+                    {% elif field.html_name == 'telegram_id' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        <input type="text" name="{{ field.name }}" id="id_telegram_id" value="{{ field.value|default_if_none:'' }}" class="form-control" placeholder="@username yoki 123456789" {% if form.instance.pk %}data-user-id="{{ form.instance.pk }}"{% endif %}>
+                        <div id="telegram-feedback" class="form-text"></div>
+                        {% if field.help_text %}<p class="form-hint">{{ field.help_text }}</p>{% endif %}
                     {% else %}
                         <label for="{{ field.id_for_label }}" class="form-label">
                             {{ field.label }}

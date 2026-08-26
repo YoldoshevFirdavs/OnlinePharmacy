@@ -523,6 +523,9 @@
                                     {% elif field.html_name == 'phone_number' %}
                                         <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" data-user-id="{{ user.id }}">
                                         <div id="phone-feedback" class="form-text"></div>
+                                    {% elif field.html_name == 'telegram_id' %}
+                                        <input type="text" name="{{ field.name }}" id="id_telegram_id" value="{{ field.value|default_if_none:'' }}" class="form-control" placeholder="@username yoki 123456789" data-user-id="{{ user.id }}">
+                                        <div id="telegram-feedback" class="form-text"></div>
                                     {% elif field.html_name == 'new_password1' %}
                                         {{ field }}
                                         <ul class="pwd-requirements" aria-live="polite">

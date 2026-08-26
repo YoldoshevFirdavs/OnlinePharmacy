@@ -208,7 +208,7 @@ class Seller(models.Model):
 
     @property
     def get_avatar_url(self):
-        if self.avatar and hasattr(self.avatar, "url"):
+        if self.avatar and hasattr(self.avatar, "url") and hasattr(self.avatar, "name") and self.avatar.name:
             return self.avatar.url
         return "/static/images/default/default_avatar.png"
 

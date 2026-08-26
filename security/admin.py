@@ -2,7 +2,34 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import AuditLog, BanRecord
+from .models import AuditLog, BanRecord, UserActionHistory
+
+
+@admin.register(UserActionHistory)
+class UserActionHistoryAdmin(admin.ModelAdmin):
+    list_display = ["user", "action", "description", "ip_address", "timestamp"]
+    list_filter = ["action", "timestamp", "user"]
+    search_fields = ["user__email", "action", "description", "ip_address"]
+    readonly_fields = [
+        "timestamp",
+        "user",
+        "action",
+        "description",
+        "ip_address",
+        "target_type",
+        "target_id",
+        "metadata",
+    ]
+    date_hierarchy = "timestamp"
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(AuditLog)
@@ -10,10 +37,16 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_display = ["user", "action", "ip_address", "timestamp"]
     list_filter = ["action", "timestamp"]
     search_fields = ["user__email", "action", "ip_address"]
-    readonly_fields = ["timestamp"]
+    readonly_fields = ["timestamp", "user", "action", "description", "ip_address", "target_type", "target_id", "meta"]
     date_hierarchy = "timestamp"
 
     def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False
 
 

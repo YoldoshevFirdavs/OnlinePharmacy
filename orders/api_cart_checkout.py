@@ -86,12 +86,12 @@ class CartSummaryAPIView(APIView):
 
         items_data = []
         for item in items_qs:
-            img_url = None
+            img_url = "/static/images/default/default_product.png"
             try:
                 if item.product.main_image and item.product.main_image.name:
                     img_url = item.product.main_image.url
             except (ValueError, AttributeError):
-                img_url = None
+                img_url = "/static/images/default/default_product.png"
 
             items_data.append(
                 {

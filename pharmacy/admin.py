@@ -1,7 +1,15 @@
 from django.contrib import admin
 
 from .models.medicine import Category, Medicine
-from .models.misc import BotInlineButton, BotMenuStep, FlashSale, MedicineImage, Review, SiteConfiguration
+from .models.misc import (
+    BotInlineButton,
+    BotMenuStep,
+    ContactMessage,
+    FlashSale,
+    MedicineImage,
+    Review,
+    SiteConfiguration,
+)
 
 
 @admin.register(SiteConfiguration)
@@ -52,3 +60,32 @@ class BotInlineButtonAdmin(admin.ModelAdmin):
 admin.site.register(MedicineImage)
 admin.site.register(Review)
 admin.site.register(FlashSale)
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ["name", "email", "created_at", "is_read", "replied"]
+    list_filter = ["is_read", "replied", "created_at"]
+    search_fields = ["name", "email", "message"]
+    readonly_fields = ["name", "email", "message", "created_at"]
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        ("Contact Info", {"fields": ("name", "email")}),
+        ("Message", {"fields": ("message",)}),
+        ("Status", {"fields": ("is_read", "replied")}),
+        ("Timestamps", {"fields": ("created_at",), "classes": ("collapse",)}),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Admin can update is_read and replied, but not name/email/message
+        if request.method == "POST" and obj:
+            # Allow partial updates for is_read and replied
+            return True
+        return obj is None  # Allow change form to load

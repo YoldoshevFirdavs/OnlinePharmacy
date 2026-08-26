@@ -5,6 +5,11 @@ from orders.models import Order
 from pharmacy.models import Category, Medicine
 from users.models import CustomUser
 
+# Default image URLs
+DEFAULT_AVATAR_URL = "/static/images/default/default_avatar.png"
+DEFAULT_PRODUCT_URL = "/static/images/default/default_product.png"
+DEFAULT_ICON_URL = "/static/images/default/default_icon.png"
+
 
 class DashboardCategorySerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(read_only=True)
@@ -55,12 +60,17 @@ class DashboardProductSerializer(serializers.ModelSerializer):
         ]
 
     def get_image_url(self, obj):
-        if obj.main_image:
+        if (
+            obj.main_image
+            and hasattr(obj.main_image, "url")
+            and hasattr(obj.main_image, "name")
+            and obj.main_image.name
+        ):
             request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(obj.main_image.url)
             return obj.main_image.url
-        return None
+        return DEFAULT_PRODUCT_URL
 
     def get_edit_url(self, obj):
         return reverse("dashboard:medicine_edit", kwargs={"pk": obj.pk})
@@ -93,8 +103,13 @@ class DashboardOrderSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         if obj.user:
             request = self.context.get("request")
-            avatar_url = None
-            if obj.user.avatar and hasattr(obj.user.avatar, "url"):
+            avatar_url = DEFAULT_AVATAR_URL
+            if (
+                obj.user.avatar
+                and hasattr(obj.user.avatar, "url")
+                and hasattr(obj.user.avatar, "name")
+                and obj.user.avatar.name
+            ):
                 avatar_url = request.build_absolute_uri(obj.user.avatar.url) if request else obj.user.avatar.url
 
             return {
