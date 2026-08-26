@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .api_views import MedicineListView, product_detail, product_suggestions
 from .views.comments import ProductCommentViewSet
+from .views.contact import ContactMessageViewSet
 from .views.detail import product_detail, product_full_guide
 from .views.product import (
     CategoryViewSet,
@@ -23,6 +24,7 @@ router.register(r"view-history", ProductViewHistoryViewSet)
 router.register(r"flash-sales", FlashSaleViewSet)
 router.register(r"images", MedicineImageViewSet)
 router.register(r"comments", ProductCommentViewSet, basename="comment")
+router.register(r"contact", ContactMessageViewSet, basename="contact-message")
 
 urlpatterns = [
     # API endpoints

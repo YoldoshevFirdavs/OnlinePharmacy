@@ -31,6 +31,42 @@ class AuditLog(models.Model):
 
     class Meta:
         ordering = ["-timestamp"]
+        indexes = [
+            models.Index(fields=["-timestamp"]),
+            models.Index(fields=["user", "-timestamp"]),
+            models.Index(fields=["target_type", "target_id"]),
+        ]
+
+
+class UserActionHistory(models.Model):
+    """
+    User action history - logs ALL user actions (not just admins)
+    Used for tracking user behavior, login history, etc.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="action_history",
+    )
+    action = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    target_type = models.CharField(max_length=64, blank=True, null=True)
+    target_id = models.PositiveIntegerField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.action} at {self.timestamp}"
+
+    class Meta:
+        ordering = ["-timestamp"]
+        indexes = [
+            models.Index(fields=["-timestamp"]),
+            models.Index(fields=["user", "-timestamp"]),
+            models.Index(fields=["action"]),
+        ]
 
 
 class UndoLog(models.Model):

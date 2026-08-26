@@ -15,6 +15,7 @@ from django.views.decorators.http import require_http_methods
 
 from orders.models import Order, OrderItem
 from pharmacy.models import Category, Medicine
+from security.audit_logger import log_category_action, log_order_action, log_product_action, log_user_action
 from security.models import AuditLog
 from users.models import CustomUser, DeliveryDriver
 
@@ -652,7 +653,15 @@ def medicine_create(request):
                 if form.is_valid():
                     try:
                         with transaction.atomic():
-                            form.save()
+                            medicine = form.save()
+                            # Log the action
+                            log_product_action(
+                                admin_user=request.user,
+                                product=medicine,
+                                action_type="create",
+                                description=f"Mahsulot yaratildi: {medicine.name}",
+                                request=request,
+                            )
                             messages.success(request, "Dori muvaffaqiyatli yaratildi.")
                             return redirect("dashboard:medicine_list")
                     except Exception as save_error:
@@ -885,7 +894,15 @@ def user_create(request):
                 if form.is_valid():
                     try:
                         with transaction.atomic():
-                            form.save()
+                            user = form.save()
+                            # Log the action
+                            log_user_action(
+                                admin_user=request.user,
+                                target_user=user,
+                                action_type="create",
+                                description=f"Foydalanuvchi yaratildi: {user.email or user.phone_number}",
+                                request=request,
+                            )
                             messages.success(request, "Foydalanuvchi muvaffaqiyatli yaratildi.")
                             return redirect("dashboard:user_list")
                     except Exception as save_error:
@@ -934,6 +951,14 @@ def user_edit(request, pk):
                         try:
                             with transaction.atomic():
                                 form.save()
+                                # Log the action
+                                log_user_action(
+                                    admin_user=request.user,
+                                    target_user=user,
+                                    action_type="edit",
+                                    description=f"Foydalanuvchi tahrirlandi: {user.email or user.phone_number}",
+                                    request=request,
+                                )
                                 messages.success(request, "Foydalanuvchi muvaffaqiyatli yangilandi.")
                                 return redirect("dashboard:user_list")
                         except Exception as save_error:

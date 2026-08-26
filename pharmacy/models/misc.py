@@ -126,3 +126,30 @@ class BotInlineButton(models.Model):
 
     def __str__(self):
         return f"Button: {self.title_uz} -> Callback ID: {self.callback_id}"
+
+
+class ContactMessage(models.Model):
+    """
+    User contact form messages
+    Minimal storage - only essential info needed
+    """
+
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    is_read = models.BooleanField(default=False)
+    replied = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Contact Message"
+        verbose_name_plural = "Contact Messages"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["is_read"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

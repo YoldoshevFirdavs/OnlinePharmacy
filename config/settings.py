@@ -393,14 +393,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "Fa
 SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Serve media files with WhiteNoise in production
-# Media files are served directly by Gunicorn + WhiteNoise
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # ← Media serving enabled
-    # ... rest of middleware
-]
-
 
 # ============================================
 # DEVICE FINGERPRINT SECURITY SETTINGS

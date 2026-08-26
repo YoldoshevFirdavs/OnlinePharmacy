@@ -153,10 +153,10 @@ class DeliveryDriverViewSet(DashboardAPIView):
     def get(self, request, pk=None):
         if pk:
             driver = get_object_or_404(DeliveryDriver, pk=pk)
-            serializer = DeliveryDriverSerializer(driver)
+            serializer = DeliveryDriverSerializer(driver, context={"request": request})
             return Response(serializer.data)
         drivers = DeliveryDriver.objects.all()
-        serializer = DeliveryDriverSerializer(drivers, many=True)
+        serializer = DeliveryDriverSerializer(drivers, many=True, context={"request": request})
         return Response(serializer.data)
 
     def post(self, request):

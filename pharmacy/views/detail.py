@@ -19,7 +19,7 @@ def product_detail(request, product_id):
     )[:12]
 
     # Safely resolve main image URL — field may have a name but no file on disk
-    DEFAULT_IMAGE = "/static/images/default/default_avatar.png"
+    DEFAULT_IMAGE = "/static/images/default/default_product.png"
     try:
         main_image_url = product.main_image.url if product.main_image and product.main_image.name else DEFAULT_IMAGE
     except (ValueError, AttributeError):

@@ -1,4 +1,9 @@
 import phonenumbers
+
+# Default image URLs
+DEFAULT_AVATAR_URL = "/static/images/default/default_avatar.png"
+DEFAULT_PRODUCT_URL = "/static/images/default/default_product.png"
+DEFAULT_ICON_URL = "/static/images/default/default_icon.png"
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from phonenumbers import PhoneNumberFormat
@@ -68,6 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(required=False, allow_blank=True, allow_null=True)
     role = serializers.SerializerMethodField()
     avatar = serializers.ImageField(validators=[validate_image_file], required=False, allow_null=True)
+    telegram_id = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=50)
 
     class Meta:
         model = CustomUser
@@ -93,7 +99,6 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "is_verified",
             "date_joined",
-            "telegram_id",
             "is_staff",
             "role",
         ]
@@ -101,18 +106,52 @@ class UserSerializer(serializers.ModelSerializer):
             "email": {"required": False, "allow_blank": True, "allow_null": True},
             "full_name": {"required": False, "allow_blank": True},
             "address": {"required": False, "allow_blank": True},
+            "telegram_id": {"required": False, "allow_blank": True, "allow_null": True},
         }
 
     def get_avatar_url(self, obj):
         if hasattr(obj, "seller") and obj.seller:
             return obj.seller.get_avatar_url
-        if obj.avatar:
+        if obj.avatar and hasattr(obj.avatar, "name") and obj.avatar.name:
             return obj.avatar.url
-        return "/static/images/default/default_avatar.png"
+        return DEFAULT_AVATAR_URL
 
     def get_role(self, obj):
         """Compute a single, primary role based on user properties using the helper function."""
         return determine_role(obj)
+
+    def validate_telegram_id(self, value):
+        """Validate Telegram ID format and uniqueness"""
+        if not value:
+            return value  # Allow empty telegram_id
+
+        # Telegram ID should be numeric or start with @
+        value = value.strip()
+        if value.startswith("@"):
+            # Username format: @username
+            username = value[1:]
+            if not username.replace("_", "").isalnum() or len(username) < 5:
+                raise serializers.ValidationError(
+                    "Telegram username noto'g'ri formatda. Namuna: @username (eng kamida 5 ta belgi)"
+                )
+        else:
+            # Numeric ID format
+            if not value.isdigit():
+                raise serializers.ValidationError(
+                    "Telegram ID raqamlar bilan yoki @username ko'rinishida bo'lishi kerak. Namuna: 123456789 yoki @username"
+                )
+            if len(value) < 5 or len(value) > 20:
+                raise serializers.ValidationError("Telegram ID 5 dan 20 ta raqamdan iborat bo'lishi kerak.")
+
+        # Check uniqueness (excluding current user if updating)
+        if self.instance and value:
+            if CustomUser.objects.exclude(id=self.instance.id).filter(telegram_id=value).exists():
+                raise serializers.ValidationError("Bu Telegram ID allaqachon ishlatilgan.")
+        elif not self.instance and value:  # For create operations
+            if CustomUser.objects.filter(telegram_id=value).exists():
+                raise serializers.ValidationError("Bu Telegram ID allaqachon ishlatilgan.")
+
+        return value
 
     def validate_phone_number(self, value):
         if not value:
@@ -156,7 +195,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         from django.db import transaction
-        
+
         password = validated_data.pop("password", None)
         avatar = validated_data.pop("avatar", None)
 
@@ -179,10 +218,11 @@ class UserSerializer(serializers.ModelSerializer):
                 instance.save()
         except Exception as e:
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"User profile update failed for user {instance.id}: {str(e)}")
             raise
-            
+
         return instance
 
 
@@ -210,7 +250,9 @@ class UserPublicSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         if hasattr(obj, "seller") and obj.seller:
             return obj.seller.get_avatar_url
-        return obj.avatar.url if obj.avatar else "/static/images/default/default_avatar.png"
+        if obj.avatar and hasattr(obj.avatar, "name") and obj.avatar.name:
+            return obj.avatar.url
+        return DEFAULT_AVATAR_URL
 
     def get_role(self, obj):
         """Compute a single, primary role based on user properties using the helper function."""
@@ -371,6 +413,7 @@ class AdminSetupSerializer(serializers.Serializer):
 
 class DeliveryDriverSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = DeliveryDriver
@@ -383,6 +426,15 @@ class DeliveryDriverSerializer(serializers.ModelSerializer):
             "avatar",
         )
         read_only_fields = ("id",)
+
+    def get_avatar(self, obj):
+        """Safely get avatar URL if file exists"""
+        if obj.avatar and hasattr(obj.avatar, "name") and obj.avatar.name:
+            request = self.context.get("request")
+            if request and hasattr(obj.avatar, "url"):
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url if hasattr(obj.avatar, "url") else DEFAULT_AVATAR_URL
+        return DEFAULT_AVATAR_URL
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
