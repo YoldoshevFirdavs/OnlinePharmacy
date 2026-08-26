@@ -56,23 +56,23 @@ services:
       retries: 10
       start_period: 30s
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      # Uncomment for production only (requires nginx.conf with SSL):
-      # - "443:443"
-    volumes:
-      - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro # LOCAL DEV
-      # Production: swap the line above for the line below:
-      # - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-    depends_on:
-      web:
-        # nginx only starts after Gunicorn is confirmed healthy
-        condition: service_healthy
+  # nginx: [COMMENTED OUT - App runs standalone without reverse proxy]
+  # image: nginx:latest
+  # ports:
+  #   - "80:80"
+  #   # Uncomment for production only (requires nginx.conf with SSL):
+  #   # - "443:443"
+  # volumes:
+  #   - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro # LOCAL DEV
+  #   # Production: swap the line above for the line below:
+  #   # - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #   - ./certs:/etc/nginx/certs:ro
+  #   - static_volume:/app/staticfiles:ro
+  #   - media_volume:/app/media:ro
+  # depends_on:
+  #   web:
+  #     # nginx only starts after Gunicorn is confirmed healthy
+  #     condition: service_healthy
 
   celery:
     build: .
