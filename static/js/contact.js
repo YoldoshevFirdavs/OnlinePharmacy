@@ -158,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // Submit to contact API endpoint at /api/v1/contact/
-            const response = await sendRequest('/api/v1/contact/', 'POST', formData);
+            // Submit to contact API endpoint at /api/v1/products/contact/
+            const response = await sendRequest('/api/v1/products/contact/', 'POST', formData);
 
             if (response.success) {
                 showModal('Muvaffaqiyatli!', 'Xabaringiz muvaffaqiyatli yuborildi! Tez orada javob beramiz.', true);

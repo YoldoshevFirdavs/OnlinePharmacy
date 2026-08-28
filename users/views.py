@@ -1794,29 +1794,51 @@ class AccountView(FormView):
         return context
 
     def form_valid(self, form):
+        from django.contrib import messages
+        from django.db import transaction
+
+        from users.avatar_handler import handle_avatar_upload
+
         user = form.save(commit=False)
 
-        # Handle password change
-        old_password = form.cleaned_data.get("old_password")
-        new_password1 = form.cleaned_data.get("new_password1")
-        new_password2 = form.cleaned_data.get("new_password2")
+        try:
+            with transaction.atomic():
+                # Handle avatar upload if provided
+                avatar_file = self.request.FILES.get("avatar")
+                if avatar_file:
+                    success, file_path, error = handle_avatar_upload(user, avatar_file)
+                    if not success:
+                        form.add_error("avatar", error)
+                        messages.error(self.request, f"Avatar yuklashda xatolik: {error}")
+                        return self.form_invalid(form)
 
-        if new_password1:
-            if user.has_usable_password() and (not old_password or not user.check_password(old_password)):
-                form.add_error("old_password", "Eski parol noto'g'ri")
-                return self.form_invalid(form)
+                # Handle password change
+                old_password = form.cleaned_data.get("old_password")
+                new_password1 = form.cleaned_data.get("new_password1")
+                new_password2 = form.cleaned_data.get("new_password2")
 
-            if new_password1 != new_password2:
-                form.add_error("new_password2", "Yangi parollar mos kelmadi")
-                return self.form_invalid(form)
+                if new_password1:
+                    if user.has_usable_password() and (not old_password or not user.check_password(old_password)):
+                        form.add_error("old_password", "Eski parol noto'g'ri")
+                        return self.form_invalid(form)
 
-            user.set_password(new_password1)
+                    if new_password1 != new_password2:
+                        form.add_error("new_password2", "Yangi parollar mos kelmadi")
+                        return self.form_invalid(form)
 
-        user.save()
+                    user.set_password(new_password1)
 
-        from django.contrib import messages
+                # Save user
+                user.save(update_fields=["full_name", "email", "phone_number", "telegram_id", "address"])
 
-        messages.success(self.request, "Profil ma'lumotlari muvaffaqiyatli saqlandi!")
+                if avatar_file:
+                    messages.success(self.request, "Avatar muvaffaqiyatli yuklandi!")
+                else:
+                    messages.success(self.request, "Profil ma'lumotlari muvaffaqiyatli saqlandi!")
+
+        except Exception as e:
+            messages.error(self.request, f"Saqlashda xatolik yuz berdi: {str(e)}")
+            return self.form_invalid(form)
 
         return super().form_valid(form)
 

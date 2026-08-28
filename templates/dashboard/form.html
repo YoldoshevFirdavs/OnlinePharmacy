@@ -186,6 +186,14 @@
 
     // File upload handler - make file input clickable
     (function() {
+        // Load avatar-upload.js dynamically for advanced validation
+        var script = document.createElement('script');
+        script.src = '{% static "js/avatar-upload.js" %}';
+        script.onload = function() {
+            initAvatarUpload();
+        };
+        document.head.appendChild(script);
+
         document.addEventListener('DOMContentLoaded', function() {
             // Find all file input wrappers
             var fileWrappers = document.querySelectorAll('.form-file-wrapper');
@@ -195,6 +203,9 @@
                 var fileLabel = wrapper.querySelector('.form-file-label');
                 
                 if (fileInput && fileLabel) {
+                    // Skip if already handled by avatar-upload.js (has id="id_avatar")
+                    if (fileInput.id === 'id_avatar') return;
+                    
                     // Click label to open file picker
                     fileLabel.addEventListener('click', function(e) {
                         e.preventDefault();

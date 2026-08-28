@@ -329,6 +329,11 @@ LOGGING = {
             "level": DJANGO_REQUEST_LOG_LEVEL,
             "propagate": False,
         },
+        "avatar_upload": {
+            "handlers": ["file", "console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
