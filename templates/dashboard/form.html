@@ -183,6 +183,59 @@
             if (slugInput.value.trim()) slugInput.value = toSlug(slugInput.value);
         });
     }
+
+    // File upload handler - make file input clickable
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all file input wrappers
+            var fileWrappers = document.querySelectorAll('.form-file-wrapper');
+            
+            fileWrappers.forEach(function(wrapper) {
+                var fileInput = wrapper.querySelector('input[type="file"]');
+                var fileLabel = wrapper.querySelector('.form-file-label');
+                
+                if (fileInput && fileLabel) {
+                    // Click label to open file picker
+                    fileLabel.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        fileInput.click();
+                    });
+                    
+                    // Handle file selection
+                    fileInput.addEventListener('change', function() {
+                        if (this.files && this.files.length > 0) {
+                            var fileName = this.files[0].name;
+                            fileLabel.innerHTML = '<i class="fa-solid fa-check"></i> ' + fileName + ' tanlandi';
+                            fileLabel.style.borderColor = '#28a745';
+                            fileLabel.style.background = 'rgba(40, 167, 69, 0.08)';
+                            fileLabel.style.color = '#28a745';
+                        }
+                    });
+
+                    // Prevent default drag and drop behavior
+                    wrapper.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        wrapper.style.opacity = '0.7';
+                    });
+                    
+                    wrapper.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        wrapper.style.opacity = '1';
+                    });
+                    
+                    wrapper.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        wrapper.style.opacity = '1';
+                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                            fileInput.files = e.dataTransfer.files;
+                            var event = new Event('change', { bubbles: true });
+                            fileInput.dispatchEvent(event);
+                        }
+                    });
+                }
+            });
+        });
+    })();
 })();
 </script>
 <script src="{% static 'dashboard/js/account-validation.js' %}" defer></script>
