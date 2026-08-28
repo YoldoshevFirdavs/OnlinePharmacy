@@ -269,7 +269,7 @@
         <div class="seller-header">
             <div class="seller-hero">
                 <div class="seller-avatar-large">
-                    <img src="{{ seller.avatar.url|default:'/static/images/default_avatar.png' }}" alt="{{ seller.shop_name }}">
+                    <img src="{{ seller.avatar.url|default:'/static/images/default/default_avatar.png' }}" alt="{{ seller.shop_name }}" onerror="this.src='/static/images/default/default_avatar.png'">
                 </div>
                 <h1>{{ seller.shop_name }}</h1>
                 <div class="seller-badge">

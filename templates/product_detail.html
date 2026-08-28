@@ -682,7 +682,7 @@
                     <a href="{% url 'dashboard:seller_profile' product.seller.id %}" class="seller-info-link">
                         <div class="seller-info">
                             <div class="seller-avatar">
-                                <img src="{{ product.seller.avatar.url|default:'/static/images/default_avatar.png' }}" alt="{{ product.seller.shop_name }}">
+                                <img src="{{ product.seller.avatar.url|default:'/static/images/default/default_avatar.png' }}" alt="{{ product.seller.shop_name }}" onerror="this.src='/static/images/default/default_avatar.png'">
                             </div>
                             <div class="seller-details">
                                 <h3>{{ product.seller.shop_name }}</h3>
@@ -819,7 +819,7 @@
     {% include 'components/footer.html' %}
 
     <script>
-        const DEFAULT_IMG = '/static/images/default_avatar.png';
+        const DEFAULT_IMG = '/static/images/default/default_product.png';
         let isAuthenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
         let productId = {{ product.id }};
 
