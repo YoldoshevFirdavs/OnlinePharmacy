@@ -97,61 +97,9 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/avatar-upload.js' %}" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Avatar preview - with enhanced debugging
-    var btnEdit = document.getElementById('btnEditAvatar');
-    var avatarInput = document.getElementById('id_avatar');
-    
-    // If avatar input not found, create a fallback file input
-    if (!avatarInput) {
-        var fallbackInput = document.createElement('input');
-        fallbackInput.type = 'file';
-        fallbackInput.id = 'id_avatar';
-        fallbackInput.name = 'avatar';
-        fallbackInput.accept = 'image/*';
-        fallbackInput.style.position = 'absolute';
-        fallbackInput.style.left = '-9999px';
-        fallbackInput.style.opacity = '0';
-        fallbackInput.style.pointerEvents = 'none';
-        fallbackInput.style.width = '0';
-        fallbackInput.style.height = '0';
-        document.body.appendChild(fallbackInput);
-        avatarInput = fallbackInput;
-    }
-    
-    if (btnEdit && avatarInput) {
-        btnEdit.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            avatarInput.click();
-        });
-        
-        avatarInput.addEventListener('change', function(e) {
-            e.stopPropagation();
-            if (this.files && this.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = document.getElementById('profileAvatarImg');
-                    if (img) {
-                        img.src = e.target.result;
-                    }
-                };
-                reader.readAsDataURL(this.files[0]);
-                
-                // Auto-submit form if needed
-                var settingsForm = document.getElementById('settingsForm');
-                if (settingsForm) {
-                    settingsForm.submit();
-                }
-            }
-        });
-        
-        // Make button clickable
-        btnEdit.style.cursor = 'pointer';
-        btnEdit.style.pointerEvents = 'auto';
-    }
-
     // Password strength checker — faqat new_password1 uchun
     var RULES = [
         { key: 'len',   label: 'Kamida 8 ta belgi',       test: function(v){ return v.length >= 8; } },
@@ -172,8 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
         pwdInput.parentNode.insertBefore(reqBox, pwdInput.nextSibling);
 
-        var submitBtn = document.getElementById('btnSaveSettings'); // This button is for the settings form, not password form
-
         function update() {
             var val = pwdInput.value;
             var visible = val.length > 0;
@@ -186,11 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 li.className = 'pwd-req ' + (pass ? 'pwd-req--pass' : 'pwd-req--fail');
                 li.querySelector('i').className = 'fa-solid ' + (pass ? 'fa-circle-check' : 'fa-circle-xmark');
             });
-            // This part needs to be handled by the account-validation.js for the password form
-            // if (submitBtn) {
-            //     submitBtn.disabled = visible && !allPass;
-            //     submitBtn.classList.toggle('btn--disabled', visible && !allPass);
-            // }
         }
 
         pwdInput.addEventListener('input', update);
