@@ -1,0 +1,101 @@
+================================================================================
+DASHBOARD FIX - CHANGES LOG
+================================================================================
+Session: August 26, 2026
+Status: IN PROGRESS
+
+================================================================================
+ISSUES TO FIX:
+================================================================================
+
+1. [CRITICAL] Ban Page & Delivery Page - Table Loading Error
+   - Empty state styling broken
+   - "Hech qanday ban topilmadi" shows with broken CSS
+   - Jadval data not loading properly
+   
+2. [HIGH] Delivery Create Page - UI Modernization
+   - Status (active/inactive) needs toggle styling:
+     * Active = green rounded badge
+     * Inactive = red rounded badge
+   - Avatar upload not opening file explorer
+   - Need modern form design
+   
+3. [HIGH] Delivery Table Size - Incorrect Row Height
+   - Rows showing as 100-10000px (broken height)
+   - Need compact, uniform row sizing
+   - Cell alignment issues
+   
+4. [HIGH] Admin Account Page - Avatar Upload
+   - File explorer not opening on button click
+   - Form refresh on file selection (auth page redirect)
+   - User remains logged in but shown error
+   - Error messages appear simultaneously (conflicting messages)
+   
+5. [MEDIUM] Account Settings Form - Error Display
+   - Multiple error messages shown at same time
+   - Should show only most relevant error
+   - Need better UX for form validation
+   
+6. [MEDIUM] Telegram Bot - URL Links
+   - Links should be production-ready with correct domain
+   - Respect .env.prod vs .env configurations
+
+================================================================================
+FILES MODIFIED/CREATED IN THIS SESSION:
+================================================================================
+
+CREATED:
+- CHANGES_LOG.txt (THIS FILE)
+
+MODIFIED:
+- templates/dashboard/bans/list.html (empty state styling)
+- templates/dashboard/delivery/list.html (empty state, row sizing)
+- templates/dashboard/delivery/form.html (avatar upload)
+- templates/dashboard/drivers/list.html (empty state styling)
+- templates/dashboard/form.html (file upload handler)
+- templates/dashboard/list.html (base styles)
+- templates/shop.html (default image constants)
+- templates/shop_new.html (default image constants)
+- templates/product_detail.html (default image, seller avatar)
+- templates/seller_detail.html (default image)
+- templates/product_comments.html (avatar defaults)
+- telegram_bot/runbot1.py (admin check, telegram_id logic)
+- static/js/contact.js (success/error modal)
+- pharmacy/views/contact.py (ContactMessage API)
+- pharmacy/urls.py (contact router)
+- pharmacy/serializers/misc.py (ContactMessageSerializer)
+- pharmacy/admin.py (ContactMessageAdmin)
+- pharmacy/models/__init__.py (ContactMessage import)
+- users/serializers.py (telegram_id validator)
+- dashboard/forms.py (telegram_id field, validation)
+- entrypoint.sh (collectstatic timeout, migration handling)
+- config/settings.py (STATICFILES_STORAGE fix)
+- .env (API_BASE_URL, SITE_URL for dev)
+- .env.prod (API_BASE_URL, SITE_URL for production)
+- pharmacy/context_processors.py (SITE_URL, API_BASE_URL)
+- docker-compose.prod.yml (.env.prod integration, comment fix)
+
+================================================================================
+NEXT STEPS:
+================================================================================
+
+Priority Order:
+1. ✅ Fix delivery list extends (added {% extends 'dashboard/list.html' %})
+2. ✅ Fix delivery create form status toggle (modern green/red badges)
+3. Fix delivery table row sizing (remaining)
+4. Fix avatar upload on account settings page
+5. Fix form error display (single error at a time)
+
+================================================================================
+CURRENT SESSION FIXES:
+================================================================================
+
+1. Ban page - Confirmed CSS is correct, template fixed
+2. Delivery page - Added missing extends, now inherits proper base template
+3. Delivery create - Status field replaced with modern toggle buttons
+   - Active = Green badge with check icon
+   - Inactive = Red badge with circle icon
+   - Toggle styling with smooth transitions
+   - JavaScript handler for value update
+
+================================================================================
