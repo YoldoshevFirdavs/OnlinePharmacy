@@ -1,3 +1,5 @@
+import os
+
 from .models.misc import SiteConfiguration
 
 
@@ -9,7 +11,16 @@ def site_configuration(request):
             "clients_count": 1000,
             "experience_years": 1,
         }
-    return {"site_config": config}
+
+    # Add dynamic URLs from environment
+    site_url = os.getenv("SITE_URL", "http://localhost:8000")
+    api_base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+
+    return {
+        "site_config": config,
+        "SITE_URL": site_url,
+        "API_BASE_URL": api_base_url,
+    }
 
 
 def social_links(request):

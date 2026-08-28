@@ -247,7 +247,7 @@
     {% if user.is_authenticated %}
     <div class="comment-form-container">
         <div class="comment-form-header">
-            <img src="{{ user.avatar|safe_image_url:'/static/images/default_avatar.png' }}" alt="{{ user.full_name }}" class="user-avatar">
+            <img src="{{ user.avatar|safe_image_url:'/static/images/default/default_avatar.png' }}" alt="{{ user.full_name }}" class="user-avatar" onerror="this.src='/static/images/default/default_avatar.png'">
             <div>
                 <p class="user-name">{{ user.full_name|default:user.phone_number }}</p>
             </div>
@@ -383,14 +383,14 @@
                 listEl.innerHTML = results.map(c => {
                     const starsHtml = c.rating ? '★'.repeat(c.rating) + '☆'.repeat(5 - c.rating) : '';
                     const ratingBlock = c.rating ? `<div class="comment-rating">${starsHtml} <span style="font-size:0.8rem; color:#64748b;">(${c.rating}/5)</span></div>` : '';
-                    const avatarUrl = (c.user && c.user.avatar) ? c.user.avatar : '/static/images/default_avatar.png';
+                    const avatarUrl = (c.user && c.user.avatar) ? c.user.avatar : '/static/images/default/default_avatar.png';
                     const userName = (c.user && c.user.name) ? c.user.name : 'Foydalanuvchi';
                     const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('uz-UZ') : '';
 
                     return `
                         <div class="comment-item" data-id="${c.id}">
                             <div class="comment-header">
-                                <img src="${avatarUrl}" class="comment-avatar" alt="${userName}" onerror="this.src='/static/images/default_avatar.png'">
+                                <img src="${avatarUrl}" class="comment-avatar" alt="${userName}" onerror="this.src='/static/images/default/default_avatar.png'">
                                 <div class="comment-meta">
                                     <p class="comment-author">${userName}</p>
                                     <span class="comment-date">${dateStr}</span>
