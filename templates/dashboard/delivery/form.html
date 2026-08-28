@@ -96,7 +96,17 @@
                                     {{ field.label }}
                                     {% if field.field.required %}<span class="form-required">*</span>{% endif %}
                                 </label>
-                                <div class="form-select-wrapper">{{ field }}</div>
+                                <!-- Modern Status Toggle -->
+                                <div class="status-toggle-group">
+                                    <input type="hidden" name="{{ field.name }}" id="id_status_value" value="{{ field.value|default:'' }}">
+                                    
+                                    <button type="button" class="status-badge status-badge--active" id="status_active" data-value="active">
+                                        <i class="fa-solid fa-check-circle"></i> Faol
+                                    </button>
+                                    <button type="button" class="status-badge status-badge--inactive" id="status_inactive" data-value="inactive">
+                                        <i class="fa-solid fa-circle"></i> No faol
+                                    </button>
+                                </div>
                                 {% if field.errors %}
                                 <ul class="form-error-list">
                                     {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
@@ -104,6 +114,88 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <script>
+                        (function() {
+                            const statusValue = '{{ field.value|default:"active" }}';
+                            const activeBtn = document.getElementById('status_active');
+                            const inactiveBtn = document.getElementById('status_inactive');
+                            const inputField = document.getElementById('id_status_value');
+                            
+                            function updateStatus(val) {
+                                inputField.value = val;
+                                if (val === 'active') {
+                                    activeBtn.classList.add('active');
+                                    inactiveBtn.classList.remove('active');
+                                } else {
+                                    activeBtn.classList.remove('active');
+                                    inactiveBtn.classList.add('active');
+                                }
+                            }
+                            
+                            activeBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                updateStatus('active');
+                            });
+                            
+                            inactiveBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                updateStatus('inactive');
+                            });
+                            
+                            updateStatus(statusValue);
+                        })();
+                        </script>
+                        <style>
+                        .status-toggle-group {
+                            display: flex;
+                            gap: 12px;
+                            margin-bottom: 16px;
+                        }
+                        
+                        .status-badge {
+                            flex: 1;
+                            padding: 12px 16px;
+                            border: 2px solid transparent;
+                            border-radius: 20px;
+                            font-size: 0.95rem;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            background: #f0f0f0;
+                            color: #666;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        }
+                        
+                        .status-badge--active {
+                            border-color: #28a745;
+                            background: rgba(40, 167, 69, 0.1);
+                            color: #28a745;
+                        }
+                        
+                        .status-badge--active.active {
+                            background: #28a745;
+                            color: white;
+                        }
+                        
+                        .status-badge--inactive {
+                            border-color: #dc3545;
+                            background: rgba(220, 53, 69, 0.1);
+                            color: #dc3545;
+                        }
+                        
+                        .status-badge--inactive.active {
+                            background: #dc3545;
+                            color: white;
+                        }
+                        
+                        .status-badge:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        }
+                        </style>
                         {% endif %}
                     {% endfor %}
                 </div>
