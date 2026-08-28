@@ -26,13 +26,14 @@
 {% block table_body %}
 {% if drivers %}
     {% for driver in drivers %}
-    <tr data-driver-id="{{ driver.pk }}">
+    <tr data-driver-id="{{ driver.pk }}" class="delivery-row">
         <td>{{ driver.id }}</td>
         <td>
             <div class="table__cell table__cell--user">
-                    <img src="{{ driver.avatar.url|default:'/static/dashboard/img/default-avatar.png' }}" 
-                         alt="{{ driver.name }}" 
-                         class="avatar-small">
+                <img src="{% if driver.avatar and driver.avatar.name %}/media/{{ driver.avatar }}{% else %}/static/images/default/default_avatar.png{% endif %}" 
+                     alt="{{ driver.user.get_display_name }}" 
+                     class="avatar-small"
+                     onerror="this.src='/static/images/default/default_avatar.png'">
                 <span>{{ driver.user.get_display_name|default:"—" }}</span>
             </div>
         </td>
@@ -60,8 +61,8 @@
     </tr>
     {% endfor %}
 {% else %}
-    <tr class="table__empty-row" style="height: 300px;">
-        <td colspan="6" style="text-align: center; vertical-align: middle;">
+    <tr class="data-table__empty">
+        <td colspan="6" style="text-align: center; vertical-align: middle; padding: 40px 20px;">
             <i class="fa-solid fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 16px; display: block;"></i>
             <span style="color: #999; font-size: 16px;">Yetkazib beruvchilar topilmadi</span>
         </td>
@@ -91,4 +92,36 @@
 {% block extra_js %}
 {{ block.super }}
 <script src="{% static 'dashboard/js/delete_handlers.js' %}"></script>
+<style>
+    /* Compact delivery table rows */
+    .data-table tbody.delivery-body tr.delivery-row {
+        height: auto;
+        line-height: 1.2;
+    }
+
+    .data-table tbody.delivery-body tr.delivery-row td {
+        padding: 8px 1rem;
+        vertical-align: middle;
+    }
+
+    .data-table tbody.delivery-body .table__cell--user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+    }
+
+    .data-table tbody.delivery-body .avatar-small {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .data-table tbody.delivery-body .table__actions {
+        display: flex;
+        gap: 6px;
+    }
+</style>
 {% endblock %}

@@ -29,13 +29,15 @@
     <td>{{ forloop.counter }}</td>
     <td>
         {% if ban.user %}
-            <div>{{ ban.user.full_name|default:ban.user.email|default:ban.user.phone_number }}</div>
-            <small style="color: #666;">{{ ban.user.email }}</small>
+            <div class="table__cell table__cell--user">
+                <span>{{ ban.user.full_name|default:ban.user.email|default:ban.user.phone_number }}</span>
+            </div>
+            <small style="color: #666; display: block; margin-top: 4px;">{{ ban.user.email }}</small>
         {% else %}
-            <span style="color: #999;">Noma'lum</span>
+            <span style="color: #999;">—</span>
         {% endif %}
     </td>
-    <td>{{ ban.reason|default:"Sabab ko'rsatilmagan" }}</td>
+    <td>{{ ban.reason|default:"—" }}</td>
     <td>{{ ban.created_at|date:"d.m.Y H:i" }}</td>
     <td>
         {% if ban.expires_at %}
@@ -46,34 +48,34 @@
     </td>
     <td>
         {% if ban.is_active %}
-            <span class="badge badge--success">Faol</span>
+            <span class="tag tag--success">Faol</span>
         {% else %}
-            <span class="badge badge--danger">No faol</span>
+            <span class="tag tag--danger">No faol</span>
         {% endif %}
     </td>
-    <td class="actions">
-        <a href="{% url 'dashboard:ban_detail' ban.id %}" class="btn btn--sm btn--ghost" title="Ko'rish">
-            <i class="fa-solid fa-eye"></i>
-        </a>
-        <a href="{% url 'dashboard:ban_edit' ban.id %}" class="btn btn--sm btn--ghost btn--primary" title="Tahrirlash">
-            <i class="fa-solid fa-pen-to-square"></i>
-        </a>
-        <button type="button" 
-                class="btn btn--sm btn--ghost btn--danger ban-delete-btn"
-                data-ban-id="{{ ban.id }}"
-                data-delete-url="{% url 'dashboard:ban_delete' ban.id %}"
-                title="O'chirish">
-            <i class="fa-solid fa-trash"></i>
-        </button>
+    <td>
+        <div class="table__actions">
+            <a href="{% url 'dashboard:ban_detail' ban.id %}" class="btn btn--sm btn--ghost" title="Ko'rish">
+                <i class="fa-solid fa-eye"></i>
+            </a>
+            <a href="{% url 'dashboard:ban_edit' ban.id %}" class="btn btn--sm btn--ghost" title="Tahrirlash">
+                <i class="fa-solid fa-pen"></i>
+            </a>
+            <button type="button" 
+                    class="btn btn--sm btn--ghost btn--danger ban-delete-btn"
+                    data-ban-id="{{ ban.id }}"
+                    data-delete-url="{% url 'dashboard:ban_delete' ban.id %}"
+                    title="O'chirish">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
     </td>
 </tr>
 {% empty %}
-<tr>
-    <td colspan="7" class="empty-state">
-        <div class="empty-icon">
-            <i class="fa-solid fa-ban"></i>
-        </div>
-        <p>Hech qanday ban topilmadi</p>
+<tr class="data-table__empty">
+    <td colspan="7" style="text-align: center; vertical-align: middle; padding: 40px 20px;">
+        <i class="fa-solid fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 16px; display: block;"></i>
+        <span style="color: #999; font-size: 16px;">Hech qanday ban topilmadi</span>
     </td>
 </tr>
 {% endfor %}

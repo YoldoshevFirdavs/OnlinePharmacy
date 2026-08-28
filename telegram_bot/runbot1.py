@@ -75,26 +75,41 @@ def start_handler(update: Update, context: CallbackContext):
         return
 
     target_user = CustomUser.objects.filter(id=expected_user_id).first()
-    if (
-        not target_user
-        or not target_user.telegram_id
-        or str(target_user.telegram_id) != str(telegram_id)
-        or str(target_user.role).lower() != "admin"
-        or not target_user.is_staff
-        or not target_user.is_superuser
-    ):
+    if not target_user:
         cache.delete(f"telegram_pending:{telegram_id}")
         update.message.reply_text(
-            "Telegram ID xato yoki admin akkauntiga bog'lanmagan. Login bekor qilindi.",
+            "Foydalanuvchi topilmadi. Login bekor qilindi.",
             reply_markup=ReplyKeyboardRemove(),
         )
         return
+    
+    # Check if user is ADMIN (is_superuser, is_staff, role="admin")
+    is_admin = target_user.is_superuser and target_user.is_staff and str(target_user.role).lower() == "admin"
+    
+    # If ADMIN: telegram_id must match
+    if is_admin:
+        if (
+            not target_user.telegram_id
+            or str(target_user.telegram_id) != str(telegram_id)
+        ):
+            cache.delete(f"telegram_pending:{telegram_id}")
+            update.message.reply_text(
+                "Telegram ID xato yoki admin akkauntiga bog'lanmagan. Login bekor qilindi.",
+                reply_markup=ReplyKeyboardRemove(),
+            )
+            return
+    # If NOT ADMIN: Save telegram_id for first-time login (optional for users/sellers/drivers)
+    else:
+        # For non-admin users, save telegram_id if not already set
+        if not target_user.telegram_id:
+            target_user.telegram_id = str(telegram_id)
+            target_user.save(update_fields=['telegram_id'])
 
     normalized_expected_phone = _normalize_phone(expected_phone)
     if not normalized_expected_phone or _normalize_phone(target_user.phone_number) != normalized_expected_phone:
         cache.delete(f"telegram_pending:{telegram_id}")
         update.message.reply_text(
-            "Telefon raqami admin akkauntiga mos kelmayapti. Login bekor qilindi.",
+            "Telefon raqami akkauntga mos kelmayapti. Login bekor qilindi.",
             reply_markup=ReplyKeyboardRemove(),
         )
         return
@@ -147,25 +162,33 @@ def contact_handler(update: Update, context: CallbackContext):
         )
         return
 
-    if (
-        not user.telegram_id
-        or str(user.telegram_id) != str(telegram_id)
-        or str(user.role).lower() != "admin"
-        or not user.is_staff
-        or not user.is_superuser
-    ):
-        cache.delete(f"telegram_pending:{telegram_id}")
-        update.message.reply_text(
-            "Telegram ID yoki admin ma'lumoti xato. Admin linki yuborilmadi.",
-            reply_markup=ReplyKeyboardRemove(),
-        )
-        return
+    # Check if user is ADMIN (is_superuser, is_staff, role="admin")
+    is_admin = user.is_superuser and user.is_staff and str(user.role).lower() == "admin"
+    
+    # If ADMIN: telegram_id must match
+    if is_admin:
+        if (
+            not user.telegram_id
+            or str(user.telegram_id) != str(telegram_id)
+        ):
+            cache.delete(f"telegram_pending:{telegram_id}")
+            update.message.reply_text(
+                "Telegram ID yoki admin ma'lumoti xato. Admin linki yuborilmadi.",
+                reply_markup=ReplyKeyboardRemove(),
+            )
+            return
+    # If NOT ADMIN: Save telegram_id for first-time login (optional for users/sellers/drivers)
+    else:
+        # For non-admin users, save telegram_id if not already set
+        if not user.telegram_id:
+            user.telegram_id = str(telegram_id)
+            user.save(update_fields=['telegram_id'])
 
     actual_user_phone = _normalize_phone(user.phone_number)
     if actual_user_phone != expected_phone:
         cache.delete(f"telegram_pending:{telegram_id}")
         update.message.reply_text(
-            "Admin telefon raqami sessiyadagi raqamga mos emas.", reply_markup=ReplyKeyboardRemove()
+            "Telefon raqami sessiyadagi raqamga mos emas.", reply_markup=ReplyKeyboardRemove()
         )
         return
 
