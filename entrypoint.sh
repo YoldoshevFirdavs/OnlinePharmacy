@@ -4,21 +4,21 @@
 
 echo "🚀 Starting OnlinePharmacy Production Entrypoint..."
 
-# 1. Run database migrations (continue even if fails - DB might not be ready)
+# 1. Run database migrations (non-blocking)
 echo "📦 Running database migrations..."
-python manage.py migrate --noinput || {
-    echo "⚠️ Migration failed or DB not ready yet. Continuing...";
-    sleep 5;
+python manage.py migrate --noinput 2>&1 || {
+    echo "⚠️ Migration warning - DB might not be fully ready";
 }
 
-# 2. Collect static files (ignore errors - may fail if DB not ready)
+# 2. Collect static files - SKIP if collectstatic causes issues
 echo "🎨 Collecting static files..."
-python manage.py collectstatic --noinput --clear || {
-    echo "⚠️ Collectstatic encountered issues. Continuing...";
+# Try to collect static files with timeout to prevent hanging
+timeout 30 python manage.py collectstatic --noinput --clear 2>&1 || {
+    echo "⚠️ Collectstatic skipped or timed out - Gunicorn will serve from staticfiles directory";
 }
 
-# 3. Start Gunicorn
-echo "✅ Starting Gunicorn server..."
+# 3. Start Gunicorn with exec to replace shell process
+echo "✅ Starting Gunicorn server on 0.0.0.0:8000..."
 exec gunicorn \
     --bind 0.0.0.0:8000 \
     --workers 3 \
