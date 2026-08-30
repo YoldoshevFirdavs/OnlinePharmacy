@@ -90,7 +90,7 @@ class AvatarUploadHandler:
 
         try:
             logger.debug(f"Starting file upload...")
-            
+
             # Reset file pointer before saving
             file_obj.seek(0)
 
