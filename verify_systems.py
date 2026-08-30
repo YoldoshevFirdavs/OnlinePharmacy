@@ -54,16 +54,16 @@ for system_name, check_info in checks.items():
     file_path = os.path.join(base_path, check_info["file"])
     print(f"[CHECK] {system_name}")
     print(f"  File: {check_info['file']}")
-    
+
     if not os.path.exists(file_path):
         print(f"  ✗ FILE NOT FOUND\n")
         total_checks += 1
         continue
-    
+
     try:
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
-        
+
         system_passed = True
         for req in check_info["required"]:
             if req in content:
@@ -71,13 +71,13 @@ for system_name, check_info in checks.items():
             else:
                 print(f"  ✗ '{req}' NOT FOUND")
                 system_passed = False
-        
+
         if system_passed:
             passed_checks += 1
-        
+
         total_checks += 1
         print()
-    
+
     except Exception as e:
         print(f"  ✗ Error reading file: {str(e)}\n")
         total_checks += 1
