@@ -27,7 +27,7 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body data-user-role="{% if request.user.is_staff %}admin{% elif request.user.is_authenticated %}authenticated{% else %}guest{% endif %}">
     <div class="tetris-loader-root" id="loader">
       <div class="tetris-loader">
         <span class="tetris-block">L</span>
@@ -333,3 +333,5 @@
     </script>
 </body>
 </html>
+
+    <script src="{% static 'js/messages.js' %}" defer></script>

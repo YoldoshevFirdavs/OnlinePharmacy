@@ -159,6 +159,45 @@
 {% block extra_js %}
 <script>
 (function() {
+    // Telegram ID validator
+    function validateTelegramId(value) {
+        if (!value) return true; // Optional field
+        
+        // Check if @username format
+        if (value.startsWith('@')) {
+            return /^@[a-zA-Z0-9_]{5,32}$/.test(value);
+        }
+        
+        // Check if numeric (5-20 digits)
+        return /^\d{5,20}$/.test(value);
+    }
+    
+    var telegramInput = document.getElementById('id_telegram_id');
+    var telegramFeedback = document.getElementById('telegram-feedback');
+    
+    if (telegramInput && telegramFeedback) {
+        telegramInput.addEventListener('input', function() {
+            var value = this.value.trim();
+            
+            if (!value) {
+                telegramFeedback.textContent = '';
+                telegramFeedback.style.color = '#666';
+                this.style.borderColor = '#ddd';
+                return;
+            }
+            
+            if (validateTelegramId(value)) {
+                telegramFeedback.textContent = '✓ To\'g\'ri Telegram ID';
+                telegramFeedback.style.color = '#28a745';
+                this.style.borderColor = '#28a745';
+            } else {
+                telegramFeedback.textContent = '✗ @username (5-32 harf) yoki 5-20 raqam bo\'lishi kerak';
+                telegramFeedback.style.color = '#dc3545';
+                this.style.borderColor = '#dc3545';
+            }
+        });
+    }
+
     // Slug auto-generate
     var nameInput = document.getElementById('id_name');
     var slugInput = document.getElementById('id_slug');

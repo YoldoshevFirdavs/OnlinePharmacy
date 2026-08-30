@@ -1,0 +1,324 @@
+================================================================================
+Docker Production Deployment - Quick Reference
+================================================================================
+
+PROJECT: OnlinePharmacy
+DOCKER CONFIG: docker-compose.prod.yml
+HOST BASE PATH: /home/ec2-user/OnlinePharmacy/
+
+================================================================================
+DIRECTORY STRUCTURE (On EC2 Host)
+================================================================================
+
+/home/ec2-user/OnlinePharmacy/
+├── docker-compose.prod.yml      ← Docker configuration
+├── .env.prod                     ← Environment variables (IMPORTANT!)
+├── Dockerfile                    ← Build configuration
+├── entrypoint.sh                 ← Startup script
+│
+├── staticfiles/                  ← SHARED WITH DOCKER ✓
+│   └── static/                   (collectstatic output)
+│
+├── media/                        ← SHARED WITH DOCKER ✓
+│   └── uploads/avatars/          (user uploads)
+│
+├── postgres_data/                ← SHARED WITH DOCKER ✓
+│   └── (database files)
+│
+├── nginx/                        ← OPTIONAL (if using Nginx)
+│   └── nginx.conf
+│
+└── backups/                      ← Database/media backups (optional)
+
+================================================================================
+VOLUME MOUNTS (How files are shared)
+================================================================================
+
+DOCKER CONTAINER              HOST FILESYSTEM
+─────────────────────────────────────────────────────────────────────────────
+/app/staticfiles      ←→   /home/ec2-user/OnlinePharmacy/staticfiles
+/app/media            ←→   /home/ec2-user/OnlinePharmacy/media
+/var/lib/postgresql/  ←→   /home/ec2-user/OnlinePharmacy/postgres_data/
+  data
+
+KEY POINT: Files written inside Docker are directly accessible on host!
+Example: collectstatic writes to /app/staticfiles, which is /home/ec2-user/.../staticfiles on host
+
+================================================================================
+DEPLOYMENT STEPS (Copy & Paste)
+================================================================================
+
+# 1. SSH into EC2
+ssh -i your-key.pem ec2-user@your-ec2-ip
+
+# 2. Go to project
+cd /home/ec2-user/OnlinePharmacy
+
+# 3. Create host directories
+bash DOCKER_HOST_SETUP.sh
+
+# 4. Update .env.prod with your settings
+nano .env.prod
+# Edit: DB_NAME, DB_USER, DB_PASSWORD, SECRET_KEY, ALLOWED_HOSTS
+
+# 5. Build Docker images (5-10 min)
+docker compose -f docker-compose.prod.yml build
+
+# 6. Start services
+docker compose -f docker-compose.prod.yml up -d
+
+# 7. Check status
+docker compose -f docker-compose.prod.yml ps
+
+# 8. Create superuser
+docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+
+# 9. Collect static files
+docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+
+# 10. Verify
+curl http://localhost:8000/api/v1/health/
+ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+
+================================================================================
+COMMON COMMANDS (Copy & Paste)
+================================================================================
+
+# VIEW LOGS
+docker compose -f docker-compose.prod.yml logs -f web              # Follow web logs
+docker compose -f docker-compose.prod.yml logs -f db               # Follow db logs
+docker compose -f docker-compose.prod.yml logs web | tail -100     # Last 100 lines
+
+# EXECUTE COMMANDS IN CONTAINER
+docker compose -f docker-compose.prod.yml exec web bash            # Shell access
+docker compose -f docker-compose.prod.yml exec web python manage.py shell
+docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+
+# RESTART SERVICES
+docker compose -f docker-compose.prod.yml restart                  # Restart all
+docker compose -f docker-compose.prod.yml restart web              # Restart just web
+docker compose -f docker-compose.prod.yml restart db               # Restart just db
+
+# STOP/START
+docker compose -f docker-compose.prod.yml stop                     # Stop (keep data)
+docker compose -f docker-compose.prod.yml down                     # Stop (remove containers)
+docker compose -f docker-compose.prod.yml up -d                    # Start again
+
+# DATABASE OPERATIONS
+docker compose -f docker-compose.prod.yml exec db psql -U pharmacy_user -d onlinepharmacy_prod
+docker compose -f docker-compose.prod.yml exec db pg_dump -U pharmacy_user -d onlinepharmacy_prod > backup.sql
+
+# STATIC FILES
+docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+
+# SYSTEM STATUS
+docker compose -f docker-compose.prod.yml ps                       # Container status
+docker stats                                                        # CPU/Memory usage
+df -h /home/ec2-user/                                              # Disk space
+
+================================================================================
+NGINX SETUP (OPTIONAL - For better performance)
+================================================================================
+
+# 1. Create nginx directory
+mkdir -p /home/ec2-user/OnlinePharmacy/nginx
+
+# 2. Create nginx/nginx.conf (see NGINX_SETUP.md for content)
+
+# 3. Uncomment nginx service in docker-compose.prod.yml
+
+# 4. Rebuild and restart
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+
+# 5. Test
+curl -I http://localhost/static/css/main.css
+curl -I http://localhost/api/v1/health/
+
+See NGINX_SETUP.md for detailed configuration.
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+ISSUE: Container won't start
+SOLUTION:
+  docker compose -f docker-compose.prod.yml logs web
+  docker compose -f docker-compose.prod.yml ps
+
+ISSUE: Static files return 404
+SOLUTION:
+  docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+  ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+  chmod -R 755 /home/ec2-user/OnlinePharmacy/staticfiles
+
+ISSUE: Media uploads not working
+SOLUTION:
+  mkdir -p /home/ec2-user/OnlinePharmacy/media
+  chmod -R 755 /home/ec2-user/OnlinePharmacy/media
+  docker compose -f docker-compose.prod.yml restart web
+
+ISSUE: Database connection error
+SOLUTION:
+  docker compose -f docker-compose.prod.yml logs db
+  docker compose -f docker-compose.prod.yml ps db
+  Check: grep DB_NAME /home/ec2-user/OnlinePharmacy/.env.prod
+
+ISSUE: Out of disk space
+SOLUTION:
+  du -sh /home/ec2-user/OnlinePharmacy/*
+  find /home/ec2-user/OnlinePharmacy/media -type f -mtime +90 -delete
+
+================================================================================
+ENV VARIABLES CHECKLIST (.env.prod)
+================================================================================
+
+REQUIRED:
+  DB_NAME=onlinepharmacy_prod
+  DB_USER=pharmacy_user
+  DB_PASSWORD=strong-password-16-chars-min
+  POSTGRES_DB=onlinepharmacy_prod
+  POSTGRES_USER=pharmacy_user
+  POSTGRES_PASSWORD=strong-password-16-chars-min
+
+DJANGO:
+  DEBUG=False
+  SECRET_KEY=very-long-random-string
+  ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+  SECURE_SSL_REDIRECT=True
+  SESSION_COOKIE_SECURE=True
+  CSRF_COOKIE_SECURE=True
+
+REDIS:
+  REDIS_URL=redis://redis:6379/0
+
+MEDIA:
+  MEDIA_ROOT=/app/media
+  MEDIA_URL=/media/
+  STATIC_ROOT=/app/staticfiles
+  STATIC_URL=/static/
+
+EMAIL (optional):
+  EMAIL_HOST=smtp.gmail.com
+  EMAIL_PORT=587
+  EMAIL_HOST_USER=your-email@gmail.com
+  EMAIL_HOST_PASSWORD=your-app-password
+  DEFAULT_FROM_EMAIL=noreply@yourdomain.com
+
+TELEGRAM (optional):
+  TELEGRAM_BOT_TOKEN=your-token
+  TELEGRAM_ADMIN_CHAT_ID=your-chat-id
+
+================================================================================
+MONITORING & MAINTENANCE
+================================================================================
+
+DAILY:
+  docker compose -f docker-compose.prod.yml ps          # Check all running
+  docker logs web | grep -i error                       # Check for errors
+
+WEEKLY:
+  df -h /home/ec2-user/                                # Check disk space
+  docker system prune -a                                # Clean up images
+  Backup database: docker-compose exec db pg_dump...
+
+MONTHLY:
+  Review logs for errors and warnings
+  Update Docker images: docker pull postgres:15
+  Test database restore procedure
+
+================================================================================
+SECURITY CHECKLIST
+================================================================================
+
+BEFORE DEPLOYMENT:
+  [ ] .env.prod created and NOT in git
+  [ ] SECRET_KEY is long and random (64+ chars)
+  [ ] DB_PASSWORD is strong (16+ chars, mixed case, symbols)
+  [ ] DEBUG=False in .env.prod
+  [ ] ALLOWED_HOSTS includes your domain
+  [ ] SSL/TLS certificates configured (if needed)
+  [ ] Firewall rules allow only 80/443/22 (ssh)
+  [ ] Database backups tested
+  [ ] Media directory permissions 755
+
+AFTER DEPLOYMENT:
+  [ ] Admin accessible at /admin/
+  [ ] Static files loading
+  [ ] Media uploads working
+  [ ] API responding
+  [ ] Logs monitored
+  [ ] Backups scheduled
+
+================================================================================
+FILE PATHS REFERENCE
+================================================================================
+
+On Host:
+  Config:           /home/ec2-user/OnlinePharmacy/docker-compose.prod.yml
+  Environment:      /home/ec2-user/OnlinePharmacy/.env.prod
+  Static Files:     /home/ec2-user/OnlinePharmacy/staticfiles/
+  Media Uploads:    /home/ec2-user/OnlinePharmacy/media/
+  Database:         /home/ec2-user/OnlinePharmacy/postgres_data/
+  Backups:          /home/ec2-user/OnlinePharmacy/backups/
+
+Inside Container:
+  App:              /app/
+  Static:           /app/staticfiles/
+  Media:            /app/media/
+  Database:         /var/lib/postgresql/data/
+
+================================================================================
+USEFUL LINKS & DOCUMENTATION
+================================================================================
+
+Main Guide:         DOCKER_PROD_DEPLOYMENT.md
+Nginx Guide:        NGINX_SETUP.md
+Setup Script:       DOCKER_HOST_SETUP.sh
+Docker Config:      docker-compose.prod.yml
+
+Docker Docs:        https://docs.docker.com/compose/
+PostgreSQL Docs:    https://www.postgresql.org/docs/
+Gunicorn Docs:      https://docs.gunicorn.org/
+Nginx Docs:         https://nginx.org/en/docs/
+
+================================================================================
+DEPLOYMENT SUCCESS CHECKLIST
+================================================================================
+
+After deployment is complete, verify:
+
+  [ ] docker compose ps shows all containers running
+  [ ] curl http://localhost:8000/api/v1/health/ returns 200
+  [ ] curl http://localhost:8000/static/css/main.css returns file
+  [ ] Django admin accessible at http://localhost:8000/admin/
+  [ ] Can upload avatar file (tests media)
+  [ ] Contact form submits (tests API)
+  [ ] /staticfiles directory has files
+  [ ] /media directory has uploads
+  [ ] Database connected and responsive
+  [ ] No error messages in logs
+  [ ] Telegram bot connected (if configured)
+  [ ] Celery background tasks working
+
+If any fail, check TROUBLESHOOTING section above.
+
+================================================================================
+QUICK START COMMAND (All in one)
+================================================================================
+
+cd /home/ec2-user/OnlinePharmacy && \
+bash DOCKER_HOST_SETUP.sh && \
+docker compose -f docker-compose.prod.yml build && \
+docker compose -f docker-compose.prod.yml up -d && \
+sleep 30 && \
+docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate && \
+docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput && \
+docker compose -f docker-compose.prod.yml ps
+
+Then:
+1. Create superuser: docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+2. Test: curl http://localhost:8000/api/v1/health/
+
+================================================================================

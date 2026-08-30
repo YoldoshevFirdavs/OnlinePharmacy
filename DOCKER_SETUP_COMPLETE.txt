@@ -1,0 +1,418 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║         🎉 Docker Production Setup - COMPLETE & READY 🎉                 ║
+║                                                                            ║
+║                       OnlinePharmacy EC2 Deployment                       ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+DATE: August 29, 2026
+STATUS: ✅ COMPLETE & PRODUCTION READY
+
+═════════════════════════════════════════════════════════════════════════════
+
+WHAT WAS DONE:
+═════════════════════════════════════════════════════════════════════════════
+
+✅ docker-compose.prod.yml UPDATED
+   ├─ Changed from Docker managed volumes to HOST PATHS
+   ├─ staticfiles now maps to /home/ec2-user/OnlinePharmacy/staticfiles
+   ├─ media now maps to /home/ec2-user/OnlinePharmacy/media
+   ├─ PostgreSQL data maps to /home/ec2-user/OnlinePharmacy/postgres_data
+   └─ Nginx service ready to uncomment (with host path volumes)
+
+✅ 5 DOCUMENTATION FILES CREATED
+   ├─ README_DOCKER.txt                    (Overview + quick links)
+   ├─ DOCKER_QUICK_REFERENCE.txt           (Copy-paste commands)
+   ├─ DOCKER_DEPLOYMENT_SUMMARY.txt        (Comprehensive guide)
+   ├─ DOCKER_PROD_DEPLOYMENT.md            (Step-by-step + troubleshooting)
+   └─ NGINX_SETUP.md                       (Nginx configuration)
+
+✅ 1 SETUP SCRIPT CREATED
+   └─ DOCKER_HOST_SETUP.sh                 (Automated directory + permissions)
+
+═════════════════════════════════════════════════════════════════════════════
+
+KEY CHANGES SUMMARY:
+═════════════════════════════════════════════════════════════════════════════
+
+BEFORE (Old docker-compose):
+  Containers wrote to → Docker managed volumes → Only visible via docker command
+
+AFTER (New docker-compose):
+  Containers write to → /app/staticfiles → Mounted to → /home/ec2-user/.../staticfiles
+  Containers write to → /app/media → Mounted to → /home/ec2-user/.../media
+  Database writes to → PostgreSQL data → Mounted to → /home/ec2-user/.../postgres_data
+
+RESULT:
+  ✅ All files directly visible on EC2 host
+  ✅ No docker cp, docker exec for file access
+  ✅ Easy backups (just copy directory)
+  ✅ Nginx can serve directly (if enabled)
+
+═════════════════════════════════════════════════════════════════════════════
+
+DOCUMENTATION READING ORDER:
+═════════════════════════════════════════════════════════════════════════════
+
+1. README_DOCKER.txt (THIS IS YOUR STARTING POINT)
+   ├─ Overview of changes
+   ├─ Quick start guide (5 minutes)
+   ├─ Directory structure explanation
+   ├─ Common commands reference
+   └─ Quick troubleshooting
+
+2. DOCKER_QUICK_REFERENCE.txt (FOR DEPLOYMENT)
+   ├─ Copy-paste deployment commands
+   ├─ Quick test commands
+   ├─ Troubleshooting tips
+   ├─ Environment variables checklist
+   └─ One-liner quick start
+
+3. DOCKER_PROD_DEPLOYMENT.md (FOR DETAILED GUIDE)
+   ├─ Step-by-step setup process
+   ├─ All available commands
+   ├─ Detailed troubleshooting
+   ├─ Monitoring & maintenance
+   └─ Security checklist
+
+4. DOCKER_DEPLOYMENT_SUMMARY.txt (FOR UNDERSTANDING)
+   ├─ How volume mounts work
+   ├─ File structure explanation
+   ├─ Migration path from old setup
+   ├─ Common scenarios explained
+   └─ Testing deployment checklist
+
+5. NGINX_SETUP.md (OPTIONAL - IF USING NGINX)
+   ├─ Nginx configuration
+   ├─ Performance tips
+   ├─ SSL/TLS setup
+   └─ Troubleshooting Nginx
+
+═════════════════════════════════════════════════════════════════════════════
+
+QUICK DEPLOYMENT (5 MINUTES):
+═════════════════════════════════════════════════════════════════════════════
+
+1. SSH to EC2:
+   ssh -i your-key.pem ec2-user@your-ec2-ip
+
+2. Go to project:
+   cd /home/ec2-user/OnlinePharmacy
+
+3. Prepare host directories:
+   bash DOCKER_HOST_SETUP.sh
+
+4. Edit environment variables:
+   nano .env.prod
+   (Set: DB_NAME, DB_USER, DB_PASSWORD, SECRET_KEY, ALLOWED_HOSTS)
+
+5. Build Docker image:
+   docker compose -f docker-compose.prod.yml build
+
+6. Start all services:
+   docker compose -f docker-compose.prod.yml up -d
+
+7. Run initial setup:
+   docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+   docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+   docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+
+8. Verify deployment:
+   docker compose -f docker-compose.prod.yml ps
+   curl http://localhost:8000/api/v1/health/
+   ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+
+Done! ✅
+
+═════════════════════════════════════════════════════════════════════════════
+
+FILE STRUCTURE AFTER SETUP:
+═════════════════════════════════════════════════════════════════════════════
+
+/home/ec2-user/OnlinePharmacy/
+│
+├── 📄 docker-compose.prod.yml          ← Updated with host paths
+├── 📄 .env.prod                        ← Your configuration (KEEP SECRET!)
+├── 📄 Dockerfile                       ← Image definition
+├── 📄 entrypoint.sh                    ← Startup script
+│
+├── 📁 staticfiles/                     ← SHARED WITH DOCKER ✓
+│   └── static/
+│       ├── admin/
+│       ├── css/
+│       ├── js/
+│       ├── images/
+│       └── ...
+│
+├── 📁 media/                           ← SHARED WITH DOCKER ✓
+│   ├── uploads/
+│   │   └── avatars/
+│   └── ...
+│
+├── 📁 postgres_data/                   ← SHARED WITH DOCKER ✓
+│   ├── base/
+│   ├── global/
+│   └── ...
+│
+├── 📁 nginx/                           ← OPTIONAL (if using Nginx)
+│   └── nginx.conf
+│
+├── 📄 README_DOCKER.txt                ← Overview (START HERE!)
+├── 📄 DOCKER_QUICK_REFERENCE.txt       ← Quick commands
+├── 📄 DOCKER_DEPLOYMENT_SUMMARY.txt    ← Comprehensive guide
+├── 📄 DOCKER_PROD_DEPLOYMENT.md        ← Step-by-step guide
+├── 📄 NGINX_SETUP.md                   ← Nginx guide (optional)
+├── 📄 DOCKER_HOST_SETUP.sh             ← Setup script
+│
+└── 📁 backups/                         ← Database/media backups
+    ├── db_backup_20260829.sql
+    └── media_backup_20260829.tar.gz
+
+═════════════════════════════════════════════════════════════════════════════
+
+VOLUME MOUNTS - HOW IT WORKS:
+═════════════════════════════════════════════════════════════════════════════
+
+docker-compose.prod.yml defines:
+
+  volumes:
+    - /home/ec2-user/OnlinePharmacy/staticfiles:/app/staticfiles
+    - /home/ec2-user/OnlinePharmacy/media:/app/media
+    - /home/ec2-user/OnlinePharmacy/postgres_data:/var/lib/postgresql/data/
+
+This means:
+  • When Django writes to /app/staticfiles inside container
+  • File actually goes to /home/ec2-user/OnlinePharmacy/staticfiles on host
+  • You can SSH to EC2 and see the file immediately
+  • Nginx can read directly from host (if enabled)
+
+Example:
+  1. User uploads avatar in browser
+  2. Django saves to: /app/media/uploads/avatars/user.jpg
+  3. File appears at: /home/ec2-user/OnlinePharmacy/media/uploads/avatars/user.jpg
+  4. You can: ssh to EC2 and ls -la /home/ec2-user/OnlinePharmacy/media/uploads/avatars/
+  5. File is there! ✓ No docker cp needed!
+
+═════════════════════════════════════════════════════════════════════════════
+
+KEY BENEFITS:
+═════════════════════════════════════════════════════════════════════════════
+
+✅ DIRECT FILE ACCESS
+   All files visible on EC2 host - no need for docker commands
+
+✅ EASY BACKUPS
+   Backup: tar -czf backup.tar.gz /home/ec2-user/OnlinePharmacy/
+   Restore: tar -xzf backup.tar.gz -C /
+
+✅ BETTER PERFORMANCE
+   Nginx serves static files directly (not through Django)
+   Gunicorn handles API only
+
+✅ SIMPLE DEBUGGING
+   SSH to EC2 and look at files directly
+   See logs, uploads, generated files immediately
+
+✅ SCALABILITY
+   Multiple containers can share same files
+   Files survive container restart/update
+
+✅ NO VOLUME EXPORT/IMPORT
+   Old way: docker export volume, then docker import
+   New way: just copy the directory
+
+═════════════════════════════════════════════════════════════════════════════
+
+ENVIRONMENT VARIABLES (.env.prod):
+═════════════════════════════════════════════════════════════════════════════
+
+REQUIRED (Database):
+  DB_NAME=onlinepharmacy_prod
+  DB_USER=pharmacy_user
+  DB_PASSWORD=your-strong-password-min-16-chars
+  POSTGRES_DB=onlinepharmacy_prod
+  POSTGRES_USER=pharmacy_user
+  POSTGRES_PASSWORD=your-strong-password-min-16-chars
+
+REQUIRED (Django):
+  DEBUG=False
+  SECRET_KEY=very-long-random-string-64-chars-minimum
+  ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,ec2-ip-address
+  SECURE_SSL_REDIRECT=True
+  SESSION_COOKIE_SECURE=True
+  CSRF_COOKIE_SECURE=True
+
+REQUIRED (Paths):
+  MEDIA_ROOT=/app/media
+  MEDIA_URL=/media/
+  STATIC_ROOT=/app/staticfiles
+  STATIC_URL=/static/
+
+REQUIRED (Cache):
+  REDIS_URL=redis://redis:6379/0
+
+OPTIONAL (Email):
+  EMAIL_HOST=smtp.gmail.com
+  EMAIL_PORT=587
+  EMAIL_HOST_USER=your-email@gmail.com
+  EMAIL_HOST_PASSWORD=your-app-password
+
+OPTIONAL (Telegram):
+  TELEGRAM_BOT_TOKEN=your-token
+  TELEGRAM_ADMIN_CHAT_ID=your-chat-id
+
+═════════════════════════════════════════════════════════════════════════════
+
+TESTING DEPLOYMENT:
+═════════════════════════════════════════════════════════════════════════════
+
+Run these commands after docker compose up -d:
+
+Test 1: All containers running?
+  docker compose -f docker-compose.prod.yml ps
+  Expected: All services show "Up"
+
+Test 2: API responding?
+  curl http://localhost:8000/api/v1/health/
+  Expected: HTTP 200 OK
+
+Test 3: Static files?
+  curl -I http://localhost:8000/static/css/main.css
+  Expected: HTTP 200 OK
+
+Test 4: Files on host?
+  ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+  Expected: See admin/, css/, js/, images/ directories
+
+Test 5: Admin page?
+  curl -I http://localhost:8000/admin/
+  Expected: HTTP 302 (redirect to login)
+
+Test 6: Media directory?
+  ls -la /home/ec2-user/OnlinePharmacy/media/
+  Expected: Directory exists and is accessible
+
+Test 7: Upload test
+  Go to http://localhost:8000/account/
+  Upload an avatar
+  Check: ls -la /home/ec2-user/OnlinePharmacy/media/uploads/avatars/
+  Expected: File appears there immediately
+
+If all tests pass: ✅ Deployment successful!
+
+═════════════════════════════════════════════════════════════════════════════
+
+NGINX (OPTIONAL):
+═════════════════════════════════════════════════════════════════════════════
+
+To use Nginx for better static file serving:
+
+1. Create nginx directory:
+   mkdir -p /home/ec2-user/OnlinePharmacy/nginx
+
+2. Create nginx/nginx.conf:
+   (See NGINX_SETUP.md for complete configuration)
+
+3. Uncomment nginx service in docker-compose.prod.yml
+
+4. Rebuild and restart:
+   docker compose -f docker-compose.prod.yml build
+   docker compose -f docker-compose.prod.yml up -d
+
+5. Test:
+   curl -I http://localhost/static/css/main.css
+   curl -I http://localhost/api/v1/health/
+
+See NGINX_SETUP.md for detailed configuration and troubleshooting.
+
+═════════════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+═════════════════════════════════════════════════════════════════════════════
+
+PROBLEM: Container won't start
+  docker compose logs web
+  Check .env.prod for typos/missing values
+
+PROBLEM: Static files 404
+  docker compose exec web python manage.py collectstatic --noinput
+  ls -la /home/ec2-user/OnlinePharmacy/staticfiles/static/
+
+PROBLEM: Media uploads fail
+  mkdir -p /home/ec2-user/OnlinePharmacy/media
+  chmod -R 755 /home/ec2-user/OnlinePharmacy/media
+
+PROBLEM: Database connection error
+  docker compose logs db
+  Check DB_PASSWORD matches POSTGRES_PASSWORD
+
+For detailed troubleshooting: DOCKER_PROD_DEPLOYMENT.md
+
+═════════════════════════════════════════════════════════════════════════════
+
+COMMON COMMANDS:
+═════════════════════════════════════════════════════════════════════════════
+
+View logs:
+  docker compose -f docker-compose.prod.yml logs -f web
+
+View all logs:
+  docker compose -f docker-compose.prod.yml logs -f
+
+Restart all:
+  docker compose -f docker-compose.prod.yml restart
+
+Restart one service:
+  docker compose -f docker-compose.prod.yml restart web
+
+Stop all:
+  docker compose -f docker-compose.prod.yml down
+
+Check status:
+  docker compose -f docker-compose.prod.yml ps
+
+Run Django command:
+  docker compose -f docker-compose.prod.yml exec web python manage.py <command>
+
+Backup database:
+  docker compose -f docker-compose.prod.yml exec db pg_dump -U $DB_USER -d $DB_NAME > backup.sql
+
+See more: DOCKER_QUICK_REFERENCE.txt
+
+═════════════════════════════════════════════════════════════════════════════
+
+WHAT YOU SHOULD DO NOW:
+═════════════════════════════════════════════════════════════════════════════
+
+1. READ: README_DOCKER.txt (Overview, 10 minutes)
+
+2. READ: DOCKER_QUICK_REFERENCE.txt (Commands, 5 minutes)
+
+3. PREPARE: Have your EC2 credentials and domain ready
+
+4. EXECUTE: Follow DOCKER_PROD_DEPLOYMENT.md step-by-step
+
+5. VERIFY: Run all 7 tests above to confirm deployment
+
+6. MONITOR: Keep an eye on logs and disk space
+
+═════════════════════════════════════════════════════════════════════════════
+
+STATUS: ✅ COMPLETE & PRODUCTION READY
+
+All files, scripts, and documentation are ready for deployment to EC2.
+
+Start with: README_DOCKER.txt
+
+═════════════════════════════════════════════════════════════════════════════
+
+Questions? Check the documentation files:
+  • Overview: README_DOCKER.txt
+  • Quick commands: DOCKER_QUICK_REFERENCE.txt
+  • Step-by-step: DOCKER_PROD_DEPLOYMENT.md
+  • How it works: DOCKER_DEPLOYMENT_SUMMARY.txt
+  • Nginx (optional): NGINX_SETUP.md
+
+═════════════════════════════════════════════════════════════════════════════
+
