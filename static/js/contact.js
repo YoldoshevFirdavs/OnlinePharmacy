@@ -158,9 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
+            console.log("📤 Sending contact form...", formData);
+            
             // Submit to contact API endpoint at /api/v1/products/contact/
             const response = await sendRequest('/api/v1/products/contact/', 'POST', formData);
 
+            console.log("✅ Response:", response);
+            
             if (response.success) {
                 showModal('Muvaffaqiyatli!', 'Xabaringiz muvaffaqiyatli yuborildi! Tez orada javob beramiz.', true);
                 contactForm.reset(); // Clear the form on success
@@ -170,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showModal('Xatolik!', errorMessage, false);
             }
         } catch (error) {
-            console.error('Contact form submission error:', error);
+            console.error('❌ Contact form submission error:', error);
             if (error.status === 401) {
                 showModal('Xatolik!', 'Iltimos, avval tizimga kiring.', false);
                 // Optionally redirect to login page or show login modal

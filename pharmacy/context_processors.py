@@ -23,6 +23,15 @@ def site_configuration(request):
     }
 
 
+def default_images(request):
+    """Default placeholder images for templates"""
+    return {
+        "DEFAULT_AVATAR_URL": "/static/images/default/default_avatar.png",
+        "DEFAULT_PRODUCT_URL": "/static/images/default/default_product.png",
+        "DEFAULT_ICON_URL": "/static/images/default/default_icon.png",
+    }
+
+
 def social_links(request):
     """Social media links for templates"""
     return {
@@ -33,10 +42,14 @@ def social_links(request):
 
 
 def footer_links(request):
-    """Footer navigation links for templates"""
+    """Footer navigation links and contact info for templates"""
     return {
         "about_url": "/about/",
         "contact_url": "/contact/",
         "terms_url": "/terms/",
         "privacy_url": "/privacy/",
+        # Contact information
+        "contact_email": "firdavsyoldoshevpython@gmail.com",
+        "contact_phone": "+998 (55) 555-5558",
+        "contact_phone_short": "+998555558",
     }

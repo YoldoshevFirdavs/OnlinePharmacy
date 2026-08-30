@@ -43,7 +43,7 @@ async function loadPopularProducts(range = 30) {
     try {
         if (loader) loader.style.display = 'block';
 
-        const response = await fetch(`/api/v1/pharmacy/products/popular/?range=${range}`);
+        const response = await fetch(`/api/v1/products/popular/?range=${range}`);
         if (!response.ok) {
             throw new Error(`Network response was not ok: ${response.statusText}`);
         }

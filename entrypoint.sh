@@ -1,6 +1,8 @@
 #!/bin/bash
 # Production entrypoint script for OnlinePharmacy Django application
-# This script runs database migrations, collects static files, and starts Gunicorn
+# This script runs database migrations and starts Gunicorn
+# NOTE: Static files collection is handled OUTSIDE Docker on the host
+# (collectstatic runs on EC2 host, not inside Docker container)
 
 echo "🚀 Starting OnlinePharmacy Production Entrypoint..."
 
@@ -10,12 +12,9 @@ python manage.py migrate --noinput 2>&1 || {
     echo "⚠️ Migration warning - DB might not be fully ready";
 }
 
-# 2. Collect static files - SKIP if collectstatic causes issues
-echo "🎨 Collecting static files..."
-# Try to collect static files with timeout to prevent hanging
-timeout 30 python manage.py collectstatic --noinput --clear 2>&1 || {
-    echo "⚠️ Collectstatic skipped or timed out - Gunicorn will serve from staticfiles directory";
-}
+# 2. SKIP collectstatic - it runs on host, not in Docker
+echo "⏭️  Skipping collectstatic (runs on host via DOCKER_HOST_SETUP.sh)"
+echo "   Static files location: /app/staticfiles → /home/ec2-user/OnlinePharmacy/staticfiles"
 
 # 3. Start Gunicorn with exec to replace shell process
 echo "✅ Starting Gunicorn server on 0.0.0.0:8000..."

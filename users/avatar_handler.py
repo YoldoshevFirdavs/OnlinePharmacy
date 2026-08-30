@@ -6,7 +6,6 @@ Features: File validation, storage path logging, upload confirmation
 import logging
 import os
 from datetime import datetime
-from io import BytesIO
 
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -16,7 +15,9 @@ logger = logging.getLogger("avatar_upload")
 
 # Create handler if not exists
 if not logger.handlers:
-    handler = logging.FileHandler(os.path.join(settings.BASE_DIR, "logs", "avatar_upload.log"))
+    log_dir = os.path.join(settings.BASE_DIR, "logs")
+    os.makedirs(log_dir, exist_ok=True)  # Ensure logs directory exists
+    handler = logging.FileHandler(os.path.join(log_dir, "avatar_upload.log"))
     formatter = logging.Formatter("[%(asctime)s] %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -63,13 +64,13 @@ class AvatarUploadHandler:
 
         # Validate image format using PIL
         try:
+            file_obj.seek(0)  # Reset file pointer to start
             img = Image.open(file_obj)
-            img.verify()
+            img.load()  # Load image data to verify
             logger.debug(f"✓ Image format valid: {img.format}")
         except Exception as e:
-            error = f"Rasm fayl qayta ishlab bo'lmadi. Xato: {str(e)}"
-            logger.warning(f"Image verification failed: {error}")
-            return False, error
+            logger.error(f"Image format invalid or corrupted: {str(e)}")
+            return False, "Rasm fayl qayta ishlab bo'lmadi. Fayl buzilganmi?"
 
         return True, None
 
@@ -89,6 +90,9 @@ class AvatarUploadHandler:
 
         try:
             logger.debug(f"Starting file upload...")
+            
+            # Reset file pointer before saving
+            file_obj.seek(0)
 
             # Create storage directory path
             upload_dir = f"avatars/{user.id}"
