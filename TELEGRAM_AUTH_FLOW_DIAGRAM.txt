@@ -1,0 +1,265 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║           TELEGRAM OTP AUTHENTICATION FLOW - NON-ADMIN USERS                   ║
+║                         (FIXED VERSION)                                         ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: USER INITIATES TELEGRAM LOGIN                                           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    CLIENT                          SERVER                          CACHE
+    ──────                          ──────                          ─────
+
+    [Click Telegram]
+    POST /api/v1/users/login/
+    telegram/
+         │                   
+         ├──────────────────→ TelegramLoginView.post()
+         │                   │
+         │                   ├─ Create OtpSession
+         │                   │
+         │                   ├─ Generate 4-digit code
+         │                   │
+         │                   ├─ store_bot_otp()
+         │                   │  ├─────────────────────→ otp:{session_id}:telegram
+         │                   │  │                      (hashed OTP, TTL: 1800s)
+         │                   │  │
+         │                   │  └─────────────────────→ otp:{session_id}:telegram:delivery
+         │                   │                         (plain code "1234", TTL: 1800s)
+         │                   │
+         │                   ├─ Create admin_session ─→ admin_session:{session_id}
+         │                   │                         {
+         │                   │                           "user_id": 123,
+         │                   │                           "phone_number": "+998...",
+         │                   │                           "flow": "telegram_user",
+         │                   │                           "created_at": timestamp
+         │                   │                         }
+         │                   │                         TTL: 1800s (30 MIN) ← EXTENDED!
+         │                   │
+         │←────────────────── Response with:
+    ✅ Deeplink             │   • session_id
+    ✅ session_id           │   • deeplink
+    ✅ message              │   • otp_required: true
+    ✅ otp_sent: true       │
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ STEP 2: USER CLICKS DEEPLINK IN TELEGRAM BOT                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    CLIENT                  TELEGRAM BOT              SERVER                 CACHE
+    ──────                  ────────────              ──────                 ─────
+
+    [Click Link]
+    https://t.me/authversabot
+         │                      ?start={session_id}
+         │                             │
+         │                             └──→ telegram_bot/runbot1.py
+         │                                  start_handler()
+         │                                  │
+         │                                  ├─ Get admin_session ────→ ✓ Found!
+         │                                  │
+         │                                  ├─ Verify session not expired
+         │                                  │
+         │                                  ├─ Check user exists
+         │                                  │
+         │                                  ├─ Save telegram_id if needed
+         │                                  │
+         │                                  ├─ Prompt: "Share phone number"
+         │                                  │
+         └─────────────────────────────────→ [Button: Send Phone]
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ STEP 3: USER SHARES PHONE VIA BOT                                               │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    TELEGRAM BOT              SERVER                        CACHE
+    ────────────              ──────                        ─────
+
+    [User clicks phone button]
+    contact_handler()
+    │
+    ├─ Get pending data ────→ ✓ Found in telegram_pending:{telegram_id}
+    │
+    ├─ Verify phone matches
+    │
+    ├─ Retrieve admin_session ────→ admin_session:{session_id}
+    │
+    ├─ Check flow type
+    │
+    ├─ IF flow == "telegram_user" (NON-ADMIN):
+    │  │
+    │  ├─ Get OTP code ────→ otp:{session_id}:telegram:delivery
+    │  │                    = "1234"
+    │  │
+    │  └─ Send message: "Sizning 4 xonali kod: 1234" ← ✅ NEW!
+    │     "Login sahifasida ushbu kodni kiriting."
+    │
+    └─ Mark session verified ────→ admin_session updated
+                                   "verified": True
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ STEP 4: USER ENTERS CODE IN LOGIN FORM                                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    CLIENT                    SERVER                          CACHE
+    ──────                    ──────                          ─────
+
+    [User enters: "1234"]
+    POST /api/v1/users/verify-otp/
+    {
+      "session_id": "...",
+      "code": "1234",
+      "identifier": "+998..."
+    }
+         │                   
+         ├──────────────────→ VerifyOtpView.post()
+         │                   │
+         │                   ├─ refresh_session_ttl() ← ✅ NEW!
+         │                   │  │
+         │                   │  ├─ Extend admin_session TTL ────→ TTL: 1800s
+         │                   │  │
+         │                   │  └─ Extend OTP caches TTL ────→ TTL: 1800s
+         │                   │
+         │                   ├─ otp_service.verify_otp_once()
+         │                   │  │
+         │                   │  ├─ get_session_meta() ← ✅ UPDATED!
+         │                   │  │  │
+         │                   │  │  ├─ Try auth_session:{session_id}
+         │                   │  │  │  └─ Not found
+         │                   │  │  │
+         │                   │  │  └─ Try admin_session:{session_id}
+         │                   │  │     └─ ✅ FOUND!
+         │                   │  │
+         │                   │  ├─ Get OTP hash ────→ otp:{session_id}:telegram
+         │                   │  │                    {hash, salt, algorithm}
+         │                   │  │
+         │                   │  ├─ Verify code: "1234" matches hash
+         │                   │  │  └─ ✅ VALID!
+         │                   │  │
+         │                   │  └─ Delete OTP ────→ Removed from cache
+         │                   │     Delete session ──→ Removed from cache
+         │                   │
+         │                   ├─ Create Django session
+         │                   │
+         │                   ├─ Generate JWT tokens
+         │                   │
+         │←────────────────── Response:
+    ✅ User logged in        │   {
+    ✅ tokens received       │     "ok": true,
+    ✅ redirect_url set      │     "token": "...",
+                             │     "user_id": 123,
+                             │     "role": "user",
+                             │     "redirect_url": "/account/"
+                             │   }
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ KEY IMPROVEMENTS                                                                ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║ ✅ TTL EXTENDED:                                                               ║
+║    300s (5 min)  ──→  1800s (30 min)                                           ║
+║    User has 6x more time to complete flow                                      ║
+║                                                                                 ║
+║ ✅ UNIFIED NAMESPACE:                                                          ║
+║    auth_session + admin_session  ──→  Uses admin_session consistently         ║
+║    Session lookup always succeeds                                              ║
+║                                                                                 ║
+║ ✅ OTP DELIVERY:                                                               ║
+║    Bot doesn't know code  ──→  Bot displays "Sizning 4 xonali kod: 1234"      ║
+║    User confused  ──→  User sees clear instructions                            ║
+║                                                                                 ║
+║ ✅ TTL REFRESH:                                                                ║
+║    No refresh  ──→  Refreshed when user submits code                          ║
+║    Session expires during typing  ──→  Session stays alive                    ║
+║                                                                                 ║
+║ ✅ DUAL NAMESPACE LOOKUP:                                                      ║
+║    Single namespace  ──→  Checks auth_session, falls back to admin_session    ║
+║    Verification fails  ──→  Works for all flow types                          ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ ERROR SCENARIOS (ALL NOW HANDLED CORRECTLY)                                    ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║ BEFORE                              AFTER                                      ║
+║ ──────────────────────────────────  ──────────────────────────────────────    ║
+║                                                                                 ║
+║ ❌ User waits 6 minutes             ✅ User still has 24 min left             ║
+║    → "session_not_found_or_expired"    (30 min total - 6 passed)             ║
+║                                                                                 ║
+║ ❌ User doesn't see OTP code        ✅ Bot sends: "Kod: 1234"                 ║
+║    → Confused, tries to guess       → User knows exact code                   ║
+║                                                                                 ║
+║ ❌ User takes time typing code      ✅ TTL refreshed before verification      ║
+║    → "session_not_found_or_expired"    → Session extended to full TTL again   ║
+║                                                                                 ║
+║ ❌ Session in wrong namespace       ✅ Checks both namespaces                  ║
+║    → Verification fails              → Always finds session                    ║
+║                                                                                 ║
+║ ❌ OTP code not accessible to bot  ✅ Stored in telegram:delivery cache       ║
+║    → Bot can't send code             → Bot retrieves and sends to user        ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+CACHE KEY STRUCTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─ Session Metadata
+│  Key: admin_session:{session_id}
+│  TTL: 1800 seconds (30 minutes)
+│  Value: {
+│    "user_id": 123,
+│    "phone_number": "+998...",
+│    "flow": "telegram_user",        ← Non-admin marker
+│    "created_at": 1692700000,
+│    "verified": true                ← After phone confirmed
+│  }
+│
+├─ OTP Hash (for verification)
+│  Key: otp:{session_id}:telegram
+│  TTL: 1800 seconds (30 minutes)
+│  Value: {
+│    "hash": "abc123def456...",     ← SHA256 hash
+│    "salt": "xyz789...",           ← Random salt
+│    "algorithm": "sha256"
+│  }
+│
+└─ OTP Plain (for bot delivery)
+   Key: otp:{session_id}:telegram:delivery
+   TTL: 1800 seconds (30 minutes)
+   Value: "1234"                    ← Plain code, only bot reads this
+
+
+FILES MODIFIED
+════════════════════════════════════════════════════════════════════════════════
+
+1. users/views.py
+   ├─ Added: ADMIN_SESSION_TTL, refresh_session_ttl imports
+   ├─ Updated: _create_telegram_otp_session()
+   └─ Updated: VerifyOtpView.post() → calls refresh_session_ttl()
+
+2. users/otp_service.py
+   ├─ Updated: get_session_meta() → checks both namespaces
+   └─ Added: refresh_session_ttl() → extends TTL on interaction
+
+3. telegram_bot/runbot1.py
+   └─ Updated: contact_handler() → sends OTP to non-admin users
+
+
+BACKWARD COMPATIBILITY
+════════════════════════════════════════════════════════════════════════════════
+
+✅ Email OTP flow:        auth_session namespace still works (checked first)
+✅ Admin Telegram flow:   admin_session with flow="telegram_deeplink" unchanged
+✅ Admin credentials:     No changes at all
+✅ Existing sessions:     No impact (new code, not retroactive)
+✅ Database:              No changes needed (cache-only solution)
+✅ Client code:           No changes needed (same endpoints)
+✅ Environment vars:      No new vars needed

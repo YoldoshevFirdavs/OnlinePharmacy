@@ -346,9 +346,14 @@
                 last14DaysChartInstance.update();
             }
 
-            // Update Payment Type chart empty state
-            const paymentHasData = (data.total_orders || 0) > 0;
+            // Update Payment Type chart & empty state
+            const paymentHasData = data.payment_method && Array.isArray(data.payment_method.values) && data.payment_method.values.some(v => v > 0);
             toggleEmptyState('paymentEmptyState', paymentHasData);
+            if (paymentTypeChartInstance && data.payment_method) {
+                paymentTypeChartInstance.data.labels = data.payment_method.labels || [];
+                paymentTypeChartInstance.data.datasets[0].data = data.payment_method.values || [];
+                paymentTypeChartInstance.update();
+            }
 
             // Update Product Revenue chart & empty state
             const prodHasData = data.product_revenue && Array.isArray(data.product_revenue.values) && data.product_revenue.values.some(v => v > 0);
@@ -440,16 +445,17 @@
             });
         }
 
-        // Payment Type Chart
+        // Payment Type Chart - will be loaded from API
+        // Initialize with empty data
         const ctxPayment = document.getElementById('paymentTypeChart');
         if (ctxPayment) {
             paymentTypeChartInstance = safeCreateChart(ctxPayment, {
                 type: 'pie',
                 data: {
-                    labels: ['Naqd', 'Click', 'Payme'],
+                    labels: [],
                     datasets: [{
-                        data: [12, 8, 5],
-                        backgroundColor: [primary, '#8b5ef6', success],
+                        data: [],
+                        backgroundColor: [primary, '#8b5ef6', success, '#e74c3c', '#f39c12'],
                         borderColor: 'transparent'
                     }]
                 },

@@ -263,6 +263,32 @@ class DashboardStatsApiView(DashboardAPIView):
                 prod_revenue_labels.append(m.name)
                 prod_revenue_values.append(float(m.price or 0.0))
 
+        # Payment method distribution
+        payment_method_qs = (
+            Order.objects.values("payment_method")
+            .annotate(count=Count("id"), total=Sum("total_price"))
+            .order_by("-count")
+        )
+
+        # Map payment methods to readable labels
+        payment_method_labels = {
+            "cash": "Naqd pul",
+            "card": "Karta",
+            "payme": "Payme",
+            "click": "Click",
+            "": "Noma'lum",
+        }
+
+        payment_labels = []
+        payment_values = []
+        for item in payment_method_qs:
+            method = item.get("payment_method") or ""
+            # Get readable label from mapping, fallback to original value
+            label = payment_method_labels.get(method.lower(), method or "Noma'lum")
+            if label not in payment_labels:  # Avoid duplicates
+                payment_labels.append(label)
+                payment_values.append(item["count"] or 0)
+
         data = {
             "total_categories": total_categories,
             "total_medicines": total_medicines,
@@ -279,6 +305,7 @@ class DashboardStatsApiView(DashboardAPIView):
             "product_revenue": {"labels": prod_revenue_labels, "values": prod_revenue_values},
             "last_14_days": {"labels": labels_14, "values": values_14},
             "top_products": top_products,
+            "payment_method": {"labels": payment_labels, "values": payment_values},
         }
         return Response(data)
 

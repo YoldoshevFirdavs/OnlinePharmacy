@@ -197,10 +197,25 @@ def contact_handler(update: Update, context: CallbackContext):
         and not admin_session.get("used")
         and _normalize_phone(admin_session.get("phone_number")) == expected_phone
     ):
-        admin_session["verified"] = True
-        cache.set(f"admin_session:{payload}", admin_session, timeout=1800)
-        web_link = f"{API_BASE_URL}{reverse('admin_check')}?session={payload}"
-        message = f"Admin Telegram tasdiqlandi. Sahifani oching:\n{web_link}"
+        # Determine flow type
+        flow = admin_session.get("flow", "telegram_deeplink")
+
+        if flow == "telegram_user":
+            # Non-admin Telegram flow: Send OTP code to user
+            otp_code = cache.get(f"otp:{payload}:telegram:delivery")
+            if otp_code:
+                message = f"Sizning 4 xonali kod: {otp_code}\n\nLogin sahifasida ushbu kodni kiriting."
+                admin_session["verified"] = True
+                cache.set(f"admin_session:{payload}", admin_session, timeout=1800)
+            else:
+                message = "OTP kod topilmadi. Login bekor qilindi."
+                cache.delete(f"admin_session:{payload}")
+        else:
+            # Admin Telegram flow: Send verification link
+            admin_session["verified"] = True
+            cache.set(f"admin_session:{payload}", admin_session, timeout=1800)
+            web_link = f"{API_BASE_URL}{reverse('admin_check')}?session={payload}"
+            message = f"Admin Telegram tasdiqlandi. Sahifani oching:\n{web_link}"
     else:
         message = "Login sessiyasi yaroqsiz yoki allaqachon ishlatilgan."
 

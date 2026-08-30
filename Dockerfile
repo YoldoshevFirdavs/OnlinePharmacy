@@ -24,6 +24,17 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Loyiha fayllarini ko'chirib o'tkazamiz
 COPY . /app/
 
+# Static files collection: Copy source static files to staticfiles directories
+# This ensures all static assets (CSS, JS, images) are available in the container
+RUN echo "🎨 Preparing static files directories..." && \
+    mkdir -p /app/staticfiles/static && \
+    mkdir -p /app/staticfiles && \
+    echo "📁 Removing old static files from staticfiles..." && \
+    rm -rf /app/staticfiles/static/* && \
+    echo "📋 Copying static files from /app/static to /app/staticfiles/static..." && \
+    cp -r /app/static/* /app/staticfiles/static/ 2>/dev/null || true && \
+    echo "✅ Static files prepared ($(find /app/staticfiles/static -type f | wc -l) files)"
+
 # Portlarni ochamiz
 EXPOSE 8000
 # NOTE: SSL certs are mounted via docker-compose volumes, not baked into the image.

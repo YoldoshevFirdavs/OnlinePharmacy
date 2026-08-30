@@ -111,64 +111,6 @@
             p { font-size: 1rem; }
         }
 
-        /* MODERN CONTACT SECTION */
-        .contact-section {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(106, 0, 244, 0.15);
-        }
-
-        .contact-card {
-            background: linear-gradient(135deg, #6a00f4 0%, #b084f4 100%);
-            padding: 30px;
-            border-radius: 16px;
-            color: white;
-            text-align: center;
-            margin-top: 30px;
-            box-shadow: 0 10px 40px rgba(106, 0, 244, 0.2);
-        }
-
-        .contact-card h3 {
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .contact-item {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .contact-item:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-3px);
-        }
-
-        .contact-icon {
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-        }
-
-        .contact-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin-bottom: 4px;
-        }
-
-        .contact-value {
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
-
         .contact-email:hover {
             text-decoration: underline;
         }
@@ -185,111 +127,86 @@
 
             <section>
                 <h2>1. Kirish</h2>
-                <p><strong>Online Pharmacy</strong> loyihasiga xush kelibsiz. Ushbu Maxfiylik Siyosati sizning shaxsiy ma’lumotlaringiz qanday to‘planishi, ishlatilishi va himoyalanishini tushuntiradi.</p>
-                <p><strong>Muhim eslatma:</strong> Loyiha faqat o‘quv maqsadida yaratilgan bo‘lib, real dorixona faoliyatini ifodalamaydi. Bu — talaba loyihasi (Yoldashev Firdavs, Komiljon Hamidjonovning 10.3 Python Backend kursi).</p>
+                <p><strong>Online Pharmacy</strong> loyihasiga xush kelibsiz. Ushbu Maxfiylik Siyosati sizning shaxsiy ma'lumotlaringiz qanday to'planishi, ishlatilishi va himoyalanishini tushuntiradi.</p>
+                <p><strong>Muhim eslatma:</strong> Loyiha faqat o'quv maqsadida yaratilgan bo'lib, real dorixona faoliyatini ifodalamaydi. Bu — talaba loyihasi (Yoldashev Firdavs, Komiljon Hamidjonovning 10.3 Python Backend kursi).</p>
                 <p class="privacy-highlight" style="text-align:center; font-weight:600;">
-                    “Loyiha o‘quv maqsadida yaratilgan, real dorixona faoliyatini ifodalamaydi.”
+                    "Loyiha o'quv maqsadida yaratilgan, real dorixona faoliyatini ifodalamaydi."
                 </p>
             </section>
 
             <section>
-                <h2>2. Ma’lumot to‘plash</h2>
-                <p>Biz quyidagi turdagi ma’lumotlarni to‘playmiz:</p>
+                <h2>2. Ma'lumot to'plash</h2>
+                <p>Biz quyidagi turdagi ma'lumotlarni to'playmiz:</p>
                 <ul>
-                    <li><strong>Ro‘yxatdan o‘tish ma’lumotlari:</strong> ism, familiya, email manzili, telefon raqami, parol.</li>
-                    <li><strong>Buyurtma ma’lumotlari:</strong> yetkazib berish manzili, buyurtma tarkibi.</li>
-                    <li><strong>Texnik ma’lumotlar:</strong> IP manzil, brauzer turi, qurilma ma’lumotlari, cookie fayllari.</li>
+                    <li><strong>Ro'yxatdan o'tish ma'lumotlari:</strong> ism, familiya, email manzili, telefon raqami, parol.</li>
+                    <li><strong>Buyurtma ma'lumotlari:</strong> yetkazib berish manzili, buyurtma tarkibi.</li>
+                    <li><strong>Texnik ma'lumotlar:</strong> IP manzil, brauzer turi, qurilma ma'lumotlari, cookie fayllari.</li>
                     <li><strong>OTP kodlari</strong> (ikkilamchi tasdiqlash uchun).</li>
                 </ul>
             </section>
 
             <section class="privacy-highlight">
-                <h2>3. Ma’lumotdan foydalanish</h2>
-                <p>Biz to‘plangan ma’lumotlardan quyidagi maqsadlarda foydalanamiz:</p>
+                <h2>3. Ma'lumotdan foydalanish</h2>
+                <p>Biz to'plangan ma'lumotlardan quyidagi maqsadlarda foydalanamiz:</p>
                 <ul>
                     <li>Foydalanuvchi hisobini yaratish va boshqarish</li>
                     <li>Buyurtmalarni qayta ishlash va yetkazib berishni tashkillashtirish</li>
-                    <li>OTP orqali xavfsiz kirishni ta’minlash</li>
+                    <li>OTP orqali xavfsiz kirishni ta'minlash</li>
                     <li>Saytni yaxshilash va texnik muammolarni hal qilish</li>
                     <li>Huquqiy talablarga rioya qilish</li>
                 </ul>
             </section>
 
             <section>
-                <h2>4. Ma’lumotni himoya qilish</h2>
-                <p>Biz sizning ma’lumotlaringizni himoya qilish uchun zamonaviy choralarni qo‘llaymiz:</p>
+                <h2>4. Ma'lumotni himoya qilish</h2>
+                <p>Biz sizning ma'lumotlaringizni himoya qilish uchun zamonaviy choralarni qo'llaymiz:</p>
                 <ul>
                     <li>JWT tokenlar orqali autentifikatsiya</li>
                     <li>Parollar PBKDF2 algoritmi yordamida hashlanadi</li>
-                    <li>Ma’lumotlar PostgreSQL bazasida xavfsiz saqlanadi</li>
+                    <li>Ma'lumotlar PostgreSQL bazasida xavfsiz saqlanadi</li>
                     <li>SSL/TLS shifrlashdan foydalaniladi</li>
-                    <li>Uchinchi shaxslarga sizning roziligingizsiz ma’lumot berilmaydi</li>
+                    <li>Uchinchi shaxslarga sizning roziligingizsiz ma'lumot berilmaydi</li>
                 </ul>
-                <p>Sizning shaxsiy ma’lumotlaringiz (email, telefon, manzil) hech qachon uchinchi tomonlarga sotilmaydi yoki berilmaydi.</p>
+                <p>Sizning shaxsiy ma'lumotlaringiz (email, telefon, manzil) hech qachon uchinchi tomonlarga sotilmaydi yoki berilmaydi.</p>
             </section>
 
             <section>
                 <h2>5. Cookie va sessiyalar</h2>
-                <p>Saytimiz cookie fayllaridan foydalanadi. Ular orqali foydalanuvchi sessiyasini saqlash, sayt ishlashini yaxshilash va statistik ma’lumotlarni yig‘ish amalga oshiriladi. Siz brauzer sozlamalari orqali cookie'larni boshqarishingiz mumkin.</p>
+                <p>Saytimiz cookie fayllaridan foydalanadi. Ular orqali foydalanuvchi sessiyasini saqlash, sayt ishlashini yaxshilash va statistik ma'lumotlarni yig'ish amalga oshiriladi. Siz brauzer sozlamalari orqali cookie'larni boshqarishingiz mumkin.</p>
             </section>
 
             <section>
                 <h2>6. Uchinchi tomon xizmatlari</h2>
-                <p>Loyiha o‘quv maqsadida bo‘lgani uchun hozirda real uchinchi tomon xizmatlari (to‘lov tizimlari, yetkazib berish kompaniyalari) ulanmagan. Kelajakda ulanishi mumkin bo‘lgan xizmatlar ham ushbu siyosatga bo‘ysunadi.</p>
+                <p>Loyiha o'quv maqsadida bo'lgani uchun hozirda real uchinchi tomon xizmatlari (to'lov tizimlari, yetkazib berish kompaniyalari) ulanmagan. Kelajakda ulanishi mumkin bo'lgan xizmatlar ham ushbu siyosatga bo'ysunadi.</p>
             </section>
 
             <section>
                 <h2>7. Foydalanuvchi huquqlari</h2>
                 <p>Siz quyidagi huquqlarga egasiz:</p>
                 <ul>
-                    <li>O‘z shaxsiy ma’lumotlaringizni ko‘rish</li>
-                    <li>Ma’lumotlaringizni tahrirlash</li>
-                    <li>Hisobingizni o‘chirish (administrator orqali)</li>
-                    <li>Ma’lumotlaringizni qayta ishlashni cheklash</li>
+                    <li>O'z shaxsiy ma'lumotlaringizni ko'rish</li>
+                    <li>Ma'lumotlaringizni tahrirlash</li>
+                    <li>Hisobingizni o'chirish (administrator orqali)</li>
+                    <li>Ma'lumotlaringizni qayta ishlashni cheklash</li>
                 </ul>
             </section>
 
             <section>
-                <h2>8. O‘zgartirishlar</h2>
-                <p>Biz ushbu Maxfiylik Siyosatini vaqti-vaqti bilan yangilab turishimiz mumkin. O‘zgartirishlar sayt orqali e’lon qilinadi. Davomiy foydalanish yangi siyosatni qabul qilganingizni bildiradi.</p>
+                <h2>8. O'zgartirishlar</h2>
+                <p>Biz ushbu Maxfiylik Siyosatini vaqti-vaqti bilan yangilab turishimiz mumkin. O'zgartirishlar sayt orqali e'lon qilinadi. Davomiy foydalanish yangi siyosatni qabul qilganingizni bildiradi.</p>
             </section>
 
             <section>
                 <h2>9. Aloqa</h2>
-                <p>Maxfiylik siyosati bo‘yicha savollaringiz bo‘lsa, quyidagi ma’lumotlar orqali bog‘laning:</p>
+                <p>Maxfiylik siyosati bo'yicha savollaringiz bo'lsa, quyidagi ma'lumotlar orqali bog'laning:</p>
                 <p><strong>Yoldashev Firdavs</strong><br>
                 Email: <a href="mailto:firdavsyoldoshevpython@gmail.com" class="contact-email">firdavsyoldoshevpython@gmail.com</a><br>
                 Telefon: <a href="tel:+998977705558">+998 97 770 55 58</a></p>
             </section>
 
-            <section class="contact-section">
-                <h2>10. Aloqa</h2>
-                <p>Biz bilan bevosita bog'lanish uchun quyidagi kontaktlarni ishlatishingiz mumkin:</p>
-                <div class="contact-card">
-                    <h3>OnlinePharmacy Muharriri</h3>
-                    <div class="contact-grid">
-                        <a href="mailto:firdavsyoldoshevpython@gmail.com" class="contact-item">
-                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-                            <div class="contact-label">Email</div>
-                            <div class="contact-value">firdavsyoldoshevpython@gmail.com</div>
-                        </a>
-                        <a href="tel:+998977705558" class="contact-item">
-                            <div class="contact-icon"><i class="fas fa-phone"></i></div>
-                            <div class="contact-label">Telefon</div>
-                            <div class="contact-value">+998 97 770 55 58</div>
-                        </a>
-                        <div class="contact-item">
-                            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <div class="contact-label">Manzil</div>
-                            <div class="contact-value">Navoiy shahar</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <p style="margin-top: 50px; font-size: 0.95rem; color: #666; text-align: center;">
                 Oxirgi yangilanish: 2026-yil 14-iyun<br>
-                Ushbu loyiha faqat o‘quv maqsadida yaratilgan bo‘lib, tijorat maqsadida ishlatilmaydi.
+                Ushbu loyiha faqat o'quv maqsadida yaratilgan bo'lib, tijorat maqsadida ishlatilmaydi.
             </p>
 
             <button class="btn-secure" id="privacyBtn">Ma'lumotlarim xavfsizligini tasdiqlash</button>

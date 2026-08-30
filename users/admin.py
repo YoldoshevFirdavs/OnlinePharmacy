@@ -1,5 +1,8 @@
 from django.contrib import admin
 
+from dashboard.forms import validate_avatar
+from dashboard.widgets import AvatarUploadWidget
+
 from .models import CustomUser, DeliveryDriver, Operator, Seller, SubscribedUser, TelegrambotUser
 
 
@@ -14,6 +17,27 @@ class CustomUserAdmin(admin.ModelAdmin):
         "date_joined",
     ]
     search_fields = ["full_name", "email", "phone_number"]
+
+    # Admin fieldsets for edit/create
+    fieldsets = (
+        ("Shaxsiy Ma'lumotlar", {"fields": ("full_name", "email", "phone_number", "avatar")}),
+        ("Telegram", {"fields": ("telegram_id",)}),
+        ("Manzil", {"fields": ("address",)}),
+        ("Rol va Ruxsatlar", {"fields": ("role", "is_staff", "is_superuser", "is_active")}),
+        ("Parol", {"fields": ("password",), "classes": ("collapse",)}),
+        ("Vaqt Ma'lumotlari", {"fields": ("date_joined", "last_login"), "classes": ("collapse",)}),
+    )
+
+    # Avatar field display with custom widget
+    readonly_fields = ["date_joined", "last_login"]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "avatar":
+            kwargs["widget"] = AvatarUploadWidget(attrs={"class": "form-control-file"})
+            kwargs["help_text"] = "Max 5MB, JPEG/PNG/GIF/WebP"
+            if "validators" not in kwargs:
+                kwargs["validators"] = [validate_avatar]
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 @admin.register(Seller)

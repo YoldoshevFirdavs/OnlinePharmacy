@@ -1,8 +1,23 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
+from dashboard.widgets import AvatarUploadWidget
 from orders.models import Order
 from pharmacy.models import Category, Medicine
 from users.models import CustomUser, DeliveryDriver
+
+
+def validate_avatar(file):
+    """Validate avatar image file"""
+    if file:
+        # Check file size (max 5MB)
+        if file.size > 5 * 1024 * 1024:
+            raise ValidationError("Rasm 5MB dan katta bo'la olmaydi.")
+
+        # Check file type
+        allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+        if file.content_type not in allowed_types:
+            raise ValidationError("Faqat JPEG, PNG, GIF yoki WebP formatida rasmlar yuklash mumkin.")
 
 
 class CategoryForm(forms.ModelForm):
@@ -60,6 +75,12 @@ class UserForm(forms.ModelForm):
         required=False,
         help_text="Telegram username (@username) yoki ID (raqamlar)",
     )
+    avatar = forms.ImageField(
+        widget=AvatarUploadWidget(attrs={"class": "form-control-file"}),
+        required=False,
+        validators=[validate_avatar],
+        help_text="Max 5MB, JPEG/PNG/GIF/WebP",
+    )
 
     class Meta:
         model = CustomUser
@@ -83,7 +104,6 @@ class UserForm(forms.ModelForm):
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
             "telegram_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "@username yoki 123456789"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),
-            "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_superuser": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
@@ -133,6 +153,13 @@ class UserForm(forms.ModelForm):
 
 
 class DeliveryDriverForm(forms.ModelForm):
+    avatar = forms.ImageField(
+        widget=AvatarUploadWidget(attrs={"class": "form-control-file"}),
+        required=False,
+        validators=[validate_avatar],
+        help_text="Max 5MB, JPEG/PNG/GIF/WebP",
+    )
+
     class Meta:
         model = DeliveryDriver
         fields = ["user", "phone_number", "vehicle_info", "status", "avatar"]
@@ -141,7 +168,6 @@ class DeliveryDriverForm(forms.ModelForm):
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
             "vehicle_info": forms.TextInput(attrs={"class": "form-control"}),
             "status": forms.Select(attrs={"class": "form-control"}),
-            "avatar": forms.ClearableFileInput(attrs={"class": "form-control-file"}),
         }
 
 
@@ -155,10 +181,16 @@ class AccountSettingsForm(forms.ModelForm):
         required=False,
         help_text="Telegram username (@username) yoki ID (raqamlar)",
     )
+    avatar = forms.ImageField(
+        widget=AvatarUploadWidget(attrs={"class": "form-control-file"}),
+        required=False,
+        validators=[validate_avatar],
+        help_text="Max 5MB, JPEG/PNG/GIF/WebP",
+    )
 
     class Meta:
         model = CustomUser
-        fields = ["full_name", "email", "phone_number", "telegram_id", "address"]
+        fields = ["full_name", "email", "phone_number", "avatar", "telegram_id", "address"]
         widgets = {
             "full_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),

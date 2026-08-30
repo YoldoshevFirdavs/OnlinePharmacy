@@ -1,0 +1,63 @@
+================================================================================
+                           CHANGE LOG - Online Pharmacy
+================================================================================
+
+VERSION: Latest (Unreleased)
+================================================================================
+
+FEATURE: Dynamic Form Error Messages Based on Page Context
+---
+
+DESCRIPTION:
+  Implemented context-specific error messages in admin dashboard forms.
+  Each page now displays relevant error messages instead of generic ones.
+
+CHANGES:
+  - Added get_form_error_message() helper function in dashboard/views.py
+  - Replaced 9 hardcoded generic error messages with dynamic function calls
+  
+ERROR MESSAGE MAPPINGS:
+  
+  Category Pages (/dashboard/category/):
+    "Kategoriya shaklini yuklashda xatolik yuz berdi."
+  
+  Medicine Pages (/dashboard/medicine/):
+    "Mahsulot shaklini yuklashda xatolik yuz berdi."
+  
+  User Pages (/dashboard/user/):
+    "Foydalanuvchi shaklini yuklashda xatolik yuz berdi."
+  
+  Account Settings (/dashboard/account/):
+    "Account sozlamalari shaklini yuklashda xatolik yuz berdi."
+  
+  Order Pages (/dashboard/order/):
+    "Buyurtma shaklini yuklashda xatolik yuz berdi."
+  
+  Delivery Pages (/dashboard/delivery/):
+    "Yetkazib beruvchi shaklini yuklashda xatolik yuz berdi."
+  
+  Other Pages (Fallback):
+    "Shaklni yuklashda xatolik yuz berdi."
+
+AFFECTED VIEWS:
+  ✓ category_create()
+  ✓ category_edit()
+  ✓ medicine_create()
+  ✓ medicine_edit()
+  ✓ user_create()
+  ✓ user_edit()
+  ✓ account_settings()
+  ✓ order_create() [2 occurrences]
+
+TESTING:
+  ✓ Django System Check: 0 issues
+  ✓ All views remain functional
+  ✓ Dynamic message generation verified
+
+TECHNICAL DETAILS:
+  - Messages generated dynamically based on request.path
+  - Admin dashboard only: specific messages for admin pages
+  - Non-dashboard pages: generic fallback message
+  - Extensible mapping for future pages
+
+================================================================================

@@ -37,34 +37,16 @@
 
             <div class="sticker-picker-wrapper" id="stickerPickerWrapper">
                 <div class="sticker-picker-controls">
-                    <span class="sticker-picker-label">Sticker tanlang (kamida 20 ta variant):</span>
+                    <span class="sticker-picker-label">Sticker tanlang:</span>
+                    <div class="emoji-category-tabs" id="emojiCategoryTabs">
+                        <!-- Categories will be loaded here -->
+                    </div>
                     <button type="button" class="btn-clear-sticker" id="btnClearSticker" title="Stickerni tozalash">
                         <i class="fa-solid fa-xmark"></i> Tozalash
                     </button>
                 </div>
                 <div class="sticker-picker" id="stickerPicker" role="radiogroup" aria-label="Sticker picker">
-                    <button type="button" class="sticker-btn sticker-btn--active" data-sticker="🏥" aria-label="Kasalxona sticker">🏥</button>
-                    <button type="button" class="sticker-btn" data-sticker="💊" aria-label="Dori sticker">💊</button>
-                    <button type="button" class="sticker-btn" data-sticker="🩺" aria-label="Stetoskop sticker">🩺</button>
-                    <button type="button" class="sticker-btn" data-sticker="💉" aria-label="Shpris sticker">💉</button>
-                    <button type="button" class="sticker-btn" data-sticker="🧪" aria-label="Kolba sticker">🧪</button>
-                    <button type="button" class="sticker-btn" data-sticker="🩹" aria-label="Plastir sticker">🩹</button>
-                    <button type="button" class="sticker-btn" data-sticker="🧬" aria-label="DNK sticker">🧬</button>
-                    <button type="button" class="sticker-btn" data-sticker="🪥" aria-label="Cho'tka sticker">🪥</button>
-                    <button type="button" class="sticker-btn" data-sticker="🚑" aria-label="Tez yordam sticker">🚑</button>
-                    <button type="button" class="sticker-btn" data-sticker="🌡️" aria-label="Termometr sticker">🌡️</button>
-                    <button type="button" class="sticker-btn" data-sticker="🩸" aria-label="Qon sticker">🩸</button>
-                    <button type="button" class="sticker-btn" data-sticker="🧼" aria-label="Sobun sticker">🧼</button>
-                    <button type="button" class="sticker-btn" data-sticker="⚕️" aria-label="Tibbiyot belgi sticker">⚕️</button>
-                    <button type="button" class="sticker-btn" data-sticker="🏬" aria-label="Magazin sticker">🏬</button>
-                    <button type="button" class="sticker-btn" data-sticker="🛒" aria-label="Savat sticker">🛒</button>
-                    <button type="button" class="sticker-btn" data-sticker="📦" aria-label="Quti sticker">📦</button>
-                    <button type="button" class="sticker-btn" data-sticker="⚡" aria-label="Chaqmoq sticker">⚡</button>
-                    <button type="button" class="sticker-btn" data-sticker="🌟" aria-label="Yulduz sticker">🌟</button>
-                    <button type="button" class="sticker-btn" data-sticker="❤️" aria-label="Yurak sticker">❤️</button>
-                    <button type="button" class="sticker-btn" data-sticker="🌿" aria-label="O'simlik sticker">🌿</button>
-                    <button type="button" class="sticker-btn" data-sticker="🛡️" aria-label="Qalqon sticker">🛡️</button>
-                    <button type="button" class="sticker-btn" data-sticker="✨" aria-label="Nur sticker">✨</button>
+                    <!-- Emojis will be loaded here from JSON -->
                 </div>
             </div>
         </div>
@@ -110,77 +92,23 @@
             <h2 class="card__title"><i class="fa-solid fa-droplet"></i> Asosiy rang</h2>
         </div>
         <div class="card__body">
-            <div class="color-palette" id="colorPalette">
-                <!-- 16 primary colors -->
-                <label class="color-swatch" style="--swatch-color: #4f46e5;" title="Indigo">
-                    <input type="radio" name="accent" value="#4f46e5" checked>
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #8b5ef6;" title="Violet">
-                    <input type="radio" name="accent" value="#8b5ef6">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #ec4899;" title="Pink">
-                    <input type="radio" name="accent" value="#ec4899">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #ef4444;" title="Red">
-                    <input type="radio" name="accent" value="#ef4444">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #fb923c;" title="Orange">
-                    <input type="radio" name="accent" value="#fb923c">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #f59e0b;" title="Yellow">
-                    <input type="radio" name="accent" value="#f59e0b">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #22c55e;" title="Green">
-                    <input type="radio" name="accent" value="#22c55e">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #10b981;" title="Emerald">
-                    <input type="radio" name="accent" value="#10b981">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #14b8a6;" title="Teal">
-                    <input type="radio" name="accent" value="#14b8a6">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #06b6d4;" title="Cyan">
-                    <input type="radio" name="accent" value="#06b6d4">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #3b82f6;" title="Blue">
-                    <input type="radio" name="accent" value="#3b82f6">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #0ea5e9;" title="Sky">
-                    <input type="radio" name="accent" value="#0ea5e9">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #7c3aed;" title="Purple">
-                    <input type="radio" name="accent" value="#7c3aed">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #f43f5e;" title="Rose">
-                    <input type="radio" name="accent" value="#f43f5e">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #84cc16;" title="Lime">
-                    <input type="radio" name="accent" value="#84cc16">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
-                <label class="color-swatch" style="--swatch-color: #64748b;" title="Slate">
-                    <input type="radio" name="accent" value="#64748b">
-                    <span class="color-swatch__check"><i class="fa-solid fa-check"></i></span>
-                </label>
+            <div class="color-categories-tabs" id="colorCategoryTabs">
+                <!-- Category tabs will load here -->
             </div>
-
-            <div class="custom-color-input" id="customColorInput">
-                <label for="customAccent" class="form-label">Maxsus rang:</label>
-                <input type="color" id="customAccent" name="custom_accent" value="#6a00f4" class="form-color-picker">
+            <div class="color-palette" id="colorPalette">
+                <!-- Colors will load here from JSON -->
+            </div>
+            
+            <div class="custom-color-section" id="customColorSection">
+                <div class="custom-color-header">
+                    <span class="custom-color-label">Maxsus rang:</span>
+                    <button type="button" class="btn-custom-color" id="btnCustomColor" title="Rang sochish">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                </div>
+                <div class="custom-color-input" id="customColorInput" style="display: none;">
+                    <input type="color" id="customAccent" name="custom_accent" value="#6a00f4" class="form-color-picker">
+                </div>
             </div>
         </div>
     </div>
@@ -199,4 +127,482 @@
         </div>
     </div>
 </div>
+
+<style>
+/* ═══════ EMOJI PICKER STYLES ═══════ */
+.emoji-category-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.emoji-category-btn {
+    background: #f0f0f0;
+    border: 2px solid transparent;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.emoji-category-btn:hover {
+    background: #e0e0e0;
+}
+
+.emoji-category-btn.active {
+    background: var(--clr-primary, #6a00f4);
+    color: white;
+    border-color: var(--clr-primary, #6a00f4);
+}
+
+.sticker-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.sticker-btn {
+    background: white;
+    border: 2px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sticker-btn:hover {
+    border-color: var(--clr-primary, #6a00f4);
+    transform: scale(1.1);
+}
+
+.sticker-btn.sticker-btn--active {
+    border-color: var(--clr-primary, #6a00f4);
+    background: rgba(106, 0, 244, 0.1);
+}
+
+.sticker-picker-wrapper {
+    margin-top: 20px;
+}
+
+.sticker-picker-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.sticker-picker-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.btn-clear-sticker {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.btn-clear-sticker:hover {
+    background: #dc2626;
+}
+
+/* ═══════ COLOR PICKER STYLES ═══════ */
+.color-categories-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.color-category-btn {
+    background: #f0f0f0;
+    border: 2px solid transparent;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    color: #333;
+}
+
+.color-category-btn:hover {
+    background: #e0e0e0;
+}
+
+.color-category-btn.active {
+    background: var(--clr-primary, #6a00f4);
+    color: white;
+    border-color: var(--clr-primary, #6a00f4);
+}
+
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.color-swatch {
+    position: relative;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    background: var(--swatch-color);
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-swatch input {
+    display: none;
+}
+
+.color-swatch input:checked + .color-swatch__check {
+    display: flex;
+}
+
+.color-swatch__check {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+}
+
+.color-swatch.active {
+    border-color: #333;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+}
+
+/* ═══════ CUSTOM COLOR SECTION ═══════ */
+.custom-color-section {
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.custom-color-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.custom-color-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.btn-custom-color {
+    background: var(--clr-primary, #6a00f4);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    margin-left: auto;
+}
+
+.btn-custom-color:hover {
+    background: #5a00dd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 0, 244, 0.3);
+}
+
+.custom-color-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-color-picker {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .sticker-picker {
+        gap: 6px;
+        padding: 8px;
+    }
+    
+    .sticker-btn {
+        padding: 8px;
+        font-size: 24px;
+    }
+    
+    .emoji-category-tabs {
+        gap: 6px;
+    }
+    
+    .emoji-category-btn {
+        padding: 4px 10px;
+        font-size: 14px;
+    }
+    
+    .color-palette {
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .color-swatch {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .color-categories-tabs {
+        gap: 6px;
+    }
+    
+    .color-category-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}
+</style>
+
+<script>
+// Load emojis and colors from JSON file
+async function loadEmojiAndColors() {
+    try {
+        const response = await fetch('/static/data/emojis.json');
+        const data = await response.json();
+        renderEmojiPicker(data.categories);
+        renderColorPicker(data.colors);
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+}
+
+// ═══════ EMOJI PICKER ═══════
+function renderEmojiPicker(categories) {
+    const tabsContainer = document.getElementById('emojiCategoryTabs');
+    const pickerContainer = document.getElementById('stickerPicker');
+    
+    // Clear existing content
+    tabsContainer.innerHTML = '';
+    pickerContainer.innerHTML = '';
+    
+    // Create category tabs
+    categories.forEach((category, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `emoji-category-btn ${index === 0 ? 'active' : ''}`;
+        button.textContent = `${category.icon} ${category.name}`;
+        button.dataset.category = index;
+        
+        button.addEventListener('click', () => {
+            // Update active tab
+            document.querySelectorAll('.emoji-category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Show emojis for this category
+            renderEmojisForCategory(category.emojis);
+        });
+        
+        tabsContainer.appendChild(button);
+    });
+    
+    // Show first category emojis by default
+    if (categories.length > 0) {
+        renderEmojisForCategory(categories[0].emojis);
+    }
+}
+
+function renderEmojisForCategory(emojis) {
+    const pickerContainer = document.getElementById('stickerPicker');
+    pickerContainer.innerHTML = '';
+    
+    emojis.forEach(item => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'sticker-btn';
+        button.textContent = item.emoji;
+        button.setAttribute('data-sticker', item.emoji);
+        button.setAttribute('aria-label', item.label);
+        button.title = item.label;
+        
+        // Check if this is the currently selected emoji
+        const currentSticker = document.getElementById('livePreviewSticker').textContent;
+        if (item.emoji === currentSticker) {
+            button.classList.add('sticker-btn--active');
+        }
+        
+        button.addEventListener('click', selectSticker);
+        pickerContainer.appendChild(button);
+    });
+}
+
+function selectSticker(e) {
+    const sticker = e.target.dataset.sticker;
+    if (!sticker) return;
+    
+    // Update preview
+    document.getElementById('livePreviewSticker').textContent = sticker;
+    
+    // Update all buttons
+    document.querySelectorAll('.sticker-btn').forEach(btn => {
+        btn.classList.remove('sticker-btn--active');
+    });
+    e.target.classList.add('sticker-btn--active');
+    
+    // Store in data
+    window.currentSticker = sticker;
+}
+
+// Clear sticker
+document.getElementById('btnClearSticker').addEventListener('click', () => {
+    document.getElementById('livePreviewSticker').textContent = '🏥';
+    document.querySelectorAll('.sticker-btn').forEach(btn => {
+        btn.classList.remove('sticker-btn--active');
+    });
+    window.currentSticker = '🏥';
+});
+
+// ═══════ COLOR PICKER ═══════
+function renderColorPicker(colorGroups) {
+    const tabsContainer = document.getElementById('colorCategoryTabs');
+    const paletteContainer = document.getElementById('colorPalette');
+    
+    // Clear existing content
+    tabsContainer.innerHTML = '';
+    paletteContainer.innerHTML = '';
+    
+    // Create category tabs
+    colorGroups.forEach((group, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `color-category-btn ${index === 0 ? 'active' : ''}`;
+        button.textContent = group.name;
+        button.dataset.category = index;
+        
+        button.addEventListener('click', () => {
+            // Update active tab
+            document.querySelectorAll('.color-category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Show colors for this category
+            renderColorsForCategory(group.colors);
+        });
+        
+        tabsContainer.appendChild(button);
+    });
+    
+    // Show first category colors by default
+    if (colorGroups.length > 0) {
+        renderColorsForCategory(colorGroups[0].colors);
+    }
+}
+
+function renderColorsForCategory(colors) {
+    const paletteContainer = document.getElementById('colorPalette');
+    paletteContainer.innerHTML = '';
+    
+    colors.forEach(colorItem => {
+        const label = document.createElement('label');
+        label.className = 'color-swatch';
+        label.style.setProperty('--swatch-color', colorItem.hex);
+        label.title = colorItem.name;
+        
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'accent';
+        input.value = colorItem.hex;
+        input.checked = colorItem.hex === '#4f46e5';
+        
+        const check = document.createElement('span');
+        check.className = 'color-swatch__check';
+        check.innerHTML = '<i class="fa-solid fa-check"></i>';
+        
+        input.addEventListener('change', selectColor);
+        
+        label.appendChild(input);
+        label.appendChild(check);
+        paletteContainer.appendChild(label);
+    });
+}
+
+function selectColor(e) {
+    const color = e.target.value;
+    if (!color) return;
+    
+    // Update all labels
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.classList.remove('active');
+    });
+    e.target.parentElement.classList.add('active');
+    
+    // Store in data
+    window.currentColor = color;
+}
+
+// Toggle custom color picker
+document.getElementById('btnCustomColor').addEventListener('click', () => {
+    const customInput = document.getElementById('customColorInput');
+    customInput.style.display = customInput.style.display === 'none' ? 'flex' : 'none';
+});
+
+// Custom color input change
+document.getElementById('customAccent').addEventListener('change', (e) => {
+    window.currentColor = e.target.value;
+    // Uncheck all default colors
+    document.querySelectorAll('input[name="accent"]').forEach(input => {
+        input.checked = false;
+    });
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.classList.remove('active');
+    });
+});
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', loadEmojiAndColors);
+</script>
 {% endblock %}
