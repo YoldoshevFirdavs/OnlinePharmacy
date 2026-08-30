@@ -49,6 +49,7 @@ from orders.models import Order
 from security.ip_score import decr_ip_score
 
 from .otp_service import (
+    ADMIN_SESSION_TTL,
     TELEGRAM_OTP_LENGTH,
     OtpHash,
     bind_session_to_user,
@@ -59,6 +60,7 @@ from .otp_service import (
     generate_numeric_code,
     get_admin_session_meta,
     is_banned,
+    refresh_session_ttl,
     store_bot_otp,
     store_otp_hash,
 )
@@ -178,8 +180,18 @@ def _create_telegram_otp_session(request, user, identifier):
     with transaction.atomic():
         session = create_otp_session(purpose="telegram")
         otp_code = generate_numeric_code(TELEGRAM_OTP_LENGTH)
-        store_bot_otp(session.session_id, otp_code, ttl=300)
-        bind_session_to_user(session.session_id, user.id, identifier, ttl=300)
+        store_bot_otp(session.session_id, otp_code, ttl=ADMIN_SESSION_TTL)
+
+        # Use admin_session namespace for consistency with admin flow
+        session_id = session.session_id
+        admin_session = {
+            "user_id": user.id,
+            "phone_number": str(identifier),
+            "flow": "telegram_user",  # Non-admin Telegram flow marker
+            "created_at": int(time.time()),
+        }
+        cache.set(f"admin_session:{session_id}", admin_session, timeout=ADMIN_SESSION_TTL)
+
         _write_auth_audit(
             request,
             user,
@@ -1142,6 +1154,9 @@ class VerifyOtpView(APIView):
         identifier = serializer.validated_data.get("identifier", "")
 
         try:
+            # Refresh session TTL when user submits OTP code
+            refresh_session_ttl(session_id, ttl=ADMIN_SESSION_TTL)
+
             is_valid, message, session = otp_service.verify_otp_once(session_id, code, identifier)
 
             if is_valid:

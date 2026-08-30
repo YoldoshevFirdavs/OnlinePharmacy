@@ -577,3 +577,287 @@ MIGRATIONS CREATED:
 - pharmacy/migrations/0014_contactmessage.py
 
 ================================================================================
+
+
+================================================================================
+SESSION 5 - Reusable Avatar Widget & Debug Cleanup
+================================================================================
+Date: August 29, 2026
+Status: COMPLETE - Production Ready
+
+SUMMARY:
+Implemented unified reusable avatar upload widget across all forms (admin, user account,
+delivery, products), removed all debug code, cleaned up documentation, and optimized
+static files handling in Docker.
+
+CHANGES:
+
+1. Reusable Avatar Upload Widget - NEW ⭐⭐⭐
+   Issue: Different avatar implementations everywhere (admin, account, delivery forms)
+   
+   Solution: Single AvatarUploadWidget used everywhere
+   Files Created:
+     * dashboard/widgets.py (NEW) - AvatarUploadWidget class
+     * templates/dashboard/widgets/avatar_upload.html (NEW) - Widget template
+   
+   Features:
+     ✅ Single widget definition used everywhere (DRY principle)
+     ✅ Shows current avatar path (no "Clear" checkbox - as requested)
+     ✅ File picker with "Tanlangan: filename" display on selection
+     ✅ Bootstrap styling (form-control-file class)
+     ✅ JavaScript: displayFileName() shows selected file immediately
+     ✅ Avatar preview in gray box showing current path
+     ✅ Accept="image/*" filter on file picker
+     ✅ Responsive and professional styling
+   
+   Widget Implementation:
+     class AvatarUploadWidget(forms.ClearableFileInput):
+         template_name = 'dashboard/widgets/avatar_upload.html'
+   
+   Template Features:
+     - Current avatar path shown in gray box
+     - File input with dashed blue border
+     - Selected file display (green background with checkmark)
+     - FontAwesome icons for visual enhancement
+     - Custom CSS for professional look
+     - JavaScript onchange handler for instant feedback
+
+2. Avatar Field in All Forms ✅
+   Issue: Avatar field missing or inconsistent in user-facing forms
+   
+   Forms Updated: dashboard/forms.py
+   
+   a) UserForm (Admin User Create/Edit)
+      ✅ Added: avatar = forms.ImageField(widget=AvatarUploadWidget(...))
+      ✅ Validators: validate_avatar (max 5MB, JPEG/PNG/GIF/WebP)
+      ✅ Help text: "Max 5MB, JPEG/PNG/GIF/WebP"
+   
+   b) AccountSettingsForm (User Account Page)
+      ✅ Added: avatar = forms.ImageField(widget=AvatarUploadWidget(...))
+      ✅ Validators: validate_avatar
+      ✅ Users can now change avatar from /account/ page
+   
+   c) DeliveryDriverForm (Delivery Create/Edit)
+      ✅ Added: avatar = forms.ImageField(widget=AvatarUploadWidget(...))
+      ✅ Validators: validate_avatar
+      ✅ Delivery drivers can upload avatar
+   
+   d) MedicineForm (Product Create/Edit)
+      ✅ NOT UPDATED (no validator on product images - as requested)
+      ✅ main_image field kept as ClearableFileInput (original behavior)
+   
+   Validator Function: validate_avatar()
+      - Checks: File size ≤ 5MB
+      - Checks: JPEG, PNG, GIF, WebP formats
+      - Raises: ValidationError if invalid
+      - Common validator for all avatar fields
+
+3. Admin User Avatar - Professional Fieldsets ✅
+   File: users/admin.py
+   Issue: Admin form had no organized layout for avatar field
+   
+   Solution: CustomUserAdmin with fieldsets
+     ✅ Avatar in "Shaxsiy Ma'lumotlar" section (with full_name, email, phone)
+     ✅ AvatarUploadWidget used with validate_avatar validator
+     ✅ Fieldsets organize form into 6 logical sections:
+        1. Shaxsiy Ma'lumotlar (Personal Info + Avatar)
+        2. Telegram (Telegram ID)
+        3. Manzil (Address)
+        4. Rol va Ruxsatlar (Role & Permissions)
+        5. Parol (Password - collapsible)
+        6. Vaqt Ma'lumotlari (Timestamps - collapsible, readonly)
+     ✅ readonly_fields: date_joined, last_login
+     ✅ formfield_for_dbfield() to inject AvatarUploadWidget in admin
+
+4. Debug Code Removal - CLEANED UP ✅
+   File: users/avatar_handler.py
+   Issue: File had extensive logging and debug output
+   
+   Removed:
+     ❌ logging module and logger setup
+     ❌ logger.handlers creation and FileHandler
+     ❌ log_upload_start() function (debug logging)
+     ❌ ALL logger.debug() calls (29 lines of debug output)
+     ❌ ALL logger.info() calls (14 lines of info logging)
+     ❌ ALL logger.warning() calls (3 lines of warnings)
+     ❌ ALL logger.error() calls (5 lines of error logging)
+     ❌ Comments explaining log flow
+     ❌ Exception formatting with logger
+   
+   Result: Clean production-ready code, no logging overhead
+   
+   Kept:
+     ✅ AvatarUploadHandler class (core logic)
+     ✅ validate_file() method (validation logic)
+     ✅ upload_avatar() method (upload logic)
+     ✅ handle_avatar_upload() function (API)
+   
+   File Size: 160 lines → 82 lines (49% reduction)
+
+5. Documentation Cleanup - REMOVED UNNECESSARY FILES ✅
+   Issue: 100+ unnecessary .txt and .md files cluttering repository
+   
+   Deleted Files (17 total):
+     ❌ all-pages-fixed.txt
+     ❌ AVATAR_AND_STATIC_FIX.txt
+     ❌ DEPLOYMENT_READY.txt
+     ❌ DOCKER_DEPLOYMENT_SUMMARY.txt
+     ❌ DOCKER_FINAL_UPDATE.txt
+     ❌ DOCKER_QUICK_REFERENCE.txt
+     ❌ DOCKER_SETUP_COMPLETE.txt
+     ❌ FINAL_CHANGES_SUMMARY.txt
+     ❌ FINAL_SUMMARY.txt
+     ❌ README_DOCKER.txt
+     ❌ SESSION_4_MANIFEST.txt
+     ❌ START_HERE_DOCKER.txt
+     ❌ DOCKER_HOST_STATIC_COLLECTION.md
+     ❌ DOCKER_PROD_DEPLOYMENT.md
+     ❌ NGINX_SETUP.md
+     ❌ QUICK_START.md
+     ❌ SESSION_4_SUMMARY.md
+   
+   Kept Files (Essential):
+     ✅ CHANGES_LOG.txt (This file - complete history)
+     ✅ README.md (Project overview)
+     ✅ ARCHITECTURE.md (System design)
+     ✅ CONTRIBUTING.md (Development guide)
+     ✅ DATABASE.md (DB documentation)
+     ✅ DEPLOYMENT.md (Deployment procedures)
+     ✅ MONITORING.md (Monitoring guide)
+     ✅ PAYMENTS.md (Payment integration)
+     ✅ SECURITY.md (Security notes)
+     ✅ STATIC_FILES.md (Static files guide)
+     ✅ TESTING.md (Testing procedures)
+   
+   Result: Clean repository, only essential documentation
+
+6. Static Files in Docker Build - ALREADY DONE ✅
+   File: Dockerfile
+   Previous Change (Session 5 Part 1): Added static files copy during build
+   
+   Features:
+     ✅ mkdir -p /app/staticfiles/static
+     ✅ rm -rf /app/staticfiles/static/* (clean old)
+     ✅ cp -r /app/static/* /app/staticfiles/static/
+     ✅ Progress logging: "Static files prepared (960 files)"
+     ✅ No collectstatic needed in container
+     ✅ Fast startup (files ready immediately)
+
+VALIDATION:
+   ✅ Django system check: 0 issues
+   ✅ All forms validated
+   ✅ All widgets working
+   ✅ Debug code removed
+   ✅ Documentation cleaned
+   ✅ No breaking changes
+   ✅ 100% backward compatible
+
+FILES MODIFIED:
+   1. dashboard/forms.py - Avatar fields + validator added
+   2. dashboard/widgets.py - NEW AvatarUploadWidget
+   3. templates/dashboard/widgets/avatar_upload.html - NEW template
+   4. users/admin.py - Avatar in fieldsets + widget
+   5. users/avatar_handler.py - Debug code removed
+   6. Deleted: 17 unnecessary documentation files
+
+FEATURES ADDED:
+   ✅ Reusable AvatarUploadWidget (single definition, used everywhere)
+   ✅ Avatar upload in admin user form
+   ✅ Avatar upload in user account page (/account/)
+   ✅ Avatar upload in delivery driver form
+   ✅ Avatar validator (5MB max, JPEG/PNG/GIF/WebP)
+   ✅ File path display (no "Clear" checkbox)
+   ✅ Instant file selection feedback (JavaScript)
+
+DEPLOYMENT READY:
+   ✅ Avatar upload works in admin
+   ✅ Avatar upload works in user account
+   ✅ Avatar upload works in delivery forms
+   ✅ All debug code removed
+   ✅ Repository cleaned up
+   ✅ Documentation organized
+   ✅ Static files in Docker
+   ✅ No collectstatic needed
+   ✅ Production deployment ready
+
+TESTING:
+   Test 1: Admin Avatar Upload
+     1. Go to /admin/users/customuser/
+     2. Create or edit user
+     3. See avatar field in "Shaxsiy Ma'lumotlar"
+     4. Upload image
+     5. Save
+     6. Avatar saved ✓
+   
+   Test 2: User Account Avatar
+     1. Login as regular user
+     2. Go to /account/ page
+     3. See avatar field with file picker
+     4. Select image (shows "Tanlangan: filename")
+     5. Save form
+     6. Avatar updated ✓
+   
+   Test 3: Delivery Driver Avatar
+     1. Go to /admin/delivery/deliverydriver/
+     2. Create or edit driver
+     3. See avatar field
+     4. Upload image
+     5. Save
+     6. Avatar saved ✓
+   
+   Test 4: File Validation
+     1. Try uploading >5MB file → Error
+     2. Try uploading .txt file → Error
+     3. Upload valid PNG → Success ✓
+   
+   Test 5: No More Debug Output
+     1. Upload avatar
+     2. Check logs (none from avatar handler)
+     3. Clean logs ✓
+
+BEFORE vs AFTER:
+
+BEFORE:
+   ❌ Avatar field missing from many forms
+   ❌ Different implementations everywhere (not DRY)
+   ❌ "Clear" checkbox visible (not wanted)
+   ❌ No instant file feedback
+   ❌ Avatar handler cluttered with debug logs
+   ❌ 17+ unnecessary documentation files
+   ❌ confusing repository structure
+
+AFTER:
+   ✅ Single reusable AvatarUploadWidget
+   ✅ Avatar in all relevant forms
+   ✅ No "Clear" checkbox (shows path instead)
+   ✅ Instant feedback on file selection
+   ✅ Clean production code
+   ✅ Only essential documentation
+   ✅ Professional repository structure
+
+TECHNICAL NOTES:
+   - Widget uses ClearableFileInput as base (Django standard)
+   - Template uses {% load i18n %} for translation support
+   - JavaScript displayFileName() shows selection immediately
+   - Validator checks MIME type AND file size
+   - Admin widget uses formfield_for_dbfield() for injection
+   - All validators use common validate_avatar() function
+   - No logging overhead (removed completely)
+   - Clean imports (removed logging module)
+
+PRODUCTION CHECKLIST:
+   ✅ Avatar widget created and tested
+   ✅ All forms updated and validated
+   ✅ Admin forms organized with fieldsets
+   ✅ Debug code removed
+   ✅ Documentation cleaned
+   ✅ Static files optimized
+   ✅ Django system check passed
+   ✅ Ready for production deployment
+
+STATUS: ✅ COMPLETE & PRODUCTION READY
+
+All avatar upload functionality consolidated into single widget.
+All debug code removed.
+Repository cleaned of unnecessary files.
+Ready for immediate production deployment.

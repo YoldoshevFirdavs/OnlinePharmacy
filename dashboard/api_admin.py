@@ -97,11 +97,28 @@ class AdminAnalyticsAPIView(APIView):
                 daily_revenue.append({"date": day.strftime("%Y-%m-%d"), "revenue": float(revenue)})
 
             # Payment method distribution (for charts)
-            payment_method_dist = (
+            payment_method_qs = (
                 Order.objects.values("payment_method")
                 .annotate(count=Count("id"), total=Sum("total_price"))
                 .order_by("-count")
             )
+
+            # Map payment methods to readable labels
+            payment_method_labels = {
+                "cash": "Naqd pul",
+                "card": "Karta",
+                "payme": "Payme",
+                "click": "Click",
+                "": "Noma'lum",
+            }
+
+            payment_method_dist = []
+            for item in payment_method_qs:
+                method = item.get("payment_method") or ""
+                label = payment_method_labels.get(method.lower(), method or "Noma'lum")
+                payment_method_dist.append(
+                    {"payment_method": label, "count": item["count"] or 0, "total": float(item["total"] or 0)}
+                )
 
             # Category-based revenue (for charts)
             category_revenue = (
@@ -147,7 +164,7 @@ class AdminAnalyticsAPIView(APIView):
                             "daily_orders": daily_orders,
                             "daily_revenue": daily_revenue,
                             "order_status": list(order_status_dist),
-                            "payment_method": list(payment_method_dist),
+                            "payment_method": payment_method_dist,
                             "category_revenue": [
                                 {
                                     "category_name": cat["category__name"],

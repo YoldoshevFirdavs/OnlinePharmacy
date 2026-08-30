@@ -24,6 +24,46 @@ from .forms import AccountSettingsForm, CategoryForm, DeliveryDriverForm, Medici
 logger = logging.getLogger(__name__)
 
 
+def get_form_error_message(request_path: str) -> str:
+    """
+    Get specific form error message based on request path.
+    Dynamically generates appropriate message for each page/action.
+
+    Examples:
+    - /dashboard/category/ → "Kategoriya shaklini yuklashda xatolik yuz berdi."
+    - /dashboard/medicine/ → "Mahsulot shaklini yuklashda xatolik yuz berdi."
+    - /dashboard/user/ → "Foydalanuvchi shaklini yuklashda xatolik yuz berdi."
+    - /dashboard/account/ → "Account sozlamalari shaklini yuklashda xatolik yuz berdi."
+    - /dashboard/order/ → "Buyurtma shaklini yuklashda xatolik yuz berdi."
+    - /dashboard/delivery/ → "Yetkazib beruvchi shaklini yuklashda xatolik yuz berdi."
+    """
+    path_lower = request_path.lower()
+
+    # Mapping of path keywords to Uzbek nouns
+    mappings = {
+        "category": "Kategoriya",
+        "medicine": "Mahsulot",
+        "product": "Mahsulot",
+        "user": "Foydalanuvchi",
+        "delivery": "Yetkazib beruvchi",
+        "driver": "Yetkazib beruvchi",
+        "account": "Account sozlamalari",
+        "order": "Buyurtma",
+        "seller": "Sotuvchi",
+        "operator": "Operator",
+        "ban": "Ban",
+        "comment": "Sharhlar",
+    }
+
+    # Find matching keyword in path
+    for key, noun in mappings.items():
+        if key in path_lower:
+            return f"{noun} shaklini yuklashda xatolik yuz berdi."
+
+    # Default fallback for non-dashboard pages
+    return "Shaklni yuklashda xatolik yuz berdi."
+
+
 def log_dashboard_error(component: str, user=None, error=None, action: str = ""):
     try:
         timestamp = timezone.now().isoformat()
@@ -461,7 +501,8 @@ def category_create(request):
                 return render(request, "dashboard/category/form.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in category_create: {str(get_error)}")
-                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                error_msg = get_form_error_message(request.path)
+                messages.error(request, error_msg)
                 return redirect("dashboard:category_list")
 
     except Exception as e:
@@ -521,7 +562,8 @@ def category_edit(request, pk):
                     return render(request, "dashboard/category/form.html", ctx)
                 except Exception as get_error:
                     logger.error(f"Error loading form in category_edit: {str(get_error)}")
-                    messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                    error_msg = get_form_error_message(request.path)
+                    messages.error(request, error_msg)
                     return redirect("dashboard:category_list")
 
         except Exception as query_error:
@@ -686,7 +728,8 @@ def medicine_create(request):
                 return render(request, "dashboard/product/form.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in medicine_create: {str(get_error)}")
-                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                error_msg = get_form_error_message(request.path)
+                messages.error(request, error_msg)
                 return redirect("dashboard:medicine_list")
 
     except Exception as e:
@@ -746,7 +789,8 @@ def medicine_edit(request, pk):
                     return render(request, "dashboard/product/form.html", ctx)
                 except Exception as get_error:
                     logger.error(f"Error loading form in medicine_edit: {str(get_error)}")
-                    messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                    error_msg = get_form_error_message(request.path)
+                    messages.error(request, error_msg)
                     return redirect("dashboard:medicine_list")
 
         except Exception as query_error:
@@ -927,7 +971,8 @@ def user_create(request):
                 return render(request, "dashboard/user/form.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in user_create: {str(get_error)}")
-                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                error_msg = get_form_error_message(request.path)
+                messages.error(request, error_msg)
                 return redirect("dashboard:user_list")
 
     except Exception as e:
@@ -998,7 +1043,8 @@ def user_edit(request, pk):
                     return render(request, "dashboard/user/form.html", ctx)
                 except Exception as get_error:
                     logger.error(f"Error loading form in user_edit: {str(get_error)}")
-                    messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                    error_msg = get_form_error_message(request.path)
+                    messages.error(request, error_msg)
                     return redirect("dashboard:user_list")
 
         except Exception as query_error:
@@ -1159,7 +1205,8 @@ def account_settings(request):
 
     except Exception as e:
         log_dashboard_error("account_settings", user, e, action="Redirected to login_page")
-        messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+        error_msg = get_form_error_message(request.path)
+        messages.error(request, error_msg)
         return redirect("dashboard:login_page")
 
 
@@ -1771,7 +1818,8 @@ def order_create(request):
                 return render(request, "dashboard/order/form.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in order_create: {str(get_error)}")
-                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                error_msg = get_form_error_message(request.path)
+                messages.error(request, error_msg)
                 return redirect("dashboard:order_list")
     except Exception as e:
         logger.error(f"Unexpected error in order_create: {str(e)}")
@@ -1830,7 +1878,8 @@ def order_edit(request, pk):
                     return render(request, "dashboard/order/form.html", ctx)
                 except Exception as get_error:
                     logger.error(f"Error loading form in order_edit: {str(get_error)}")
-                    messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                    error_msg = get_form_error_message(request.path)
+                    messages.error(request, error_msg)
                     return redirect("dashboard:order_list")
 
         except Exception as query_error:
@@ -2237,7 +2286,8 @@ def order_create(request):
                 return render(request, "dashboard/admin/orders_create.html", ctx)
             except Exception as get_error:
                 logger.error(f"Error loading form in order_create: {str(get_error)}")
-                messages.error(request, "Shaklni yuklashda xatolik yuz berdi.")
+                error_msg = get_form_error_message(request.path)
+                messages.error(request, error_msg)
                 return redirect("dashboard:order_list")
     except Exception as e:
         logger.error(f"Unexpected error in order_create: {str(e)}")

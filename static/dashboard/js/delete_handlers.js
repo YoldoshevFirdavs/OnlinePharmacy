@@ -116,11 +116,13 @@ async function executeDelete() {
                 undoBtn.onclick = () => undoDelete();
             }
             
-            // Auto-close modal
+            // Start 10-second countdown timer for undo
+            startUndoCountdown(10);
+            
+            // Auto-close modal after short delay
             setTimeout(() => {
                 closeDeleteModal();
-                setUndoTimer(24 * 60 * 60 * 1000);
-            }, 500);
+            }, 800);
         } else {
             alert(data.message || 'O\'chirishda xatolik yuz berdi');
             confirmBtn.disabled = false;
@@ -140,6 +142,11 @@ async function undoDelete() {
     const undoUrl = document.getElementById('undoUrl').value;
     if (!undoUrl) {
         return;
+    }
+    
+    // Clear countdown interval if running
+    if (window.undoCountdownInterval) {
+        clearInterval(window.undoCountdownInterval);
     }
     
     const undoBtn = document.getElementById('undoDeleteBtn');
@@ -213,6 +220,45 @@ function setUndoTimer(ms) {
             notification.style.display = 'none';
         }
     }, ms);
+}
+
+// Start 10-second undo countdown
+function startUndoCountdown(seconds) {
+    const undoCountdownSec = document.getElementById('undoCountdownSec');
+    const undoProgressBar = document.getElementById('undoProgressBar');
+    const undoNotification = document.getElementById('undoNotification');
+    
+    if (!undoCountdownSec || !undoProgressBar || !undoNotification) return;
+    
+    let secondsLeft = seconds;
+    const totalSeconds = seconds;
+    
+    // Update every 100ms for smooth progress bar
+    const interval = setInterval(() => {
+        secondsLeft -= 0.1;
+        
+        // Update progress bar
+        const progressPercent = (secondsLeft / totalSeconds) * 100;
+        undoProgressBar.style.width = progressPercent + '%';
+        
+        // Update countdown display (show whole seconds)
+        undoCountdownSec.textContent = Math.ceil(secondsLeft);
+        
+        // When time is up
+        if (secondsLeft <= 0) {
+            clearInterval(interval);
+            undoNotification.style.display = 'none';
+            undoProgressBar.style.width = '0%';
+            
+            // Delete the item permanently
+            if (window.currentRow) {
+                window.currentRow.style.display = 'none';
+            }
+        }
+    }, 100);
+    
+    // Store interval ID for cleanup
+    window.undoCountdownInterval = interval;
 }
 
 // Delete item helper function

@@ -47,8 +47,10 @@
       <!-- NOTE: Account dropdown for logged-in users -->
       {% include 'components/account_dropdown.html' %}
 
+      {% if request.user.is_authenticated %}
       <a href="{% url 'cart' %}" id="cartIcon" class="header-cart cart-link" aria-label="View cart"
         style="display: none;">Cart 🛒 <span class="cart-badge" id="header-cart-count" aria-hidden="true">0</span></a>
+      {% endif %}
     </div>
   </div>
 </header>

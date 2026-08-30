@@ -193,16 +193,22 @@ def bind_session_to_user(session_id: str, user_id: int, identifier: str, ttl: in
 
 
 def get_session_meta(session_id: str) -> Optional[Dict[str, Any]]:
-    """Retrieve session metadata from cache."""
+    """Retrieve session metadata from cache (checks both auth_session and admin_session namespaces)."""
     if not session_id:
         return None
 
     try:
+        # Try auth_session first (legacy/email OTP flow)
         key = f"auth_session:{session_id}"
         result = cache.get(key)
 
         if result is None:
-            logger.warning(f"Session not found: {session_id[:8]}...")
+            # Fall back to admin_session (admin Telegram and non-admin Telegram flows)
+            key = f"admin_session:{session_id}"
+            result = cache.get(key)
+
+        if result is None:
+            logger.warning(f"Session not found in either namespace: {session_id[:8]}...")
             return None
 
         if not isinstance(result, dict):
@@ -224,6 +230,54 @@ def delete_session(session_id: str) -> bool:
         return True
     except Exception as e:
         logger.error(f"delete_session error: {str(e)[:100]}")
+        return False
+
+
+def refresh_session_ttl(session_id: str, ttl: int = ADMIN_SESSION_TTL) -> bool:
+    """
+    Extend session TTL when user interacts with auth flow.
+    Checks both auth_session and admin_session namespaces.
+    Returns True if successfully refreshed, False if session not found.
+    """
+    if not session_id:
+        return False
+
+    try:
+        # Try auth_session first
+        auth_key = f"auth_session:{session_id}"
+        session = cache.get(auth_key)
+
+        if session is None:
+            # Try admin_session
+            auth_key = f"admin_session:{session_id}"
+            session = cache.get(auth_key)
+
+        if session is None:
+            logger.warning(f"Session not found for TTL refresh: {session_id[:8]}...")
+            return False
+
+        if not isinstance(session, dict):
+            logger.error(f"Session corrupted during TTL refresh: {type(session).__name__}")
+            return False
+
+        # Refresh the session with new TTL
+        cache.set(auth_key, session, timeout=ttl)
+
+        # Also refresh the OTP if it exists
+        otp_key = f"otp:{session_id}:telegram"
+        otp_data = cache.get(otp_key)
+        if otp_data:
+            cache.set(otp_key, otp_data, timeout=ttl)
+
+        otp_delivery_key = f"otp:{session_id}:telegram:delivery"
+        otp_delivery = cache.get(otp_delivery_key)
+        if otp_delivery:
+            cache.set(otp_delivery_key, otp_delivery, timeout=ttl)
+
+        logger.info(f"Session TTL refreshed: {session_id[:8]}... (new TTL: {ttl}s)")
+        return True
+    except Exception as e:
+        logger.error(f"refresh_session_ttl error: {str(e)[:100]}")
         return False
 
 

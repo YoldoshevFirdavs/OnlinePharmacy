@@ -1,0 +1,253 @@
+{
+  "colors": [
+    {
+      "name": "Bosh ranglar",
+      "colors": [
+        {"hex": "#4f46e5", "name": "Indigo", "rgb": "79, 70, 229"},
+        {"hex": "#8b5ef6", "name": "Violet", "rgb": "139, 94, 246"},
+        {"hex": "#ec4899", "name": "Pink", "rgb": "236, 72, 153"},
+        {"hex": "#ef4444", "name": "Red", "rgb": "239, 68, 68"},
+        {"hex": "#fb923c", "name": "Orange", "rgb": "251, 146, 60"},
+        {"hex": "#f59e0b", "name": "Amber", "rgb": "245, 158, 11"},
+        {"hex": "#22c55e", "name": "Green", "rgb": "34, 197, 94"},
+        {"hex": "#10b981", "name": "Emerald", "rgb": "16, 185, 129"}
+      ]
+    },
+    {
+      "name": "Sovuq ranglar",
+      "colors": [
+        {"hex": "#14b8a6", "name": "Teal", "rgb": "20, 184, 166"},
+        {"hex": "#06b6d4", "name": "Cyan", "rgb": "6, 182, 212"},
+        {"hex": "#3b82f6", "name": "Blue", "rgb": "59, 130, 246"},
+        {"hex": "#0ea5e9", "name": "Sky", "rgb": "14, 165, 233"},
+        {"hex": "#7c3aed", "name": "Purple", "rgb": "124, 58, 237"},
+        {"hex": "#a855f7", "name": "Fuchsia", "rgb": "168, 85, 247"},
+        {"hex": "#06b6d4", "name": "Aqua", "rgb": "6, 182, 212"},
+        {"hex": "#0891b2", "name": "Cyan Dark", "rgb": "8, 145, 178"}
+      ]
+    },
+    {
+      "name": "Neytral ranglar",
+      "colors": [
+        {"hex": "#64748b", "name": "Slate", "rgb": "100, 116, 139"},
+        {"hex": "#6b7280", "name": "Gray", "rgb": "107, 114, 128"},
+        {"hex": "#78716c", "name": "Stone", "rgb": "120, 113, 108"},
+        {"hex": "#57534e", "name": "Dark", "rgb": "87, 83, 78"},
+        {"hex": "#f59e0b", "name": "Gold", "rgb": "245, 158, 11"},
+        {"hex": "#84cc16", "name": "Lime", "rgb": "132, 204, 22"},
+        {"hex": "#f43f5e", "name": "Rose", "rgb": "244, 63, 94"},
+        {"hex": "#06b6d4", "name": "Cyan Bright", "rgb": "6, 182, 212"}
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "name": "Tibbiyot",
+      "icon": "🏥",
+      "emojis": [
+        {"emoji": "🏥", "label": "Kasalxona"},
+        {"emoji": "💊", "label": "Dori"},
+        {"emoji": "🩺", "label": "Stetoskop"},
+        {"emoji": "💉", "label": "Shpris"},
+        {"emoji": "🧪", "label": "Kolba"},
+        {"emoji": "🩹", "label": "Plastir"},
+        {"emoji": "🧬", "label": "DNK"},
+        {"emoji": "🪥", "label": "Cho'tka"},
+        {"emoji": "🚑", "label": "Tez yordam"},
+        {"emoji": "🌡️", "label": "Termometr"},
+        {"emoji": "🩸", "label": "Qon"},
+        {"emoji": "🧼", "label": "Sobun"},
+        {"emoji": "⚕️", "label": "Tibbiyot belgi"},
+        {"emoji": "💊", "label": "Vitamin"},
+        {"emoji": "🏨", "label": "Klinika"},
+        {"emoji": "👨‍⚕️", "label": "Shifokor"},
+        {"emoji": "👩‍⚕️", "label": "Shinasi"},
+        {"emoji": "🦠", "label": "Virus"},
+        {"emoji": "🧫", "label": "Mikrob"},
+        {"emoji": "💉", "label": "Vaksina"}
+      ]
+    },
+    {
+      "name": "Savdo",
+      "icon": "🛒",
+      "emojis": [
+        {"emoji": "🛒", "label": "Savat"},
+        {"emoji": "🏬", "label": "Magazin"},
+        {"emoji": "🛍️", "label": "Sotib olish"},
+        {"emoji": "💳", "label": "Karta"},
+        {"emoji": "💰", "label": "Pul"},
+        {"emoji": "📦", "label": "Quti"},
+        {"emoji": "📫", "label": "Pochta"},
+        {"emoji": "🚚", "label": "Yetkazib berish"},
+        {"emoji": "🚛", "label": "Furgon"},
+        {"emoji": "✈️", "label": "Parvoz"},
+        {"emoji": "📍", "label": "Manzil"},
+        {"emoji": "🗺️", "label": "Xarita"},
+        {"emoji": "📬", "label": "Xat"},
+        {"emoji": "📭", "label": "Bo'sh quti"},
+        {"emoji": "🎁", "label": "Sovg'a"},
+        {"emoji": "🎀", "label": "Ribbon"},
+        {"emoji": "💎", "label": "Qimmatbaho"},
+        {"emoji": "⭐", "label": "Reyting"},
+        {"emoji": "🌟", "label": "Yulduz"},
+        {"emoji": "✨", "label": "Nur"}
+      ]
+    },
+    {
+      "name": "Sog'liq",
+      "icon": "❤️",
+      "emojis": [
+        {"emoji": "❤️", "label": "Yurak"},
+        {"emoji": "💚", "label": "Yashil yurak"},
+        {"emoji": "💙", "label": "Ko'k yurak"},
+        {"emoji": "💛", "label": "Sariq yurak"},
+        {"emoji": "🧡", "label": "Apelsin yurak"},
+        {"emoji": "💪", "label": "Mushak"},
+        {"emoji": "🦵", "label": "Oyoq"},
+        {"emoji": "🧠", "label": "Miya"},
+        {"emoji": "👁️", "label": "Ko'z"},
+        {"emoji": "👂", "label": "Quloq"},
+        {"emoji": "👃", "label": "Burun"},
+        {"emoji": "👅", "label": "Til"},
+        {"emoji": "🦷", "label": "Tish"},
+        {"emoji": "🦴", "label": "Suyak"},
+        {"emoji": "😊", "label": "Baxtli"},
+        {"emoji": "😴", "label": "Uyu"},
+        {"emoji": "🤗", "label": "Quchoq"},
+        {"emoji": "🥗", "label": "Salat"},
+        {"emoji": "🥤", "label": "Ichimlik"},
+        {"emoji": "🧘", "label": "Jismoniy kun"}
+      ]
+    },
+    {
+      "name": "Tabiat",
+      "icon": "🌿",
+      "emojis": [
+        {"emoji": "🌿", "label": "O'simlik"},
+        {"emoji": "🍃", "label": "Barg"},
+        {"emoji": "🌱", "label": "Mikrob"},
+        {"emoji": "🌾", "label": "Xitoy"},
+        {"emoji": "🌳", "label": "Daraxt"},
+        {"emoji": "🌲", "label": "Elon"},
+        {"emoji": "🌴", "label": "Palma"},
+        {"emoji": "🌵", "label": "Kaktus"},
+        {"emoji": "🌸", "label": "Gul"},
+        {"emoji": "🌼", "label": "Ayg'ir guli"},
+        {"emoji": "🌻", "label": "Podsolnuh"},
+        {"emoji": "🌺", "label": "Xibiskus"},
+        {"emoji": "🌷", "label": "Tulip"},
+        {"emoji": "🌹", "label": "Roza"},
+        {"emoji": "💐", "label": "Gullar"},
+        {"emoji": "🍀", "label": "Shamoli"},
+        {"emoji": "☘️", "label": "Shamoli"},
+        {"emoji": "🍄", "label": "Mantar"},
+        {"emoji": "🌍", "label": "Dunyo"},
+        {"emoji": "🌱", "label": "Rivojlanish"}
+      ]
+    },
+    {
+      "name": "Tehnologiya",
+      "icon": "💻",
+      "emojis": [
+        {"emoji": "💻", "label": "Kompyuter"},
+        {"emoji": "📱", "label": "Telefon"},
+        {"emoji": "⌚", "label": "Soat"},
+        {"emoji": "💾", "label": "Disketa"},
+        {"emoji": "💿", "label": "Disk"},
+        {"emoji": "📀", "label": "DVD"},
+        {"emoji": "🖥️", "label": "Monitor"},
+        {"emoji": "⌨️", "label": "Klaviatura"},
+        {"emoji": "🖱️", "label": "Sichqoncha"},
+        {"emoji": "🖨️", "label": "Printer"},
+        {"emoji": "📡", "label": "Satellit"},
+        {"emoji": "📞", "label": "Telefon"},
+        {"emoji": "📟", "label": "Peyjer"},
+        {"emoji": "📠", "label": "Faks"},
+        {"emoji": "📺", "label": "Televizor"},
+        {"emoji": "📻", "label": "Radio"},
+        {"emoji": "🎙️", "label": "Mikrofon"},
+        {"emoji": "🎚️", "label": "Slider"},
+        {"emoji": "🎛️", "label": "Kontrol"},
+        {"emoji": "⚡", "label": "Chaqmoq"}
+      ]
+    },
+    {
+      "name": "Emotsiyalar",
+      "icon": "😊",
+      "emojis": [
+        {"emoji": "😊", "label": "Baxtli"},
+        {"emoji": "😃", "label": "Kulish"},
+        {"emoji": "😄", "label": "Katta kuli"},
+        {"emoji": "😁", "label": "Shoshilinch"},
+        {"emoji": "😆", "label": "Chaqqalash"},
+        {"emoji": "😅", "label": "Shodi"},
+        {"emoji": "🤣", "label": "Kuchli kulish"},
+        {"emoji": "😂", "label": "Tinc yig'lash"},
+        {"emoji": "🙂", "label": "Ohak kuli"},
+        {"emoji": "🙃", "label": "Teskari kuli"},
+        {"emoji": "😉", "label": "Qirqish"},
+        {"emoji": "😌", "label": "Zavqlanish"},
+        {"emoji": "😍", "label": "Sevgi"},
+        {"emoji": "🥰", "label": "Sevib quyish"},
+        {"emoji": "😘", "label": "Suyish"},
+        {"emoji": "😗", "label": "Dudak"},
+        {"emoji": "😚", "label": "Og'zi yopiq"},
+        {"emoji": "😙", "label": "Kulish kissed"},
+        {"emoji": "🥲", "label": "Nostalgic"},
+        {"emoji": "😋", "label": "Mazali"}
+      ]
+    },
+    {
+      "name": "Xavfsizlik",
+      "icon": "🛡️",
+      "emojis": [
+        {"emoji": "🛡️", "label": "Qalqon"},
+        {"emoji": "🔒", "label": "Qulf"},
+        {"emoji": "🔓", "label": "Ochiq qulf"},
+        {"emoji": "🔐", "label": "Qulfli"},
+        {"emoji": "🔑", "label": "Kalit"},
+        {"emoji": "🗝️", "label": "Old Kalit"},
+        {"emoji": "⚔️", "label": "Qilich"},
+        {"emoji": "🛠️", "label": "Asbob"},
+        {"emoji": "⚙️", "label": "Gear"},
+        {"emoji": "🔧", "label": "Kalish"},
+        {"emoji": "🔨", "label": "Chekuch"},
+        {"emoji": "⛏️", "label": "Zaryadka"},
+        {"emoji": "🔩", "label": "Bolt"},
+        {"emoji": "⛓️", "label": "Zanjir"},
+        {"emoji": "🧲", "label": "Magnit"},
+        {"emoji": "🧰", "label": "Kutisi"},
+        {"emoji": "🚨", "label": "Sirena"},
+        {"emoji": "📡", "label": "Monitoring"},
+        {"emoji": "🔔", "label": "Jalunga"},
+        {"emoji": "✅", "label": "Tekshirilgan"}
+      ]
+    },
+    {
+      "name": "Boshqalar",
+      "icon": "⭐",
+      "emojis": [
+        {"emoji": "⭐", "label": "Yulduz"},
+        {"emoji": "🌟", "label": "Parlaydi"},
+        {"emoji": "✨", "label": "Nur"},
+        {"emoji": "⚡", "label": "Chaqmoq"},
+        {"emoji": "🔥", "label": "Olovni"},
+        {"emoji": "🌈", "label": "Kamalak"},
+        {"emoji": "☀️", "label": "Quyosh"},
+        {"emoji": "🌙", "label": "Oy"},
+        {"emoji": "⭐", "label": "Star"},
+        {"emoji": "💫", "label": "Hushuqlash"},
+        {"emoji": "💥", "label": "Portlash"},
+        {"emoji": "💢", "label": "Qizg'in"},
+        {"emoji": "💬", "label": "Gaplashish"},
+        {"emoji": "🎉", "label": "Bayram"},
+        {"emoji": "🎊", "label": "Shamshira"},
+        {"emoji": "🎈", "label": "Shar"},
+        {"emoji": "🎁", "label": "Sovg'a"},
+        {"emoji": "🎀", "label": "Ribbon"},
+        {"emoji": "🏆", "label": "Trophy"},
+        {"emoji": "🎯", "label": "Maqsad"}
+      ]
+    }
+  ]
+}
