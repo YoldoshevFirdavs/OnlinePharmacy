@@ -2,37 +2,143 @@
 {% load static %}
 
 {% block title %}
-    {% if order %}
-        Buyurtmani tahrirlash #{{ order.id }}
-    {% else %}
-        Yangi buyurtma qo'shish
-    {% endif %}
+{% if order %}
+Buyurtmani tahrirlash #{{ order.id }}
+{% else %}
+Yangi buyurtma qo'shish
+{% endif %}
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* Order form - Add product section */
-#addProductCard .form-label {
-    font-size: 11px;
-    margin-bottom: 4px !important;
-}
-#productIdInput, #productQtyInput {
-    width: 80px;
-    padding: 6px 8px !important;
-    font-size: 13px;
-}
-#addProductBtn {
-    height: 32px;
-    padding: 4px 12px !important;
-    font-size: 13px;
-}
-#productInfo {
-    margin-top: 8px;
-}
-#productInfo .alert {
-    padding: 6px 10px !important;
-    margin: 0;
-}
+    /* Order form - Add product section - MODERN REDESIGN */
+    .add-product-section {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+        border: 2px solid #e5e7ff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .add-product-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .add-product-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .add-product-header .icon {
+        font-size: 24px;
+        color: #6a00f4;
+    }
+
+    .add-product-inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+        align-items: flex-end;
+    }
+
+    .add-product-input-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .add-product-input-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .add-product-input-group input {
+        padding: 12px 14px !important;
+        font-size: 14px;
+        border: 2px solid #d5d7e0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .add-product-input-group input:focus {
+        border-color: #6a00f4;
+        background: #f8f9ff;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(106, 0, 244, 0.1);
+    }
+
+    .add-product-btn-group {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    #addProductBtn {
+        padding: 12px 24px !important;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+
+    #addProductBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(106, 0, 244, 0.25);
+    }
+
+    #productInfo {
+        margin-top: 12px;
+    }
+
+    #productInfo .alert {
+        padding: 14px 16px !important;
+        margin: 0;
+        border-radius: 8px;
+        border: none;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #productInfo .alert--success {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    #productInfo .alert i {
+        font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .add-product-inputs {
+            grid-template-columns: 1fr;
+        }
+
+        .add-product-btn-group {
+            flex-direction: column;
+        }
+
+        #addProductBtn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -42,9 +148,9 @@
         <h1 class="page-title">
             <i class="fa-solid fa-cart-shopping"></i>
             {% if order %}
-                Buyurtmani tahrirlash #{{ order.id }}
+            Buyurtmani tahrirlash #{{ order.id }}
             {% else %}
-                Yangi buyurtma qo'shish
+            Yangi buyurtma qo'shish
             {% endif %}
         </h1>
         <p class="page-subtitle">Mahsulot qo'shish uchun ID va miqdorni kiriting</p>
@@ -74,73 +180,102 @@
                     <select name="user" id="userSelect" class="form-select" required>
                         <option value="">-- Mijoz tanlang --</option>
                         {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.email }} ({{ user.full_name|default:user.email }})</option>
+                        <option value="{{ user.id }}">{{ user.email }} ({{ user.full_name|default:user.email }})
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
             {% endif %}
-            
+
             <div class="form-group">
                 <label class="form-label">Manzil <span class="form-required">*</span></label>
-                <textarea name="address" id="addressInput" class="form-control" rows="3" placeholder="Yetkazib berish manzili" required>{% if order %}{{ order.address|default:'' }}{% endif %}</textarea>
+                <textarea name="address" id="addressInput" class="form-control" rows="3"
+                    placeholder="Yetkazib berish manzili"
+                    required>{% if order %}{{ order.address|default:'' }}{% endif %}</textarea>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Qo'shimcha ma'lumotlar</label>
-                <textarea name="notes" id="notesInput" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumotlar (ixtiyoriy)">{% if order %}{{ order.notes|default:'' }}{% endif %}</textarea>
+                <textarea name="notes" id="notesInput" class="form-control" rows="2"
+                    placeholder="Qo'shimcha ma'lumotlar (ixtiyoriy)">{% if order %}{{ order.notes|default:'' }}{% endif %}</textarea>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">To'lov usuli</label>
                 <div class="form-select-wrapper">
                     <select name="payment_method" id="paymentMethodSelect" class="form-control">
-                        <option value="cash" {% if order.payment_method == 'cash' or not order.payment_method %}selected{% endif %}>Naqd pul</option>
-                        <option value="card" {% if order.payment_method == 'card' %}selected{% endif %}>Karta</option>
+                        <option value="cash" {% if order.payment_method=='cash' or not order.payment_method %}selected{%
+                            endif %}>Naqd pul</option>
+                        <option value="card" {% if order.payment_method=='card' %}selected{% endif %}>Karta</option>
                     </select>
                 </div>
                 <p class="form-hint">To'lov qanday amalga oshirilishi kerak?</p>
             </div>
-            
+
             {% if user.user_cart %}
             <div class="alert alert--info" style="margin-top: 16px;">
                 <i class="fa-solid fa-shopping-cart"></i>
-                <span>Foydalanuvchining savatchasi bor - <a href="#" id="loadCartBtn" style="color: #6a00f4; text-decoration: none;">Savatchadan yuklash</a></span>
+                <span>Foydalanuvchining savatchasi bor - <a href="#" id="loadCartBtn"
+                        style="color: #6a00f4; text-decoration: none;">Savatchadan yuklash</a></span>
             </div>
             {% endif %}
         </div>
     </div>
-    
+
     <!-- Add Product -->
     <div class="card" id="addProductCard">
         <div class="card__header">
             <h3 class="card__title">Mahsulot qo'shish</h3>
         </div>
         <div class="card__body">
-            <div class="d-flex gap-2 align-items-end" style="flex-wrap: wrap;">
-                <div style="flex: 0 0 80px; width: 80px;">
-                    <label class="form-label small text-muted" style="margin-bottom: 4px;">ID</label>
-                    <input type="number" id="productIdInput" class="form-control form-control-sm" placeholder="123" min="1" style="font-size: 13px; padding: 4px 8px;">
+            <div class="add-product-section">
+                <div class="add-product-header">
+                    <i class="fa-solid fa-cart-plus icon"></i>
+                    <h3>Yangi mahsulot qo'shish</h3>
                 </div>
-                <div style="flex: 0 0 80px; width: 80px;">
-                    <label class="form-label small text-muted" style="margin-bottom: 4px;">Miqdor</label>
-                    <input type="number" id="productQtyInput" class="form-control form-control-sm" placeholder="1" min="1" style="font-size: 13px; padding: 4px 8px;">
+
+                <div class="add-product-inputs">
+                    <div class="add-product-input-group">
+                        <label for="productIdInput">Mahsulot ID</label>
+                        <input type="number" 
+                               id="productIdInput" 
+                               class="form-control" 
+                               placeholder="Masalan: 123" 
+                               min="1">
+                    </div>
+
+                    <div class="add-product-input-group">
+                        <label for="productQtyInput">Miqdor</label>
+                        <input type="number" 
+                               id="productQtyInput" 
+                               class="form-control" 
+                               placeholder="Masalan: 1" 
+                               min="1" 
+                               value="1">
+                    </div>
                 </div>
-                <div style="flex: 1 1 auto;">
-                    <button type="button" id="addProductBtn" class="btn btn-sm btn--primary" style="height: 32px; padding: 4px 12px;">
-                        <i class="fa-solid fa-plus"></i> Qo'shish
+
+                <div class="add-product-btn-group">
+                    <button type="button" 
+                            id="addProductBtn" 
+                            class="btn btn--primary"
+                            style="padding: 12px 24px !important; font-size: 14px !important; font-weight: 600 !important; border-radius: 8px !important; display: flex !important; align-items: center !important; gap: 8px !important; white-space: nowrap !important;">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Buyurtmaga qo'shish</span>
                     </button>
                 </div>
-            </div>
-            <div id="productInfo" style="margin-top: 8px; display: none;">
-                <div class="alert alert--success" style="margin: 0; padding: 6px 10px;">
-                    <i class="fa-solid fa-check"></i>
-                    <span id="productInfoText" style="font-size: 13px;"></span>
+
+                <div id="productInfo" style="display: none;">
+                    <div class="alert alert--success">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <span id="productInfoText"></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Order Items -->
     <div class="card" id="itemsCard">
         <div class="card__header">
@@ -161,28 +296,31 @@
                     </thead>
                     <tbody id="orderItemsTable">
                         {% if order %}
-                            {% for item in order.order_items.all %}
-                            <tr>
-                                <td><strong>{{ item.product.id }}</strong></td>
-                                <td>{{ item.product.name }}</td>
-                                <td style="text-align: right;">{{ item.price_at_order }}</td>
-                                <td style="text-align: right;">{{ item.quantity }}</td>
-                                <td style="text-align: right; font-weight: 600; color: #6a00f4;">{{ item.subtotal }}</td>
-                                <td style="text-align: center;">
-                                    <button type="button" class="btn btn--sm btn--ghost btn--danger remove-item-btn" data-item-id="{{ item.id }}">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                        {% for item in order.order_items.all %}
+                        <tr>
+                            <td><strong>{{ item.product.id }}</strong></td>
+                            <td>{{ item.product.name }}</td>
+                            <td style="text-align: right;">{{ item.price_at_order }}</td>
+                            <td style="text-align: right;">{{ item.quantity }}</td>
+                            <td style="text-align: right; font-weight: 600; color: #6a00f4;">{{ item.subtotal }}</td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn btn--sm btn--ghost btn--danger remove-item-btn"
+                                    data-item-id="{{ item.id }}">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
                         {% endif %}
                     </tbody>
                 </table>
             </div>
-            
+
             <!-- Summary -->
-            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e5ea;">
-                <span class="text-muted" style="font-size: 18px; font-weight: 600; margin-right: 16px;">Jami summa:</span>
+            <div
+                style="display: flex; justify-content: flex-end; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e5e5ea;">
+                <span class="text-muted" style="font-size: 18px; font-weight: 600; margin-right: 16px;">Jami
+                    summa:</span>
                 <strong style="font-size: 24px; color: #6a00f4;" id="totalPrice">
                     {% if order %}{{ order.total_price|default:'0.00' }}{% else %}0.00{% endif %}
                 </strong>
@@ -190,7 +328,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Actions -->
     <div class="card" id="actionsCard">
         <div class="card__body" style="text-align: center;">
@@ -201,7 +339,8 @@
             <button type="button" id="clearCartBtn" class="btn btn--outline" style="width: 200px; margin-left: 12px;">
                 <i class="fa-solid fa-trash"></i> Tozalash
             </button>
-            <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline" style="width: 200px; margin-left: 12px;">
+            <a href="{% url 'dashboard:order_list' %}" class="btn btn--outline"
+                style="width: 200px; margin-left: 12px;">
                 <i class="fa-solid fa-arrow-left"></i> Orqaga
             </a>
         </div>
@@ -209,40 +348,47 @@
 </div>
 
 <!-- Hidden form -->
-<form id="orderForm" method="POST" action="{% if order %}{% url 'dashboard:order_edit' order.id %}{% else %}{% url 'dashboard:order_create' %}{% endif %}" style="display: none;">
+<form id="orderForm" method="POST"
+    action="{% if order %}{% url 'dashboard:order_edit' order.id %}{% else %}{% url 'dashboard:order_create' %}{% endif %}"
+    style="display: none;">
     {% csrf_token %}
     {{ form.hidden_fields }}
-    <input type="hidden" name="user" id="formUserId" value="{% if order %}{{ order.user.id }}{% else %}{{ form.user.value|default:'' }}{% endif %}">
-    <input type="hidden" name="address" id="formAddress" value="{% if order %}{{ order.address|default:'' }}{% else %}{{ form.address.value|default:'' }}{% endif %}">
-    <input type="hidden" name="notes" id="formNotes" value="{% if order %}{{ order.notes|default:'' }}{% else %}{{ form.notes|default:'' }}{% endif %}">
-    <input type="hidden" name="payment_method" id="formPaymentMethod" value="{% if order %}{{ order.payment_method|default:'cash' }}{% else %}cash{% endif %}">
+    <input type="hidden" name="user" id="formUserId"
+        value="{% if order %}{{ order.user.id }}{% else %}{{ form.user.value|default:'' }}{% endif %}">
+    <input type="hidden" name="address" id="formAddress"
+        value="{% if order %}{{ order.address|default:'' }}{% else %}{{ form.address.value|default:'' }}{% endif %}">
+    <input type="hidden" name="notes" id="formNotes"
+        value="{% if order %}{{ order.notes|default:'' }}{% else %}{{ form.notes|default:'' }}{% endif %}">
+    <input type="hidden" name="payment_method" id="formPaymentMethod"
+        value="{% if order %}{{ order.payment_method|default:'cash' }}{% else %}cash{% endif %}">
     <input type="hidden" name="items_json" id="formItemsJson">
-    <input type="hidden" name="total_price" id="formTotalPrice" value="{% if order %}{{ order.total_price|default:'0' }}{% else %}0{% endif %}">
+    <input type="hidden" name="total_price" id="formTotalPrice"
+        value="{% if order %}{{ order.total_price|default:'0' }}{% else %}0{% endif %}">
 </form>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Order Create/Edit JS
-let orderItems = [];
+    // Order Create/Edit JS
+    let orderItems = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded triggered in order form');
-    
-    // Load existing items if editing
-    {% if order %}
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOMContentLoaded triggered in order form');
+
+        // Load existing items if editing
+        {% if order %}
         {% for item in order.order_items.all %}
         orderItems.push({
             item_id: {{ item.id }},
-            product_id: {{ item.product.id }},
-            product_name: "{{ item.product.name|escapejs }}",
-            unit_price: {{ item.price_at_order }},
-            quantity: {{ item.quantity }},
-            stock: {{ item.product.stock }}
+        product_id: {{ item.product.id }},
+        product_name: "{{ item.product.name|escapejs }}",
+        unit_price: {{ item.price_at_order }},
+        quantity: {{ item.quantity }},
+        stock: {{ item.product.stock }}
         });
-        {% endfor %}
+    {% endfor %}
     {% endif %}
-    
+
     const addProductBtn = document.getElementById('addProductBtn');
     const productIdInput = document.getElementById('productIdInput');
     const productQtyInput = document.getElementById('productQtyInput');
@@ -254,37 +400,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearCartBtn = document.getElementById('clearCartBtn');
     const loadCartBtn = document.getElementById('loadCartBtn');
     const orderForm = document.getElementById('orderForm');
-    
+
     // Debug: Check if elements exist
     console.log('addProductBtn:', addProductBtn);
     console.log('orderItemsTable:', orderItemsTable);
-    
+
     if (!orderItemsTable) {
         console.error('ERROR: orderItemsTable not found in DOM!');
         return;
     }
-    
+
     // Load cart items
     if (loadCartBtn) {
-        loadCartBtn.addEventListener('click', function(e) {
+        loadCartBtn.addEventListener('click', function (e) {
             e.preventDefault();
             loadCartItems();
         });
     }
-    
+
     // Add product
     if (addProductBtn) {
-        addProductBtn.addEventListener('click', function() {
+        addProductBtn.addEventListener('click', function () {
             console.log('Add product button clicked');
             const productId = productIdInput.value.trim();
             const quantity = parseInt(productQtyInput.value);
             console.log('Product ID:', productId, 'Quantity:', quantity);
-            
+
             if (!productId || !quantity || quantity <= 0) {
                 alert('Mahsulot ID va miqdorni to\'g\'ri kiriting!');
                 return;
             }
-            
+
             console.log('Fetching product from API...');
             fetch(`/api/v1/products/${productId}/`)
                 .then(response => {
@@ -297,13 +443,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         alert(data.error);
                         return;
                     }
-                    
+
                     // Validate stock
                     if (quantity > data.stock) {
                         alert(`Yetarli mahsulot yo'q! Omborda ${data.stock} ta bor.`);
                         return;
                     }
-                    
+
                     // Add or update item
                     const existingItem = orderItems.find(item => item.product_id === data.id);
                     if (existingItem) {
@@ -324,15 +470,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         console.log('Added new item:', orderItems[orderItems.length - 1]);
                     }
-                    
+
                     console.log('Total items:', orderItems.length);
                     updateUI();
                     productInfoText.textContent = `${data.name} (${quantity} ta) qo'shildi`;
                     productInfo.style.display = 'block';
-                    
+
                     productIdInput.value = '';
                     productQtyInput.value = '';
-                    
+
                     setTimeout(() => {
                         productInfo.style.display = 'none';
                     }, 2000);
@@ -344,12 +490,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
-    
+
     // Remove item
-    orderItemsTable.addEventListener('click', function(e) {
+    orderItemsTable.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-item-btn')) {
             const itemId = e.target.dataset.itemId;
-            
+
             if (itemId) {
                 // For existing order items (editing)
                 fetch(`/dashboard/api/admin/orders/${itemId}/delete/`, {
@@ -358,12 +504,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRFToken': getCookie('csrftoken'),
                     },
                 })
-                .then(response => {
-                    if (response.ok) {
-                        orderItems = orderItems.filter(item => !item.item_id || item.item_id != itemId);
-                        updateUI();
-                    }
-                });
+                    .then(response => {
+                        if (response.ok) {
+                            orderItems = orderItems.filter(item => !item.item_id || item.item_id != itemId);
+                            updateUI();
+                        }
+                    });
             } else {
                 // For new items
                 const productId = parseInt(e.target.dataset.productId);
@@ -372,57 +518,57 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     // Update quantity
-    orderItemsTable.addEventListener('input', function(e) {
+    orderItemsTable.addEventListener('input', function (e) {
         if (e.target.classList.contains('item-qty')) {
             const productId = parseInt(e.target.dataset.productId);
             const newQty = parseInt(e.target.value);
-            
+
             if (newQty <= 0) {
                 e.target.value = 1;
                 return;
             }
-            
+
             const item = orderItems.find(item => item.product_id === productId);
             if (item && newQty > item.stock) {
                 alert(`Jami miqdor ombor miqdoridan oshib ketishi mumkin! Maksimal: ${item.stock}`);
                 e.target.value = item.quantity;
                 return;
             }
-            
+
             if (item) {
                 item.quantity = newQty;
                 updateUI();
             }
         }
     });
-    
+
     // Clear cart
     if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', function() {
+        clearCartBtn.addEventListener('click', function () {
             if (confirm('Barcha mahsulotlarni o\'chirmoqchimisiz?')) {
                 orderItems = [];
                 updateUI();
             }
         });
     }
-    
+
     // Update form before submit
     if (orderForm) {
-        orderForm.addEventListener('submit', function(e) {
+        orderForm.addEventListener('submit', function (e) {
             // Update payment method from dropdown
             const paymentMethodSelect = document.getElementById('paymentMethodSelect');
             if (paymentMethodSelect) {
                 document.getElementById('formPaymentMethod').value = paymentMethodSelect.value;
             }
-            
+
             document.getElementById('formItemsJson').value = JSON.stringify(orderItems.map(item => ({
                 product_id: item.product_id,
                 quantity: item.quantity,
                 unit_price: item.unit_price
             })));
-            
+
             // Calculate total
             let total = 0;
             orderItems.forEach(item => {
@@ -431,20 +577,20 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('formTotalPrice').value = total;
         });
     }
-    
+
     function updateUI() {
         console.log('updateUI called with', orderItems.length, 'items');
         console.log('orderItemsTable:', orderItemsTable);
         // Clear table
         orderItemsTable.innerHTML = '';
         console.log('Table cleared');
-        
+
         let total = 0;
-        
+
         orderItems.forEach((item, index) => {
             const lineTotal = item.quantity * item.unit_price;
             total += lineTotal;
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><strong>${item.product_id}</strong></td>
@@ -463,13 +609,13 @@ document.addEventListener('DOMContentLoaded', function() {
             orderItemsTable.appendChild(row);
             console.log('Row appended:', row);
         });
-        
+
         // Update counts
         itemsCountSpan.textContent = orderItems.length;
         totalPriceSpan.textContent = parseFloat(total).toFixed(2);
         console.log('UI updated, total:', total);
     }
-    
+
     function loadCartItems() {
         fetch('/api/v1/cart/')
             .then(response => response.json())
@@ -492,7 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Savatchani yuklashda xatolik yuz berdi!');
             });
     }
-    
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

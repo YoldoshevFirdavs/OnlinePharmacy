@@ -1170,7 +1170,9 @@ class VerifyOtpView(APIView):
                 try:
                     user = CustomUser.objects.get(id=user_id)
 
-                    if _is_admin_identity(user):
+                    # Allow admin OTP login in development/local mode (DEBUG=True)
+                    # In production (DEBUG=False), admins must use Telegram login only
+                    if _is_admin_identity(user) and not settings.DEBUG:
                         return Response(
                             {
                                 "ok": False,
@@ -1821,10 +1823,16 @@ class AccountView(FormView):
                 # Handle avatar upload if provided
                 avatar_file = self.request.FILES.get("avatar")
                 if avatar_file:
-                    success, file_path, error = handle_avatar_upload(user, avatar_file)
-                    if not success:
-                        form.add_error("avatar", error)
-                        messages.error(self.request, f"Avatar yuklashda xatolik: {error}")
+                    try:
+                        success, file_path, error = handle_avatar_upload(user, avatar_file)
+                        if not success:
+                            form.add_error("avatar", error)
+                            messages.error(self.request, f"Avatar yuklashda xatolik: {error}")
+                            return self.form_invalid(form)
+                    except Exception as avatar_error:
+                        logger.error(f"Avatar upload error: {str(avatar_error)}")
+                        form.add_error("avatar", f"Avatar yuklashda xatolik: {str(avatar_error)}")
+                        messages.error(self.request, f"Avatar yuklashda xatolik: {str(avatar_error)}")
                         return self.form_invalid(form)
 
                 # Handle password change
@@ -1844,7 +1852,13 @@ class AccountView(FormView):
                     user.set_password(new_password1)
 
                 # Save user
-                user.save(update_fields=["full_name", "email", "phone_number", "telegram_id", "address"])
+                try:
+                    user.save(update_fields=["full_name", "email", "phone_number", "telegram_id", "address"])
+                except Exception as save_error:
+                    logger.error(f"Error saving user profile: {str(save_error)}")
+                    form.add_error(None, f"Profil saqlashda xatolik: {str(save_error)}")
+                    messages.error(self.request, f"Profil saqlashda xatolik: {str(save_error)}")
+                    return self.form_invalid(form)
 
                 if avatar_file:
                     messages.success(self.request, "Avatar muvaffaqiyatli yuklandi!")
@@ -1852,7 +1866,8 @@ class AccountView(FormView):
                     messages.success(self.request, "Profil ma'lumotlari muvaffaqiyatli saqlandi!")
 
         except Exception as e:
-            messages.error(self.request, f"Saqlashda xatolik yuz berdi: {str(e)}")
+            logger.error(f"Unexpected error in account form_valid: {str(e)}")
+            messages.error(self.request, f"Noma'lum xatolik: {str(e)}")
             return self.form_invalid(form)
 
         return super().form_valid(form)
@@ -1860,7 +1875,14 @@ class AccountView(FormView):
     def form_invalid(self, form):
         from django.contrib import messages
 
-        messages.error(self.request, "Forma xatolar bilan to'ldirilgan")
+        # Add all form errors to messages
+        for field, errors in form.errors.items():
+            for error in errors:
+                if field == "__all__":
+                    messages.error(self.request, str(error))
+                else:
+                    messages.error(self.request, f"{field}: {error}")
+
         return self.render_to_response(self.get_context_data(form=form))
 
 

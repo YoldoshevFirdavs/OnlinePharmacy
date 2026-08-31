@@ -1,0 +1,180 @@
+<!-- Avatar Upload Widget -->
+<div class="avatar-upload-widget">
+    <div class="mb-3">
+        <label for="id_avatar" class="form-label">Avatar</label>
+        
+        <!-- Current Avatar Display -->
+        <div class="avatar-preview mb-3">
+            {% if user.profile.avatar %}
+                <img id="avatar-preview-img" 
+                     src="{{ user.profile.avatar.url }}" 
+                     alt="Avatar" 
+                     class="rounded-circle"
+                     style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #ddd;">
+            {% else %}
+                <img id="avatar-preview-img" 
+                     src="/static/images/default/default_avatar.png" 
+                     alt="Default Avatar" 
+                     class="rounded-circle"
+                     style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #ddd;">
+            {% endif %}
+        </div>
+
+        <!-- File Input -->
+        <div class="input-group">
+            <input type="file" 
+                   name="avatar" 
+                   id="id_avatar" 
+                   class="form-control" 
+                   accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                   aria-label="Upload avatar">
+            <button type="button" 
+                    class="btn btn-outline-secondary" 
+                    id="clear-avatar-btn"
+                    onclick="clearAvatarPreview()">
+                Yo'q qilish
+            </button>
+        </div>
+
+        <!-- File Info -->
+        <small class="form-text text-muted d-block mt-2">
+            📸 Rasm formatlari: PNG, JPG, GIF, WebP (max 5MB)
+        </small>
+
+        <!-- Feedback Messages -->
+        <div id="avatar-feedback" class="form-text mt-2"></div>
+    </div>
+</div>
+
+<style>
+.avatar-upload-widget {
+    padding: 1rem;
+    background-color: var(--clr-bg);
+    border-radius: 8px;
+    border-left: 4px solid var(--clr-primary);
+}
+
+.avatar-preview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.avatar-preview img {
+    transition: all 0.3s ease;
+    border: 3px solid var(--clr-border);
+    border-radius: 100px;
+}
+
+.avatar-preview img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--clr-primary);
+}
+
+#id_avatar {
+    cursor: pointer;
+    background-color: var(--clr-surface);
+    color: var(--clr-text);
+    border: 2px solid var(--clr-border);
+    padding: 0.5rem;
+}
+
+#id_avatar:focus {
+    border-color: var(--clr-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(106, 0, 244, 0.1);
+}
+
+#clear-avatar-btn {
+    background-color: var(--clr-surface);
+    border: 2px solid var(--clr-border);
+    color: var(--clr-text);
+    font-weight: 500;
+}
+
+#clear-avatar-btn:hover {
+    background-color: var(--clr-bg);
+    border-color: var(--clr-primary);
+    color: var(--clr-primary);
+}
+
+.avatar-upload-widget small.form-text {
+    color: var(--clr-muted);
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.avatar-upload-widget label.form-label {
+    color: var(--clr-text);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.avatar-upload-widget .form-control {
+    background-color: var(--clr-surface);
+    border-color: var(--clr-border);
+    color: var(--clr-text);
+}
+
+.avatar-upload-widget .form-control:focus {
+    border-color: var(--clr-primary);
+    background-color: var(--clr-bg);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(106, 0, 244, 0.1);
+}
+
+#avatar-feedback .text-danger {
+    color: var(--clr-error) !important;
+}
+
+#avatar-feedback .text-success {
+    color: var(--clr-success) !important;
+}
+</style>
+
+<script>
+// Avatar preview o'zgarish
+document.getElementById('id_avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const feedback = document.getElementById('avatar-feedback');
+    const previewImg = document.getElementById('avatar-preview-img');
+
+    if (!file) {
+        feedback.innerHTML = '';
+        return;
+    }
+
+    // File size check (5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        feedback.innerHTML = '<span class="text-danger">❌ Fayl juda katta (max 5MB)</span>';
+        this.value = '';
+        return;
+    }
+
+    // File type check
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        feedback.innerHTML = '<span class="text-danger">❌ Noto\'g\'ri fayl turi. PNG, JPG, GIF, WebP ishlatiting</span>';
+        this.value = '';
+        return;
+    }
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        previewImg.src = event.target.result;
+        feedback.innerHTML = '<span class="text-success">✅ Rasm tanlandi</span>';
+    };
+    reader.readAsDataURL(file);
+});
+
+// Clear avatar
+function clearAvatarPreview() {
+    document.getElementById('id_avatar').value = '';
+    document.getElementById('avatar-preview-img').src = '/static/images/default/default_avatar.png';
+    document.getElementById('avatar-feedback').innerHTML = '';
+}
+</script>
