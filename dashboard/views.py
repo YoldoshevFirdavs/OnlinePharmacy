@@ -970,14 +970,18 @@ def user_create(request):
                 ctx = {"form": form}
                 return render(request, "dashboard/user/form.html", ctx)
             except Exception as get_error:
-                logger.error(f"Error loading form in user_create: {str(get_error)}")
-                error_msg = get_form_error_message(request.path)
+                import traceback
+
+                logger.error(f"Error loading form in user_create: {str(get_error)}\n{traceback.format_exc()}")
+                error_msg = f"Foydalanuvchi shaklini yuklashda xatolik: {str(get_error)}"
                 messages.error(request, error_msg)
                 return redirect("dashboard:user_list")
 
     except Exception as e:
-        logger.error(f"Unexpected error in user_create: {str(e)}")
-        messages.error(request, "Noma'lum xatolik yuz berdi.")
+        import traceback
+
+        logger.error(f"Unexpected error in user_create: {str(e)}\n{traceback.format_exc()}")
+        messages.error(request, f"Noma'lum xatolik: {str(e)}")
         return redirect("dashboard:user_list")
 
 
@@ -1042,8 +1046,10 @@ def user_edit(request, pk):
                     ctx = {"form": form, "user": user}
                     return render(request, "dashboard/user/form.html", ctx)
                 except Exception as get_error:
-                    logger.error(f"Error loading form in user_edit: {str(get_error)}")
-                    error_msg = get_form_error_message(request.path)
+                    import traceback
+
+                    logger.error(f"Error loading form in user_edit: {str(get_error)}\n{traceback.format_exc()}")
+                    error_msg = f"Foydalanuvchi shaklini yuklashda xatolik: {str(get_error)}"
                     messages.error(request, error_msg)
                     return redirect("dashboard:user_list")
 
@@ -1178,15 +1184,29 @@ def account_settings(request):
         if request.method == "POST":
             form = AccountSettingsForm(request.POST, request.FILES, instance=user)
             if form.is_valid():
-                with transaction.atomic():
-                    user_obj = form.save(commit=False)
-                    new_password1 = form.cleaned_data.get("new_password1")
-                    if new_password1:
-                        user_obj.set_password(new_password1)
-                    user_obj.save()
-                    messages.success(request, "Hisob sozlamalari muvaffaqiyatli yangilandi.")
-                    return redirect("dashboard:account_settings")
+                try:
+                    with transaction.atomic():
+                        user_obj = form.save(commit=False)
+                        new_password1 = form.cleaned_data.get("new_password1")
+                        if new_password1:
+                            user_obj.set_password(new_password1)
+                        user_obj.save()
+                        from django.contrib.auth import update_session_auth_hash
+
+                        update_session_auth_hash(request, user_obj)
+                        messages.success(request, "Hisob sozlamalari muvaffaqiyatli yangilandi.")
+                        return redirect("dashboard:account_dashboard")
+                except Exception as save_error:
+                    logger.error(f"Error saving account settings: {str(save_error)}")
+                    messages.error(request, f"Hisob saqlashda xatolik: {str(save_error)}")
+                    return render(
+                        request,
+                        "dashboard/account/settings.html",
+                        {"form": form, "user_display": user_display},
+                    )
             else:
+                # Log form errors for debugging
+                logger.warning(f"Account form validation failed: {form.errors}")
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field}: {error}")
@@ -1204,10 +1224,14 @@ def account_settings(request):
             )
 
     except Exception as e:
-        log_dashboard_error("account_settings", user, e, action="Redirected to login_page")
-        error_msg = get_form_error_message(request.path)
-        messages.error(request, error_msg)
-        return redirect("dashboard:login_page")
+        logger.exception(f"Unexpected error in account_settings: {str(e)}")
+        log_dashboard_error("account_settings", user, e, action="Account settings error")
+        messages.error(request, "Hisob sozlamalarini yuklashda xatolik yuz berdi.")
+        return render(
+            request,
+            "dashboard/account/settings.html",
+            {"form": AccountSettingsForm(instance=user), "user_display": get_user_display(user)},
+        )
 
 
 @login_required_decorator(login_url="dashboard:login_page")
@@ -1324,15 +1348,22 @@ def delivery_list(request):
 @user_passes_test(is_admin, login_url="dashboard:not_allowed")
 @require_http_methods(["GET", "POST"])
 def delivery_create(request):
-    if request.method == "POST":
-        form = DeliveryDriverForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Haydovchi muvaffaqiyatli yaratildi.")
-            return redirect("dashboard:delivery_list")
-    else:
-        form = DeliveryDriverForm()
-    return render(request, "dashboard/delivery/form.html", {"form": form})
+    try:
+        if request.method == "POST":
+            form = DeliveryDriverForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Haydovchi muvaffaqiyatli yaratildi.")
+                return redirect("dashboard:delivery_list")
+        else:
+            form = DeliveryDriverForm()
+        return render(request, "dashboard/delivery/form.html", {"form": form})
+    except Exception as e:
+        import traceback
+
+        logger.error(f"Error in delivery_create: {str(e)}\n{traceback.format_exc()}")
+        messages.error(request, f"Yetkazib beruvchi yaratishda xatolik: {str(e)}")
+        return redirect("dashboard:delivery_list")
 
 
 @login_required_decorator(login_url="dashboard:login_page")
@@ -1509,8 +1540,10 @@ def ban_create(request):
                 {"all_users": all_users, "expires_value": 7, "expires_unit": "days"},
             )
     except Exception as e:
-        logger.error(f"Error in ban_create: {str(e)}")
-        messages.error(request, "Noma'lum xatolik.")
+        import traceback
+
+        logger.error(f"Error in ban_create: {str(e)}\n{traceback.format_exc()}")
+        messages.error(request, f"Banni yaratishda xatolik: {str(e)}")
         return redirect("dashboard:ban_list")
 
 
@@ -1604,8 +1637,10 @@ def ban_edit(request, pk):
             ctx = {"ban": ban, "all_users": all_users, "expires_value": expires_value, "expires_unit": expires_unit}
             return render(request, "dashboard/bans/form.html", ctx)
     except Exception as e:
-        logger.error(f"Error in ban_edit: {str(e)}")
-        messages.error(request, "Noma'lum xatolik.")
+        import traceback
+
+        logger.error(f"Error in ban_edit: {str(e)}\n{traceback.format_exc()}")
+        messages.error(request, f"Banni tahrirlashda xatolik: {str(e)}")
         return redirect("dashboard:ban_list")
 
 

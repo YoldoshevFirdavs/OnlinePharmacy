@@ -1,46 +1,42 @@
-{% load i18n %}
-
 <div class="avatar-upload-widget">
     {% if widget.value %}
-    <div class="avatar-preview" style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+    <div class="avatar-preview">
+        <span class="avatar-preview__label">
             <i class="fa-solid fa-image"></i> Hozirgi rasm:
-        </label>
-        <p style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin: 0; word-break: break-all; font-family: monospace; font-size: 0.9rem; color: #666;">
-            {{ widget.value }}
-        </p>
+        </span>
+        <p class="avatar-preview__path">{{ widget.value }}</p>
     </div>
     {% endif %}
     
-    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+    <span class="avatar-upload__label">
         <i class="fa-solid fa-file-arrow-up"></i> Yangi rasm:
-    </label>
+    </span>
     
-    <div class="file-input-wrapper" style="position: relative;">
+    <div class="avatar-upload__input-wrap">
         <input 
             type="file" 
             name="{{ widget.name }}" 
-            {% include "django/forms/widgets/attrs.html" with widget=widget %}
+            {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
+            {% if widget.attrs.class %}class="{{ widget.attrs.class }}"{% endif %}
             accept="image/*"
             onchange="displayFileName(this)"
-            style="cursor: pointer;"
         />
     </div>
     
-    <div id="file-name-display-{{ widget.name }}" style="margin-top: 8px; padding: 8px; background: #f0f7ff; border-radius: 4px; display: none; color: #0066ff; font-size: 0.9rem;">
-        <i class="fa-solid fa-check-circle"></i> <span id="selected-file-{{ widget.name }}"></span>
+    <div class="avatar-upload__feedback" id="file-name-display-{{ widget.name }}" style="display:none;">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="selected-file-{{ widget.name }}"></span>
     </div>
 </div>
 
 <script>
 function displayFileName(input) {
-    const widgetName = input.name;
-    const displayDiv = document.getElementById('file-name-display-' + widgetName);
-    const fileNameSpan = document.getElementById('selected-file-' + widgetName);
-    
+    var widgetName = input.name;
+    var displayDiv = document.getElementById('file-name-display-' + widgetName);
+    var fileNameSpan = document.getElementById('selected-file-' + widgetName);
     if (input.files && input.files[0]) {
         fileNameSpan.textContent = 'Tanlangan: ' + input.files[0].name;
-        displayDiv.style.display = 'block';
+        displayDiv.style.display = 'flex';
     } else {
         displayDiv.style.display = 'none';
     }
@@ -49,55 +45,62 @@ function displayFileName(input) {
 
 <style>
 .avatar-upload-widget {
-    padding: 12px;
-    background: #fafafa;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
+    padding: 16px;
+    background: var(--gray-50, #f8f9fa);
+    border: 1px solid var(--gray-200, #e9ecef);
+    border-radius: 8px;
 }
-
-.avatar-upload-widget label {
-    font-weight: 600;
-    color: #333;
-}
-
 .avatar-preview {
     padding: 12px;
-    background: #fff;
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--gray-200, #e9ecef);
+    border-radius: 6px;
+    margin-bottom: 14px;
 }
-
-.avatar-preview p {
+.avatar-preview__label,
+.avatar-upload__label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--gray-700, #495057);
+}
+.avatar-preview__path {
     margin: 0;
-    padding: 8px;
-    background: #f5f5f5;
+    padding: 8px 12px;
+    background: var(--gray-100, #f1f3f5);
     border-radius: 4px;
     word-break: break-all;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    color: #555;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.82rem;
+    color: var(--gray-600, #6c757d);
 }
-
-.file-input-wrapper input[type="file"] {
+.avatar-upload__input-wrap input[type="file"] {
     display: block;
     width: 100%;
-    padding: 10px;
-    border: 2px dashed #0066ff;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border: 2px dashed var(--primary, #6a00f4);
+    border-radius: 6px;
     cursor: pointer;
-    background: #fff;
-}
-
-.file-input-wrapper input[type="file"]:hover {
-    background: #f0f7ff;
-}
-
-#file-name-display {
-    padding: 8px 12px;
-    background: #d4edda;
-    color: #155724;
-    border-radius: 4px;
+    background: var(--card-bg, #fff);
+    color: var(--gray-700, #495057);
     font-size: 0.9rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+.avatar-upload__input-wrap input[type="file"]:hover {
+    background: var(--gray-50, #f8f9fa);
+    border-color: var(--primary-hover, #5500cc);
+}
+.avatar-upload__feedback {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(40, 167, 69, 0.08);
+    border-radius: 6px;
+    color: #28a745;
+    font-size: 0.88rem;
+    font-weight: 500;
 }
 </style>

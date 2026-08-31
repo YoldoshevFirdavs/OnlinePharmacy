@@ -1,143 +1,278 @@
-{% extends 'dashboard/form.html' %}
+{% extends 'dashboard/base.html' %}
 {% load static %}
 
-{% block title %}{% if user %}Foydalanuvchini tahrirlash{% else %}Yangi foydalanuvchi{% endif %}{% endblock %}
+{% block title %}{% if form.instance.pk %}Foydalanuvchini tahrirlash{% else %}Yangi foydalanuvchi{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header" id="pageHeader">
+    <h1 class="page-title">
+        <i class="fa-solid fa-user-pen"></i>
+        {% if form.instance.pk %}
+            Foydalanuvchini tahrirlash
+        {% else %}
+            Yangi foydalanuvchi
+        {% endif %}
+    </h1>
+    <a href="{% url 'dashboard:user_list' %}" class="btn btn--outline" id="btnBack">
+        <i class="fa-solid fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card card--form" id="formCard">
+    <div class="card__body">
+        <form method="post" enctype="multipart/form-data" class="dashboard-form" id="dashboardForm" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="form-errors" id="formErrors">
+                {% for error in form.non_field_errors %}
+                <div class="alert alert--error" role="alert">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+                {% if field.name not in 'is_staff,is_superuser,is_active,is_verified' %}
+                <div class="form-group{% if field.errors %} form-group--error{% endif %}{% if field.field.widget.input_type == 'checkbox' %} form-group--checkbox{% endif %}" id="group_{{ field.html_name }}">
+                    
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                        <div class="checkbox-wrapper">
+                            <label for="{{ field.id_for_label }}" class="form-label form-label--checkbox">
+                                <span class="checkbox-label-text">{{ field.label }}</span>
+                                {{ field }}
+                            </label>
+                            {% if field.help_text %}
+                                <span class="form-hint">{{ field.help_text }}</span>
+                            {% endif %}
+                        </div>
+                    {% elif field.field.widget.input_type == 'file' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        {% if field.name == 'avatar' and form.instance.avatar %}
+                        <div class="avatar-current-preview">
+                            <img src="{{ form.instance.avatar.url }}" alt="Avatar">
+                        </div>
+                        {% endif %}
+                        <div class="form-file-wrapper" id="fileWrapper_{{ field.html_name }}">
+                            {{ field }}
+                            <span class="form-file-label">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Faylni tanlang
+                            </span>
+                        </div>
+                    {% elif field.html_name == 'email' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        <input type="email" name="{{ field.name }}" id="id_email" value="{{ field.value|default_if_none:'' }}" class="form-control" {% if form.instance.pk %}data-user-id="{{ form.instance.pk }}"{% endif %}>
+                        <div id="email-feedback" class="form-text"></div>
+                    {% elif field.html_name == 'phone_number' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        <input type="text" name="{{ field.name }}" id="id_phone" value="{{ field.value|default_if_none:'' }}" class="form-control" {% if form.instance.pk %}data-user-id="{{ form.instance.pk }}"{% endif %}>
+                        <div id="phone-feedback" class="form-text"></div>
+                    {% elif field.html_name == 'telegram_id' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        <input type="text" name="{{ field.name }}" id="id_telegram_id" value="{{ field.value|default_if_none:'' }}" class="form-control" placeholder="@username yoki 123456789" {% if form.instance.pk %}data-user-id="{{ form.instance.pk }}"{% endif %}>
+                        <div id="telegram-feedback" class="form-text"></div>
+                        {% if field.help_text %}<p class="form-hint">{{ field.help_text }}</p>{% endif %}
+                    {% elif field.field.widget.input_type == 'select' %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        <div class="form-select-wrapper">{{ field }}</div>
+                    {% else %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="form-required">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.help_text and field.html_name != 'telegram_id' %}
+                    <p class="form-hint">{{ field.help_text }}</p>
+                    {% endif %}
+
+                    {% if field.errors %}
+                    <ul class="form-error-list">
+                        {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Ruxsatlar va Holat (checkboxlar) -->
+            <div class="user-permissions-section">
+                <h3 class="user-permissions-title">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Ruxsatlar va Holat
+                </h3>
+                <div class="user-permissions-grid">
+                    {% for field in form %}
+                        {% if field.name in 'is_staff,is_superuser,is_active,is_verified' %}
+                        <div class="form-group form-group--checkbox" id="group_{{ field.html_name }}">
+                            <div class="checkbox-wrapper">
+                                <label for="{{ field.id_for_label }}" class="form-label form-label--checkbox">
+                                    <span class="checkbox-label-text">{{ field.label }}</span>
+                                    {{ field }}
+                                </label>
+                            </div>
+                            {% if field.errors %}
+                            <ul class="form-error-list">
+                                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions" id="formActions">
+                <button type="submit" class="btn btn--primary" id="btnSubmit">
+                    <i class="fa-solid fa-floppy-disk"></i> Saqlash
+                </button>
+                <a href="{% url 'dashboard:user_list' %}" class="btn btn--ghost" id="btnCancel">Bekor qilish</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
 
 {% block extra_css %}
 {{ block.super }}
 <style>
-    .form-section-title {
-        font-size: 1.1rem;
+    .avatar-current-preview {
+        margin-bottom: 12px;
+    }
+    .avatar-current-preview img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary, #6a00f4);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .user-permissions-section {
+        border-top: 2px solid var(--gray-200, #e9ecef);
+        margin-top: 28px;
+        padding-top: 24px;
+    }
+    .user-permissions-title {
+        font-size: 1.05rem;
         font-weight: 700;
+        color: var(--gray-900, #212529);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .user-permissions-title i {
+        color: var(--primary, #6a00f4);
+        font-size: 1.15rem;
+    }
+    .user-permissions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+    .checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .checkbox-wrapper .checkbox-label-text {
+        flex: 1;
+        font-weight: 500;
         color: var(--gray-900);
-        margin-top: 30px;
-        margin-bottom: 16px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--gray-200);
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        cursor: pointer;
     }
-
-    .form-section-title i {
-        color: var(--primary, #007bff);
-        font-size: 1.2rem;
-    }
-
-    .pwd-requirements {
-        list-style: none;
-        margin: 12px 0 0 0;
-        padding: 12px;
-        background: var(--gray-100);
-        border-radius: var(--radius-sm);
-        border-left: 4px solid var(--gray-300);
-        font-size: 0.85rem;
-        opacity: 0;
-        transition: all 0.3s ease;
-        display: none;
-    }
-
-    .pwd-requirements--visible {
-        opacity: 1;
-        display: block;
-    }
-
-    .pwd-req {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        color: var(--gray-700);
-    }
-
-    .pwd-req:last-child {
-        margin-bottom: 0;
-    }
-
-    .pwd-req i {
-        font-size: 0.9rem;
+    .checkbox-wrapper input[type="checkbox"] {
+        flex: 0 0 18px;
+        height: 18px;
         width: 18px;
-        flex-shrink: 0;
+        cursor: pointer;
     }
-
-    .pwd-req--fail i {
-        color: #ef4444;
-    }
-
-    .pwd-req--pass i {
-        color: #34c759;
+    @media (max-width: 640px) {
+        .user-permissions-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
 
 {% block extra_js %}
-{{ block.super }}
 <script>
 (function() {
-    var RULES = [
-        { key: 'len',   label: 'Kamida 8 ta belgi',       test: function(v){ return v.length >= 8; } },
-        { key: 'upper', label: 'Kamida 1 ta katta harf',  test: function(v){ return /[A-Z]/.test(v); } },
-        { key: 'lower', label: 'Kamida 1 ta kichik harf', test: function(v){ return /[a-z]/.test(v); } },
-        { key: 'digit', label: 'Kamida 1 ta raqam',       test: function(v){ return /[0-9]/.test(v); } },
-    ];
-
-    var pwdInput = document.getElementById('id_password');
-    if (!pwdInput) return;
-
-    var reqBox = document.createElement('ul');
-    reqBox.className = 'pwd-requirements';
-    reqBox.setAttribute('aria-live', 'polite');
-    reqBox.innerHTML = RULES.map(function(r) {
-        return '<li class="pwd-req pwd-req--fail" data-key="' + r.key + '">' +
-               '<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>' +
-               '<span>' + r.label + '</span></li>';
-    }).join('');
-    pwdInput.parentNode.insertBefore(reqBox, pwdInput.nextSibling);
-
-    var submitBtn = document.getElementById('btnSubmit');
-
-    function update() {
-        var val = pwdInput.value;
-        var visible = val.length > 0;
-        reqBox.classList.toggle('pwd-requirements--visible', visible);
-        var allPass = true;
-        RULES.forEach(function(r) {
-            var li = reqBox.querySelector('[data-key="' + r.key + '"]');
-            var pass = r.test(val);
-            if (!pass) allPass = false;
-            li.className = 'pwd-req ' + (pass ? 'pwd-req--pass' : 'pwd-req--fail');
-            li.querySelector('i').className = 'fa-solid ' + (pass ? 'fa-circle-check' : 'fa-circle-xmark');
-        });
-        if (submitBtn) {
-            submitBtn.disabled = visible && !allPass;
-            submitBtn.classList.toggle('btn--disabled', visible && !allPass);
+    // Telegram ID validator
+    function validateTelegramId(value) {
+        if (!value) return true;
+        if (value.startsWith('@')) {
+            return /^@[a-zA-Z0-9_]{5,32}$/.test(value);
         }
+        return /^\d{5,20}$/.test(value);
     }
-
-    pwdInput.addEventListener('input', update);
-    pwdInput.addEventListener('focus', update);
-    pwdInput.addEventListener('blur', function() {
-        if (!pwdInput.value) reqBox.classList.remove('pwd-requirements--visible');
-    });
-
-    // Ban section visibility toggle
-    var isPermanentBanCheckbox = document.getElementById('id_is_permanent_ban');
-    var banUntilField = document.getElementById('id_ban_until');
     
-    if (isPermanentBanCheckbox && banUntilField) {
-        function toggleBanUntilField() {
-            if (isPermanentBanCheckbox.checked) {
-                banUntilField.parentElement.style.display = 'none';
-                banUntilField.value = '';
-            } else {
-                banUntilField.parentElement.style.display = 'block';
+    var telegramInput = document.getElementById('id_telegram_id');
+    var telegramFeedback = document.getElementById('telegram-feedback');
+    
+    if (telegramInput && telegramFeedback) {
+        telegramInput.addEventListener('input', function() {
+            var value = this.value.trim();
+            if (!value) {
+                telegramFeedback.textContent = '';
+                telegramFeedback.style.color = '#666';
+                this.style.borderColor = '';
+                return;
             }
-        }
-        isPermanentBanCheckbox.addEventListener('change', toggleBanUntilField);
-        toggleBanUntilField();
+            if (validateTelegramId(value)) {
+                telegramFeedback.textContent = '✓ To\'g\'ri Telegram ID';
+                telegramFeedback.style.color = '#28a745';
+                this.style.borderColor = '#28a745';
+            } else {
+                telegramFeedback.textContent = '✗ @username (5-32 harf) yoki 5-20 raqam bo\'lishi kerak';
+                telegramFeedback.style.color = '#dc3545';
+                this.style.borderColor = '#dc3545';
+            }
+        });
     }
+
+    // File upload handler
+    document.addEventListener('DOMContentLoaded', function() {
+        var fileWrappers = document.querySelectorAll('.form-file-wrapper');
+        fileWrappers.forEach(function(wrapper) {
+            var fileInput = wrapper.querySelector('input[type="file"]');
+            var fileLabel = wrapper.querySelector('.form-file-label');
+            if (fileInput && fileLabel) {
+                if (fileInput.id === 'id_avatar') return;
+                fileLabel.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fileInput.click();
+                });
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        fileLabel.innerHTML = '<i class="fa-solid fa-check"></i> ' + this.files[0].name + ' tanlandi';
+                        fileLabel.style.borderColor = '#28a745';
+                        fileLabel.style.background = 'rgba(40, 167, 69, 0.08)';
+                        fileLabel.style.color = '#28a745';
+                    }
+                });
+            }
+        });
+    });
 })();
 </script>
 <script src="{% static 'dashboard/js/account-validation.js' %}" defer></script>
 {% endblock %}
-

@@ -112,11 +112,11 @@ class UserForm(forms.ModelForm):
         }
 
     def clean_telegram_id(self):
-        """Validate Telegram ID"""
-        telegram_id = self.cleaned_data.get("telegram_id", "").strip()
+        """Validate Telegram ID - allow empty (None)"""
+        telegram_id = self.cleaned_data.get("telegram_id", "").strip() or None
 
         if not telegram_id:
-            return telegram_id  # Allow empty
+            return None  # Return None instead of empty string
 
         # Check format
         if telegram_id.startswith("@"):
@@ -200,11 +200,11 @@ class AccountSettingsForm(forms.ModelForm):
         }
 
     def clean_telegram_id(self):
-        """Validate Telegram ID"""
-        telegram_id = self.cleaned_data.get("telegram_id", "").strip()
+        """Validate Telegram ID - allow empty (None)"""
+        telegram_id = self.cleaned_data.get("telegram_id", "").strip() or None
 
         if not telegram_id:
-            return telegram_id  # Allow empty
+            return None  # Return None instead of empty string
 
         # Check format
         if telegram_id.startswith("@"):
