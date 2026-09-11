@@ -27,8 +27,8 @@ class DeliveryParallelAcceptTests(TestCase):
         self.customer = CustomUser.objects.create_user(email="customer@test.com", password="testpass123")
 
         # Create delivery drivers
-        self.driver1 = DeliveryDriver.objects.create(user=self.user1, vehicle_type="bike", license_plate="ABC123")
-        self.driver2 = DeliveryDriver.objects.create(user=self.user2, vehicle_type="car", license_plate="XYZ789")
+        self.driver1 = DeliveryDriver.objects.create(user=self.user1)
+        self.driver2 = DeliveryDriver.objects.create(user=self.user2)
 
         # Create order
         self.order = Order.objects.create(user=self.customer, total_price=150.00, status="Pending")

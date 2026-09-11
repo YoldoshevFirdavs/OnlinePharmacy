@@ -191,11 +191,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", 30))),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 7))),
-    "ROTATE_REFRESH_TOKENS": os.getenv("JWT_ROTATE_REFRESH_TOKENS", "true").lower() == "true",
-    "BLACKLIST_AFTER_ROTATION": os.getenv("JWT_BLACKLIST_AFTER_ROTATION", "true").lower() == "true",
-    "UPDATE_LAST_LOGIN": os.getenv("JWT_UPDATE_LAST_LOGIN", "true").lower() == "true",
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
     "SIGNING_KEY": SECRET_KEY,
     "VERIFYING_KEY": None,
     "AUDIENCE": None,
@@ -217,10 +217,10 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
 }
 
-SESSION_COOKIE_AGE = 1800
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-ADMIN_SESSION_TIMEOUT = 1800
-ADMIN_SESSION_DURATION = 1800
+SESSION_COOKIE_AGE = 1800  # 30 minutes
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Session persists after browser close
+ADMIN_SESSION_TIMEOUT = 1800  # 30 minutes for admin sessions
+ADMIN_SESSION_DURATION = 1800  # 30 minutes for admin sessions
 
 CORS_ALLOWED_ORIGINS = [
     o.strip()
@@ -245,9 +245,9 @@ EMAIL_HOST = email_config.EMAIL_HOST
 EMAIL_PORT = email_config.EMAIL_PORT
 EMAIL_USE_TLS = email_config.EMAIL_USE_TLS
 EMAIL_USE_SSL = email_config.EMAIL_USE_SSL
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@example.com")
+EMAIL_HOST_USER = email_config.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = email_config.EMAIL_HOST_PASSWORD
+DEFAULT_FROM_EMAIL = email_config.DEFAULT_FROM_EMAIL
 
 # Fall back to a path inside the project if the env-specified path is not writable.
 # This prevents a missing /var/log/... directory from crashing Gunicorn on startup.
@@ -423,37 +423,36 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 # ============================================
 
 # Device fingerprint rate limiting (requests per second per fingerprint)
-FINGERPRINT_RATE_THRESHOLD = int(os.getenv("FINGERPRINT_RATE_THRESHOLD", "100"))
+FINGERPRINT_RATE_THRESHOLD = 100  # Default rate limit
 
 # Temporary ban duration for rate limiting violations (minutes)
-FINGERPRINT_TEMP_BAN_DURATION = int(os.getenv("FINGERPRINT_TEMP_BAN_DURATION", "1"))
+FINGERPRINT_TEMP_BAN_DURATION = 1  # 1 minute ban
 
 # IP block duration after rate limiting (seconds)
-FINGERPRINT_IP_BLOCK_DURATION = int(os.getenv("FINGERPRINT_IP_BLOCK_DURATION", "3600"))
+FINGERPRINT_IP_BLOCK_DURATION = 3600  # 1 hour
 
 # Main page refresh limit per fingerprint per hour
-FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT = int(os.getenv("FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT", "20"))
+FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT = 20  # 20 refreshes per hour
 
 # Fingerprint ban cache TTL (seconds) - how long to keep ban info in cache
-# For permanent bans, this is ignored
-FINGERPRINT_BAN_CACHE_TTL = int(os.getenv("FINGERPRINT_BAN_CACHE_TTL", "86400"))  # 24 hours
+FINGERPRINT_BAN_CACHE_TTL = 86400  # 24 hours
 
 # Fingerprint to user mapping TTL (seconds)
-FINGERPRINT_USER_MAPPING_TTL = int(os.getenv("FINGERPRINT_USER_MAPPING_TTL", "86400"))  # 24 hours
+FINGERPRINT_USER_MAPPING_TTL = 86400  # 24 hours
 
 # Auto cleanup settings
-FINGERPRINT_AUTO_CLEANUP_ENABLED = os.getenv("FINGERPRINT_AUTO_CLEANUP_ENABLED", "True").lower() == "true"
-FINGERPRINT_CLEANUP_BATCH_SIZE = int(os.getenv("FINGERPRINT_CLEANUP_BATCH_SIZE", "100"))
+FINGERPRINT_AUTO_CLEANUP_ENABLED = True
+FINGERPRINT_CLEANUP_BATCH_SIZE = 100
 
 # Security settings
-FINGERPRINT_REQUIRE_HTTPS_COOKIE = os.getenv("FINGERPRINT_REQUIRE_HTTPS_COOKIE", "True").lower() == "true"
-FINGERPRINT_COOKIE_SAMESITE = os.getenv("FINGERPRINT_COOKIE_SAMESITE", "Lax")  # Strict, Lax, None
-FINGERPRINT_HEADER_NAME = os.getenv("FINGERPRINT_HEADER_NAME", "Authorization-Fingerprint")
+FINGERPRINT_REQUIRE_HTTPS_COOKIE = True
+FINGERPRINT_COOKIE_SAMESITE = "Lax"  # Strict, Lax, None
+FINGERPRINT_HEADER_NAME = "Authorization-Fingerprint"
 
 # Logging settings
-FINGERPRINT_LOG_LEVEL = os.getenv("FINGERPRINT_LOG_LEVEL", "WARNING")
-FINGERPRINT_LOG_BLOCKED_REQUESTS = os.getenv("FINGERPRINT_LOG_BLOCKED_REQUESTS", "True").lower() == "true"
-FINGERPRINT_LOG_RATE_LIMITS = os.getenv("FINGERPRINT_LOG_RATE_LIMITS", "True").lower() == "true"
+FINGERPRINT_LOG_LEVEL = "WARNING"
+FINGERPRINT_LOG_BLOCKED_REQUESTS = True
+FINGERPRINT_LOG_RATE_LIMITS = True
 
 
 # ============================================
@@ -461,10 +460,10 @@ FINGERPRINT_LOG_RATE_LIMITS = os.getenv("FINGERPRINT_LOG_RATE_LIMITS", "True").l
 # ============================================
 
 # Admin login maximum failed attempts before ban
-ADMIN_LOGIN_MAX_ATTEMPTS = int(os.getenv("ADMIN_LOGIN_MAX_ATTEMPTS", "10"))
+ADMIN_LOGIN_MAX_ATTEMPTS = 10
 
 # Admin ban duration in seconds (1 hour = 3600)
-ADMIN_BAN_SECONDS = int(os.getenv("ADMIN_BAN_SECONDS", "3600"))
+ADMIN_BAN_SECONDS = 3600
 
 # Admin session timeout in seconds (30 minutes = 1800)
-ADMIN_SESSION_TIMEOUT = int(os.getenv("ADMIN_SESSION_TIMEOUT", "1800"))
+ADMIN_SESSION_TIMEOUT = 1800

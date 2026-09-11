@@ -32,15 +32,6 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
-    # Driver field for delivery assignment
-    driver = models.ForeignKey(
-        "users.DeliveryDriver",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="assigned_orders",
-        help_text="Driver assigned to deliver this order",
-    )
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     address = models.TextField(blank=True, null=True)
@@ -83,7 +74,6 @@ class DeliveryOrder(models.Model):
         ("cancelled", "Cancelled"),
     ]
 
-    driver = models.ForeignKey(DeliveryDriver, on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.CharField(
         max_length=50,
@@ -95,4 +85,4 @@ class DeliveryOrder(models.Model):
     delivered_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Delivery for Order #{self.order.id} by {self.driver.user.full_name if self.driver else 'N/A'}"
+        return f"Delivery for Order #{self.order.id}"

@@ -7,17 +7,14 @@ from orders.models import Cart, CartItem, DeliveryOrder, Order, OrderItem
 class DeliveryOrderAdmin(admin.ModelAdmin):
     list_display = (
         "order",
-        "driver",
         "status",
         "assigned_at",
     )
-    list_filter = ("driver", "status", "assigned_at")
+    list_filter = ("status", "assigned_at")
     search_fields = (
         "order__id",
-        "driver__user__full_name",
-        "driver__user__phone_number",
     )
-    raw_id_fields = ("order", "driver")
+    raw_id_fields = ("order",)
 
 
 @admin.register(Order)

@@ -26,10 +26,10 @@ class ReviewOwnershipSecurityTests(TestCase):
 
         # Create reviews
         self.review_user1 = Review.objects.create(
-            user=self.user1, product=None, rating=5, comment="Great product!", is_approved=True  # For testing only
+            user=self.user1, medicine=None, rating=5, content="Great product!", is_approved=True  # For testing only
         )
         self.review_user2 = Review.objects.create(
-            user=self.user2, product=None, rating=3, comment="Average product", is_approved=True
+            user=self.user2, medicine=None, rating=3, content="Average product", is_approved=True
         )
 
     def test_user_cannot_update_another_users_review(self):
