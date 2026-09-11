@@ -188,8 +188,11 @@ class ProductSuggestionsTestCase(APITestCase):
             suggestion = data[0]
             self.assertIn("id", suggestion)
             self.assertIn("name", suggestion)
-            # rating and price may not always be present in suggestions
-            self.assertTrue("rating" in suggestion or "average_rating" in suggestion or True)
+            # Check if suggestion contains required rating information
+            self.assertTrue(
+                "rating" in suggestion or "average_rating" in suggestion,
+                f"Suggestion missing rating data: {suggestion}",
+            )
 
 
 class ProductSerializerTestCase(TestCase):

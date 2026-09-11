@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from pharmacy.models.medicine import Category, Medicine
 from pharmacy.models.misc import FlashSale, MedicineImage, ProductViewHistory, Review
+from pharmacy.permissions import IsOwnerOrReadOnly
 from pharmacy.permissons import IsVerifiedSeller
 from pharmacy.serializers.misc import (
     CategorySerializer,
@@ -86,19 +87,26 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated]  # Only authenticated users can create/update/delete categories
+            return [IsAuthenticated()]  # Return permission INSTANCES, not classes
         return [AllowAny()]  # Anyone can view categories
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.approved.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         if self.action in ["list", "retrieve"]:
             return Review.approved.all()
+        # For update/delete actions, only show user's own reviews
+        elif self.action in ["update", "partial_update", "destroy"]:
+            return Review.objects.filter(user=self.request.user)
         return Review.objects.all()
+
+    def perform_create(self, serializer):
+        # Ensure the review is created by the current user
+        serializer.save(user=self.request.user)
 
 
 class FlashSaleViewSet(viewsets.ReadOnlyModelViewSet):

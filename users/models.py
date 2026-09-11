@@ -47,6 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ("user", "User"),
         ("admin", "Admin"),
         ("seller", "Seller"),
+        ("driver", "Driver"),
     ]
 
     phone_number = models.CharField(max_length=32, unique=True, null=True, blank=True)

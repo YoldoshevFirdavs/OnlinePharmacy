@@ -345,6 +345,14 @@ PAYROLL_TAX_RATE = float(os.getenv("PAYROLL_TAX_RATE", 0.15))
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
+# Validate required Stripe configuration in production
+if not DEBUG and not STRIPE_WEBHOOK_SECRET:
+    raise ValueError(
+        "STRIPE_WEBHOOK_SECRET must be configured in production environment. "
+        "Set the STRIPE_WEBHOOK_SECRET environment variable."
+    )
 
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 
@@ -409,10 +417,10 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 # ============================================
 
 # Device fingerprint rate limiting (requests per second per fingerprint)
-FINGERPRINT_RATE_THRESHOLD = int(os.getenv("FINGERPRINT_RATE_THRESHOLD", "10"))
+FINGERPRINT_RATE_THRESHOLD = int(os.getenv("FINGERPRINT_RATE_THRESHOLD", "100"))
 
 # Temporary ban duration for rate limiting violations (minutes)
-FINGERPRINT_TEMP_BAN_DURATION = int(os.getenv("FINGERPRINT_TEMP_BAN_DURATION", "60"))
+FINGERPRINT_TEMP_BAN_DURATION = int(os.getenv("FINGERPRINT_TEMP_BAN_DURATION", "1"))
 
 # IP block duration after rate limiting (seconds)
 FINGERPRINT_IP_BLOCK_DURATION = int(os.getenv("FINGERPRINT_IP_BLOCK_DURATION", "3600"))

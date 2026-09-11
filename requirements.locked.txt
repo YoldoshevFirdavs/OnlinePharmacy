@@ -1,0 +1,73 @@
+# Production Locked Dependencies
+# Generated from requirements.txt with exact versions for reproducible builds
+# Last updated: 2026-08-31
+
+# Core Django Framework
+Django==5.1.1
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.5.1
+
+# Database
+psycopg2-binary==2.9.7
+redis==4.5.4
+django-redis==6.0.0
+
+# Task Queue
+celery==5.3.1
+kombu==5.3.6
+billiard==4.2.0
+vine==5.1.0
+amqp==5.2.0
+
+# Authentication
+djoser==2.2.1
+social-auth-app-django==5.4.0
+social-auth-core==4.6.0
+PyJWT==2.8.0
+
+# API Documentation
+drf-yasg==1.21.8
+uritemplate==4.1.1
+
+# Security
+django-cors-headers==4.3.1
+django-sslserver==0.22
+django-ratelimit==4.0.0
+
+# Payment Processing
+stripe==7.6.0
+
+# Email
+django-sendgrid-v5==1.0.0
+
+# File Uploads
+Pillow==10.2.0
+
+# Testing
+pytest==7.4.4
+pytest-django==4.8.0
+pytest-cov==4.1.0
+factory-boy==3.3.1
+freezegun==1.4.0
+
+# Development Tools
+django-extensions==3.2.3
+django-debug-toolbar==4.2.0
+ipython==8.18.1
+
+# Web Server
+gunicorn==21.2.0
+whitenoise==6.6.0
+
+# Monitoring
+sentry-sdk==1.40.0
+
+# Utilities
+python-dateutil==2.8.2
+python-magic==0.4.27
+requests==2.31.0
+Pygments==2.17.2
+
+# Telegram Bot
+python-telegram-bot==13.15
+cryptography==42.0.5

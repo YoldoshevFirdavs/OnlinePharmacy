@@ -78,12 +78,11 @@ IS_DOCKER = os.path.exists("/.dockerenv")
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "test_pharmacy_db"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "root"),
-        "HOST": os.getenv("DB_HOST", "db" if IS_DOCKER else "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+        "TEST": {
+            "NAME": ":memory:",
+        },
     }
 }
 
@@ -122,11 +121,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PHONENUMBER_DEFAULT_REGION = "UZ"
 
 # OTP Configuration for tests
-OTP_MAX_ATTEMPTS = 5
+OTP_MAX_ATTEMPTS = 50
 OTP_ATTEMPT_RESET_TIMEOUT = 3600  # 1 hour
 
 # Fingerprint and Rate Limiting Configuration
-FINGERPRINT_RATE_THRESHOLD = 5
+FINGERPRINT_RATE_THRESHOLD = 100
 FINGERPRINT_TEMP_BAN_DURATION = 1  # minutes
 
 REST_FRAMEWORK = {

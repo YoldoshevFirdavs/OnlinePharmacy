@@ -7,7 +7,7 @@ Secure, clean, production-ready OTP management
 - Type hints
 - Comprehensive error handling
 
-This is Claude AI recommended implementation.
+Production-ready implementation.
 Replaces otp_service.py after verification.
 """
 

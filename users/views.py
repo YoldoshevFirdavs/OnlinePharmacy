@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import generics, permissions, serializers, status, viewsets
 from rest_framework.generics import CreateAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -33,7 +33,7 @@ except ImportError:
     def is_admin(user):
         try:
             return user.is_authenticated and getattr(user, "role", None) == "admin"
-        except Exception:
+        except (AttributeError, KeyError):
             return False
 
 
@@ -1364,25 +1364,59 @@ class SubscribedUserViewSet(viewsets.ModelViewSet):
 
 
 class VerifySubscriptionView(APIView):
+    """
+    Verify subscription email.
+    - Checks if user already subscribed (is_verified=True)
+    - Checks token expiration
+    - Verifies duplicate subscription
+    """
+
+    permission_classes = [permissions.AllowAny]
+
     def get(self, request, token):
         try:
+            # First, check if the token is expired
             email = loads(token, max_age=3600)
-            user = SubscribedUser.objects.get(email=email)
-            user.is_verified = True
-            user.save()
-            return Response({"detail": "Email tasdiqlandi."}, status=status.HTTP_200_OK)
-        except (BadSignature, SignatureExpired, SubscribedUser.DoesNotExist):
+
+            # Get or create subscriber - check if already verified
+            subscriber, created = SubscribedUser.objects.get_or_create(email=email)
+
+            if subscriber.is_verified:
+                # User already verified - return success but don't allow re-verification
+                return Response(
+                    {"detail": "Siz allaqachon robota qilmoqdasiz."},
+                    status=status.HTTP_200_OK,
+                )
+
+            # Verify the subscription
+            subscriber.is_verified = True
+            subscriber.save()
+
             return Response(
-                {"detail": "Token noto‘g‘ri yoki muddati o‘tgan."},
+                {"detail": "Muvaffaqiyatli robota qilmoqdasiz."},
+                status=status.HTTP_200_OK,
+            )
+        except SignatureExpired:
+            return Response(
+                {"detail": "Link muddati tugab ketdi. Iltimos, qayta ro'yxatdan o'ting."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Exception:
-            logger.exception("Error during email verification")
+        except BadSignature:
             return Response(
-                {"detail": "Xato yuz berdi"},
+                {"detail": "Token noto‘g‘ri. Iltimos, qayta urinib ko'ring."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except SubscribedUser.DoesNotExist:
+            return Response(
+                {"detail": "Foydalanuvchi topilmadi. Iltimos, qayta urinib ko'ring."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            logger.exception(f"Subscription verification error for token: {str(token)[:20]}")
+            return Response(
+                {"detail": "Server xatosi. Iltimos, qayta urinib ko'ring."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        return Response({"detail": "Topilmadi"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class SubscriberCreateView(CreateAPIView):
@@ -1390,11 +1424,37 @@ class SubscriberCreateView(CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
+        email = serializer.validated_data.get("email")
+
+        # Check if user already subscribed
+        existing_subscriber = SubscribedUser.objects.filter(email=email).first()
+        if existing_subscriber:
+            if existing_subscriber.is_verified:
+                # Already verified - don't send another email
+                raise serializers.ValidationError(
+                    "Siz allaqachon robota qilmoqdasiz. Qo'shimcha ro'yxatdan o'tish mumkin emas."
+                )
+            else:
+                # Already registered but not verified - send verification again
+                token = dumps(email)
+                verify_url = f"{self.request.build_absolute_uri('/api/v1/users/subscribe/verify/')}{token}/"
+                try:
+                    tasks.send_subscription_verification_email.delay(email, verify_url)
+                except Exception as e:
+                    logger.error("Subscription email enqueue failed for existing user")
+                raise serializers.ValidationError(
+                    "Siz allaqachon ro'yxatdan o'tgansiz. Iltimos, emailingizni tekshiring."
+                )
+
+        # New subscriber
         subscriber = serializer.save()
         if not subscriber.is_verified:
-            token = dumps(subscriber.email)
+            token = dumps(email)
             verify_url = f"{self.request.build_absolute_uri('/api/v1/users/subscribe/verify/')}{token}/"
             try:
+                tasks.send_subscription_verification_email.delay(email, verify_url)
+            except Exception as e:
+                logger.error("Subscription email enqueue failed")
                 tasks.send_subscription_verification_email.delay(subscriber.email, verify_url)
             except Exception as e:
                 logger.error("Subscription email enqueue failed")
@@ -1414,10 +1474,31 @@ class CookieRefreshView(APIView):
             )
 
         try:
-            raise Exception("JWT refresh logic is incomplete or incorrect.")
+            # Validate and refresh the token
+            token = RefreshToken(refresh_token)
+            new_access_token = str(token.access_token)
 
-        except Exception:
-            logger.exception("Error refreshing token via cookie")
+            # If rotation is enabled, get new refresh token
+            if settings.SIMPLE_JWT.get("ROTATE_REFRESH_TOKENS", False):
+                new_refresh_token = str(token)
+                response = Response(
+                    {"access": new_access_token, "refresh": new_refresh_token}, status=status.HTTP_200_OK
+                )
+                response.set_cookie(
+                    "refresh_token",
+                    new_refresh_token,
+                    max_age=settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME").total_seconds(),
+                    httponly=True,
+                    secure=settings.SIMPLE_JWT.get("AUTH_COOKIE_SECURE", True),
+                    samesite="Lax",
+                )
+            else:
+                response = Response({"access": new_access_token}, status=status.HTTP_200_OK)
+
+            return response
+
+        except Exception as e:
+            logger.exception(f"Error refreshing token via cookie: {e}")
             return Response(
                 {"detail": "Refresh token yaroqsiz yoki muddati o'tgan."},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -1912,31 +1993,37 @@ class AdminCheckView(TemplateView):
         )
 
     def get(self, request, *args, **kwargs):
+        """Handle GET request - check if session is valid and not expired."""
         session_id = request.GET.get("session")
         otp = request.GET.get("otp")
 
         if not session_id:
-            return self.render_to_response({"session_expired": True})
+            return self.render_to_response({"session_expired": True, "message": "Sessiya topilmadi"})
 
         stored_data = cache.get(f"admin_session:{session_id}")
 
         if not stored_data:
-            return self.render_to_response({"session_expired": True})
+            # Session doesn't exist - could be expired or invalid
+            return self.render_to_response({"session_expired": True, "message": "Sessiya tugadi yoki noto'g'ri"})
 
         if self._is_expired(stored_data):
+            # Session is expired - mark as expired and show error
             self._mark_expired(session_id, stored_data)
             return self.render_to_response(
                 {
                     "session_id": session_id,
                     "session_expired": True,
+                    "message": "Sessiya muddati tugab ketdi. Iltimos, qayta urinib ko'ring.",
                 }
             )
 
         if stored_data.get("used"):
+            # Session already used - one-time use enforcement
             return self.render_to_response(
                 {
                     "session_id": session_id,
                     "already_completed": True,
+                    "message": "Sessiya allaqachon ishlatilgan. Bu link bir marta ishlatilishi uchun mo'ljallangan.",
                 }
             )
 
@@ -1946,6 +2033,7 @@ class AdminCheckView(TemplateView):
                 "pending_verification": bool(stored_data),
                 "telegram_verified": bool(stored_data.get("verified")),
                 "attempts": stored_data.get("attempts", 0),
+                "message": "Telegram orqali tasdiqlang",
             }
         )
 

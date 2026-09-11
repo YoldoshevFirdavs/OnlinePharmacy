@@ -50,6 +50,6 @@ def footer_links(request):
         "privacy_url": "/privacy/",
         # Contact information
         "contact_email": "firdavsyoldoshevpython@gmail.com",
-        "contact_phone": "+998 (55) 555-5558",
-        "contact_phone_short": "+998555558",
+        "contact_phone": "+998 (97) 770-5558",
+        "contact_phone_short": "+998977705558",
     }

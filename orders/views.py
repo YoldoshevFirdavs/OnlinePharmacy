@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -157,12 +158,23 @@ class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
         if getattr(self, "swagger_fake_view", False):
             return self.queryset.none()
 
-        # Faqat login bo‘lgan userning driver sifatida assign qilingan orderlari
-        return self.queryset.filter(driver=self.request.user)
+        # Check if user is a delivery driver
+        if not hasattr(self.request.user, "delivery_profile"):
+            return self.queryset.none()
+
+        # Additional validation: check delivery_profile integrity
+        if (
+            not hasattr(self.request.user.delivery_profile, "user")
+            or self.request.user.delivery_profile.user != self.request.user
+        ):
+            return self.queryset.none()
+
+        # Faqat login bo'lgan userning driver sifatida assign qilingan orderlari
+        return self.queryset.filter(driver=self.request.user.delivery_profile)
 
     @action(detail=True, methods=["post"], url_path="update-status")
     def update_status(self, request, pk=None):
-        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        order = get_object_or_404(Order, pk=pk, driver=request.user.delivery_profile)
         serializer = OrderStatusUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order.status = serializer.validated_data["status"]
@@ -171,7 +183,7 @@ class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="arrived")
     def mark_arrived(self, request, pk=None):
-        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        order = get_object_or_404(Order, pk=pk, driver=request.user.delivery_profile)
         serializer = ArrivalSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order.arrived_at = serializer.validated_data["arrived_at"]
@@ -180,7 +192,7 @@ class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="location")
     def update_location(self, request, pk=None):
-        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        order = get_object_or_404(Order, pk=pk, driver=request.user.delivery_profile)
         serializer = LocationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         # Bu yerda location logikasi yoziladi (masalan, DBga saqlash yoki cache)
@@ -195,17 +207,46 @@ class OrderAcceptView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        order = get_object_or_404(Order, pk=pk)
-        if order.driver and order.driver != request.user:
-            return Response(
-                {"error": "Order already assigned to another driver."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        order.driver = request.user
-        order.accepted_at = timezone.now()
-        order.status = "Accepted"
-        order.save()
-        return Response({"status": "Order accepted"})
+        # Use select_for_update to prevent race conditions during parallel accepts
+        with transaction.atomic():
+            try:
+                order = Order.objects.select_for_update().get(pk=pk)
+            except Order.DoesNotExist:
+                return Response(
+                    {"error": "Order not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Check if order is already assigned to another driver
+            if order.driver and order.driver.user != request.user:
+                return Response(
+                    {"error": "Order already assigned to another driver."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Check if user is a driver and has delivery_profile
+            if not hasattr(request.user, "delivery_profile"):
+                return Response(
+                    {"error": "Only delivery drivers can accept orders."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            # Additional check: verify the delivery_profile is valid and belongs to this user
+            if not hasattr(request.user.delivery_profile, "user") or request.user.delivery_profile.user != request.user:
+                return Response(
+                    {"error": "Invalid driver profile."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            # Assign order to driver
+            order.driver = request.user.delivery_profile
+            order.accepted_at = timezone.now()
+            order.status = "Accepted"
+            order.save(update_fields=["driver", "accepted_at", "status"])
+
+        return Response(
+            {"status": "Order accepted", "order_id": order.id, "accepted_at": order.accepted_at.isoformat()}
+        )
 
 
 class OrderStatusUpdateView(APIView):
@@ -216,7 +257,7 @@ class OrderStatusUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        order = get_object_or_404(Order, pk=pk, driver=request.user)
+        order = get_object_or_404(Order, pk=pk, driver=request.user.delivery_profile)
         serializer = OrderStatusUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order.status = serializer.validated_data["status"]

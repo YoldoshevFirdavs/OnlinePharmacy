@@ -34,9 +34,10 @@ class CreateChargeView(APIView):
         order_id = request.data.get("order_id")
 
         try:
-            order = Order.objects.get(id=order_id)
+            # Security: Only allow user to pay for their own orders
+            order = Order.objects.get(id=order_id, user=request.user)
         except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Order not found or not owned by user"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             total_amount = order.total_price * 100
@@ -192,17 +193,19 @@ class StripeWebhookView(APIView):
     def post(self, request):
         payload = request.body
         sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
-        webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", "")
+        webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
+
+        # STRIPE_WEBHOOK_SECRET must be configured for security
+        if not webhook_secret:
+            logger.error("STRIPE_WEBHOOK_SECRET not configured - webhook rejected")
+            return Response({"error": "Webhook secret not configured"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            if webhook_secret:
-                event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-            else:
-                import json
-
-                event = json.loads(payload)
-        except (ValueError, stripe.error.SignatureVerificationError):
-            return Response({"error": "Invalid payload"}, status=status.HTTP_400_BAD_REQUEST)
+            # Always validate webhook signature for security
+            event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        except (ValueError, stripe.error.SignatureVerificationError) as e:
+            logger.error(f"Webhook signature verification failed: {e}")
+            return Response({"error": "Invalid payload or signature"}, status=status.HTTP_400_BAD_REQUEST)
 
         if event.get("type") == "checkout.session.completed":
             session = event["data"]["object"]
