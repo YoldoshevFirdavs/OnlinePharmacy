@@ -27,9 +27,18 @@ sys.path.insert(0, str(BASE_DIR))
 # Load .env file if it exists
 from dotenv import load_dotenv
 
+# Try to load .env.prod first for production, otherwise .env for development
+env_prod_path = BASE_DIR / ".env.prod"
 env_path = BASE_DIR / ".env"
-if env_path.exists():
+
+if env_prod_path.exists():
+    load_dotenv(dotenv_path=env_prod_path)
+    logger.info("Loaded .env.prod (production environment)")
+elif env_path.exists():
     load_dotenv(dotenv_path=env_path)
+    logger.info("Loaded .env (development environment)")
+else:
+    logger.warning("No .env or .env.prod file found")
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
