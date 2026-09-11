@@ -4,15 +4,16 @@ This file is configured to load all sensitive and environment-specific settings 
 Safe default values are provided for development and testing environments.
 In production, ensure all sensitive variables are set in the .env file."""
 
-import logging  # Import logging module
+import logging
 import logging.handlers
 import os
-import re  # Import re module for regex
+import re
 import sys
 from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 import config.email_config as email_config
 
@@ -23,9 +24,6 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(BASE_DIR))
-
-# Load .env file if it exists
-from dotenv import load_dotenv
 
 # Try to load .env.prod first for production, otherwise .env for development
 env_prod_path = BASE_DIR / ".env.prod"
@@ -179,7 +177,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": int(os.getenv("REST_FRAMEWORK_PAGE_SIZE", 10)),
+    "PAGE_SIZE": 10,  # Default page size
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -213,10 +211,8 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_SLIDING_TOKEN_LIFETIME_MINUTES", 60))),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(
-        days=int(os.getenv("JWT_SLIDING_TOKEN_REFRESH_TOKEN_LIFETIME_DAYS", 7))
-    ),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=60),  # Default sliding token lifetime
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=7),  # Default sliding token refresh lifetime
     # ADDED: Custom serializer for token obtain to include role in JWT claims
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
 }
@@ -237,8 +233,8 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = DEBUG or os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
 CORS_ALLOW_CREDENTIALS = True
 
-PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "UZ")
-PHONENUMBER_DEFAULT_REGION_CODE = os.getenv("PHONENUMBER_DEFAULT_REGION_CODE", "998")  # Added this line
+PHONENUMBER_DEFAULT_REGION = "UZ"  # Default for Uzbekistan
+PHONENUMBER_DEFAULT_REGION_CODE = "998"  # Default country code
 
 AUTH_BOT_TOKEN = os.getenv("AUTH_BOT_TOKEN", "")
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
@@ -365,11 +361,12 @@ if not DEBUG and not STRIPE_WEBHOOK_SECRET:
 
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")  # This is for Django Cache
-# Celery Redis connection configuration
-CELERY_REDIS_HOST = os.getenv("CELERY_REDIS_HOST", "localhost")  # Default to localhost for local dev
-CELERY_BROKER_URL = f"redis://{CELERY_REDIS_HOST}:6379/1"
-CELERY_RESULT_BACKEND = f"redis://{CELERY_REDIS_HOST}:6379/1"
+# Redis URL - hardcoded default for Docker
+REDIS_URL = "redis://redis:6379/0"
+
+# Celery Redis connection configuration - hardcoded defaults
+CELERY_BROKER_URL = "redis://redis:6379/1"
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
