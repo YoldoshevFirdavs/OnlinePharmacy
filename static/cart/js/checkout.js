@@ -2,6 +2,7 @@
  * Checkout & Cart Manager
  * OnlinePharmacy
  */
+
 (function() {
     'use strict';
 
