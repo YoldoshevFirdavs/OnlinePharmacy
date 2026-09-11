@@ -38,7 +38,7 @@ elif env_path.exists():
     load_dotenv(dotenv_path=env_path)
     logger.info("Loaded .env (development environment)")
 else:
-    logger.warning("No .env or .env.prod file found")
+    logger.info("No .env or .env.prod file found, using defaults")
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 

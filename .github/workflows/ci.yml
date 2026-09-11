@@ -73,12 +73,24 @@ jobs:
 
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DEBUG: "False"
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_HOST: localhost
       DB_PORT: 5432
       REDIS_URL: redis://localhost:6379/0
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      MAIN_BOT_TOKEN: ${{ secrets.MAIN_BOT_TOKEN }}
+      AUTH_BOT_TOKEN: ${{ secrets.AUTH_BOT_TOKEN }}
+      ADMIN_ID: ${{ secrets.ADMIN_ID }}
+      AUTH_BOT_USERNAME: ${{ secrets.AUTH_BOT_USERNAME }}
+      EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+      EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+      DEFAULT_FROM_EMAIL: ${{ secrets.EMAIL_HOST_USER }}
+      GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       SOCIAL_TELEGRAM: "https://t.me/testbot"
       CORS_ORIGINS: "http://localhost:3000,http://localhost:8000"
