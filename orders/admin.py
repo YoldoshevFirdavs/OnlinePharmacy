@@ -11,9 +11,7 @@ class DeliveryOrderAdmin(admin.ModelAdmin):
         "assigned_at",
     )
     list_filter = ("status", "assigned_at")
-    search_fields = (
-        "order__id",
-    )
+    search_fields = ("order__id",)
     raw_id_fields = ("order",)
 
 
