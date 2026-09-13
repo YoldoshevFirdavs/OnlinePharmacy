@@ -1,5 +1,6 @@
-# Local development docker-compose without Grafana/Bugsnag
-# For testing and local development only
+# Local development docker-compose
+# Run: docker-compose -f docker-compose.local.yml up -d
+# Services: db, redis, web, celery, auth_bot (NO Grafana, NO Prometheus)
 
 services:
   db:
@@ -44,6 +45,7 @@ services:
       - PYTHONUNBUFFERED=1
       - LOG_FILE=/app/logs/django.log
       - DEBUG=True
+      - IS_DOCKER=true
     ports:
       - "8000:8000"
     env_file:

@@ -25,16 +25,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(BASE_DIR))
 
-# Try to load .env.prod first for production, otherwise .env for development
+# Default: Load .env for development
+# Production environments (docker-compose.prod.yml) will explicitly use .env.prod
 env_prod_path = BASE_DIR / ".env.prod"
 env_path = BASE_DIR / ".env"
 
-if env_prod_path.exists():
-    load_dotenv(dotenv_path=env_prod_path)
-    logger.info("Loaded .env.prod (production environment)")
-elif env_path.exists():
+# Try .env first, then .env.prod as fallback
+if env_path.exists():
     load_dotenv(dotenv_path=env_path)
     logger.info("Loaded .env (development environment)")
+elif env_prod_path.exists():
+    load_dotenv(dotenv_path=env_prod_path)
+    logger.info("Loaded .env.prod (production environment)")
 else:
     logger.info("No .env or .env.prod file found, using defaults")
 
@@ -356,12 +358,18 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "test-stripe-webhook-
 
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 
-# Redis URL - hardcoded default for Docker
-REDIS_URL = "redis://redis:6379/0"
+# Determine if running inside Docker
+is_docker = os.getenv("IS_DOCKER", "false").lower() == "true"
 
-# Celery Redis connection configuration - hardcoded defaults
-CELERY_BROKER_URL = "redis://redis:6379/1"
-CELERY_RESULT_BACKEND = "redis://redis:6379/1"
+# Redis URL - use localhost for local dev, docker hostname for containerized
+if is_docker:
+    REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+else:
+    REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+# Celery Redis connection configuration
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", REDIS_URL.replace("/0", "/1"))
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL.replace("/0", "/1"))
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
