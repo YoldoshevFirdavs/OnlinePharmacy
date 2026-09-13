@@ -31,9 +31,10 @@ class CategoryPermissionSecurityTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_anonymous_cannot_create_category(self):
-        """Anonymous user cannot create category"""
+        """Anonymous user cannot create category - DRF IsAuthenticated returns 403"""
         response = self.client.post("/api/v1/products/categories/", {"name": "New Category", "slug": "new-category"})
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # DRF IsAuthenticated permission returns 403 FORBIDDEN, not 401 UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_regular_user_cannot_create_category(self):
         """Regular user without admin privileges cannot create category"""

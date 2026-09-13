@@ -84,11 +84,12 @@ class MedicineViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.filter(parent=None)  # Only show top-level categories by default
     serializer_class = CategorySerializer
+    permission_classes = [AllowAny()]  # Default permission INSTANCE
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated]  # Return permission class, not instance
-        return [AllowAny]  # Anyone can view categories
+            return [IsAuthenticated()]  # Return permission INSTANCE
+        return [AllowAny()]  # Anyone can view categories
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
