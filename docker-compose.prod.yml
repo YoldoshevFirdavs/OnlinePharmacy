@@ -98,51 +98,12 @@ services:
       - prod_network
     restart: unless-stopped
 
-  prometheus:
-    image: prom/prometheus:v2.45.0
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=15d'
-    networks:
-      - prod_network
-    depends_on:
-      - web
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-    environment:
-      - GF_AUTH_ANONYMOUS_TEAM_ORGANIZATION=Main Org.
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_AUTHENTICATION_DISABLE_LOGIN_FORM=false
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    networks:
-      - prod_network
-    depends_on:
-      - prometheus
-
 volumes:
   postgres_data:
   redis_data:
   static_volume:
   media_volume:
   logs_volume:
-  grafana_data:
-  prometheus_data:
 
 networks:
   prod_network:
