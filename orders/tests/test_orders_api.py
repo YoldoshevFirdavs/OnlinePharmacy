@@ -115,6 +115,7 @@ class OrderAPITestCase(APITestCase):
 
         self.assertEqual(order.order_items.count(), 2)
         expected_total = (2 * 100.0) + (1 * 50.0)
+        self.assertEqual(order.total_price, 0)  # Initial total is 0
 
     def test_update_order_status(self):
         """Test updating order status"""

@@ -198,9 +198,15 @@ class Seller(models.Model):
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     sells_count = models.PositiveIntegerField(default=0)
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
-    credit_card = models.CharField(max_length=16, blank=True, null=True)
-    credit_card_expiry = models.CharField(max_length=5, blank=True, null=True)
-    credit_card_holder = models.CharField(max_length=255, blank=True, null=True)
+    credit_card = models.CharField(
+        max_length=16, blank=True, null=True, help_text="O'chirilgan -Stripe Connect orqali saqlang"
+    )
+    credit_card_expiry = models.CharField(
+        max_length=5, blank=True, null=True, help_text="O'chirilgan -Stripe Connect orqali saqlang"
+    )
+    credit_card_holder = models.CharField(
+        max_length=255, blank=True, null=True, help_text="O'chirilgan -Stripe Connect orqali saqlang"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

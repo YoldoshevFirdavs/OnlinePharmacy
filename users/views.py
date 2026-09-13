@@ -15,6 +15,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import users.otp_service as otp_service
@@ -1476,6 +1477,14 @@ class CookieRefreshView(APIView):
         try:
             # Validate and refresh the token
             token = RefreshToken(refresh_token)
+
+            # Check if token is blacklisted
+            if token.blacklisted:
+                return Response(
+                    {"detail": "Refresh token bekor qilingan."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
             new_access_token = str(token.access_token)
 
             # If rotation is enabled, get new refresh token
@@ -1497,11 +1506,17 @@ class CookieRefreshView(APIView):
 
             return response
 
-        except Exception as e:
-            logger.exception(f"Error refreshing token via cookie: {e}")
+        except TokenError as e:
+            logger.warning(f"TokenError refreshing token via cookie: {e}")
             return Response(
                 {"detail": "Refresh token yaroqsiz yoki muddati o'tgan."},
                 status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except Exception as e:
+            logger.exception(f"Unexpected error refreshing token via cookie: {e}")
+            return Response(
+                {"detail": "Server xatosi. Iltimos, qayta urinib ko'ring."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 

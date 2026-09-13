@@ -352,9 +352,9 @@ PAYROLL_TAX_RATE = float(os.getenv("PAYROLL_TAX_RATE", 0.15))
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "test-stripe-webhook-secret")  # Default for local/dev
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
-# Webhook secret is optional - defaults to test value for local development
+# Webhook secret is required - no default value
 
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "")
 

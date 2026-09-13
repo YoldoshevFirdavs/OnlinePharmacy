@@ -32,7 +32,7 @@ gunicorn
 # Security
 django-ratelimit             # Rate limiting for Django views
 cryptography                 # Encryption and security primitives
-csp                          # Content Security Policy middleware
+django-csp                   # Content Security Policy middleware
 
 # Utilities
 django-filter                # Filtering support for DRF

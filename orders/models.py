@@ -50,6 +50,14 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     accepted_at = models.DateTimeField(null=True, blank=True, help_text="When driver accepted the order")
+    driver = models.ForeignKey(
+        DeliveryDriver,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_orders",
+        help_text="Driver who accepted this order",
+    )
 
     def __str__(self):
         return f"Order #{self.id} - {self.user.full_name or self.user.phone_number}"
