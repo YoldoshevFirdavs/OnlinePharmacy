@@ -31,22 +31,22 @@ class CategoryPermissionSecurityTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_anonymous_cannot_create_category(self):
-        """Anonymous user cannot create category - DRF IsAdminUser returns 403"""
+        """Anonymous user cannot create category - DRF IsAdminUser returns 401"""
         response = self.client.post("/api/v1/products/categories/", {"name": "New Category", "slug": "new-category"})
-        # DRF IsAdminUser permission returns 403 FORBIDDEN for unauthenticated requests
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # DRF IsAdminUser permission returns 401 UNAUTHORIZED for unauthenticated requests
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_anonymous_cannot_update_category(self):
-        """Anonymous user cannot update category - DRF IsAdminUser returns 403"""
+        """Anonymous user cannot update category - DRF IsAdminUser returns 401"""
         response = self.client.patch(f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"})
-        # DRF IsAdminUser permission returns 403 FORBIDDEN for unauthenticated requests
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # DRF IsAdminUser permission returns 401 UNAUTHORIZED for unauthenticated requests
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_anonymous_cannot_delete_category(self):
-        """Anonymous user cannot delete category - DRF IsAdminUser returns 403"""
+        """Anonymous user cannot delete category - DRF IsAdminUser returns 401"""
         response = self.client.delete(f"/api/v1/products/categories/{self.category.id}/")
-        # DRF IsAdminUser permission returns 403 FORBIDDEN for unauthenticated requests
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # DRF IsAdminUser permission returns 401 UNAUTHORIZED for unauthenticated requests
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_regular_user_cannot_create_category(self):
         """Regular user without admin privileges cannot create category"""

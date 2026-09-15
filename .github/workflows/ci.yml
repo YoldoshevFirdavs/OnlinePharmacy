@@ -83,6 +83,8 @@ jobs:
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       SOCIAL_TELEGRAM: "https://t.me/testbot"
       CORS_ORIGINS: "http://localhost:3000,http://localhost:8000"
+      TESTING: "true"
+      DJANGO_SETTINGS_MODULE: config.settings_test
 
     steps:
     - uses: actions/checkout@v3

@@ -98,7 +98,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
             # Should process normally without fingerprint checking
             self.assertEqual(response.status_code, 200)
 
-    @override_settings(FINGERPRINT_RATE_THRESHOLD=2)
+    @override_settings(FINGERPRINT_RATE_THRESHOLD=2, TESTING=False)
     def test_rate_limiting_trigger(self):
         """Test that rate limiting triggers ban"""
         request = self.factory.get("/")
@@ -117,6 +117,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
             self.assertEqual(args[0], self.test_fingerprint)
             self.assertIn("Rate limit exceeded", kwargs["reason"])
 
+    @override_settings(TESTING=False)
     def test_banned_fingerprint_redirect(self):
         """Test that banned fingerprint gets redirected"""
         # Ban the fingerprint
@@ -140,6 +141,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
         self.assertIn("/security/not-allowed/", response.url)
         self.assertIn("next=/test-path", response.url)
 
+    @override_settings(TESTING=False)
     def test_expired_ban_automatic_cleanup(self):
         """Test that expired bans are automatically cleaned up"""
         # Create an expired ban
@@ -168,6 +170,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
             # Should trigger unban for expired ban (called by is_fp_banned with actor="system")
             mock_unban.assert_called_once_with(self.test_fingerprint, actor="system")
 
+    @override_settings(TESTING=False)
     def test_ip_block_check(self):
         """Test IP blocking functionality"""
         # Block the IP
@@ -183,7 +186,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/security/not-allowed/", response.url)
 
-    @override_settings(FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT=2)
+    @override_settings(FINGERPRINT_MAIN_PAGE_REFRESH_LIMIT=2, TESTING=False)
     def test_main_page_refresh_limit(self):
         """Test main page refresh limiting"""
         # Set up existing counter close to limit
@@ -226,7 +229,7 @@ class DeviceFingerprintMiddlewareTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(getattr(request, "device_fingerprint", None))
 
-    @override_settings(FINGERPRINT_RATE_THRESHOLD=1, FINGERPRINT_IP_BLOCK_DURATION=1800)
+    @override_settings(FINGERPRINT_RATE_THRESHOLD=1, FINGERPRINT_IP_BLOCK_DURATION=1800, TESTING=False)
     def test_rate_limit_ip_block_integration(self):
         """Test that rate limiting triggers IP block"""
         request = self.factory.get("/")

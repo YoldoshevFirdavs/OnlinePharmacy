@@ -59,10 +59,6 @@ class DeviceFingerprintMiddleware:
         if path.startswith("/static/") or path.startswith("/media/") or path == "/favicon.ico":
             return self.get_response(request)
 
-        # Bypass rate limiting during testing
-        if getattr(settings, "TESTING", False):
-            return self.get_response(request)
-
         # Extract fingerprint: cookie takes priority
         fp = None
         try:
@@ -74,9 +70,13 @@ class DeviceFingerprintMiddleware:
             fp = request.META.get("HTTP_AUTHORIZATION_FINGERPRINT") or request.META.get("HTTP_DEVICE_FP")
 
         if fp:
-            # attach to request for downstream usage
+            # attach to request for downstream usage (always, even in testing)
             setattr(request, "device_fingerprint", fp)
             setattr(request, "client_ip", get_client_ip(request))
+
+            # Skip ban/rate-limit checks during testing
+            if getattr(settings, "TESTING", False):
+                return self.get_response(request)
 
             # quick ban check
             from django.core.cache import cache

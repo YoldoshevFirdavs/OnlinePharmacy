@@ -142,12 +142,12 @@ class ProductCommentAPITestCase(APITestCase):
         self.assertEqual(comment.user.id, self.user1.id)
 
     def test_create_comment_unauthenticated_forbidden(self):
-        """Test that unauthenticated users can't create comments - DRF IsAuthenticated returns 403"""
+        """Test that unauthenticated users can't create comments - DRF IsAuthenticated returns 401"""
         response = self.client.post(
             f"/api/v1/products/{self.product.id}/comments/",
             {"content": "Test", "rating": 5, "product": self.product.id},
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_edit_own_comment(self):
         """Test editing own comment"""

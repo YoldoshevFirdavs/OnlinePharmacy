@@ -173,6 +173,7 @@ class DeviceFingerprintMiddlewareTest(DeviceFingerprintTestCase):
         # Verify fingerprint is now banned
         self.assertTrue(BanService.is_fp_banned(self.test_fingerprint))
 
+    @override_settings(TESTING=False)
     def test_banned_fingerprint_blocked(self):
         """Test that banned fingerprints are blocked by middleware"""
         from django.test import RequestFactory
@@ -196,6 +197,7 @@ class DeviceFingerprintMiddlewareTest(DeviceFingerprintTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/security/not-allowed/", response.url)
 
+    @override_settings(TESTING=False)
     def test_ip_blocking_after_rate_limit(self):
         """Test IP blocking after rate limit exceeded"""
         from django.core.cache import cache
