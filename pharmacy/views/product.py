@@ -6,7 +6,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from pharmacy.models.medicine import Category, Medicine
@@ -84,12 +84,11 @@ class MedicineViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.filter(parent=None)  # Only show top-level categories by default
     serializer_class = CategorySerializer
-    permission_classes = [AllowAny()]  # Default permission INSTANCE
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated()]  # Return permission INSTANCE
-        return [AllowAny()]  # Anyone can view categories
+            return [IsAdminUser()]  # Admin only
+        return [AllowAny()]
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -101,7 +100,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return Review.approved.all()
         # For update/delete actions, only show user's own reviews
+        # But staff can edit any review
         elif self.action in ["update", "partial_update", "destroy"]:
+            if self.request.user and self.request.user.is_staff:
+                return Review.objects.all()
             return Review.objects.filter(user=self.request.user)
         return Review.objects.all()
 

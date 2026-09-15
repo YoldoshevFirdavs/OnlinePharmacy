@@ -33,7 +33,21 @@ class CategoryPermissionSecurityTests(TestCase):
     def test_anonymous_cannot_create_category(self):
         """Anonymous user cannot create category - DRF IsAuthenticated returns 403"""
         response = self.client.post("/api/v1/products/categories/", {"name": "New Category", "slug": "new-category"})
-        # DRF IsAuthenticated permission returns 403 FORBIDDEN, not 401 UNAUTHORIZED
+        # DRF IsAdminUser permission returns 403 FORBIDDEN for unauthenticated requests
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_anonymous_cannot_update_category(self):
+        """Anonymous user cannot update category"""
+        response = self.client.patch(
+            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
+        )
+        # DRF returns 403 FORBIDDEN for unauthenticated requests
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_anonymous_cannot_delete_category(self):
+        """Anonymous user cannot delete category"""
+        response = self.client.delete(f"/api/v1/products/categories/{self.category.id}/")
+        # DRF returns 403 FORBIDDEN for unauthenticated requests
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_regular_user_cannot_create_category(self):
@@ -57,6 +71,56 @@ class CategoryPermissionSecurityTests(TestCase):
 
         # Verify category was created
         self.assertTrue(Category.objects.filter(slug="admin-category").exists())
+
+    def test_regular_user_cannot_update_category(self):
+        """Regular user cannot update category"""
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.patch(
+            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Verify category was NOT updated
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.name, "Test Category")
+
+    def test_regular_user_cannot_delete_category(self):
+        """Regular user cannot delete category"""
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.delete(f"/api/v1/products/categories/{self.category.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Verify category still exists
+        self.assertTrue(Category.objects.filter(id=self.category.id).exists())
+
+    def test_admin_can_update_category(self):
+        """Admin user can update category"""
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify category was updated
+        self.category.refresh_from_db()
+        self.assertEqual(self.category.name, "Updated Category")
+
+    def test_admin_can_delete_category(self):
+        """Admin user can delete category"""
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(f"/api/v1/products/categories/{self.category.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Verify category was deleted
+        self.assertFalse(Category.objects.filter(id=self.category.id).exists())
 
 
 class RollbackTransactionTests(TestCase):
