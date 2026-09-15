@@ -38,9 +38,7 @@ class CategoryPermissionSecurityTests(TestCase):
 
     def test_anonymous_cannot_update_category(self):
         """Anonymous user cannot update category"""
-        response = self.client.patch(
-            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
-        )
+        response = self.client.patch(f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"})
         # DRF returns 403 FORBIDDEN for unauthenticated requests
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -76,9 +74,7 @@ class CategoryPermissionSecurityTests(TestCase):
         """Regular user cannot update category"""
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.patch(
-            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
-        )
+        response = self.client.patch(f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -101,9 +97,7 @@ class CategoryPermissionSecurityTests(TestCase):
         """Admin user can update category"""
         self.client.force_authenticate(user=self.admin)
 
-        response = self.client.patch(
-            f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"}
-        )
+        response = self.client.patch(f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
