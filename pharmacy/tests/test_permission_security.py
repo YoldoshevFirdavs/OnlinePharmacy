@@ -31,21 +31,21 @@ class CategoryPermissionSecurityTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_anonymous_cannot_create_category(self):
-        """Anonymous user cannot create category - DRF IsAuthenticated returns 403"""
+        """Anonymous user cannot create category - DRF IsAdminUser returns 403"""
         response = self.client.post("/api/v1/products/categories/", {"name": "New Category", "slug": "new-category"})
-        # DRF IsAdminUser permission returns 403 FORBIDDEN for unauthenticated requests
+        # DRF IsAdminUser permission returns 403 FORBIDDEN (not 401) for unauthenticated requests
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_anonymous_cannot_update_category(self):
-        """Anonymous user cannot update category"""
+        """Anonymous user cannot update category - DRF IsAdminUser returns 403"""
         response = self.client.patch(f"/api/v1/products/categories/{self.category.id}/", {"name": "Updated Category"})
-        # DRF returns 403 FORBIDDEN for unauthenticated requests
+        # DRF IsAdminUser permission returns 403 FORBIDDEN (not 401) for unauthenticated requests
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_anonymous_cannot_delete_category(self):
-        """Anonymous user cannot delete category"""
+        """Anonymous user cannot delete category - DRF IsAdminUser returns 403"""
         response = self.client.delete(f"/api/v1/products/categories/{self.category.id}/")
-        # DRF returns 403 FORBIDDEN for unauthenticated requests
+        # DRF IsAdminUser permission returns 403 FORBIDDEN (not 401) for unauthenticated requests
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_regular_user_cannot_create_category(self):
