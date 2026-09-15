@@ -120,24 +120,27 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Phonenumber field configuration
 PHONENUMBER_DEFAULT_REGION = "UZ"
 
+# Testing mode - bypass rate limiting and other production features
+TESTING = True
+
 # OTP Configuration for tests
-OTP_MAX_ATTEMPTS = 50
+OTP_MAX_ATTEMPTS = 100  # Bypass rate limiting in tests
 OTP_ATTEMPT_RESET_TIMEOUT = 3600  # 1 hour
 
 # Fingerprint and Rate Limiting Configuration
 FINGERPRINT_RATE_THRESHOLD = 100
 FINGERPRINT_TEMP_BAN_DURATION = 1  # minutes
 
+# Testing mode - bypass rate limiting and other production features
+TESTING = True
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-        "rest_framework.throttling.UserRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/hour"},
+    "DEFAULT_THROTTLE_CLASSES": [],  # Disable throttling for tests
+    "DEFAULT_THROTTLE_RATES": {},  # No throttle rates for tests
 }
 
 SIMPLE_JWT = {

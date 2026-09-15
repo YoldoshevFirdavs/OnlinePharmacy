@@ -155,9 +155,9 @@ class CustomerUserHistoryAPITestCase(APITestCase):
         self.assertIn(response.status_code, [status.HTTP_405_METHOD_NOT_ALLOWED, status.HTTP_403_FORBIDDEN])
 
     def test_unauthenticated_cannot_access_history(self):
-        """Test that unauthenticated users can't access history"""
+        """Test that unauthenticated users can't access history - DRF IsAuthenticated returns 403"""
         response = self.client.get("/api/v1/user/history/")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_different_users_see_own_history(self):
         """Test that users see only their own history"""

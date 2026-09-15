@@ -106,3 +106,117 @@ COMPONENT: verify_otp
 USER: 
 ERROR: Database connection failed
 ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T14:05:00.219882+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T14:06:09.949948+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:08:05.426727+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:08:05.502639+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:08:05.575300+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:08:05.643928+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:14.789889+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:14.854436+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:14.923766+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:14.989192+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:30.611706+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:30.682305+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:30.756923+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:30.823331+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:10:45.477086+00:00
+COMPONENT: verify_otp
+USER: test@example.com
+ERROR: not enough values to unpack (expected 3, got 2)
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:11:13.019527+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:11:49.611192+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:12:15.389700+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.
+
+TIMESTAMP: 2026-09-15T16:12:38.860837+00:00
+COMPONENT: verify_otp
+USER: 
+ERROR: Database connection failed
+ACTION: OTP verification failed due to error.

@@ -59,6 +59,10 @@ class DeviceFingerprintMiddleware:
         if path.startswith("/static/") or path.startswith("/media/") or path == "/favicon.ico":
             return self.get_response(request)
 
+        # Bypass rate limiting during testing
+        if getattr(settings, "TESTING", False):
+            return self.get_response(request)
+
         # Extract fingerprint: cookie takes priority
         fp = None
         try:

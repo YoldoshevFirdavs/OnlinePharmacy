@@ -42,6 +42,10 @@ else:
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
+# Testing mode - bypass rate limiting and other production features
+# Set via settings_test.py or environment variable for tests
+TESTING = os.getenv("TESTING", "False").lower() == "true"
+
 # SECRET_KEY loading logic
 SECRET_KEY = os.getenv("SECRET_KEY")
 
