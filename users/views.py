@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
@@ -23,6 +24,14 @@ from dashboard.forms import AccountSettingsForm
 from security.locks import is_locked
 from security.middleware import get_client_ip
 from security.models import AuditLog, BanRecord
+from utils.exceptions import (
+    InvalidCredentialsException,
+    OTPExpiredException,
+    OTPInvalidException,
+    RateLimitExceededException,
+    TokenBlacklistedException,
+    UserNotFoundException,
+)
 
 from .models import CustomUser, Seller, SubscribedUser
 
@@ -1478,12 +1487,21 @@ class CookieRefreshView(APIView):
             # Validate and refresh the token
             token = RefreshToken(refresh_token)
 
-            # Check if token is blacklisted
-            if token.blacklisted:
-                return Response(
-                    {"detail": "Refresh token bekor qilingan."},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
+            # Check if token is blacklisted (using proper DRF method)
+            # token_blacklist app'da OutstandingToken va BlacklistedToken modellari mavjud
+            from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+            try:
+                outstanding_token = OutstandingToken.objects.get(token=refresh_token)
+                if BlacklistedToken.objects.filter(token=outstanding_token).exists():
+                    logger.warning(f"Attempt to use blacklisted refresh token")
+                    return Response(
+                        {"detail": "Refresh token bekor qilingan."},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+            except OutstandingToken.DoesNotExist:
+                # Token not tracked - this is OK for fresh tokens
+                pass
 
             new_access_token = str(token.access_token)
 
@@ -1496,7 +1514,7 @@ class CookieRefreshView(APIView):
                 response.set_cookie(
                     "refresh_token",
                     new_refresh_token,
-                    max_age=settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME").total_seconds(),
+                    max_age=int(settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME", timedelta(days=7)).total_seconds()),
                     httponly=True,
                     secure=settings.SIMPLE_JWT.get("AUTH_COOKIE_SECURE", True),
                     samesite="Lax",
@@ -1504,20 +1522,15 @@ class CookieRefreshView(APIView):
             else:
                 response = Response({"access": new_access_token}, status=status.HTTP_200_OK)
 
+            logger.info(f"Refresh token successfully refreshed")
             return response
 
         except TokenError as e:
             logger.warning(f"TokenError refreshing token via cookie: {e}")
-            return Response(
-                {"detail": "Refresh token yaroqsiz yoki muddati o'tgan."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise TokenBlacklistedException("Refresh token is invalid or expired")
         except Exception as e:
             logger.exception(f"Unexpected error refreshing token via cookie: {e}")
-            return Response(
-                {"detail": "Server xatosi. Iltimos, qayta urinib ko'ring."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            raise
 
 
 class LogoutView(APIView):
@@ -1530,8 +1543,8 @@ class LogoutView(APIView):
             if refresh_token:
                 try:
                     RefreshToken(refresh_token).blacklist()
-                except Exception:
-                    logger.warning("Refresh token blacklist failed during logout")
+                except (TokenError, Exception) as e:
+                    logger.warning("Refresh token blacklist failed during logout: %s", str(e))
             response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
             for cookie_name in (
                 settings.SESSION_COOKIE_NAME,
@@ -1553,8 +1566,8 @@ class LogoutJWTView(APIView):
             if refresh_token:
                 try:
                     RefreshToken(refresh_token).blacklist()
-                except Exception:
-                    logger.warning("Failed to blacklist refresh token")
+                except (TokenError, Exception) as e:
+                    logger.warning("Failed to blacklist refresh token: %s", str(e))
             for cookie_name in (
                 settings.SESSION_COOKIE_NAME,
                 settings.CSRF_COOKIE_NAME,

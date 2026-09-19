@@ -25,40 +25,40 @@ social-auth-core             # Core social auth library
 PyJWT                        # JSON Web Token implementation
 
 # API Documentation
-drf-yasg                     # Swagger/OpenAPI generator for DRF
-uritemplate                  # URI template support
-gunicorn
+drf-yasg==1.21.6             # Swagger/OpenAPI generator for DRF
+uritemplate==4.1.1           # URI template support
+gunicorn==22.0.0             # WSGI HTTP Server
 
 # Security
-django-ratelimit             # Rate limiting for Django views
-cryptography                 # Encryption and security primitives
-django-csp                   # Content Security Policy middleware
+django-ratelimit==4.1.0      # Rate limiting for Django views
+cryptography==41.0.7         # Encryption and security primitives
+django-csp==3.8              # Content Security Policy middleware
 
 # Utilities
-django-filter                # Filtering support for DRF
-django-cors-headers          # CORS headers middleware
-python-dotenv                # Load environment variables from .env
-sqlparse                     # SQL parsing library
-python-dateutil              # Date/time utilities
-pytz                         # Timezone support
-tzdata                       # Timezone database
-PyYAML                       # YAML parser
-Werkzeug                     # WSGI utilities
+django-filter==23.5          # Filtering support for DRF
+django-cors-headers==4.3.1   # CORS headers middleware
+python-dotenv==1.0.0         # Load environment variables from .env
+sqlparse==0.4.4              # SQL parsing library
+python-dateutil==2.8.2       # Date/time utilities
+pytz==2024.1                 # Timezone support
+tzdata==2024.1               # Timezone database
+PyYAML==6.0.1                # YAML parser
+Werkzeug==3.0.1              # WSGI utilities
 
 # Static files & Extensions
-whitenoise                   # Serve static files in production
-django-extensions            # Extra management commands for Django
+whitenoise==6.6.0            # Serve static files in production
+django-extensions==3.2.3     # Extra management commands for Django
 
 # Frontend / Assets
-pillow                       # Image processing library
-openpyxl                     # Excel file support
-stripe                       # Stripe payment integration
-requests                     # HTTP requests library
+pillow==10.1.0               # Image processing library
+openpyxl==3.1.2              # Excel file support
+stripe==8.0.0                # Stripe payment integration
+requests==2.31.0             # HTTP requests library
 
 # Monitoring & Observability
 prometheus-client==0.20.0    # Prometheus client library
 
 # Other integrations
-phonenumbers>=8.13.25        # Phone number validation
-google-genai                 # Google AI Studio SDK
-django-templated-mail        # Template-based email sending for Django
+phonenumbers==8.13.25        # Phone number validation
+google-genai==0.3.0          # Google AI Studio SDK
+django-templated-mail==3.0.1 # Template-based email sending for Django

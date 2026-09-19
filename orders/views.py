@@ -15,6 +15,7 @@ from .serializers import (
     CartItemSerializer,
     CartSummarySerializer,
     DeliveryOrderSerializer,
+    DriverOrderSerializer,
     LocationSerializer,
     OrderDetailSerializer,
     OrderListSerializer,
@@ -149,28 +150,33 @@ class DriverOrderViewSet(viewsets.ReadOnlyModelViewSet):
     Viewset for drivers to see their assigned orders.
     """
 
-    queryset = Order.objects.all().order_by("-created_at")
     permission_classes = [IsAuthenticated]
-    serializer_class = DeliveryOrderSerializer
+    serializer_class = DriverOrderSerializer
 
     def get_queryset(self):
         # Swagger uchun workaround
         if getattr(self, "swagger_fake_view", False):
-            return self.queryset.none()
+            return Order.objects.none()
 
         # Check if user is a delivery driver
         if not hasattr(self.request.user, "delivery_profile"):
-            return self.queryset.none()
+            return Order.objects.none()
 
         # Additional validation: check delivery_profile integrity
         if (
             not hasattr(self.request.user.delivery_profile, "user")
             or self.request.user.delivery_profile.user != self.request.user
         ):
-            return self.queryset.none()
+            return Order.objects.none()
 
         # Faqat login bo'lgan userning driver sifatida assign qilingan orderlari
-        return self.queryset.filter(driver=self.request.user.delivery_profile)
+        # Use select_related for performance optimization
+        return (
+            Order.objects.filter(driver=self.request.user.delivery_profile)
+            .select_related("user", "driver")
+            .prefetch_related("order_items__product")
+            .order_by("-created_at")
+        )
 
     @action(detail=True, methods=["post"], url_path="update-status")
     def update_status(self, request, pk=None):

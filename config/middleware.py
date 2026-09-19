@@ -63,7 +63,8 @@ class DeviceFingerprintMiddleware:
         fp = None
         try:
             fp = request.COOKIES.get("device_fp")
-        except Exception:
+        except (AttributeError, KeyError) as e:
+            logger.debug("Failed to get device fingerprint from cookies: %s", str(e))
             fp = None
 
         if not fp:
@@ -126,9 +127,9 @@ class DeviceFingerprintMiddleware:
                             banned_for="rate_limit",
                             actor=None,
                         )
-            except Exception:
+            except (ImportError, AttributeError, TypeError, ValueError) as e:
                 # Fail-safe: do not crash the request
-                pass
+                logger.debug("Middleware error in ban/rate-limit check: %s", str(e))
 
         # proceed with request
         return self.get_response(request)

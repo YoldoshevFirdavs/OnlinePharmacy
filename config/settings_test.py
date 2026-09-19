@@ -90,20 +90,36 @@ REDIS_HOST = "redis" if IS_DOCKER else "localhost"
 REDIS_PORT = 6379
 REDIS_URL = os.getenv("REDIS_URL") or f"redis://{REDIS_HOST}:{REDIS_PORT}/1"  # Use DB 1 for tests
 
+# Use LocMemCache for tests (no Redis dependency required)
+# This allows tests to run locally without Redis service
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
         "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "SOCKET_CONNECT_TIMEOUT": 10,
-            "SOCKET_TIMEOUT": 10,
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-            "IGNORE_EXCEPTIONS": False,
-            "CONNECTION_POOL_KWARGS": {"max_connections": 50, "retry_on_timeout": True},
+            "MAX_ENTRIES": 10000,
         },
     }
 }
+
+# Alternative: Use fakeredis if Redis needed but not available
+# Uncomment below if Redis behavior is critical for tests
+# try:
+#     import fakeredis
+#     CACHES = {
+#         "default": {
+#             "BACKEND": "django_redis.cache.RedisCache",
+#             "LOCATION": "redis://127.0.0.1:6379/1",
+#             "OPTIONS": {
+#                 "CLIENT_CLASS": "fakeredis.FakeStrictRedis",
+#                 "SOCKET_CONNECT_TIMEOUT": 5,
+#                 "SOCKET_TIMEOUT": 5,
+#             },
+#         }
+#     }
+# except ImportError:
+#     # Fall back to LocMemCache if fakeredis not available
+#     pass
 
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 SESSION_COOKIE_AGE = 86400
@@ -141,6 +157,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_CLASSES": [],  # Disable throttling for tests
     "DEFAULT_THROTTLE_RATES": {},  # No throttle rates for tests
+    "EXCEPTION_HANDLER": "utils.exception_handler.custom_exception_handler",
 }
 
 SIMPLE_JWT = {

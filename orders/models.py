@@ -5,6 +5,21 @@ from pharmacy.models.medicine import Medicine
 from users.models import DeliveryDriver
 
 
+class OrderStatus(models.TextChoices):
+    """Order status state machine"""
+
+    PENDING = "Pending", "Pending"
+    PROCESSING = "Processing", "Processing"
+    READY_FOR_DELIVERY = "Ready for Delivery", "Ready for Delivery"
+    ACCEPTED = "Accepted", "Accepted"
+    PICKED_UP = "Picked Up", "Picked Up"
+    ON_THE_WAY = "On The Way", "On The Way"
+    ARRIVED = "Arrived", "Arrived"
+    DELIVERED = "Delivered", "Delivered"
+    CANCELED = "Canceled", "Canceled"
+    RETURNED = "Returned", "Returned"
+
+
 class Cart(models.Model):
     user = models.OneToOneField("users.CustomUser", on_delete=models.CASCADE, related_name="user_cart")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,17 +38,11 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
-    STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("Processing", "Processing"),
-        ("Delivered", "Delivered"),
-        ("Canceled", "Canceled"),
-        ("Returned", "Returned"),
-    ]
-
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    status = models.CharField(
+        max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING, help_text="Order status"
+    )
     address = models.TextField(blank=True, null=True)
     phone_number = models.CharField(
         max_length=20, blank=True, null=True, help_text="Ixtiyoriy telefon raqami. Yetkazib berish uchun ishlatiladi."

@@ -8,6 +8,12 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
 
 # Virtualenvs
 venv/
@@ -18,13 +24,14 @@ venvs*/
 # Django
 media/
 staticfiles/
-
+*.db
+db.sqlite3
 
 # IDEs
 .idea/
 .vscode/
 
-
+# Logs & Backups
 *.log
 *.bak
 *.crt
@@ -33,7 +40,15 @@ staticfiles/
 *.zip
 *.tar
 *.gz
+
 # Kiro IDE
 .kiro/
 logs
 *.bak.*
+
+# Cache & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+

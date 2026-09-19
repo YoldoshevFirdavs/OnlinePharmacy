@@ -17,7 +17,7 @@ def is_admin(user):
     """Check if user is admin"""
     try:
         return user.is_authenticated and getattr(user, "role", None) == "admin"
-    except:
+    except (AttributeError, TypeError):
         return False
 
 
@@ -44,8 +44,8 @@ def user_history_view(request, user_id):
     """
     try:
         user = get_object_or_404(CustomUser, id=user_id)
-    except:
-        return HttpResponseForbidden("User not found")
+    except (CustomUser.DoesNotExist, ValueError) as e:
+        return HttpResponseForbidden(f"User not found")
 
     context = {
         "page_title": f"User History - {user.full_name or user.phone_number}",
@@ -65,7 +65,7 @@ def order_detail_admin_view(request, user_id, order_id):
     try:
         user = get_object_or_404(CustomUser, id=user_id)
         order = get_object_or_404(Order, id=order_id, user=user)
-    except:
+    except (CustomUser.DoesNotExist, Order.DoesNotExist, ValueError) as e:
         return HttpResponseForbidden("Order not found")
 
     context = {
@@ -105,30 +105,7 @@ def order_detail_view(request, user_id, order_id):
     try:
         user = get_object_or_404(CustomUser, id=user_id)
         order = get_object_or_404(Order, id=order_id, user=user)
-    except:
-        return HttpResponseForbidden("Order not found")
-
-    context = {
-        "page_title": f"Order #{order.id}",
-        "target_user": user,
-        "order": order,
-        "user_id": user_id,
-        "order_id": order_id,
-    }
-    return render(request, "dashboard/admin/order_detail.html", context)
-
-
-@login_required(login_url="/auth/")
-@user_passes_test(is_admin, redirect_field_name=None)
-def order_detail_view(request, user_id, order_id):
-    """
-    Order detail page for admin
-    Shows full order info, line items, customer details, status
-    """
-    try:
-        user = get_object_or_404(CustomUser, id=user_id)
-        order = get_object_or_404(Order, id=order_id, user=user)
-    except:
+    except (CustomUser.DoesNotExist, Order.DoesNotExist, ValueError) as e:
         return HttpResponseForbidden("Order not found")
 
     context = {
@@ -154,7 +131,7 @@ def admin_order_view(request, order_id):
 
         order = get_object_or_404(Order.objects.select_related("user").prefetch_related("order_items"), id=order_id)
         order_items = order.order_items.select_related("product").all()
-    except:
+    except (Order.DoesNotExist, ValueError) as e:
         return HttpResponseForbidden("Order not found")
 
     context = {

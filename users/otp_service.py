@@ -517,21 +517,22 @@ def is_banned(identifier: str) -> bool:
         try:
             from security.models import BanRecord
             from users.models import CustomUser
-            
+
             # Try to find user by email, phone, or username
             user = None
-            if '@' in str(identifier):
+            if "@" in str(identifier):
                 user = CustomUser.objects.filter(email__iexact=identifier).first()
             else:
                 # Check if identifier looks like a phone number
                 from phonenumber_field.phonenumber import PhoneNumber
+
                 try:
                     phone = PhoneNumber.from_string(str(identifier))
                     user = CustomUser.objects.filter(phone_number=phone).first()
                 except Exception:
                     # Not a phone number, try username
                     user = CustomUser.objects.filter(username=identifier).first()
-            
+
             if user:
                 return BanRecord.objects.filter(user_id=user.id, is_active=True).exists()
             return False

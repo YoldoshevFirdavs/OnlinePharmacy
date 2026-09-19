@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from orders.models import Cart, CartItem, DeliveryOrder, Order, OrderItem
+from orders.models import Cart, CartItem, DeliveryOrder, Order, OrderItem, OrderStatus
 from pharmacy.models.medicine import Medicine
 
 
@@ -231,11 +231,11 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 class OrderStatusUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(
         choices=[
-            ("Accepted", "Accepted by Driver"),
-            ("Picked Up", "Picked Up by Driver"),
-            ("On The Way", "On The Way for Delivery"),
-            ("Arrived", "Arrived at User Location"),
-            ("Delivered", "Delivered"),
+            (OrderStatus.ACCEPTED, "Accepted by Driver"),
+            (OrderStatus.PICKED_UP, "Picked Up by Driver"),
+            (OrderStatus.ON_THE_WAY, "On The Way for Delivery"),
+            (OrderStatus.ARRIVED, "Arrived at User Location"),
+            (OrderStatus.DELIVERED, "Delivered"),
         ]
     )
 

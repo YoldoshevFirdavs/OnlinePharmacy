@@ -12,6 +12,14 @@ from rest_framework.views import APIView
 
 from billing.models import Payment
 from orders.models import Order
+from utils.exception_handler import handle_api_exceptions
+from utils.exceptions import (
+    DuplicatePaymentException,
+    OrderNotFoundException,
+    PaymentGatewayException,
+    StripeException,
+    WebhookSignatureException,
+)
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -37,7 +45,7 @@ class CreateChargeView(APIView):
             # Security: Only allow user to pay for their own orders
             order = Order.objects.get(id=order_id, user=request.user)
         except Order.DoesNotExist:
-            return Response({"error": "Order not found or not owned by user"}, status=status.HTTP_400_BAD_REQUEST)
+            raise OrderNotFoundException("Order not found or not owned by user")
 
         try:
             total_amount = order.total_price * 100
@@ -47,8 +55,15 @@ class CreateChargeView(APIView):
             order.save()
 
             return Response({"status": "Payment successful"}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except stripe.error.CardError as e:
+            logger.error("Stripe card error: %s", str(e))
+            raise PaymentGatewayException(f"Card error: {str(e)}")
+        except stripe.error.StripeError as e:
+            logger.error("Stripe error: %s", str(e))
+            raise StripeException(f"Stripe error: {str(e)}")
+        except Payment.DoesNotExist as e:
+            logger.error("Duplicate payment attempt: %s", str(e))
+            raise DuplicatePaymentException("Payment already exists for this order")
 
 
 class StripeCheckoutSessionView(APIView):
@@ -94,10 +109,7 @@ class StripeCheckoutSessionView(APIView):
             order = Order.objects.get(id=order_id, user=request.user)
         except Order.DoesNotExist:
             logger.error("Order %s not found for user %s", order_id, request.user)
-            return Response(
-                {"error": "Buyurtma topilmadi."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            raise OrderNotFoundException(f"Order {order_id} not found")
 
         if order.status == "Paid":
             return Response(
@@ -163,22 +175,10 @@ class StripeCheckoutSessionView(APIView):
             )
         except stripe.error.AuthenticationError as auth_err:
             logger.error("Stripe authentication error: %s", auth_err)
-            return Response(
-                {"error": "Stripe API kaliti noto'g'ri sozlangan. Admin bilan bog'laning."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            raise StripeException("Stripe API key is not configured properly")
         except stripe.error.StripeError as stripe_err:
             logger.error("Stripe error during checkout session creation: %s", stripe_err)
-            return Response(
-                {"error": f"Stripe xatosi: {str(stripe_err)}"},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
-        except Exception as e:
-            logger.exception("Unexpected error while creating Stripe checkout session")
-            return Response(
-                {"error": f"Server error: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            raise StripeException(f"Stripe checkout error: {str(stripe_err)}")
 
 
 class StripeWebhookView(APIView):
@@ -205,7 +205,7 @@ class StripeWebhookView(APIView):
             event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
         except (ValueError, stripe.error.SignatureVerificationError) as e:
             logger.error(f"Webhook signature verification failed: {e}")
-            return Response({"error": "Invalid payload or signature"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid webhook signature"}, status=status.HTTP_400_BAD_REQUEST)
 
         if event.get("type") == "checkout.session.completed":
             session = event["data"]["object"]
@@ -245,8 +245,8 @@ class StripeWebhookView(APIView):
                                             "payment_method": "card",
                                         },
                                     )
-                                except:
-                                    pass
+                                except (ImportError, Exception) as e:
+                                    logger.debug("Could not create UserHistory: %s", str(e))
 
                                 # AuditLog - faqat admin uchun (role='admin', is_superuser=True, is_staff=True)
                                 if user.role == "admin" and user.is_superuser and user.is_staff:

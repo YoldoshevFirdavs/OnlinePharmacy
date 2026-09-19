@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from orders.models import Order
+from orders.models import Order, OrderStatus
 from pharmacy.models import Category, Medicine
 from users.models import CustomUser, DeliveryDriver
 from users.serializers import BanUserSerializer, DeliveryDriverSerializer, UnbanUserSerializer, UserBanSerializer
@@ -23,7 +23,7 @@ from .serializers import (
     DashboardUserSerializer,
 )
 
-VALID_ORDER_STATUSES = {choice[0] for choice in Order.STATUS_CHOICES}
+VALID_ORDER_STATUSES = {choice[0] for choice in OrderStatus.choices}
 STATUS_ALIASES = {"Cancelled": "Canceled"}
 
 

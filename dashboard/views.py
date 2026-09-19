@@ -125,7 +125,8 @@ def get_user_display(user):
             # File not found on disk but field has value — still return URL
             try:
                 avatar_url = user.avatar.url
-            except Exception:
+            except (AttributeError, ValueError) as e:
+                logger.debug("Avatar URL retrieval failed: %s", str(e))
                 avatar_url = None
     if not avatar_url:
         avatar_url = "/static/images/default/default_avatar.png"
@@ -1942,13 +1943,17 @@ def order_view(request, pk):
                 "order_items": order_items,
             }
             return render(request, "dashboard/order/view.html", ctx)
+        except (Order.DoesNotExist, ValueError) as e:
+            logger.error(f"Order not found or invalid ID: {str(e)}")
+            messages.error(request, "Buyurtma topilmadi.")
+            return redirect("dashboard:order_list")
         except Exception as query_error:
             logger.error(f"Database query error in order_view: {str(query_error)}")
             messages.error(request, "Buyurtmani yuklashda xatolik yuz berdi.")
             return redirect("dashboard:order_list")
-    except Exception as e:
-        logger.error(f"Unexpected error in order_view: {str(e)}")
-        messages.error(request, "Noma'lum xatolik yuz berdi.")
+    except (Order.DoesNotExist, ValueError) as e:
+        logger.error(f"Order not found or invalid ID: {str(e)}")
+        messages.error(request, "Buyurtma topilmadi.")
         return redirect("dashboard:order_list")
 
 

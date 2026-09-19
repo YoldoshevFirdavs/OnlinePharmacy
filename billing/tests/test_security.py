@@ -100,3 +100,65 @@ class PaymentIdempotencyTests(TestCase):
         """Duplicate webhook should not create multiple payments - test with empty webhook secret (skip signature verification)"""
         # Skip this test in CI/CD since signature verification requires real webhook secret
         self.skipTest("Skip webhook signature test in CI/CD - requires real STRIPE_WEBHOOK_SECRET")
+
+
+class PaymentIdempotencyTests(TestCase):
+    """Test idempotent payment processing - duplicate webhooks should not create duplicate payments"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = CustomUser.objects.create_user(email="user@test.com", password="testpass123")
+        self.order = Order.objects.create(user=self.user, total_price=100.00, status="Pending")
+
+    @override_settings(STRIPE_WEBHOOK_SECRET="test_secret_key")
+    def test_duplicate_webhook_does_not_create_duplicate_payment(self):
+        """Duplicate webhook with same session_id should not create multiple payments"""
+        from unittest.mock import MagicMock, patch
+
+        import stripe
+
+        # Create a valid webhook event
+        webhook_event = {
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test_12345",
+                    "payment_intent": "pi_test_67890",
+                    "metadata": {"order_id": str(self.order.id), "user_id": str(self.user.id)},
+                }
+            },
+        }
+
+        # Mock Stripe webhook construction
+        with patch("stripe.Webhook.construct_event") as mock_construct:
+            mock_construct.return_value = webhook_event
+
+            # Send webhook first time
+            response1 = self.client.post(
+                "/api/v1/payments/webhook/",
+                data=webhook_event,
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="valid_signature",
+            )
+            self.assertEqual(response1.status_code, 200)
+
+            # Verify payment created
+            payment_count_after_first = Payment.objects.filter(order=self.order).count()
+            self.assertEqual(payment_count_after_first, 1)
+
+            # Send SAME webhook second time (duplicate)
+            response2 = self.client.post(
+                "/api/v1/payments/webhook/",
+                data=webhook_event,
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="valid_signature",
+            )
+            self.assertEqual(response2.status_code, 200)
+
+            # Verify ONLY ONE payment exists (not 2!)
+            payment_count_after_second = Payment.objects.filter(order=self.order).count()
+            self.assertEqual(payment_count_after_second, 1, "Duplicate webhook should not create duplicate payment")
+
+            # Verify order status is still "Paid"
+            self.order.refresh_from_db()
+            self.assertEqual(self.order.status, "Paid")

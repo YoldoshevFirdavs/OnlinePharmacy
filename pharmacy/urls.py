@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .api_views import MedicineListView, product_detail, product_suggestions, popular_products
+from .api_views import MedicineListView, popular_products, product_detail, product_suggestions
 from .views.comments import ProductCommentViewSet
 from .views.contact import ContactMessageViewSet
 from .views.detail import product_detail, product_full_guide

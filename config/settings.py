@@ -101,6 +101,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "security.middleware.BanMiddleware",  # Ban middleware AFTER auth to check user bans
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "utils.exception_handler.APIExceptionMiddleware",  # Global exception handler for API
     # "config.middleware.DeviceFingerprintMiddleware",  # DISABLED: Replaced by BanMiddleware
     # "config.middleware.BanCheckMiddleware",  # DISABLED: Replaced by BanMiddleware
     "config.middleware.CustomErrorMiddleware",
@@ -194,6 +195,7 @@ REST_FRAMEWORK = {
         # Lenient rate for GET requests (caching-friendly)
         "comments_get": "1000/min",
     },
+    "EXCEPTION_HANDLER": "utils.exception_handler.custom_exception_handler",
 }
 
 SIMPLE_JWT = {

@@ -1,13 +1,46 @@
-# Testing
-pytest==8.3.5                # Testing framework
-pytest-django==4.12.0        # Django plugin for pytest
-coverage>=7.6,<8.0           # Code coverage measurement
+# Development and Testing Dependencies
+# Install with: pip install -r requirements-dev.txt
 
-# Code Quality & Linting
-flake8>=7.1,<8.0             # Python linter
-black>=24.8,<25.0            # Code formatter
-isort>=5.13,<6.0             # Import sorter
+# Include base requirements
+-r requirements.txt
 
-# Utilities
-autoflake>=2.0               # Remove unused imports automatically
+# Testing frameworks
+pytest==8.0.0                # Testing framework
+pytest-django==4.7.0         # Pytest Django plugin
+pytest-cov==4.1.0            # Code coverage measurement for pytest
+faker==20.0.0                # Generate fake data for tests
+factory-boy==3.3.0           # Test fixtures and factories
 
+# Linting & Code Quality
+flake8==7.0.0                # Code style checker
+black==23.12.0               # Code formatter
+isort==5.13.2                # Import sorting tool
+pylint==3.0.3                # Code analysis tool
+
+# Type checking
+mypy==1.7.1                  # Static type checker
+django-stubs==4.2.7          # Type stubs for Django
+
+# Development utilities
+django-debug-toolbar==4.2.0  # Debug toolbar for Django
+ipython==8.19.0              # Enhanced Python shell
+notebook==7.0.6              # Jupyter notebook
+django-extensions==3.2.3     # Extra Django commands
+
+# Task runners & automation
+invoke==2.2.0                # Task execution tool
+watchdog==3.0.0              # File system monitoring
+
+# Pre-commit hooks
+pre-commit==3.6.0            # Framework for managing git hooks
+
+# API testing
+httpx==0.25.2                # HTTP client for testing
+requests-mock==1.11.0        # Mock requests for testing
+
+# Database testing
+factory-boy==3.3.0           # Already listed, for DB fixtures
+fakeredis==2.19.0            # In-memory Redis for testing (alternative to LocMemCache)
+
+# Coverage
+coverage==7.4.0              # Code coverage measurement
