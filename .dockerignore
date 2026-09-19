@@ -1,4 +1,5 @@
 venv
+venvs310
 .env
 __pycache__
 *.pyc
@@ -7,6 +8,7 @@ db.sqlite3
 static
 media
 venv/
+venvs310/
 __pycache__/
 *.log
 media/
