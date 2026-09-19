@@ -167,7 +167,6 @@ class FlashSaleSerializer(serializers.ModelSerializer):
 
 
 class ProductViewHistorySerializer(serializers.ModelSerializer):
-
     product = MedicineListSerializer(read_only=True)
 
     class Meta:

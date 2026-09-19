@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("users", "0024_deliverydriver_remove_deliverer_user_and_more"),
     ]

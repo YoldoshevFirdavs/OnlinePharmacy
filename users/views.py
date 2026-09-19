@@ -336,7 +336,6 @@ class AdminLoginViewSet(viewsets.ViewSet):
         return self._login_user(request, user, identifier)
 
     def _handle_telegram_login(self, request, data, identifier):
-
         phone_number = data.get("phone_number")
         telegram_id = data.get("telegram_id")
 
@@ -832,14 +831,12 @@ class RegistrationView(APIView):
                 email=email, defaults={"phone_number": phone, "full_name": full_name}
             )
         else:
-
             return Response(
                 {"error": "Telefon raqami yoki email kiritilishi shart."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if not created:
-
             if full_name and user.full_name != full_name:
                 user.full_name = full_name
 

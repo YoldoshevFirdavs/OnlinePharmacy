@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("users", "0025_customuser_ban_reason_customuser_ban_until_and_more"),
     ]

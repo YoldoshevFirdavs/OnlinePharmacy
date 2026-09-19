@@ -8,7 +8,6 @@ import users.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("users", "0015_alter_customuser_email"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("pharmacy", "0012_rename_pharmacy_cu_user_id_timestamp_idx_pharmacy_cu_user_id_12c7bc_idx_and_more"),
     ]

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("security", "0005_auditlog_meta_auditlog_target_id_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0003_salary_delete_payout"),
         ("users", "0023_alter_customuser_role"),

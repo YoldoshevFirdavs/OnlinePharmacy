@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payments", "0003_salary_delete_payout"),
         ("users", "0024_deliverydriver_remove_deliverer_user_and_more"),

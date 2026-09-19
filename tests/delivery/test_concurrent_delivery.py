@@ -45,7 +45,7 @@ class ParallelDriverAcceptTests(TransactionTestCase):
         with transaction.atomic():
             order = Order.objects.select_for_update().get(id=self.order.id)
             self.assertIsNone(order.driver)
-            
+
             # In a separate transaction, try to lock the same order
             # This should wait until first transaction completes
             try:

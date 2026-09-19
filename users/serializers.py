@@ -41,7 +41,6 @@ def validate_image_file(file):
 
 
 class PhoneNumberField(serializers.CharField):
-
     def to_internal_value(self, data):
         if isinstance(data, (list, tuple)):
             data = data[0] if data else ""
@@ -53,10 +52,8 @@ class PhoneNumberField(serializers.CharField):
             data = f"+{settings.PHONENUMBER_DEFAULT_REGION_CODE}{data}"
 
         try:
-
             parsed_number = phonenumbers.parse(data, settings.PHONENUMBER_DEFAULT_REGION)
             if not phonenumbers.is_valid_number(parsed_number):
-
                 parsed_number = phonenumbers.parse(data)
                 if not phonenumbers.is_valid_number(parsed_number):
                     raise serializers.ValidationError("Telefon raqami noto‘g‘ri.")

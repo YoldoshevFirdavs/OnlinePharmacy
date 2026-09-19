@@ -78,7 +78,6 @@ class VerifyOTPIdentifierTests(APITestCase):
     """Test that identifier is optional and handled correctly."""
 
     def setUp(self):
-
         self.client = APIClient()
         self.user = User.objects.create_user(
             email="test@example.com",
@@ -193,7 +192,6 @@ class VerifyOTPInvalidCodeTests(APITestCase):
     """Test behavior with invalid OTP code."""
 
     def setUp(self):
-
         self.client = APIClient()
 
     @patch("users.views.otp_service.verify_otp_once")
@@ -243,7 +241,6 @@ class VerifyOTPTooManyAttemptsTests(APITestCase):
     """Test behavior when max attempts are exceeded."""
 
     def setUp(self):
-
         self.client = APIClient()
 
     @patch("users.views.otp_service.verify_otp_once")
@@ -293,7 +290,6 @@ class VerifyOTPSuccessTests(APITestCase):
     """Test successful OTP verification flow."""
 
     def setUp(self):
-
         self.client = APIClient()
         self.user = User.objects.create_user(
             email="test@example.com",
@@ -399,7 +395,6 @@ class VerifyOTPIdentifierMaskingTests(APITestCase):
     """Test that identifiers are properly masked in logs."""
 
     def setUp(self):
-
         self.client = APIClient()
 
     @patch("users.views.otp_service.verify_otp_once")
@@ -437,7 +432,6 @@ class VerifyOTPServerErrorTests(APITestCase):
     """Test server error handling."""
 
     def setUp(self):
-
         self.client = APIClient()
 
     @patch("users.views.otp_service.get_session_meta")
