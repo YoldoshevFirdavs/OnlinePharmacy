@@ -19,9 +19,9 @@ vine                         # Dependency for Celery
 amqp                         # AMQP protocol library for Celery
 
 # Authentication & Users
-djoser==2.3.4                # REST implementation of Django auth
-social-auth-app-django==3.1.0 # Social login integration (Django 5.1 compatible)
-social-auth-core==4.5.1      # Core social auth library (Django 5.1 compatible)
+djoser                       # REST implementation of Django auth
+social-auth-app-django       # Social login integration
+social-auth-core             # Core social auth library
 PyJWT                        # JSON Web Token implementation
 
 # API Documentation
@@ -36,7 +36,7 @@ django-csp==3.8              # Content Security Policy middleware
 
 # Utilities
 django-filter==23.5          # Filtering support for DRF
-django-cors-headers==4.6.0   # CORS headers middleware (Django 5.1 compatible)
+django-cors-headers==4.3.1   # CORS headers middleware
 python-dotenv==1.0.0         # Load environment variables from .env
 sqlparse==0.4.4              # SQL parsing library
 python-dateutil==2.8.2       # Date/time utilities
@@ -61,3 +61,4 @@ prometheus-client==0.20.0    # Prometheus client library
 # Other integrations
 phonenumbers==8.13.25        # Phone number validation
 google-genai==0.3.0          # Google AI Studio SDK
+django-templated-mail==3.1.1 # Template-based email sending for Django (Python 3.10 compatible)
