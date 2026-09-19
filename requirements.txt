@@ -61,4 +61,3 @@ prometheus-client==0.20.0    # Prometheus client library
 # Other integrations
 phonenumbers==8.13.25        # Phone number validation
 google-genai==0.3.0          # Google AI Studio SDK
-django-templated-email==1.1.1 # Template-based email sending for Django
