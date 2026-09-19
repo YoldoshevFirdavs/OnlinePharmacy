@@ -510,18 +510,35 @@ def refresh_session_ttl(session_id: str, ttl: int = OTP_TTL) -> bool:
         return False
 
 
-def is_banned(user_id: int) -> bool:
-    """Check if user is banned - placeholder for security.models.BanRecord check."""
+def is_banned(identifier: str) -> bool:
+    """Check if user is banned by identifier (email, phone, username, or IP)."""
     try:
         # Try to import BanRecord from security app
         try:
             from security.models import BanRecord
-
-            return BanRecord.objects.filter(user_id=user_id, is_active=True).exists()
+            from users.models import CustomUser
+            
+            # Try to find user by email, phone, or username
+            user = None
+            if '@' in str(identifier):
+                user = CustomUser.objects.filter(email__iexact=identifier).first()
+            else:
+                # Check if identifier looks like a phone number
+                from phonenumber_field.phonenumber import PhoneNumber
+                try:
+                    phone = PhoneNumber.from_string(str(identifier))
+                    user = CustomUser.objects.filter(phone_number=phone).first()
+                except Exception:
+                    # Not a phone number, try username
+                    user = CustomUser.objects.filter(username=identifier).first()
+            
+            if user:
+                return BanRecord.objects.filter(user_id=user.id, is_active=True).exists()
+            return False
         except ImportError:
             # Fallback if security app not available
             logger.debug("BanRecord not available, assuming user not banned")
             return False
     except Exception as e:
-        logger.error(f"is_banned error: {str(e)[:100]}")
+        logger.error(f"is_banned error for identifier '{identifier}': {str(e)[:100]}")
         return False

@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .api_views import MedicineListView, product_detail, product_suggestions
+from .api_views import MedicineListView, product_detail, product_suggestions, popular_products
 from .views.comments import ProductCommentViewSet
 from .views.contact import ContactMessageViewSet
 from .views.detail import product_detail, product_full_guide
@@ -29,6 +29,7 @@ router.register(r"contact", ContactMessageViewSet, basename="contact-message")
 urlpatterns = [
     # API endpoints
     path("", MedicineListView.as_view(), name="product_list_api"),
+    path("popular/", popular_products, name="popular_products"),
     path("<int:product_id>/", product_detail, name="product_detail_api"),
     path("suggest/", product_suggestions, name="product_suggestions_api"),
     # Comments nested under products (handled by viewset)

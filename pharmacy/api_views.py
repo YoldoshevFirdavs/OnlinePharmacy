@@ -250,3 +250,35 @@ def product_detail(request, product_id):
     }
 
     return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def popular_products(request):
+    """
+    Popular products endpoint - returns top products by reviews count and rating.
+    
+    Query params:
+    - range: Time range in days (default 30)
+    
+    Returns: List of popular products sorted by reviews_count and average_rating
+    """
+    try:
+        range_days = int(request.query_params.get("range", 30))
+        range_days = max(1, min(range_days, 365))  # Clamp between 1-365
+    except (ValueError, TypeError):
+        range_days = 30
+    
+    # Calculate date range
+    from django.utils import timezone
+    from datetime import timedelta
+    date_from = timezone.now() - timedelta(days=range_days)
+    
+    # Get products ordered by reviews_count and average_rating
+    queryset = Medicine.objects.filter(
+        is_active=True,
+        reviews_count__gt=0
+    ).order_by('-reviews_count', '-average_rating')[:20]
+    
+    serializer = MedicineListSerializer(queryset, many=True)
+    return Response(serializer.data)
