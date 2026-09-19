@@ -42,15 +42,16 @@ class ParallelDriverAcceptTests(TransactionTestCase):
     def test_parallel_driver_accept_only_one_wins(self):
         """Two drivers trying to accept same order simultaneously - only one should win"""
         from threading import Thread
+        from django.db.utils import OperationalError
 
         results = {}
 
         def driver_accept(driver_user, driver_profile, driver_name):
             """Simulate driver accepting order"""
             try:
-                # Use select_for_update to lock the order
+                # Use select_for_update to lock the order with timeout
                 with transaction.atomic():
-                    order = Order.objects.select_for_update().get(id=self.order.id)
+                    order = Order.objects.select_for_update(nowait=True).get(id=self.order.id)
 
                     # Check if order already assigned
                     if order.driver is not None:
@@ -63,6 +64,9 @@ class ParallelDriverAcceptTests(TransactionTestCase):
                     order.save()
 
                     results[driver_name] = {"status": "SUCCESS", "driver_id": driver_profile.id}
+            except OperationalError as e:
+                # Database lock timeout - another transaction holds the lock
+                results[driver_name] = {"status": "FAILED", "reason": "Database locked"}
             except Exception as e:
                 results[driver_name] = {"status": "ERROR", "error": str(e)}
 
