@@ -42,6 +42,7 @@ class ParallelDriverAcceptTests(TransactionTestCase):
     def test_parallel_driver_accept_only_one_wins(self):
         """Two drivers trying to accept same order simultaneously - only one should win"""
         from threading import Thread
+
         from django.db.utils import OperationalError
 
         results = {}
