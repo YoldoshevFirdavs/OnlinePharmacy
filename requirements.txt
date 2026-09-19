@@ -9,7 +9,7 @@ python-telegram-bot==13.15   # Telegram bot integration
 # Database & ORM
 psycopg2-binary==2.9.7       # PostgreSQL database adapter
 redis>=4.5.2,!=4.5.5          # Redis client
-django-redis==6.0.0          # Redis cache backend for Django
+django-redis==7.0.0          # Redis cache backend for Django
 
 # Task queue
 celery[redis]==5.3.1         # Celery task queue with Redis broker
@@ -19,9 +19,9 @@ vine                         # Dependency for Celery
 amqp                         # AMQP protocol library for Celery
 
 # Authentication & Users
-djoser                       # REST implementation of Django auth
-social-auth-app-django       # Social login integration
-social-auth-core             # Core social auth library
+djoser==2.3.4                # REST implementation of Django auth
+social-auth-app-django==3.1.0 # Social login integration (Django 5.1 compatible)
+social-auth-core==4.5.1      # Core social auth library (Django 5.1 compatible)
 PyJWT                        # JSON Web Token implementation
 
 # API Documentation
@@ -36,7 +36,7 @@ django-csp==3.8              # Content Security Policy middleware
 
 # Utilities
 django-filter==23.5          # Filtering support for DRF
-django-cors-headers==4.3.1   # CORS headers middleware
+django-cors-headers==4.6.0   # CORS headers middleware (Django 5.1 compatible)
 python-dotenv==1.0.0         # Load environment variables from .env
 sqlparse==0.4.4              # SQL parsing library
 python-dateutil==2.8.2       # Date/time utilities
