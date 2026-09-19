@@ -4,7 +4,7 @@ Tests driver parallel accept of same order
 """
 
 from django.db import transaction
-from django.test import TransactionTestCase
+from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -12,7 +12,7 @@ from orders.models import Order
 from users.models import CustomUser, DeliveryDriver
 
 
-class ParallelDriverAcceptTests(TransactionTestCase):
+class ParallelDriverAcceptTests(TestCase):
     """Test concurrent driver accept of orders - verify only one driver gets the order"""
 
     def setUp(self):
