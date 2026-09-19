@@ -24,7 +24,7 @@ django-stubs==4.2.7          # Type stubs for Django
 # Development utilities
 django-debug-toolbar==4.2.0  # Debug toolbar for Django
 ipython==8.19.0              # Enhanced Python shell
-notebook==7.0.6              # Jupyter notebook
+notebook==6.5.5              # Jupyter notebook (Python 3.10 compatible)
 django-extensions==3.2.3     # Extra Django commands
 
 # Task runners & automation
